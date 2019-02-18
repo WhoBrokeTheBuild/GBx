@@ -19,6 +19,7 @@ get_rom() {
 }
 
 get_rom "LoZ_Links_Awakening.gb" "https://s1roms.cc/s3roms/Gameboy/Legend%20of%20Zelda%2C%20The%20-%20Link%27s%20Awakening%20%28U%29%20%28V1.2%29%20%5B%21%5D.zip"
+get_rom "PokemonBlue.gb" "https://s1roms.cc/s3roms/Gameboy/Pokemon%20-%20Blue%20Version%20%28UE%29%20%5BS%5D%5B%21%5D.zip"
 
 wait
 echo "All Files Downloaded"

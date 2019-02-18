@@ -7,8 +7,16 @@
 
 static void opCALL() 
 {
-    uint16_t nn = (readByte(R.PC++) << 8) | readByte(R.PC++);
-    //RAM[R.SP]
+    LogVerbose("%s", __FUNCTION__);
+    writeByte(R.SP--, readByte(R.PC + 2));
+    writeByte(R.SP--, readByte(R.PC + 3));
+    R.PC = readByte(R.PC++) | (readByte(R.PC++) << 8);
+}
+
+static void opRET()
+{
+    LogVerbose("%s", __FUNCTION__);
+    R.PC = (readByte(R.SP++) << 8) | readByte(R.SP++);
 }
 
 #endif // CALLS_H

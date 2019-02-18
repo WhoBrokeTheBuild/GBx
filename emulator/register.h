@@ -3,57 +3,57 @@
 
 #include "log.h"
 #include <stdint.h>
+#include <stdbool.h>
 
 typedef struct
 {
     union {
         struct {
+            union {
+                struct {
+                    uint8_t _:4;
+                    bool FC:1; // Carry Flag
+                    bool FN:1; // Subtract Flag
+                    bool FH:1; // Half Carry Flag
+                    bool FZ:1; // Zero Flag
+                };
+                uint8_t F;
+            };
             uint8_t A;
-            uint8_t F;
         };
         uint16_t AF;
     };
     union {
         struct {
-            uint8_t B;
             uint8_t C;
+            uint8_t B;
         };
         uint16_t BC;
     };
     union {
         struct {
-            uint8_t D;
             uint8_t E;
+            uint8_t D;
         };
         uint16_t DE;
     };
     union {
         struct {
-            uint8_t H;
             uint8_t L;
+            uint8_t H;
         };
         uint16_t HL;
     };
     uint16_t SP;
     uint16_t PC;
-    union {
-        struct {
-            uint8_t Flag_:4;
-            uint8_t FlagC:1;
-            uint8_t FlagN:1;
-            uint8_t FlagH:1;
-            uint8_t FlagZ:1;
-        };
-        uint8_t Flag;
-    };
-} GB_register_t;
+} reg_t;
 
-extern GB_register_t R;
+extern reg_t R;
 
 static void printR()
 {
-    LogVerbose("AF=%08X DE=%08X HL=%08X SP=%08X PC=%08X F=%08X",
-        R.AF, R.DE, R.HL, R.SP, R.PC, R.Flag);
+    LogVerbose("AF=%04X BC=%04X DE=%04X HL=%04X SP=%04X PC=%04X FC=%d FN=%d FH=%d FZ=%d",
+        R.AF, R.BC, R.DE, R.HL, R.SP, R.PC, R.FC, R.FN, R.FH, R.FZ);
 }
 
 #endif // REGISTER_H

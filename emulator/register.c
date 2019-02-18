@@ -1,3 +1,3 @@
 #include "register.h"
 
-GB_register_t R;
+reg_t R;
