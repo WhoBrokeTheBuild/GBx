@@ -2,7 +2,13 @@
 #include <ctype.h>
 #include <stdint.h>
 #include <string.h>
+
+#if defined(_WIN32)
+#include <WinSock2.h>
+#pragma comment(lib, "WS2_32.lib")
+#else
 #include <netinet/in.h>
+#endif
 
 void usage() 
 {
