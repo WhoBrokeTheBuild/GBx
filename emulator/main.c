@@ -1,11 +1,12 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "log.h"
-#include "usage.h"
+#include "bootstrap.h"
 #include "cpu.h"
+#include "log.h"
 #include "memory.h"
 #include "register.h"
+#include "usage.h"
 
 int main(int argc, char** argv)
 {
@@ -14,23 +15,21 @@ int main(int argc, char** argv)
         return 0;
     }
 
+    R.PC = 0x0000;
+
+    for (int i = 0; i < sizeof(BOOTSTRAP); ++i) {
+        cpuTick();
+        printR();
+    }
+
     if (!loadROM(argv[1])) {
         return 1;
     }
 
-    R.A  = 0x01;
-    R.F  = 0b10110000;
-    R.PC = 0x0100;
-    R.BC = 0x0013;
-    R.DE = 0x00D8;
-    R.HL = 0x014D;
-    R.SP = 0xFFFE;
-    printR();
-
-    const int LIMIT = 15;
+    const int LIMIT = 1000;
 
     for (int i = 0; i < LIMIT; ++i) {
-        CPUTick();
+        cpuTick();
         printR();
         //getchar();
     }

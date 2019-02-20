@@ -1,15 +1,24 @@
 
 ADD_EXECUTABLE(
     GBx
-    main.c
-    memory.c
+    alu.c
+    bootstrap.c
     cpu.c
-    register.c
+    inst/CB.c
     interrupt.c
     io.c
-    timer.c
-    alu.c
+    main.c
+    memory.c
+    register.c
     sound.c
+    timer.c
     video.c
 )
 
+IF(VERBOSE)
+    TARGET_COMPILE_DEFINITIONS(
+        GBx
+        PRIVATE
+            -DVERBOSE
+    )
+ENDIF()

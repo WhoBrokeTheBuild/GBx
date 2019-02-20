@@ -1,5 +1,6 @@
 #include "memory.h"
 #include "alu.h"
+#include "bootstrap.h"
 #include "interrupt.h"
 #include "io.h"
 #include "log.h"
@@ -23,12 +24,12 @@ uint8_t * RAM = RAM0;
 
 uint8_t ZP[127];
 
-uint8_t * ROM0 = NULL;
-uint8_t * ROM = NULL;
+uint8_t * ROM0 = BOOTSTRAP;
+uint8_t * ROM = BOOTSTRAP;
 
 uint8_t readByte(uint16_t address)
 {
-    //LogVerbose("read %02X", address);
+    LogVerbose("read %02X", address);
     if (address <= 0x3FFF) {
         // ROM Bank 0
         return ROM0[address];
@@ -184,7 +185,7 @@ uint16_t nextWord()
 
 void writeByte(uint16_t address, uint8_t data)
 {
-    //LogVerbose("write %02X", address);
+    LogVerbose("write %02X", address);
     if (address <= 0x3FFF) {
         // ROM Bank 0
     }

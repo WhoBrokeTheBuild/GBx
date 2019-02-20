@@ -1,18 +1,20 @@
 #ifndef CALL_H
 #define CALL_H
 
+#include "../cpu.h"
+#include "../log.h"
 #include "../memory.h"
 #include "../register.h"
 
 static void _CALL_nn()
 {
     uint16_t nn = nextWord();
-    TickCounter += 4;
+    TickCounter += 8;
 
-    LogVerbose("CALL %02X", nn);
+    LogDebug("CALL %04Xh", nn);
 
     pushWord(R.PC);
-    TickCounter += 4;
+    TickCounter += 8;
 
     R.PC = nn;
     TickCounter += 4;
@@ -21,13 +23,13 @@ static void _CALL_nn()
 static void _CALL_NZ_nn()
 {
     uint16_t nn = nextWord();
-    TickCounter += 4;
+    TickCounter += 8;
 
-    LogVerbose("CALL NZ,%02X", nn);
+    LogDebug("CALL NZ,%04Xh", nn);
 
     if (!R.FZ) {
         pushWord(R.PC);
-        TickCounter += 4;
+        TickCounter += 8;
 
         R.PC = nn;
         TickCounter += 4;
@@ -37,13 +39,13 @@ static void _CALL_NZ_nn()
 static void _CALL_Z_nn()
 {
     uint16_t nn = nextWord();
-    TickCounter += 4;
+    TickCounter += 8;
 
-    LogVerbose("CALL Z,%02X", nn);
+    LogDebug("CALL Z,%04Xh", nn);
 
     if (R.FZ) {
         pushWord(R.PC);
-        TickCounter += 4;
+        TickCounter += 8;
 
         R.PC = nn;
         TickCounter += 4;
@@ -53,13 +55,13 @@ static void _CALL_Z_nn()
 static void _CALL_NC_nn()
 {
     uint16_t nn = nextWord();
-    TickCounter += 4;
+    TickCounter += 8;
 
-    LogVerbose("CALL NC,%02X", nn);
+    LogDebug("CALL NC,%04Xh", nn);
 
     if (!R.C) {
         pushWord(R.PC);
-        TickCounter += 4;
+        TickCounter += 8;
 
         R.PC = nn;
         TickCounter += 4;
@@ -69,13 +71,13 @@ static void _CALL_NC_nn()
 static void _CALL_C_nn()
 {
     uint16_t nn = nextWord();
-    TickCounter += 4;
+    TickCounter += 8;
 
-    LogVerbose("CALL C,%02X", nn);
+    LogDebug("CALL C,%04Xh", nn);
 
     if (R.C) {
         pushWord(R.PC);
-        TickCounter += 4;
+        TickCounter += 8;
 
         R.PC = nn;
         TickCounter += 4;

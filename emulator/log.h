@@ -15,7 +15,7 @@
 #   define LogDebug(M, ...) printf("[DEBG] " M "\n", ##__VA_ARGS__)
 #endif
 
-#if defined(VERBOSE)
+#if !defined(VERBOSE)
 #   define LogVerbose(M, ...)
 #else
 #   define LogVerbose(M, ...) printf("[VERB] " M "\n", ##__VA_ARGS__)

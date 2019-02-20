@@ -3,89 +3,312 @@
 #include "log.h"
 #include "memory.h"
 
+#include "inst/CB.h"
 #include "inst/add.h"
-#include "inst/bit.h"
+#include "inst/and.h"
 #include "inst/call.h"
-#include "inst/intctl.h"
+#include "inst/compare.h"
+#include "inst/dec.h"
+#include "inst/inc.h"
 #include "inst/jump.h"
+#include "inst/load.h"
 #include "inst/misc.h"
-#include "inst/reset.h"
+#include "inst/or.h"
+#include "inst/pop.h"
+#include "inst/push.h"
 #include "inst/restart.h"
 #include "inst/return.h"
-#include "inst/set.h"
+#include "inst/rotate.h"
 #include "inst/subtract.h"
+#include "inst/xor.h"
 
 #define GB_CLOCK_SPEED 4194304 // Hz
 
 uint32_t ClockSpeed = GB_CLOCK_SPEED;
 uint64_t TickCounter = 0;
 
-uint8_t fetch() 
-{
-    uint8_t op = readByte(R.PC++);
-    TickCounter += 4;
-    return op;
-}
-
-typedef void(* CB_inst_t)(uint8_t);
-inst CB_instructions[0x100] = {
-    // bit
-    [0x47] = _BIT_b_A,
-    [0x40] = _BIT_b_B,
-    [0x41] = _BIT_b_C,
-    [0x42] = _BIT_b_D,
-    [0x43] = _BIT_b_E,
-    [0x44] = _BIT_b_H,
-    [0x45] = _BIT_b_L,
-    [0x46] = _BIT_b_HL,
-};
-
-void _CB() 
-{
-    uint8_t op = fetch();
-    CB_inst_t inst = CB_instructions[op];
-    if (inst) {
-        inst(op);
-    } else {
-        LogWarn("unknown instruction CB%02X", op);
-    }
-}
-
-typedef void(* inst_t)();
 inst_t instructions[0x100] = {
     // CB
     [0xCB] = _CB,
     // misc
     [0x00] = _NOP,
     [0x76] = _HALT,
-    // intctl
+    [0x10] = _STOP,
     [0xF3] = _DI,
     [0xFB] = _EI,
+    [0x27] = _DAA,
+    [0x37] = _SCF,
+    [0x2F] = _CPL,
+    [0x3F] = _CCF,
     // call
     [0xCD] = _CALL_nn,
     [0xC4] = _CALL_NZ_nn,
     [0xCC] = _CALL_Z_nn,
     [0xD4] = _CALL_NC_nn,
     [0xDC] = _CALL_C_nn,
-    // rst
+    // restart
     [0xC7] = _RST_00,
     [0xCF] = _RST_08,
     [0xD7] = _RST_10,
     [0xDF] = _RST_18,
     [0xE7] = _RST_20,
-    [0xDF] = _RST_28,
+    [0xEF] = _RST_28,
     [0xF7] = _RST_30,
     [0xFF] = _RST_38,
-    // ret
+    // return
     [0xC9] = _RET,
     [0xC0] = _RET_NZ,
     [0xC8] = _RET_Z,
     [0xD0] = _RET_NC,
     [0xD8] = _RET_C,
     [0xD9] = _RETI,
+    // rotate
+    [0x07] = _RLCA,
+    [0x0F] = _RRCA,
+    [0x17] = _RLA,
+    [0x1F] = _RRA,
+    // jump
+    [0xC3] = _JP_nn,
+    [0xC2] = _JP_NZ_nn,
+    [0xCA] = _JP_Z_nn,
+    [0xD2] = _JP_NC_nn,
+    [0xDA] = _JP_C_nn,
+    [0x18] = _JR_n,
+    [0x20] = _JR_NZ_n,
+    [0x28] = _JR_Z_n,
+    [0x30] = _JR_NC_n,
+    [0x38] = _JR_C_n,
+    // stack
+    [0xF5] = _PUSH_AF,
+    [0xC5] = _PUSH_BC,
+    [0xD5] = _PUSH_DE,
+    [0xE5] = _PUSH_HL,
+    [0xF1] = _POP_AF,
+    [0xC1] = _POP_BC,
+    [0xD1] = _POP_DE,
+    [0xE1] = _POP_HL,
+    // load
+    [0x40] = _LD_B_B,
+    [0x41] = _LD_B_C,
+    [0x42] = _LD_B_D,
+    [0x43] = _LD_B_E,
+    [0x44] = _LD_B_H,
+    [0x45] = _LD_B_L,
+    [0x46] = _LD_B_pHL,
+    [0x47] = _LD_B_A,
+    [0x48] = _LD_C_B,
+    [0x49] = _LD_C_C,
+    [0x4A] = _LD_C_D,
+    [0x4B] = _LD_C_E,
+    [0x4C] = _LD_C_H,
+    [0x4D] = _LD_C_L,
+    [0x4E] = _LD_C_pHL,
+    [0x4F] = _LD_C_A,
+    [0x50] = _LD_D_B,
+    [0x51] = _LD_D_C,
+    [0x52] = _LD_D_D,
+    [0x53] = _LD_D_E,
+    [0x54] = _LD_D_H,
+    [0x55] = _LD_D_L,
+    [0x56] = _LD_D_pHL,
+    [0x57] = _LD_D_A,
+    [0x58] = _LD_E_B,
+    [0x59] = _LD_E_C,
+    [0x5A] = _LD_E_D,
+    [0x5B] = _LD_E_E,
+    [0x5C] = _LD_E_H,
+    [0x5D] = _LD_E_L,
+    [0x5E] = _LD_E_pHL,
+    [0x5F] = _LD_E_A,
+    [0x60] = _LD_H_B,
+    [0x61] = _LD_H_C,
+    [0x62] = _LD_H_D,
+    [0x63] = _LD_H_E,
+    [0x64] = _LD_H_H,
+    [0x65] = _LD_H_L,
+    [0x66] = _LD_H_pHL,
+    [0x67] = _LD_H_A,
+    [0x68] = _LD_L_B,
+    [0x69] = _LD_L_C,
+    [0x6A] = _LD_L_D,
+    [0x6B] = _LD_L_E,
+    [0x6C] = _LD_L_H,
+    [0x6D] = _LD_L_L,
+    [0x6E] = _LD_L_pHL,
+    [0x6F] = _LD_L_A,
+    [0x70] = _LD_pHL_B,
+    [0x71] = _LD_pHL_C,
+    [0x72] = _LD_pHL_D,
+    [0x73] = _LD_pHL_E,
+    [0x74] = _LD_pHL_H,
+    [0x75] = _LD_pHL_L,
+    [0x77] = _LD_pHL_A,
+    [0x78] = _LD_A_B,
+    [0x79] = _LD_A_C,
+    [0x7A] = _LD_A_D,
+    [0x7B] = _LD_A_E,
+    [0x7C] = _LD_A_H,
+    [0x7D] = _LD_A_L,
+    [0x7E] = _LD_A_pHL,
+    [0x7F] = _LD_A_A,
+    [0x02] = _LD_pBC_A,
+    [0x12] = _LD_pDE_A,
+    [0x06] = _LD_B_n,
+    [0x0E] = _LD_C_n,
+    [0x16] = _LD_D_n,
+    [0x1E] = _LD_E_n,
+    [0x26] = _LD_H_n,
+    [0x2E] = _LD_L_n,
+    [0x36] = _LD_pHL_n,
+    [0x3E] = _LD_A_n,
+    [0x0A] = _LD_A_pBC,
+    [0x1A] = _LD_A_pDE,
+    [0x01] = _LD_BC_nn,
+    [0x11] = _LD_DE_nn,
+    [0x21] = _LD_HL_nn,
+    [0x31] = _LD_SP_nn,
+    [0x08] = _LD_pnn_SP,
+    [0xEA] = _LD_pnn_A,
+    [0xFA] = _LD_A_pnn,
+    [0x22] = _LDI_pHL_A,
+    [0x32] = _LDD_pHL_A,
+    [0x2A] = _LDI_A_pHL,
+    [0x3A] = _LDD_A_pHL,
+    [0xE0] = _LDH_pn_A,
+    [0xF0] = _LDH_A_pn,
+    [0xE2] = _LDH_pC_A,
+    [0xF2] = _LDH_A_pC,
+    // add
+    [0x80] = _ADD_B,
+    [0x81] = _ADD_C,
+    [0x82] = _ADD_D,
+    [0x83] = _ADD_E,
+    [0x84] = _ADD_H,
+    [0x85] = _ADD_L,
+    [0x86] = _ADD_pHL,
+    [0x87] = _ADD_A,
+    [0xC6] = _ADD_n,
+    [0x88] = _ADC_B,
+    [0x89] = _ADC_C,
+    [0x8A] = _ADC_D,
+    [0x8B] = _ADC_E,
+    [0x8C] = _ADC_H,
+    [0x8D] = _ADC_L,
+    [0x8E] = _ADC_pHL,
+    [0x8F] = _ADC_A,
+    [0xCE] = _ADC_n,
+    [0x09] = _ADD_HL_BC,
+    [0x19] = _ADD_HL_DE,
+    [0x29] = _ADD_HL_HL,
+    [0x39] = _ADD_HL_SP,
+    // subtract
+    [0x90] = _SUB_B,
+    [0x91] = _SUB_C,
+    [0x92] = _SUB_D,
+    [0x93] = _SUB_E,
+    [0x94] = _SUB_H,
+    [0x95] = _SUB_L,
+    [0x96] = _SUB_pHL,
+    [0x97] = _SUB_A,
+    [0xD6] = _SUB_n,
+    [0x98] = _SBC_B,
+    [0x99] = _SBC_C,
+    [0x9A] = _SBC_D,
+    [0x9B] = _SBC_E,
+    [0x9C] = _SBC_H,
+    [0x9D] = _SBC_L,
+    [0x9E] = _SBC_pHL,
+    [0x9F] = _SBC_A,
+    [0xDE] = _SBC_n,
+    // inc
+    [0x04] = _INC_B,
+    [0x0C] = _INC_C,
+    [0x14] = _INC_D,
+    [0x1C] = _INC_E,
+    [0x24] = _INC_H,
+    [0x2C] = _INC_L,
+    [0x34] = _INC_pHL,
+    [0x3C] = _INC_A,
+    [0x03] = _INC_BC,
+    [0x13] = _INC_DE,
+    [0x23] = _INC_HL,
+    [0x33] = _INC_SP,
+    // dec
+    [0x05] = _DEC_B,
+    [0x0D] = _DEC_C,
+    [0x15] = _DEC_D,
+    [0x1D] = _DEC_E,
+    [0x25] = _DEC_H,
+    [0x2D] = _DEC_L,
+    [0x35] = _DEC_pHL,
+    [0x3D] = _DEC_A,
+    [0x0B] = _DEC_BC,
+    [0x1B] = _DEC_DE,
+    [0x2B] = _DEC_HL,
+    [0x3B] = _DEC_SP,
+    // compare
+    [0xB8] = _CP_B,
+    [0xB9] = _CP_C,
+    [0xBA] = _CP_D,
+    [0xBB] = _CP_E,
+    [0xBC] = _CP_H,
+    [0xBD] = _CP_L,
+    [0xBE] = _CP_pHL,
+    [0xBF] = _CP_A,
+    [0xFE] = _CP_n,
+    // and
+    [0xA0] = _AND_B,
+    [0xA1] = _AND_C,
+    [0xA2] = _AND_D,
+    [0xA3] = _AND_E,
+    [0xA4] = _AND_H,
+    [0xA5] = _AND_L,
+    [0xA6] = _AND_pHL,
+    [0xA7] = _AND_A,
+    [0xE6] = _AND_n,
+    // or
+    [0xB0] = _OR_B,
+    [0xB1] = _OR_C,
+    [0xB2] = _OR_D,
+    [0xB3] = _OR_E,
+    [0xB4] = _OR_H,
+    [0xB5] = _OR_L,
+    [0xB6] = _OR_pHL,
+    [0xB7] = _OR_A,
+    [0xF6] = _OR_n,
+    // xor
+    [0xA8] = _XOR_B,
+    [0xA9] = _XOR_C,
+    [0xAA] = _XOR_D,
+    [0xAB] = _XOR_E,
+    [0xAC] = _XOR_H,
+    [0xAD] = _XOR_L,
+    [0xAE] = _XOR_pHL,
+    [0xAF] = _XOR_A,
+    [0xEE] = _XOR_n,
+    // null
+    [0xD3] = NULL,
+    [0xDB] = NULL,
+    [0xDD] = NULL,
+    [0xE3] = NULL,
+    [0xE4] = NULL,
+    [0xEB] = NULL,
+    [0xEC] = NULL,
+    [0xED] = NULL,
+    [0xF4] = NULL,
+    [0xFC] = NULL,
+    [0xFD] = NULL,
 };
 
-void execute(uint8_t op) 
+uint8_t fetch()
+{
+    uint8_t op = readByte(R.PC++);
+    LogVerbose("%02X", op);
+    TickCounter += 4;
+    return op;
+}
+
+void execute(uint8_t op)
 {
     inst_t inst = instructions[op];
     if (inst) {
@@ -95,993 +318,8 @@ void execute(uint8_t op)
     }
 }
 
-void CPUTick(int cycles)
+void cpuTick(int cycles)
 {
     uint8_t op = fetch();
     execute(op);
-}
-
-void tick(uint8_t c) { }
-
-void nextInstruction() 
-{
-    uint8_t op;
-    uint8_t b = 0;
-    uint8_t sop = 0;
-
-    switch (op) {
-    case 0x00: // NOP
-        LogVerbose("NOP");
-        tick(4);
-        break;
-
-    case 0x76: // HALT
-        break;
-
-    case 0xF3:
-        LogVerbose("DI");
-        tick(4);
-        IME = false;
-        break;
-    case 0xFB:
-        LogVerbose("EI");
-        tick(4);
-        IME = true;
-        break;
-
-    case 0xCD: // CALL nn
-        LogVerbose("CALL %04X", readWord(R.PC));
-        tick(12);
-        R.SP -= 2;
-        writeWord(R.SP, R.PC+2);
-        R.PC = readWord(R.PC);
-        break;
-    case 0xC9: // RET
-        LogVerbose("RET");
-        tick(12);
-        R.PC = readWord(R.SP);
-        R.SP += 2;
-        break;
-    case 0xD9: // RETI
-        LogVerbose("RETI");
-        tick(8);
-        IME = true;
-        R.PC = readWord(R.SP);
-        R.SP += 2;
-        break;
-
-    case 0x01: // LD BC,nn
-        LogVerbose("LD BC,%04X", readWord(R.PC));
-        tick(12);
-        R.BC = readWord(R.PC);
-        R.PC += 2;
-        break;
-    case 0x11: // LD DE,nn
-        LogVerbose("LD DE,%04X", readWord(R.PC));
-        tick(12);
-        R.DE = readWord(R.PC);
-        R.PC += 2;
-        break;
-    case 0x21: // LD HL,nn
-        LogVerbose("LD HL,%04X", readWord(R.PC));
-        tick(12);
-        R.HL = readWord(R.PC);
-        R.PC += 2;
-        break;
-    case 0x31: // LD SP,nn
-        LogVerbose("LD SP,%04X", readWord(R.PC));
-        tick(12);
-        R.SP = readWord(R.PC);
-        R.PC += 2;
-        break;
-    case 0x02: // LD (BC),A
-        LogVerbose("LD (BC),A");
-        tick(8);
-        writeByte(R.BC, R.A);
-        break;
-    case 0x12: // LD (DE),A
-        LogVerbose("LD (DE),A");
-        tick(8);
-        writeByte(R.DE, R.A);
-        break;
-    case 0x77: // LD (HL),A
-        LogVerbose("LD (HL),A");
-        tick(8);
-        writeByte(R.HL, R.A);
-        break;
-    case 0x7F: // LD A,A
-        LogVerbose("LD A,A");
-        tick(4);
-        R.A = R.A;
-        break;
-    case 0x47: // LD B,A
-        LogVerbose("LD A,A");
-        tick(4);
-        R.B = R.A;
-        break;
-    case 0x4F: // LD C,A
-        LogVerbose("LD C,A");
-        tick(4);
-        R.C = R.A;
-        break;
-    case 0x57: // LD D,A
-        LogVerbose("LD D,A");
-        tick(4);
-        R.D = R.A;
-        break;
-    case 0x5F: // LD E,A
-        LogVerbose("LD E,A");
-        tick(4);
-        R.E = R.A;
-        break;
-    case 0x67: // LD H,A
-        LogVerbose("LD H,A");
-        tick(4);
-        R.H = R.A;
-        break;
-    case 0x6F: // LD L,A
-        LogVerbose("LD L,A");
-        tick(4);
-        R.L = R.A;
-        break;
-    case 0xEA: // LD (nn),A
-        LogVerbose("LD (%04X),A", readWord(R.PC));
-        tick(16);
-        writeByte(readWord(R.PC), R.A);
-        R.PC += 2;
-        break;
-    case 0xE0: // LDH (n),A
-        LogVerbose("LDH (%02X),A", readByte(R.PC));
-        tick(12);
-        writeByte(0xFF00 + readByte(R.PC++), R.A);
-        break;
-    case 0xF0: // LDH A,(n)
-        LogVerbose("LDH A,(%02X)", readByte(R.PC));
-        tick(12);
-        R.A = readByte(0xFF00 + readByte(R.PC++));
-        break;
-    case 0x78: // LD A,B
-        LogVerbose("LD A,B");
-        tick(4);
-        R.A = R.B;
-        break;
-    case 0x79: // LD A,C
-        LogVerbose("LD A,C");
-        tick(4);
-        R.A = R.C;
-        break;
-    case 0x7A: // LD A,D
-        LogVerbose("LD A,D");
-        tick(4);
-        R.A = R.D;
-        break;
-    case 0x7B: // LD A,E
-        LogVerbose("LD A,E");
-        tick(4);
-        R.A = R.E;
-        break;
-    case 0x7C: // LD A,H
-        LogVerbose("LD A,H");
-        tick(4);
-        R.A = R.H;
-        break;
-    case 0x7D: // LD A,L
-        LogVerbose("LD A,L");
-        tick(4);
-        R.A = R.L;
-        break;
-    case 0x0A: // LD A,(BC)
-        LogVerbose("LD A,(BC)");
-        tick(8);
-        R.A = readByte(R.BC);
-        break;
-    case 0x1A: // LD A,(DE)
-        LogVerbose("LD A,(DE)");
-        tick(8);
-        R.A = readByte(R.DE);
-        break;
-    case 0x7E: // LD A,(HL)
-        LogVerbose("LD A,(HL)");
-        tick(8);
-        R.A = readByte(R.HL);
-        break;
-    case 0xFA: // LD A,(nn)
-        LogVerbose("LD A,(%04X)", readWord(R.PC));
-        tick(8);
-        R.A = readByte(readWord(R.PC));
-        R.PC += 2;
-        break;
-    case 0x3E: // LD A,#
-        LogVerbose("LD A,%02X", readByte(R.PC));
-        tick(8);
-        R.A = readByte(R.PC);
-        break;
-    
-    case 0xCB: // Bit Manipulation
-        sop = readByte(R.PC++);
-        //LogVerbose("sop %02X", sop);
-        switch (sop) {
-        case 0x37: // SWAP A
-            LogVerbose("SWAP A");
-            R.A = ((R.A & 0x0F) << 4) | ((R.A & 0xF0) >> 4);
-            break;
-        case 0x30: // SWAP B
-            LogVerbose("SWAP B");
-            R.B = ((R.B & 0x0F) << 4) | ((R.B & 0xF0) >> 4);
-            break;
-        case 0x31: // SWAP C
-            LogVerbose("SWAP C");
-            R.C = ((R.C & 0x0F) << 4) | ((R.C & 0xF0) >> 4);
-            break;
-        case 0x32: // SWAP D
-            LogVerbose("SWAP D");
-            R.D = ((R.D & 0x0F) << 4) | ((R.D & 0xF0) >> 4);
-            break;
-        case 0x33: // SWAP E
-            LogVerbose("SWAP E");
-            R.E = ((R.E & 0x0F) << 4) | ((R.E & 0xF0) >> 4);
-            break;
-        case 0x34: // SWAP H
-            LogVerbose("SWAP H");
-            R.H = ((R.H & 0x0F) << 4) | ((R.H & 0xF0) >> 4);
-            break;
-        case 0x35: // SWAP L
-            LogVerbose("SWAP L");
-            R.L = ((R.L & 0x0F) << 4) | ((R.L & 0xF0) >> 4);
-            break;
-        case 0x36: // SWAP (HL)
-            LogVerbose("SWAP (HL)");
-            {
-                uint8_t n = readByte(R.HL);
-                writeByte(R.HL, ((n & 0x0F) << 4) | ((n & 0xF0) >> 4));
-            }
-            break;
-        
-        case 0x07: // RLC A
-            LogVerbose("RLC A");
-            tick(8);
-            break;
-        case 0x00: // RLC B
-            LogVerbose("RLC B");
-            tick(8);
-            break;
-        case 0x01: // RLC C
-            LogVerbose("RLC C");
-            tick(8);
-            break;
-        case 0x02: // RLC D
-            LogVerbose("RLC D");
-            tick(8);
-            break;
-        case 0x03: // RLC E
-            LogVerbose("RLC E");
-            tick(8);
-            break;
-        case 0x04: // RLC H
-            LogVerbose("RLC H");
-            tick(8);
-            break;
-        case 0x05: // RLC L
-            LogVerbose("RLC L");
-            tick(8);
-            break;
-        case 0x06: // RLC (HL)
-            LogVerbose("RLC (HL)");
-            tick(16);
-            break;
-
-        case 0x17: // RL A
-            LogVerbose("RL A");
-            tick(8);
-            break;
-        case 0x10: // RL B
-            LogVerbose("RL B");
-            tick(8);
-            break;
-        case 0x11: // RL C
-            LogVerbose("RL C");
-            tick(8);
-            break;
-        case 0x12: // RL D
-            LogVerbose("RL D");
-            tick(8);
-            break;
-        case 0x13: // RL E
-            LogVerbose("RL E");
-            tick(8);
-            break;
-        case 0x14: // RL H
-            LogVerbose("RL H");
-            tick(8);
-            break;
-        case 0x15: // RL L
-            LogVerbose("RL L");
-            tick(8);
-            break;
-        case 0x16: // RL (HL)
-            LogVerbose("RL (HL)");
-            tick(16);
-            break;
-
-        case 0x0F: // RRC A
-            LogVerbose("RRC A");
-            tick(8);
-            break;
-        case 0x08: // RRC B
-            LogVerbose("RRC B");
-            tick(8);
-            break;
-        case 0x09: // RRC C
-            LogVerbose("RRC C");
-            tick(8);
-            break;
-        case 0x0A: // RRC D
-            LogVerbose("RRC D");
-            tick(8);
-            break;
-        case 0x0B: // RRC E
-            LogVerbose("RRC E");
-            tick(8);
-            break;
-        case 0x0C: // RRC H
-            LogVerbose("RRC H");
-            tick(8);
-            break;
-        case 0x0D: // RRC L
-            LogVerbose("RRC L");
-            tick(8);
-            break;
-        case 0x0E: // RRC (HL)
-            LogVerbose("RRC (HL)");
-            tick(16);
-            break;
-        
-        case 0x1F: // RR A
-            LogVerbose("RR A");
-            tick(8);
-            break;
-        case 0x18: // RR B
-            LogVerbose("RR B");
-            tick(8);
-            break;
-        case 0x19: // RR C
-            LogVerbose("RR C");
-            tick(8);
-            break;
-        case 0x1A: // RR D
-            LogVerbose("RR D");
-            tick(8);
-            break;
-        case 0x1B: // RR E
-            LogVerbose("RR E");
-            tick(8);
-            break;
-        case 0x1C: // RR H
-            LogVerbose("RR H");
-            tick(8);
-            break;
-        case 0x1D: // RR L
-            LogVerbose("RR L");
-            tick(8);
-            break;
-        case 0x1E: // RR (HL)
-            LogVerbose("RR (HL)");
-            tick(16);
-            break;
-        
-        case 0x27: // SLA A
-            LogVerbose("SLA A");
-            tick(8);
-            break;
-        case 0x20: // SLA B
-            LogVerbose("SLA B");
-            tick(8);
-            break;
-        case 0x21: // SLA C
-            LogVerbose("SLA C");
-            tick(8);
-            break;
-        case 0x22: // SLA D
-            LogVerbose("SLA D");
-            tick(8);
-            break;
-        case 0x23: // SLA E
-            LogVerbose("SLA E");
-            tick(8);
-            break;
-        case 0x24: // SLA H
-            LogVerbose("SLA H");
-            tick(8);
-            break;
-        case 0x25: // SLA L
-            LogVerbose("SLA L");
-            tick(8);
-            break;
-        case 0x26: // SLA (HL)
-            LogVerbose("SLA (HL)");
-            tick(16);
-            break;
-
-        case 0x2F: // SRA A
-            LogVerbose("SRA A");
-            tick(8);
-            break;
-        case 0x28: // SRA B
-            LogVerbose("SRA B");
-            tick(8);
-            break;
-        case 0x29: // SRA C
-            LogVerbose("SRA C");
-            tick(8);
-            break;
-        case 0x2A: // SRA D
-            LogVerbose("SRA D");
-            tick(8);
-            break;
-        case 0x2B: // SRA E
-            LogVerbose("SRA E");
-            tick(8);
-            break;
-        case 0x2C: // SRA H
-            LogVerbose("SRA H");
-            tick(8);
-            break;
-        case 0x2D: // SRA L
-            LogVerbose("SRA L");
-            tick(8);
-            break;
-        case 0x2E: // SRA (HL)
-            LogVerbose("SRA (HL)");
-            tick(16);
-            break;
-        
-        case 0x3F: // SRL A
-            LogVerbose("SRL A");
-            tick(8);
-            break;
-        case 0x38: // SRL B
-            LogVerbose("SRL B");
-            tick(8);
-            break;
-        case 0x39: // SRL C
-            LogVerbose("SRL C");
-            tick(8);
-            break;
-        case 0x3A: // SRL D
-            LogVerbose("SRL D");
-            tick(8);
-            break;
-        case 0x3B: // SRL E
-            LogVerbose("SRL E");
-            tick(8);
-            break;
-        case 0x3C: // SRL H
-            LogVerbose("SRL H");
-            tick(8);
-            break;
-        case 0x3D: // SRL L
-            LogVerbose("SRL L");
-            tick(8);
-            break;
-        case 0x3E: // SRL (HL)
-            LogVerbose("SRL (HL)");
-            tick(16);
-            break;
-        
-        
-        case 0xC7: // SET b,A
-            LogVerbose("SET b,A");
-            tick(8);
-            break;
-        case 0xC0: // SET b,B
-            LogVerbose("SET b,B");
-            tick(8);
-            break;
-        case 0xC1: // SET b,C
-            LogVerbose("SET b,C");
-            tick(8);
-            break;
-        case 0xC2: // SET b,D
-            LogVerbose("SET b,D");
-            tick(8);
-            break;
-        case 0xC3: // SET b,E
-            LogVerbose("SET b,E");
-            tick(8);
-            break;
-        case 0xC4: // SET b,H
-            LogVerbose("SET b,H");
-            tick(8);
-            break;
-        case 0xC5: // SET b,L
-            LogVerbose("SET b,L");
-            tick(8);
-            break;
-        case 0xC6: // SET b,(HL)
-            LogVerbose("SET b,(HL)");
-            tick(16);
-            break;
-        
-        case 0x87: // RES 0,A
-        case 0x8F: // RES 1,A
-        case 0x97: // RES 2,A
-        case 0x9F: // RES 3,A
-        case 0xA7: // RES 4,A
-        case 0xAF: // RES 5,A
-        case 0xB7: // RES 6,A
-        case 0xBF: // RES 7,A
-            b = (0x87 - sop) / 8;
-            LogVerbose("RES %d,A", b);
-            tick(8);
-            R.A = R.A & ~(1 << b);
-            break;
-        case 0x80: // RES b,B
-            LogVerbose("RES b,B");
-            tick(8);
-            break;
-        case 0x81: // RES b,C
-            LogVerbose("RES b,C");
-            tick(8);
-            break;
-        case 0x82: // RES b,D
-            LogVerbose("RES b,D");
-            tick(8);
-            break;
-        case 0x83: // RES b,E
-            LogVerbose("RES b,E");
-            tick(8);
-            break;
-        case 0x84: // RES b,H
-            LogVerbose("RES b,H");
-            tick(8);
-            break;
-        case 0x85: // RES b,L
-            LogVerbose("RES b,L");
-            tick(8);
-            break;
-        case 0x86: // RES b,(HL)
-            LogVerbose("RES b,(HL)");
-            tick(16);
-            break;
-        }
-        break;
-
-    case 0xF5: // PUSH AF
-        LogVerbose("PUSH AF");
-        tick(16);
-        R.SP -= 2;
-        writeWord(R.SP, R.AF);
-        break;
-    case 0xC5: // PUSH BC
-        LogVerbose("PUSH BC");
-        tick(16);
-        R.SP -= 2;
-        writeWord(R.SP, R.BC);
-        break;
-    case 0xD5: // PUSH DE
-        LogVerbose("PUSH DE");
-        tick(16);
-        R.SP -= 2;
-        writeWord(R.SP, R.DE);
-        break;
-    case 0xE5: // PUSH HL
-        LogVerbose("PUSH HL");
-        tick(16);
-        R.SP -= 2;
-        writeWord(R.SP, R.HL);
-        break;
-
-    case 0xF1: // POP AF
-        LogVerbose("POP AF");
-        tick(12);
-        R.AF = readWord(R.SP);
-        R.SP += 2;
-        break;
-    case 0xC1: // POP BC
-        LogVerbose("POP BC");
-        tick(12);
-        R.BC = readWord(R.SP);
-        R.SP += 2;
-        break;
-    case 0xD1: // POP DE
-        LogVerbose("POP DE");
-        tick(12);
-        R.DE = readWord(R.SP);
-        R.SP += 2;
-        break;
-    case 0xE1: // POP HL
-        LogVerbose("POP HL");
-        tick(12);
-        R.HL = readWord(R.SP);
-        R.SP += 2;
-        break;
-
-    case 0x09: // ADD HL,BC
-        LogVerbose("ADD HL,BC");
-        R.HL = add16(R.HL, R.BC);
-        break;
-    case 0x19: // ADD HL,DE
-        LogVerbose("ADD HL,DE");
-        R.HL = add16(R.HL, R.DE);
-        break;
-    case 0x29: // ADD HL,HL
-        LogVerbose("ADD HL,HL");
-        R.HL = add16(R.HL, R.HL);
-        break;
-    case 0x39: // ADD HL,SP
-        LogVerbose("ADD HL,SP");
-        R.HL = add16(R.HL, R.SP);
-        break;
-
-    case 0x87: // ADD A,A
-        LogVerbose("ADD A,A");
-        tick(4);
-        R.A = add8(R.A, R.A);
-        break;
-    case 0x80: // ADD A,B
-        LogVerbose("ADD A,B");
-        tick(4);
-        R.A = add8(R.A, R.B);
-        break;
-    case 0x81: // ADD A,C
-        LogVerbose("ADD A,C");
-        tick(4);
-        R.A = add8(R.A, R.C);
-        break;
-    case 0x82: // ADD A,D
-        LogVerbose("ADD A,D");
-        tick(4);
-        R.A = add8(R.A, R.D);
-        break;
-    case 0x83: // ADD A,E
-        LogVerbose("ADD A,E");
-        tick(4);
-        R.A = add8(R.A, R.E);
-        break;
-    case 0x84: // ADD A,H
-        LogVerbose("ADD A,H");
-        tick(4);
-        R.A = add8(R.A, R.H);
-        break;
-    case 0x85: // ADD A,L
-        LogVerbose("ADD A,L");
-        tick(4);
-        R.A = add8(R.A, R.L);
-        break;
-    case 0x86: // ADD A,(HL)
-        LogVerbose("ADD A,(HL)");
-        tick(8);
-        R.A = add8(R.A, readByte(R.HL));
-        break;
-    case 0xC6: // ADD A,#
-        LogVerbose("ADD A,#");
-        tick(8);
-        R.A = add8(R.A, readByte(R.PC++));
-        break;
-    
-    case 0x97: // SUB A
-        LogVerbose("SUB A");
-        tick(4);
-        R.A = sub8(R.A, R.A);
-        break;
-    case 0x90: // SUB B
-        LogVerbose("SUB B");
-        tick(4);
-        R.A = sub8(R.A, R.B);
-        break;
-    case 0x91: // SUB C
-        LogVerbose("SUB C");
-        tick(4);
-        R.A = sub8(R.A, R.C);
-        break;
-    case 0x92: // SUB D
-        LogVerbose("SUB D");
-        tick(4);
-        R.A = sub8(R.A, R.D);
-        break;
-    case 0x93: // SUB E
-        LogVerbose("SUB E");
-        tick(4);
-        R.A = sub8(R.A, R.E);
-        break;
-    case 0x94: // SUB H
-        LogVerbose("SUB H");
-        tick(4);
-        R.A = sub8(R.A, R.H);
-        break;
-    case 0x95: // SUB L
-        LogVerbose("SUB L");
-        tick(4);
-        R.A = sub8(R.A, R.L);
-        break;
-    case 0x96: // SUB (HL)
-        LogVerbose("SUB (HL)");
-        tick(8);
-        R.A = sub8(R.A, readByte(R.HL));
-        break;
-    case 0xD6: // SUB #
-        LogVerbose("SUB #");
-        tick(8);
-        R.A = sub8(R.A, readByte(R.PC++));
-        break;
-
-    case 0xA7: // AND A
-        LogVerbose("AND A");
-        tick(4);
-        R.A = and8(R.A, R.A);
-        break;
-    case 0xA0: // AND B
-        LogVerbose("AND B");
-        tick(4);
-        R.A = and8(R.A, R.B);
-        break;
-    case 0xA1: // AND C
-        LogVerbose("AND C");
-        tick(4);
-        R.A = and8(R.A, R.C);
-        break;
-    case 0xA2: // AND D
-        LogVerbose("AND D");
-        tick(4);
-        R.A = and8(R.A, R.D);
-        break;
-    case 0xA3: // AND E
-        LogVerbose("AND E");
-        tick(4);
-        R.A = and8(R.A, R.E);
-        break;
-    case 0xA4: // AND H
-        LogVerbose("AND H");
-        tick(4);
-        R.A = and8(R.A, R.H);
-        break;
-    case 0xA5: // AND L
-        LogVerbose("AND L");
-        tick(4);
-        R.A = and8(R.A, R.L);
-        break;
-    case 0xA6: // AND (HL)
-        LogVerbose("AND (HL)");
-        tick(8);
-        R.A = and8(R.A, readByte(R.HL));
-        break;
-    case 0xE6: // AND #
-        LogVerbose("AND #");
-        tick(8);
-        R.A = and8(R.A, readByte(R.PC++));
-        break;
-    
-    case 0xB7: // OR A
-        LogVerbose("OR A");
-        tick(4);
-        R.A = or8(R.A, R.A);
-        break;
-    case 0xB0: // OR B
-        LogVerbose("OR B");
-        tick(4);
-        R.A = or8(R.A, R.B);
-        break;
-    case 0xB1: // OR C
-        LogVerbose("OR C");
-        tick(4);
-        R.A = or8(R.A, R.C);
-        break;
-    case 0xB2: // OR D
-        LogVerbose("OR D");
-        tick(4);
-        R.A = or8(R.A, R.D);
-        break;
-    case 0xB3: // OR E
-        LogVerbose("OR E");
-        tick(4);
-        R.A = or8(R.A, R.E);
-        break;
-    case 0xB4: // OR H
-        LogVerbose("OR H");
-        tick(4);
-        R.A = or8(R.A, R.H);
-        break;
-    case 0xB5: // OR L
-        LogVerbose("OR L");
-        tick(4);
-        R.A = or8(R.A, R.L);
-        break;
-    case 0xB6: // OR (HL)
-        LogVerbose("OR (HL)");
-        tick(8);
-        R.A = or8(R.A, readByte(R.HL));
-        break;
-    case 0xF6: // OR #
-        LogVerbose("OR #");
-        tick(8);
-        R.A = or8(R.A, readByte(R.PC++));
-        break;
-    
-    case 0xAF: // XOR A
-        LogVerbose("XOR A");
-        tick(4);
-        R.A = xor8(R.A, R.A);
-        break;
-    case 0xA8: // XOR B
-        LogVerbose("XOR B");
-        tick(4);
-        R.A = xor8(R.A, R.B);
-        break;
-    case 0xA9: // XOR C
-        LogVerbose("XOR C");
-        tick(4);
-        R.A = xor8(R.A, R.C);
-        break;
-    case 0xAA: // XOR D
-        LogVerbose("XOR D");
-        tick(4);
-        R.A = xor8(R.A, R.D);
-        break;
-    case 0xAB: // XOR E
-        LogVerbose("XOR E");
-        tick(4);
-        R.A = xor8(R.A, R.E);
-        break;
-    case 0xAC: // XOR H
-        LogVerbose("XOR H");
-        tick(4);
-        R.A = xor8(R.A, R.H);
-        break;
-    case 0xAD: // XOR L
-        LogVerbose("XOR L");
-        tick(4);
-        R.A = xor8(R.A, R.L);
-        break;
-    case 0xAE: // XOR (HL)
-        LogVerbose("XOR (HL)");
-        tick(4);
-        R.A = xor8(R.A, readByte(R.HL));
-        break;
-    case 0xEE: // XOR #
-        LogVerbose("XOR #");
-        tick(4);
-        R.A = xor8(R.A, readByte(R.PC++));
-        break;
-
-    case 0xBF: // CP A
-        LogVerbose("CP A");
-        tick(4);
-        sub8(R.A, R.A);
-        break;
-    case 0xB8: // CP B
-        LogVerbose("CP B");
-        tick(4);
-        sub8(R.A, R.B);
-        break;
-    case 0xB9: // CP C
-        LogVerbose("CP C");
-        tick(4);
-        sub8(R.A, R.C);
-        break;
-    case 0xBA: // CP D
-        LogVerbose("CP D");
-        tick(4);
-        sub8(R.A, R.D);
-        break;
-    case 0xBB: // CP E
-        LogVerbose("CP E");
-        tick(4);
-        sub8(R.A, R.E);
-        break;
-    case 0xBC: // CP H
-        LogVerbose("CP H");
-        tick(4);
-        sub8(R.A, R.H);
-        break;
-    case 0xBD: // CP L
-        LogVerbose("CP L");
-        tick(4);
-        sub8(R.A, R.L);
-        break;
-    case 0xBE: // CP (HL)
-        LogVerbose("CP (HL)");
-        tick(8);
-        sub8(R.A, readByte(R.HL));
-        break;
-    case 0xFE: // CP #
-        LogVerbose("CP %02X", readByte(R.PC));
-        tick(8);
-        sub8(R.A, readByte(R.PC++));
-        break;
-    
-    case 0x3C: // INC A
-        LogVerbose("INC A");
-        tick(4);
-        R.A = inc8(R.A);
-        break;
-    case 0x04: // INC B
-        LogVerbose("INC B");
-        tick(4);
-        R.B = inc8(R.B);
-        break;
-    case 0x0C: // INC C
-        LogVerbose("INC C");
-        tick(4);
-        R.C = inc8(R.C);
-        break;
-    case 0x14: // INC D
-        LogVerbose("INC D");
-        tick(4);
-        R.D = inc8(R.D);
-        break;
-    case 0x1C: // INC E
-        LogVerbose("INC E");
-        tick(4);
-        R.E = inc8(R.E);
-        break;
-    case 0x24: // INC H
-        LogVerbose("INC H");
-        tick(4);
-        R.H = inc8(R.H);
-        break;
-    case 0x2C: // INC L
-        LogVerbose("INC L");
-        tick(4);
-        R.L = inc8(R.L);
-        break;
-    case 0x34: // INC 
-        LogVerbose("INC (HL)");
-        tick(12);
-        writeByte(R.HL, inc8(readByte(R.HL)));
-        break;
-
-    case 0xC3: // JP nn
-        LogVerbose("JP %02X", readWord(R.PC));
-        tick(12);
-        R.PC = readWord(R.PC);
-        break;
-    case 0xC2: // JP NZ,nn
-        break;
-    case 0xCA: // JP Z,nn
-        break;
-    case 0xD2: // JP NC,nn
-        break;
-    case 0xDA: // JP C,nn
-        break;
-    
-    case 0x18: // JR *
-        LogVerbose("JR %02X", readByte(R.PC));
-        tick(8);
-        R.PC += (int8_t)readByte(R.PC);
-        break;
-    case 0x20: // JR NZ,*
-        LogVerbose("JR NZ,%02X", readByte(R.PC));
-        tick(8);
-        if (!R.FZ) {
-            tick(12);
-            R.PC += (int8_t)readByte(R.PC);
-        }
-        break;
-    case 0x28: // JR Z,*
-        LogVerbose("JR Z,%02X", readByte(R.PC));
-        tick(8);
-        if (R.FZ) {
-            tick(12);
-            R.PC += (int8_t)readByte(R.PC);
-        }
-        break;
-    case 0x30: // JR NC,*
-        LogVerbose("JR NC,%02X", readByte(R.PC));
-        tick(8);
-        if (!R.FC) {
-            tick(12);
-            R.PC += (int8_t)readByte(R.PC);
-        }
-        break;
-    case 0x38: // JR C,*
-        LogVerbose("JR C,%02X", readByte(R.PC));
-        tick(8);
-        if (R.FC) {
-            tick(12);
-            R.PC += (int8_t)readByte(R.PC);
-        }
-        break;
-    }
-
-    // TODO: delay by cycles
 }

@@ -1,12 +1,14 @@
 #ifndef RET_H
 #define RET_H
 
+#include "../cpu.h"
+#include "../log.h"
 #include "../memory.h"
 #include "../register.h"
 
 static void _RET()
 {
-    LogVerbose("RET");
+    LogDebug("RET");
 
     uint8_t nn = popWord();
     TickCounter += 4;
@@ -17,7 +19,7 @@ static void _RET()
 
 static void _RET_NZ()
 {
-    LogVerbose("RET NZ");
+    LogDebug("RET NZ");
 
     uint8_t nn = popWord();
     TickCounter += 4;
@@ -30,7 +32,7 @@ static void _RET_NZ()
 
 static void _RET_Z()
 {
-    LogVerbose("RET Z");
+    LogDebug("RET Z");
     
     uint8_t nn = popWord();
     TickCounter += 4;
@@ -43,7 +45,7 @@ static void _RET_Z()
 
 static void _RET_NC()
 {
-    LogVerbose("RET NC");
+    LogDebug("RET NC");
     
     uint8_t nn = popWord();
     TickCounter += 4;
@@ -56,7 +58,7 @@ static void _RET_NC()
 
 static void _RET_C()
 {
-    LogVerbose("RET C");
+    LogDebug("RET C");
     
     uint8_t nn = popWord();
     TickCounter += 4;
@@ -69,7 +71,7 @@ static void _RET_C()
 
 static void _RETI()
 {
-    LogVerbose("RETI");
+    LogDebug("RETI");
     
     uint8_t nn = popWord();
     TickCounter += 4;
