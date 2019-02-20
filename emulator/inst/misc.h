@@ -26,14 +26,14 @@ static void _DI()
 {
     LogDebug("DI");
     IME = false;
-    TickCounter += 4;
+    tick(4);
 }
 
 static void _EI()
 {
     LogDebug("EI");
     IME = true;
-    TickCounter += 4;
+    tick(4);
 }
 
 static void _DAA()

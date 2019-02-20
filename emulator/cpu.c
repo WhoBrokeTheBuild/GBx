@@ -3,6 +3,9 @@
 #include "log.h"
 #include "memory.h"
 
+#include <SDL.h>
+#include <time.h>
+
 #include "inst/CB.h"
 #include "inst/add.h"
 #include "inst/and.h"
@@ -300,11 +303,23 @@ inst_t instructions[0x100] = {
     [0xFD] = NULL,
 };
 
+void tick(uint8_t cycles)
+{
+    double length = 1.0 / (ClockSpeed / 4.0);
+    
+    struct timespec ts, ts2;
+    ts.tv_sec  = 0;
+    ts.tv_nsec = (length * 1000000000.0) * cycles;
+    if (nanosleep(&ts, &ts2) < 0) {
+        LogError("nanosleep failed");
+    }
+}
+
 uint8_t fetch()
 {
     uint8_t op = readByte(R.PC++);
     LogVerbose("%02X", op);
-    TickCounter += 4;
+    tick(4);
     return op;
 }
 

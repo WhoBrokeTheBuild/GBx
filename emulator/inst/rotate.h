@@ -76,12 +76,12 @@ static void _RLC_pHL()
 {
     LogDebug("RLC (HL)");
     uint8_t n = readByte(R.HL);
-    TickCounter += 4;
+    tick(4);
 
     _RLC(n);
 
     writeByte(R.HL, n);
-    TickCounter += 4;
+    tick(4);
 }
 
 static void _RLC_A()
@@ -136,12 +136,12 @@ static void _RRC_pHL()
 {
     LogDebug("RRC (HL)");
     uint8_t n = readByte(R.HL);
-    TickCounter += 4;
+    tick(4);
 
     _RRC(n);
 
     writeByte(R.HL, n);
-    TickCounter += 4;
+    tick(4);
 }
 
 static void _RRC_A()
@@ -196,12 +196,12 @@ static void _RL_pHL()
 {
     LogDebug("RL (HL)");
     uint8_t n = readByte(R.HL);
-    TickCounter += 4;
+    tick(4);
 
     _RL(n);
 
     writeByte(R.HL, n);
-    TickCounter += 4;
+    tick(4);
 }
 
 static void _RL_A()
@@ -256,12 +256,12 @@ static void _RR_pHL()
 {
     LogDebug("RR (HL)");
     uint8_t n = readByte(R.HL);
-    TickCounter += 4;
+    tick(4);
 
     _RR(n);
 
     writeByte(R.HL, n);
-    TickCounter += 4;
+    tick(4);
 }
 
 static void _RR_A()

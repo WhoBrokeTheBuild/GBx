@@ -57,7 +57,7 @@ static void _BIT_b_HL(int bit)
 {
     LogDebug("BIT %d,(HL)", bit);
     uint8_t n = readByte(R.HL);
-    TickCounter += 4;
+    tick(4);
 
     _BIT(n, bit);
 }

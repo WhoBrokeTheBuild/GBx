@@ -56,7 +56,7 @@ static void _XOR_pHL()
 {
     LogDebug("XOR HL");
     uint8_t n = readByte(R.HL);
-    TickCounter += 4;
+    tick(4);
 
     _XOR(n);
 }
@@ -64,7 +64,7 @@ static void _XOR_pHL()
 static void _XOR_n()
 {
     uint8_t n = nextByte();
-    TickCounter += 4;
+    tick(4);
 
     LogDebug("XOR %02Xh", n);
 

@@ -55,12 +55,12 @@ static void _SET_b_HL(int bit)
 {
     LogDebug("SET %d,(HL)", bit);
     uint8_t n = readByte(R.HL);
-    TickCounter += 4;
+    tick(4);
 
     _SET(n, bit);
 
     writeByte(R.HL, n);
-    TickCounter += 4;
+    tick(4);
 }
 
 #endif // SET_H

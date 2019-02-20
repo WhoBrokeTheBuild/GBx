@@ -56,40 +56,40 @@ static void _INC_pHL()
 {
     LogDebug("INC (HL)");
     uint8_t n = readByte(R.HL);
-    TickCounter += 4;
+    tick(4);
 
     _INC(n);
     
     writeByte(R.HL, n);
-    TickCounter += 4;
+    tick(4);
 }
 
 static void _INC_BC()
 {
     LogDebug("INC BC");
     ++R.BC;
-    TickCounter += 4;
+    tick(4);
 }
 
 static void _INC_DE()
 {
     LogDebug("INC DE");
     ++R.DE;
-    TickCounter += 4;
+    tick(4);
 }
 
 static void _INC_HL()
 {
     LogDebug("INC HL");
     ++R.HL;
-    TickCounter += 4;
+    tick(4);
 }
 
 static void _INC_SP()
 {
     LogDebug("INC SP");
     ++R.SP;
-    TickCounter += 4;
+    tick(4);
 }
 
 #endif // INC_H

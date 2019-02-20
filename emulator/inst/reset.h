@@ -54,12 +54,12 @@ static void _RES_b_HL(int bit)
 {
     LogDebug("RES %d,(HL)", bit);
     uint8_t n = readByte(R.HL);
-    TickCounter += 4;
+    tick(4);
 
     _RES(n, bit);
 
     writeByte(R.HL, n);
-    TickCounter += 4;
+    tick(4);
 }
 
 #endif // RESET_H

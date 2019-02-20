@@ -15,6 +15,12 @@ ADD_EXECUTABLE(
     video.c
 )
 
+TARGET_LINK_LIBRARIES(
+    GBx
+    SDL2::SDL2
+    Threads::Threads
+)
+
 IF(VERBOSE)
     TARGET_COMPILE_DEFINITIONS(
         GBx

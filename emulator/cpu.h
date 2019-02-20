@@ -8,6 +8,8 @@ extern uint64_t TickCounter;
 
 typedef void(* inst_t)();
 
+void tick(uint8_t cycles);
+
 uint8_t fetch();
 void execute(uint8_t op);
 
