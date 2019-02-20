@@ -52,7 +52,7 @@ extern reg_t R;
 
 static void printR()
 {
-    LogVerbose("AF=%04X BC=%04X DE=%04X HL=%04X SP=%04X PC=%04X FC=%d FN=%d FH=%d FZ=%d",
+    LogDebug("AF=%04X BC=%04X DE=%04X HL=%04X SP=%04X PC=%04X FC=%d FN=%d FH=%d FZ=%d",
         R.AF, R.BC, R.DE, R.HL, R.SP, R.PC, R.FC, R.FN, R.FH, R.FZ);
 }
 

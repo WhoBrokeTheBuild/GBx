@@ -1,11 +1,13 @@
 #include "memory.h"
-#include "log.h"
-#include "io.h"
 #include "alu.h"
-#include "sound.h"
-#include "video.h"
 #include "interrupt.h"
+#include "io.h"
+#include "log.h"
+#include "register.h"
+#include "sound.h"
 #include "timer.h"
+#include "video.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -26,15 +28,8 @@ uint8_t * ROM = NULL;
 
 uint8_t readByte(uint16_t address)
 {
-    LogVerbose("read %02X", address);
-    if (address <= 0x00FF) {
-        // Restart & Interrupt Vectors
-    }
-    else if (address <= 0x014F) {
-        // ROM Header
-        return ROM[address];
-    }
-    else if (address <= 0x3FFF) {
+    //LogVerbose("read %02X", address);
+    if (address <= 0x3FFF) {
         // ROM Bank 0
         return ROM0[address];
     }
@@ -173,16 +168,24 @@ uint16_t readWord(uint16_t address)
     return word;
 }
 
+uint8_t nextByte()
+{
+    uint8_t byte = readByte(R.PC);
+    ++R.PC;
+    return byte;
+}
+
+uint16_t nextWord()
+{
+    uint16_t word = readWord(R.PC);
+    R.PC += 2;
+    return word;
+}
+
 void writeByte(uint16_t address, uint8_t data)
 {
-    LogVerbose("write %02X", address);
-    if (address <= 0x00FF) {
-        // Restart & Interrupt Vectors
-    }
-    else if (address <= 0x014F) {
-        // ROM Header
-    }
-    else if (address <= 0x3FFF) {
+    //LogVerbose("write %02X", address);
+    if (address <= 0x3FFF) {
         // ROM Bank 0
     }
     else if (address <= 0x7FFF) {
@@ -313,6 +316,32 @@ void writeWord(uint16_t address, uint16_t data)
 {
     writeByte(address, (uint8_t)(data & 0x00FF));
     writeByte(address+1, (uint8_t)(data >> 8));
+}
+
+void pushByte(uint8_t data)
+{
+    --R.SP;
+    writeByte(R.SP, data);
+}
+
+void pushWord(uint16_t data)
+{
+    R.SP -= 2;
+    writeWord(R.SP, data);
+}
+
+uint8_t popByte()
+{
+    uint8_t byte = readByte(R.SP);
+    ++R.SP;
+    return byte;
+}
+
+uint16_t popWord()
+{
+    uint16_t word = readWord(R.SP);
+    R.SP += 2;
+    return word;
 }
 
 bool loadROM(const char * filename)

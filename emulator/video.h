@@ -38,4 +38,13 @@ extern uint8_t SCX;
 extern uint8_t LY;
 extern uint8_t LYC;
 
+enum {
+    BLACK       = 0xFF000000,
+    DARK_GREY   = 0xFF555555,
+    LIGHT_GREY  = 0xFFAAAAAA,
+    WHITE       = 0xFFFFFFFF,
+};
+
+void LCDTick();
+
 #endif // VIDEO_H

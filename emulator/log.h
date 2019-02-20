@@ -10,6 +10,12 @@
 #define LogError(M, ...) fprintf(stderr, "[ERRO] " M "\n", ##__VA_ARGS__)
 
 #if defined(NDEBUG)
+#   define LogDebug(M, ...)
+#else
+#   define LogDebug(M, ...) printf("[DEBG] " M "\n", ##__VA_ARGS__)
+#endif
+
+#if defined(VERBOSE)
 #   define LogVerbose(M, ...)
 #else
 #   define LogVerbose(M, ...) printf("[VERB] " M "\n", ##__VA_ARGS__)

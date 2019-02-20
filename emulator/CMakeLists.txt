@@ -3,6 +3,7 @@ ADD_EXECUTABLE(
     GBx
     main.c
     memory.c
+    cpu.c
     register.c
     interrupt.c
     io.c
