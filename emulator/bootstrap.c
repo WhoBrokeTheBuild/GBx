@@ -1,5 +1,7 @@
 #include "bootstrap.h"
 
+bool BootstrapEnable = true;
+
 uint8_t BOOTSTRAP[256] = {
     0X31, 0XFE, 0XFF, 0XAF, 0X21, 0XFF, 0X9F, 0X32, 0XCB, 0X7C, 0X20, 0XFB,
     0X21, 0X26, 0XFF, 0X0E, 0X11, 0X3E, 0X80, 0X32, 0XE2, 0X0C, 0X3E, 0XF3,

@@ -45,6 +45,6 @@ enum {
     WHITE       = 0xFFFFFFFF,
 };
 
-void LCDTick();
+void lcdTick();
 
 #endif // VIDEO_H

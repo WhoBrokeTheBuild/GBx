@@ -24,13 +24,21 @@ uint8_t * RAM = RAM0;
 
 uint8_t ZP[127];
 
-uint8_t * ROM0 = BOOTSTRAP;
-uint8_t * ROM = BOOTSTRAP;
+uint8_t * ROM0 = NULL;
+uint8_t * ROM = NULL;
 
 uint8_t readByte(uint16_t address)
 {
     LogVerbose("read %02X", address);
-    if (address <= 0x3FFF) {
+    if (address <= 0x00FF) {
+        // Bootstrap / Jump Vectors
+        if (BootstrapEnable) {
+            return BOOTSTRAP[address];
+        } else {
+            return ROM0[address];
+        }
+    }
+    else if (address <= 0x3FFF) {
         // ROM Bank 0
         return ROM0[address];
     }
@@ -146,6 +154,9 @@ uint8_t readByte(uint16_t address)
             return LY;
         case 0xFF45:
             return LYC;
+
+        case 0xFF50:
+            return BootstrapEnable;
         };
     }
     else if (address <= 0xFFFE) {
@@ -186,7 +197,10 @@ uint16_t nextWord()
 void writeByte(uint16_t address, uint8_t data)
 {
     LogVerbose("write %02X", address);
-    if (address <= 0x3FFF) {
+    if (address <= 0x00FF) {
+        // Bootstrap / Jump Vectors
+    }
+    else if (address <= 0x3FFF) {
         // ROM Bank 0
     }
     else if (address <= 0x7FFF) {
@@ -300,6 +314,9 @@ void writeByte(uint16_t address, uint8_t data)
             LY = data;
         case 0xFF45:
             LYC = data;
+        
+        case 0xFF50:
+            BootstrapEnable = data;
         };
     }
     else if (address <= 0xFFFE) {

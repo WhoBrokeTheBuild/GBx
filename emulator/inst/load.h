@@ -680,14 +680,14 @@ static void _LDH_A_pn()
 static void _LDH_pC_A()
 {
     LogDebug("LDH (C),A");
-    R.A = readByte(R.C);
+    R.A = readByte(0xFF00 + R.C);
     tick(4);
 }
 
 static void _LDH_A_pC()
 {
     LogDebug("LDH A,(C)");
-    writeByte(R.C, R.A);
+    writeByte(0xFF00 + R.C, R.A);
     tick(4);
 }
 
