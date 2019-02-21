@@ -70,12 +70,12 @@ static void _SLA_pHL()
 {
     LogDebug("SLA (HL)");
     uint8_t n = readByte(R.HL);
-    tick(4);
+    cpuTick(4);
 
     _SLA(n);
 
     writeByte(R.HL, n);
-    tick(4);
+    cpuTick(4);
 }
 
 static void _SLA_A()
@@ -124,12 +124,12 @@ static void _SRA_pHL()
 {
     LogDebug("_SRA (HL)");
     uint8_t n = readByte(R.HL);
-    tick(4);
+    cpuTick(4);
 
     _SRA(n);
 
     writeByte(R.HL, n);
-    tick(4);
+    cpuTick(4);
 }
 
 static void _SRA_A()
@@ -178,12 +178,12 @@ static void _SRL_pHL()
 {
     LogDebug("_SRL (HL)");
     uint8_t n = readByte(R.HL);
-    tick(4);
+    cpuTick(4);
 
     _SRL(n);
 
     writeByte(R.HL, n);
-    tick(4);
+    cpuTick(4);
 }
 
 static void _SRL_A()
@@ -196,62 +196,62 @@ static void _SWAP_B()
 {
     LogDebug("SWAP B");
     _SWAP(R.B);
-    tick(4);
+    cpuTick(4);
 }
 
 static void _SWAP_C()
 {
     LogDebug("SWAP C");
     _SWAP(R.C);
-    tick(4);
+    cpuTick(4);
 }
 
 static void _SWAP_D()
 {
     LogDebug("SWAP D");
     _SWAP(R.D);
-    tick(4);
+    cpuTick(4);
 }
 
 static void _SWAP_E()
 {
     LogDebug("SWAP E");
     _SWAP(R.E);
-    tick(4);
+    cpuTick(4);
 }
 
 static void _SWAP_H()
 {
     LogDebug("SWAP H");
     _SWAP(R.H);
-    tick(4);
+    cpuTick(4);
 }
 
 static void _SWAP_L()
 {
     LogDebug("SWAP L");
     _SWAP(R.L);
-    tick(4);
+    cpuTick(4);
 }
 
 static void _SWAP_pHL()
 {
     LogDebug("SWAP (HL)");
     uint8_t n = readByte(R.HL);
-    tick(4);
+    cpuTick(4);
 
     _SWAP(n);
-    tick(4);
+    cpuTick(4);
 
     writeByte(R.HL, n);
-    tick(4);
+    cpuTick(4);
 }
 
 static void _SWAP_A()
 {
     LogDebug("SWAP A");
     _SWAP(R.A);
-    tick(4);
+    cpuTick(4);
 }
 
 #undef _SLA

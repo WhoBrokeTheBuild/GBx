@@ -4,6 +4,7 @@ ADD_EXECUTABLE(
     alu.c
     bootstrap.c
     cpu.c
+    debug.c
     inst/CB.c
     interrupt.c
     io.c
@@ -18,13 +19,32 @@ ADD_EXECUTABLE(
 TARGET_LINK_LIBRARIES(
     GBx
     SDL2::SDL2
-    Threads::Threads
 )
 
-IF(VERBOSE)
+IF(Readline_FOUND)
+    TARGET_LINK_LIBRARIES(
+        GBx
+        Readline::Readline
+    )
     TARGET_COMPILE_DEFINITIONS(
         GBx
         PRIVATE
-            -DVERBOSE
+            -DHAVE_READLINE
+    )
+ENDIF()
+
+IF(LOG_VERBOSE)
+    TARGET_COMPILE_DEFINITIONS(
+        GBx
+        PRIVATE
+            -DLOG_VERBOSE
+    )
+ENDIF()
+
+IF(LOG_INST)
+    TARGET_COMPILE_DEFINITIONS(
+        GBx
+        PRIVATE
+            -DLOG_INST
     )
 ENDIF()

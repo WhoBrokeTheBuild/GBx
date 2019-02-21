@@ -22,21 +22,21 @@ static void _STOP()
 {
     LogDebug("STOP");
     ++R.PC;
-    LCDEnabled = false;
+    LCDC.LCDEnable = false;
 }
 
 static void _DI()
 {
     LogDebug("DI");
     IME = false;
-    tick(4);
+    cpuTick(4);
 }
 
 static void _EI()
 {
     LogDebug("EI");
     IME = true;
-    tick(4);
+    cpuTick(4);
 }
 
 static void _DAA()

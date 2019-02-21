@@ -56,7 +56,7 @@ static void _AND_pHL()
 {
     LogDebug("AND HL");
     uint8_t n = readByte(R.HL);
-    tick(4);
+    cpuTick(4);
 
     _AND(n);
 }
@@ -64,7 +64,7 @@ static void _AND_pHL()
 static void _AND_n()
 {
     uint8_t n = nextByte();
-    tick(4);
+    cpuTick(4);
 
     LogDebug("AND %02Xh", n);
 

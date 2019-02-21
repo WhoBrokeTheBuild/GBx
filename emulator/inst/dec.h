@@ -56,40 +56,40 @@ static void _DEC_pHL()
 {
     LogDebug("DEC (HL)");
     uint8_t n = readByte(R.HL);
-    tick(4);
+    cpuTick(4);
 
     _DEC(n);
     
     writeByte(R.HL, n);
-    tick(4);
+    cpuTick(4);
 }
 
 static void _DEC_BC()
 {
     LogDebug("DEC BC");
     --R.BC;
-    tick(4);
+    cpuTick(4);
 }
 
 static void _DEC_DE()
 {
     LogDebug("DEC DE");
     --R.DE;
-    tick(4);
+    cpuTick(4);
 }
 
 static void _DEC_HL()
 {
     LogDebug("DEC HL");
     --R.HL;
-    tick(4);
+    cpuTick(4);
 }
 
 static void _DEC_SP()
 {
     LogDebug("DEC SP");
     --R.SP;
-    tick(4);
+    cpuTick(4);
 }
 
 #endif // DEC_H

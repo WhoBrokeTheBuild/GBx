@@ -6,8 +6,9 @@
 static void usage() 
 {
     printf(
-        "usage: GBx FILENAME\n"
+        "usage: GBx FILENAME [-d]\n"
         "\n"
+        "-d     Run with the built-in debugger."
     );
 }
 

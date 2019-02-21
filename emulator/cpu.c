@@ -28,9 +28,10 @@
 #define GB_CLOCK_SPEED 4194304 // Hz
 
 bool CPUEnabled = true;
+bool CPULimit = false;
 
 uint32_t ClockSpeed = GB_CLOCK_SPEED;
-uint64_t TickCounter = 0;
+uint64_t CPUTicks = 0;
 
 inst_t instructions[0x100] = {
     // CB
@@ -305,23 +306,28 @@ inst_t instructions[0x100] = {
     [0xFD] = NULL,
 };
 
-void tick(uint8_t cycles)
+void cpuTick(unsigned cycles)
 {
-    double length = 1.0 / (ClockSpeed / 4.0);
-    
-    struct timespec ts, ts2;
-    ts.tv_sec  = 0;
-    ts.tv_nsec = (length * 1000000000.0) * cycles;
-    if (nanosleep(&ts, &ts2) < 0) {
-        LogError("nanosleep failed");
+    if (CPULimit) {
+        double length = 1.0 / (ClockSpeed / 4.0);
+        
+        struct timespec ts, ts2;
+        ts.tv_sec  = 0;
+        ts.tv_nsec = (length * 1000000000.0) * cycles;
+        if (nanosleep(&ts, &ts2) < 0) {
+            LogError("nanosleep failed");
+        }
     }
+
+    CPUTicks += cycles;
+    lcdTick(cycles);
 }
 
 uint8_t fetch()
 {
     uint8_t op = readByte(R.PC++);
     LogVerbose("%02X", op);
-    tick(4);
+    cpuTick(4);
     return op;
 }
 
@@ -335,10 +341,12 @@ void execute(uint8_t op)
     }
 }
 
-void cpuTick(int cycles)
+void nextInstruction(int cycles)
 {
     if (CPUEnabled) {
         uint8_t op = fetch();
         execute(op);
+    } else {
+        cpuTick(1);
     }
 }

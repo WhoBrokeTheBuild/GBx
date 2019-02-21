@@ -23,7 +23,7 @@ extern IE_t IF;
 
 static void printIE() 
 {
-    LogVerbose("VBlank=%d STAT=%d Timer=%d Serial=%d Joypad=%d",
+    LogDebug("VBlank=%d STAT=%d Timer=%d Serial=%d Joypad=%d",
         IE.VBlank, IE.STAT, IE.Timer, IE.Serial, IE.Joypad);
 }
 

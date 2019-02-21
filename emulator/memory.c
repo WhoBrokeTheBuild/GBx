@@ -48,17 +48,17 @@ uint8_t readByte(uint16_t address)
     }
     else if (address <= 0x97FF) {
         // Character RAM
-        LogInfo("read CharacterRAM @ %04Xh", address);
+        LogVerbose("read CharacterRAM @ %04Xh", address);
         return CharacterRAM[address - 0x8000];
     }
     else if (address <= 0x9BFF) {
         // BG Map Data 1
-        LogInfo("read BGMapData1 @ %04Xh", address);
+        LogVerbose("read BGMapData1 @ %04Xh", address);
         return BGMapData1[address - 0x9800];
     }
     else if (address <= 0x9FFF) {
         // BG Map Data 2
-        LogInfo("read BGMapData2 @ %04Xh", address);
+        LogVerbose("read BGMapData2 @ %04Xh", address);
         return BGMapData2[address - 0x9C00];
     }
     else if (address <= 0xBFFF) {
@@ -149,8 +149,8 @@ uint8_t readByte(uint16_t address)
             return NR52;
         
         case 0xFF40:
-            return LCDC.data;
             printLCDC();
+            return LCDC.data;
         case 0xFF41:
             return STAT.data;
         case 0xFF42:
@@ -215,17 +215,17 @@ void writeByte(uint16_t address, uint8_t data)
     }
     else if (address <= 0x97FF) {
         // Character RAM
-        LogInfo("write CharacterRAM @ %04Xh", address);
+        LogVerbose("write CharacterRAM @ %04Xh", address);
         CharacterRAM[address - 0x8000] = data;
     }
     else if (address <= 0x9BFF) {
         // BG Map Data 1
-        LogInfo("write BGMapData1 @ %04Xh", address);
+        LogVerbose("write BGMapData1 @ %04Xh", address);
         BGMapData1[address - 0x9800] = data;
     }
     else if (address <= 0x9FFF) {
         // BG Map Data 2
-        LogInfo("write BGMapData2 @ %04Xh", address);
+        LogVerbose("write BGMapData2 @ %04Xh", address);
         BGMapData1[address - 0x9C00] = data;
     }
     else if (address <= 0xBFFF) {

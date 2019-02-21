@@ -59,7 +59,7 @@ static void _SUB_pHL()
 {
     LogDebug("SUB A,(HL)");
     uint8_t n = readByte(R.HL);
-    tick(4);
+    cpuTick(4);
 
     _SUB(n);
 }
@@ -67,7 +67,7 @@ static void _SUB_pHL()
 static void _SUB_n()
 {
     uint8_t n = nextByte();
-    tick(4);
+    cpuTick(4);
 
     LogDebug("SUB A,%02Xh", n);
 
@@ -120,7 +120,7 @@ static void _SBC_pHL()
 {
     LogDebug("SBC A,(HL)");
     uint8_t n = readByte(R.HL);
-    tick(4);
+    cpuTick(4);
 
     _SBC(n);
 }
@@ -128,7 +128,7 @@ static void _SBC_pHL()
 static void _SBC_n()
 {
     uint8_t n = nextByte();
-    tick(4);
+    cpuTick(4);
 
     LogDebug("SBC A,%02Xh", n);
 

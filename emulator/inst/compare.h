@@ -56,7 +56,7 @@ static void _CP_pHL()
 {
     LogDebug("CP (HL)");
     uint8_t nn = readByte(R.HL);
-    tick(4);
+    cpuTick(4);
 
     _CP(nn);
 }
@@ -64,7 +64,7 @@ static void _CP_pHL()
 static void _CP_n()
 {
     uint8_t n = nextByte();
-    tick(4);
+    cpuTick(4);
 
     LogDebug("CP %02Xh", n);
 
