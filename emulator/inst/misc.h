@@ -5,6 +5,7 @@
 #include "../log.h"
 #include "../interrupt.h"
 #include "../register.h"
+#include "../video.h"
 
 static void _NOP()
 {
@@ -14,12 +15,14 @@ static void _NOP()
 static void _HALT()
 {
     LogDebug("HALT");
+    CPUEnabled = false;
 }
 
 static void _STOP()
 {
     LogDebug("STOP");
     ++R.PC;
+    LCDEnabled = false;
 }
 
 static void _DI()

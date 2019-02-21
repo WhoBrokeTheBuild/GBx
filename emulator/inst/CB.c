@@ -110,9 +110,13 @@ void _CB()
     if (op < 0x40) {
         CB_instructions[op]();
     } else {
-        int bit = (op - 0x40) % 8;
-        int inst = (op - 0x40) / 32;
-        int variant = ((op - 0x40) / 8) - 1;
+        uint8_t tmp = op - 0x40;
+        // 0-7
+        int bit = (tmp % 8) + (tmp / 16);
+        // 0-3
+        int inst = tmp / 64;
+        // 0-7
+        int variant = tmp % 8;
         bit_instructions[(inst * 8) + variant](bit);
     }
 }

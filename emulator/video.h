@@ -1,6 +1,7 @@
 #ifndef VIDEO_H
 #define VIDEO_H
 
+#include "log.h"
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -31,6 +32,8 @@ typedef union {
     uint8_t data;
 } STAT_t;
 
+extern bool LCDEnabled;
+
 extern LCDC_t LCDC;
 extern STAT_t STAT;
 extern uint8_t SCY;
@@ -38,12 +41,27 @@ extern uint8_t SCX;
 extern uint8_t LY;
 extern uint8_t LYC;
 
+extern uint8_t CharacterRAM[0x1800];
+extern uint8_t BGMapData1[0x400];
+extern uint8_t BGMapData2[0x400];
+
 enum {
     BLACK       = 0xFF000000,
     DARK_GREY   = 0xFF555555,
     LIGHT_GREY  = 0xFFAAAAAA,
     WHITE       = 0xFFFFFFFF,
 };
+
+static void printLCDC()
+{
+    LogDebug("BGWinDisp=%d OBJDisp=%d OBJSize=%d BGTileMap=%s TileData=%s WinDisp=%d WinTileMap=%s LCDEnab=%d",
+        LCDC.BGWindowDisplay, LCDC.SpriteDisplay, LCDC.SpriteSize,
+        (LCDC.BGTileMapSelect ? "9C00h-9FFFh" : "9800h-9BFFh"),
+        (LCDC.BGTileDataSelect ? "8000h-8FFFh" : "8800h-97FFh"),
+        LCDC.WindowDisplay,
+        (LCDC.WindowTileMapSelect ? "9C00h-9FFFh" : "9800h-9BFFh"),
+        LCDC.LCDEnable);
+}
 
 void lcdTick();
 

@@ -27,6 +27,8 @@
 
 #define GB_CLOCK_SPEED 4194304 // Hz
 
+bool CPUEnabled = true;
+
 uint32_t ClockSpeed = GB_CLOCK_SPEED;
 uint64_t TickCounter = 0;
 
@@ -335,6 +337,8 @@ void execute(uint8_t op)
 
 void cpuTick(int cycles)
 {
-    uint8_t op = fetch();
-    execute(op);
+    if (CPUEnabled) {
+        uint8_t op = fetch();
+        execute(op);
+    }
 }

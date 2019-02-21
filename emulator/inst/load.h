@@ -625,7 +625,8 @@ static void _LDI_pHL_A()
     uint8_t n = readByte(R.HL);
     tick(4);
 
-    R.A = n + 1;
+    R.A = n;
+    ++R.HL;
 }
 
 static void _LDD_pHL_A()
@@ -634,7 +635,8 @@ static void _LDD_pHL_A()
     uint8_t n = readByte(R.HL);
     tick(4);
 
-    R.A = n - 1;
+    R.A = n;
+    --R.HL;
 }
 
 static void _LDI_A_pHL()
@@ -643,7 +645,8 @@ static void _LDI_A_pHL()
     uint8_t n = readByte(R.HL);
     tick(4);
 
-    R.A = n + 1;
+    R.A = n;
+    ++R.HL;
 }
 
 static void _LDD_A_pHL()
@@ -652,7 +655,8 @@ static void _LDD_A_pHL()
     uint8_t n = readByte(R.HL);
     tick(4);
 
-    R.A = n - 1;
+    R.A = n;
+    --R.HL;
 }
 
 static void _LDH_pn_A()

@@ -8,6 +8,7 @@
 #include "memory.h"
 #include "register.h"
 #include "usage.h"
+#include "video.h"
 
 int main(int argc, char** argv)
 {
