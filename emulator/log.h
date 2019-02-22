@@ -30,7 +30,7 @@
 #define LogDebug(M, ...) \
     do { if (DebugMode) { printf(COLOR_CYAN "[DEBG] " M "\n" COLOR_END, ##__VA_ARGS__); } } while (0)
 
-#if !defined(LOG_VERBOSE)
+#if !defined(VERBOSE)
 #   define LogVerbose(M, ...)
 #else
 #   define LogVerbose(M, ...) printf(COLOR_MAGENTA "[VERB] " M "\n" COLOR_END, ##__VA_ARGS__)

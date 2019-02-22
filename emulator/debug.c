@@ -51,11 +51,11 @@ void debugPrompt()
         }
         else if (strncmp(input, "b ", 2) == 0) {
             sscanf(input, "b %04X", (unsigned int *)&B.PC);
-            LogInfo("B set at %04Xh", B.PC);
+            LogInfo("breakpoint set at %04Xh", B.PC);
         }
         else if (strncmp(input, "break ", 6) == 0) {
             sscanf(input, "break %04X", (unsigned int *)&B.PC);
-            LogInfo("B set at %04Xh", B.PC);
+            LogInfo("breakpoint set at %04Xh", B.PC);
         }
 
         free(input);

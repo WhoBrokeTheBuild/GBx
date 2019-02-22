@@ -78,6 +78,7 @@ uint8_t readByte(uint16_t address)
     }
     else if (address <= 0xFE9F) {
         // Object Attribute Memory OAM
+        return OAM[address - 0xFE00];
     }
     else if (address <= 0xFEFF) {
         // Unusable
@@ -147,7 +148,7 @@ uint8_t readByte(uint16_t address)
             return NR51;
         case 0xFF26:
             return NR52;
-        
+
         case 0xFF40:
             printLCDC();
             return LCDC.data;
@@ -161,6 +162,18 @@ uint8_t readByte(uint16_t address)
             return LY;
         case 0xFF45:
             return LYC;
+        case 0xFF47:
+            return BGP.data;
+        case 0xFF48:
+            return OBP0.data;
+        case 0xFF49:
+            return OBP1.data;
+        case 0xFF4A:
+            return WX;
+            break;
+        case 0xFF4B:
+            return WY;
+            break;
 
         case 0xFF50:
             return BootstrapEnable;
@@ -245,6 +258,7 @@ void writeByte(uint16_t address, uint8_t data)
     }
     else if (address <= 0xFE9F) {
         // Object Attribute Memory OAM
+        OAM[address - 0xFE00] = data;
     }
     else if (address <= 0xFEFF) {
         // Unusable
@@ -258,79 +272,135 @@ void writeByte(uint16_t address, uint8_t data)
         switch (address) {
         case 0xFF00:
             P1.data = data;
+            break;
         case 0xFF01:
             SB = data;
+            break;
         case 0xFF02:
             SC.data = data;
+            break;
         case 0xFF04:
             DIV = data;
+            break;
         case 0xFF05:
             TIMA = data;
+            break;
         case 0xFF06:
             TMA = data;
+            break;
         case 0xFF07:
             TAC.data = data;
+            break;
         case 0xFF0F:
             IF.data = data;
+            break;
         case 0xFF10:
             NR10 = data;
+            break;
         case 0xFF11:
             NR11 = data;
+            break;
         case 0xFF12:
             NR12 = data;
+            break;
         case 0xFF13:
             NR13 = data;
+            break;
         case 0xFF14:
             NR14 = data;
+            break;
         case 0xFF16:
             NR21 = data;
+            break;
         case 0xFF17:
             NR22 = data;
+            break;
         case 0xFF18:
             NR23 = data;
+            break;
         case 0xFF19:
             NR24 = data;
+            break;
         case 0xFF1A:
             NR30 = data;
+            break;
         case 0xFF1B:
             NR31 = data;
+            break;
         case 0xFF1C:
             NR32 = data;
+            break;
         case 0xFF1D:
             NR33 = data;
+            break;
         case 0xFF1E:
             NR34 = data;
+            break;
         case 0xFF20:
             NR41 = data;
+            break;
         case 0xFF21:
             NR42 = data;
+            break;
         case 0xFF22:
             NR43 = data;
+            break;
         case 0xFF23:
             NR44 = data;
+            break;
         case 0xFF24:
             NR50 = data;
+            break;
         case 0xFF25:
             NR51 = data;
+            break;
         case 0xFF26:
             NR52 = data;
+            break;
         
         case 0xFF40:
             LCDC.data = data;
             printLCDC();
+            break;
         case 0xFF41:
             STAT.data = data;
+            break;
         case 0xFF42:
             SCY = data;
+            break;
         case 0xFF43:
             SCX = data;
-        case 0xFF44:
-            LY = data;
+            break;
         case 0xFF45:
             LYC = data;
+            break;
+        case 0xFF46:
+            {
+                uint16_t addr = data << 8;
+                for (unsigned i = 0; i < 0xA0; ++i) {
+                    writeByte(0xFE00 + i, readByte(addr + 1));
+                }
+            }
+            break;
+        case 0xFF47:
+            BGP.data = data;
+            break;
+        case 0xFF48:
+            OBP0.data = data;
+            break;
+        case 0xFF49:
+            OBP1.data = data;
+            break;
+        case 0xFF4A:
+            WX = data;
+            break;
+        case 0xFF4B:
+            WY = data;
+            break;
         
         case 0xFF50:
             BootstrapEnable = data;
+            break;
         };
     }
     else if (address <= 0xFFFE) {

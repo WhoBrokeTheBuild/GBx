@@ -86,5 +86,5 @@ uint8_t dec8(uint8_t a)
     R.FZ = (a - 1 == 0);
     R.FN = 1;
     R.FH = ((a & 0xF) - 1) == 0x00;
-    return ++a;
+    return --a;
 }

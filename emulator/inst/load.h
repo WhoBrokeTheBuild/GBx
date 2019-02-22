@@ -601,7 +601,7 @@ static void _LD_pnn_A()
 
     LogDebug("LD (%04Xh),A", nn);
 
-    R.A = readByte(nn);
+    writeByte(nn, R.A);
     cpuTick(4);
 }
 
@@ -622,41 +622,33 @@ static void _LD_A_pnn()
 static void _LDI_pHL_A()
 {
     LogDebug("LDI (HL),A");
-    uint8_t n = readByte(R.HL);
-    cpuTick(4);
-
-    R.A = n;
+    writeByte(R.HL, R.A);
     ++R.HL;
+    cpuTick(4);
 }
 
 static void _LDD_pHL_A()
 {
     LogDebug("LDI (HL),A");
-    uint8_t n = readByte(R.HL);
-    cpuTick(4);
-
-    R.A = n;
+    writeByte(R.HL, R.A);
     --R.HL;
+    cpuTick(4);
 }
 
 static void _LDI_A_pHL()
 {
     LogDebug("LDI A,(HL)");
-    uint8_t n = readByte(R.HL);
-    cpuTick(4);
-
-    R.A = n;
+    R.A = readByte(R.HL);
     ++R.HL;
+    cpuTick(4);
 }
 
 static void _LDD_A_pHL()
 {
     LogDebug("LDI A,(HL)");
-    uint8_t n = readByte(R.HL);
-    cpuTick(4);
-
-    R.A = n;
+    R.A = readByte(R.HL);;
     --R.HL;
+    cpuTick(4);
 }
 
 static void _LDH_pn_A()

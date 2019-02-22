@@ -7,11 +7,11 @@
 
 typedef union {
     struct {
-        bool BGWindowDisplay:1;
+        bool TileDisplay:1;
         bool SpriteDisplay:1;
         uint8_t SpriteSize:1;
-        uint8_t BGTileMapSelect:1;
-        uint8_t BGTileDataSelect:1;
+        uint8_t TileMapSelect:1;
+        uint8_t TileDataSelect:1;
         bool WindowDisplay:1;
         uint8_t WindowTileMapSelect:1;
         bool LCDEnable:1;
@@ -37,34 +37,62 @@ typedef union {
 #define MODE_SEARCH_SPRITE  0b10
 #define MODE_DATA_TRANSFER  0b11
 
+typedef union {
+    struct {
+        uint8_t Color00:2;
+        uint8_t Color01:2;
+        uint8_t Color10:2;
+        uint8_t Color11:2;
+    };
+    uint8_t data;
+} palette_t;
+
+typedef union {
+    struct {
+        uint8_t Y;
+        uint8_t X;
+        uint8_t Pattern;
+        union {
+            struct {
+                uint8_t Priority:1;
+                uint8_t YFlip:1;
+                uint8_t XFlip:1;
+                uint8_t Palette:1;
+                uint8_t _:4;
+            };
+            uint8_t Attrib;
+        };
+    };
+    uint32_t data;
+} sprite_t;
+
 extern LCDC_t LCDC;
 extern STAT_t STAT;
 extern uint8_t SCY;
 extern uint8_t SCX;
 extern uint8_t LY;
 extern uint8_t LYC;
+extern palette_t BGP;
+extern palette_t OBP0;
+extern palette_t OBP1;
+extern uint8_t WX;
+extern uint8_t WY;
 
 extern uint8_t CharacterRAM[0x1800];
 extern uint8_t BGMapData1[0x400];
 extern uint8_t BGMapData2[0x400];
+extern uint8_t OAM[0xA0];
 
 extern uint64_t LCDTicks;
-
-enum {
-    BLACK       = 0xFF000000,
-    DARK_GREY   = 0xFF555555,
-    LIGHT_GREY  = 0xFFAAAAAA,
-    WHITE       = 0xFFFFFFFF,
-};
 
 static void printLCDC()
 {
     LogDebug("BGWinDisp=%d OBJDisp=%d OBJSize=%d BGTileMap=%s TileData=%s WinDisp=%d WinTileMap=%s LCDEnab=%d",
-        LCDC.BGWindowDisplay, LCDC.SpriteDisplay, LCDC.SpriteSize,
-        (LCDC.BGTileMapSelect ? "9C00h-9FFFh" : "9800h-9BFFh"),
-        (LCDC.BGTileDataSelect ? "8000h-8FFFh" : "8800h-97FFh"),
+        LCDC.TileDisplay, LCDC.SpriteDisplay, LCDC.SpriteSize,
+        (LCDC.TileMapSelect == 0 ? "9800h-9BFFh" : "9C00h-9FFFh"),
+        (LCDC.TileDataSelect == 0 ? "8800h-97FFh" : "8000h-8FFFh"),
         LCDC.WindowDisplay,
-        (LCDC.WindowTileMapSelect ? "9C00h-9FFFh" : "9800h-9BFFh"),
+        (LCDC.WindowTileMapSelect == 0 ? "9C00h-9FFFh" : "9800h-9BFFh"),
         LCDC.LCDEnable);
 }
 

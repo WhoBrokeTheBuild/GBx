@@ -325,7 +325,7 @@ void cpuTick(unsigned cycles)
 
 uint8_t fetch()
 {
-    uint8_t op = readByte(R.PC++);
+    uint8_t op = nextByte();
     LogVerbose("%02X", op);
     cpuTick(4);
     return op;

@@ -33,18 +33,10 @@ IF(Readline_FOUND)
     )
 ENDIF()
 
-IF(LOG_VERBOSE)
+IF(VERBOSE)
     TARGET_COMPILE_DEFINITIONS(
         GBx
         PRIVATE
-            -DLOG_VERBOSE
-    )
-ENDIF()
-
-IF(LOG_INST)
-    TARGET_COMPILE_DEFINITIONS(
-        GBx
-        PRIVATE
-            -DLOG_INST
+            -DVERBOSE
     )
 ENDIF()

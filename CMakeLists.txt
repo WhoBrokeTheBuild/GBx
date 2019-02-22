@@ -5,8 +5,7 @@ PROJECT(GBx LANGUAGES C VERSION 0.0.1)
 LIST(INSERT CMAKE_MODULE_PATH 0 "${CMAKE_SOURCE_DIR}/cmake")
 
 OPTION(BUILD_TOOLS "Build tool executables." ON )
-OPTION(LOG_VERBOSE "Build with verbose logging." OFF )
-OPTION(LOG_INST    "Build with instruction logging." OFF )
+OPTION(VERBOSE "Build with verbose logging." OFF )
 
 FIND_PACKAGE(SDL2 REQUIRED)
 FIND_PACKAGE(Readline)
