@@ -320,7 +320,6 @@ void cpuTick(unsigned cycles)
     }
 
     CPUTicks += cycles;
-    lcdTick(cycles);
 }
 
 uint8_t fetch()

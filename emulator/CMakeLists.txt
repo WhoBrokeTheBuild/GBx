@@ -13,12 +13,20 @@ ADD_EXECUTABLE(
     register.c
     sound.c
     timer.c
+    tinycthread.c
     video.c
+)
+
+TARGET_INCLUDE_DIRECTORIES(
+    GBx
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 TARGET_LINK_LIBRARIES(
     GBx
     SDL2::SDL2
+    Threads::Threads
 )
 
 IF(Readline_FOUND)

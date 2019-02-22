@@ -19,10 +19,6 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-        LogFatal("failed to initialize SDL2, %s", SDL_GetError());
-    }
-
     lcdInit();
 
     LogInfo("loading rom %s", argv[1]);
@@ -38,22 +34,14 @@ int main(int argc, char** argv)
 
     R.PC = 0x0000;
 
-    SDL_Event evt;
-    bool running = true;
-    while (running) {
-        while (SDL_PollEvent(&evt)) {
-            if (evt.type == SDL_QUIT) {
-                running = false;
-                break;
-            }
-        }
-
+    for (;;) {
         if (R.PC == B.PC) {
             debugPrompt();
         } else {
             nextInstruction();
         }
     }
+
 
     freeROM();
 

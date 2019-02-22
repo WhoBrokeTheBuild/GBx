@@ -1,16 +1,23 @@
 #include "video.h"
+#include "cpu.h"
 #include "memory.h"
 #include <SDL.h>
 
+#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L) && !defined(__STDC_NO_THREADS__)
+#   include <threads.h>
+#else
+#   include <tinycthread.h>
+#endif
+
 LCDC_t LCDC = { 
-    .TileDisplay = false,
-    .SpriteDisplay = false,
-    .SpriteSize = 0,
-    .TileMapSelect = 0,
-    .TileDataSelect = 0,
-    .WindowDisplay = false,
-    .WindowTileMapSelect = 0,
-    .LCDEnable = false,
+    .TileDisplay            = false,
+    .SpriteDisplay          = false,
+    .SpriteSize             = 0,
+    .TileMapSelect          = 0,
+    .TileDataSelect         = 0,
+    .WindowDisplay          = false,
+    .WindowTileMapSelect    = 0,
+    .LCDEnable              = false,
 };
 STAT_t STAT;
 uint8_t SCY = 0x00;
@@ -29,16 +36,19 @@ uint8_t BGMapData2[0x400];
 uint8_t OAM[0xA0];
 
 uint64_t LCDTicks = 0;
+bool LCDLimit = true;
 
 SDL_Window * sdlWindow = NULL;
 SDL_Renderer * sdlRenderer = NULL;
 SDL_Texture * sdlTexture = NULL;
 
-uint8_t VRAM[160*144*3];
+uint8_t VRAM[256*256*3];
 
-const int SCALE = 1;
+const int SCALE = 4;
 
-void drawTiles(uint8_t * pixels, int pitch)
+thrd_t lcdThread;
+
+void drawTiles()
 {
     int y = 0;
     if (LCDC.WindowDisplay) {
@@ -126,16 +136,14 @@ void drawTiles(uint8_t * pixels, int pitch)
             break;
         }
 
-        unsigned off = (LY * pitch) + (x * 3);
-        pixels[off + 0] = color;
-        pixels[off + 1] = color;
-        pixels[off + 2] = color;
+        unsigned off = (LY * 256*3) + (x * 3);
+        VRAM[off + 0] = color;
+        VRAM[off + 1] = color;
+        VRAM[off + 2] = color;
     }
-
-    SDL_UnlockTexture(sdlTexture);
 }
 
-void drawSprites(uint8_t * pixels, int pitch)
+void drawSprites()
 {
     sprite_t s;
     for (int sprite = 0; sprite < 40; ++sprite) {
@@ -207,29 +215,21 @@ void drawSprites(uint8_t * pixels, int pitch)
 
                 int x = -pixel + 7;
 
-                unsigned off = (LY * pitch) + (x * 3);
-                pixels[off + 0] = 0x00;
-                pixels[off + 1] = 0x00;
-                pixels[off + 2] = 0x00;
+                unsigned off = (LY * 256*3) + (x * 3);
+                VRAM[off + 0] = 0x00;
+                VRAM[off + 1] = 0x00;
+                VRAM[off + 2] = 0x00;
             }
         }
     }
 }
 
-void drawScanline()
+void lcdRender() 
 {
     uint8_t * pixels = NULL;
     int pitch = 0;
     SDL_LockTexture(sdlTexture, NULL, (void **)&pixels, &pitch);
-
-    if (LCDC.TileDisplay) {
-        drawTiles(pixels, pitch);
-    }
-
-    if (LCDC.SpriteDisplay) {
-        drawSprites(pixels, pitch);
-    }
-
+    memcpy(pixels, VRAM, sizeof(VRAM));
     SDL_UnlockTexture(sdlTexture);
 
     SDL_Rect src = { .x = 0, .y = 0, .w = 160, .h = 144 };
@@ -239,48 +239,17 @@ void drawScanline()
     SDL_RenderPresent(sdlRenderer);
 }
 
-void lcdInit()
+void drawScanline()
 {
-    if (SDL_CreateWindowAndRenderer(160 * SCALE, 144 * SCALE, 0, &sdlWindow, &sdlRenderer)) {
-        LogFatal("failed to create SDL2 sdlWindow/sdlRenderer, %s", SDL_GetError());
+    if (LCDC.TileDisplay) {
+        drawTiles();
     }
-    
-    SDL_SetRenderDrawColor(sdlRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-    SDL_RenderClear(sdlRenderer);
-    SDL_RenderPresent(sdlRenderer);
 
-    sdlTexture = SDL_CreateTexture(sdlRenderer, SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_STREAMING, 256, 256);
-
-    int w, h;
-    SDL_QueryTexture(sdlTexture, NULL, NULL, &w, &h);
-    
-    uint8_t * pixels = NULL;
-    int pitch = 0;
-    
-    SDL_LockTexture(sdlTexture, NULL, (void **)&pixels, &pitch);
-    for (unsigned y = 0; y < 144; ++y) {
-        for (unsigned x = 0; x < 160; ++x) {
-            unsigned off = (y * pitch) + (x * 3);
-            pixels[off + 0] = 0xFF;
-            pixels[off + 1] = 0xFF;
-            pixels[off + 2] = 0xFF;
-        }
+    if (LCDC.SpriteDisplay) {
+        drawSprites();
     }
-    SDL_UnlockTexture(sdlTexture);
-    
-    SDL_Rect src = { .x = 0, .y = 0, .w = 160, .h = 144 };
-    SDL_Rect dst = { .x = 0, .y = 0, .w = 160 * SCALE, .h = 144 * SCALE };
-    
-    SDL_RenderCopy(sdlRenderer, sdlTexture, &src, &dst);
-    SDL_RenderPresent(sdlRenderer);
-}
 
-void lcdTerm()
-{
-    SDL_DestroyTexture(sdlTexture);
-
-    SDL_DestroyRenderer(sdlRenderer);
-    SDL_DestroyWindow(sdlWindow);
+    lcdRender();
 }
 
 void lcdTick(unsigned cycles)
@@ -339,6 +308,9 @@ void lcdTick(unsigned cycles)
 
         if (LY == 144) {
             STAT.Mode = MODE_VBLANK;
+            
+            //LogInfo("vblank");
+            //lcdRender();
             // Interrupt 0
         }
         else if (LY < 144) {
@@ -348,4 +320,69 @@ void lcdTick(unsigned cycles)
 
     //SDL_RenderClear(sdlRenderer);
     //SDL_RenderPresent(sdlRenderer);
+}
+
+int lcdThreadFunc(void * args)
+{
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+        LogFatal("failed to initialize SDL2, %s", SDL_GetError());
+    }
+
+    sdlWindow = SDL_CreateWindow("GBx", -1, -1, 160 * SCALE, 144 * SCALE, 0);
+    if (!sdlWindow) {
+        LogFatal("failed to create SDL2 window, %s", SDL_GetError());
+    }
+
+    sdlRenderer = SDL_CreateRenderer(sdlWindow, 0, SDL_RENDERER_ACCELERATED);
+    if (!sdlRenderer) {
+        LogFatal("failed to create SDL2 renderer, %s", SDL_GetError());
+    }
+    
+    sdlTexture = SDL_CreateTexture(sdlRenderer, SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_STREAMING, 256, 256);
+
+    for (unsigned y = 0; y < 144; ++y) {
+        for (unsigned x = 0; x < 160; ++x) {
+            unsigned off = (y * 256*3) + (x * 3);
+            VRAM[off + 0] = 0xFF;
+            VRAM[off + 1] = 0xFF;
+            VRAM[off + 2] = 0xFF;
+        }
+    }
+
+    lcdRender();
+
+    SDL_Event evt;
+    bool running = true;
+    while (running) {
+        while (SDL_PollEvent(&evt)) {
+            if (evt.type == SDL_QUIT) {
+                running = false;
+                break;
+            }
+        }
+
+        //if (LCDTicks < CPUTicks) {
+            //LogInfo("%d", CPUTicks - LCDTicks);
+            lcdTick(4);
+        //}
+    }
+
+    SDL_DestroyTexture(sdlTexture);
+
+    SDL_DestroyRenderer(sdlRenderer);
+    SDL_DestroyWindow(sdlWindow);
+
+    exit(0);
+}
+
+void lcdInit()
+{
+    if (thrd_create(&lcdThread, lcdThreadFunc, (void*)0) != thrd_success) {
+        LogFatal("failed to start LCD thread");
+    }
+}
+
+void lcdTerm()
+{
+    thrd_join(lcdThread, NULL);
 }
