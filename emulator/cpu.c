@@ -1,5 +1,6 @@
 #include "cpu.h"
 
+#include "interrupt.h"
 #include "log.h"
 #include "memory.h"
 
@@ -320,6 +321,7 @@ void cpuTick(unsigned cycles)
     }
 
     CPUTicks += cycles;
+    lcdTick(cycles * 10);
 }
 
 uint8_t fetch()
@@ -348,4 +350,6 @@ void nextInstruction(int cycles)
     } else {
         cpuTick(1);
     }
+
+    checkInterrupts();
 }

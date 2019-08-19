@@ -2,6 +2,7 @@
 #define REGISTER_H
 
 #include "log.h"
+
 #include <stdint.h>
 #include <stdbool.h>
 

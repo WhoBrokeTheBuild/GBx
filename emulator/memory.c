@@ -1,4 +1,5 @@
 #include "memory.h"
+
 #include "alu.h"
 #include "bootstrap.h"
 #include "interrupt.h"
@@ -11,6 +12,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 
 uint8_t RAM0[0x0FFF];
 uint8_t RAM1[0x0FFF];
@@ -204,6 +206,7 @@ uint8_t nextByte()
 {
     uint8_t byte = readByte(R.PC);
     ++R.PC;
+    R.PC &= USHRT_MAX;
     return byte;
 }
 
@@ -211,6 +214,7 @@ uint16_t nextWord()
 {
     uint16_t word = readWord(R.PC);
     R.PC += 2;
+    R.PC &= USHRT_MAX;
     return word;
 }
 
@@ -364,15 +368,19 @@ void writeByte(uint16_t address, uint8_t data)
             break;
         case 0xFF41:
             STAT.data = data;
+            printSTAT();
             break;
         case 0xFF42:
             SCY = data;
+            printLCDInfo();
             break;
         case 0xFF43:
             SCX = data;
+            printLCDInfo();
             break;
         case 0xFF45:
             LYC = data;
+            printLCDInfo();
             break;
         case 0xFF46:
             {
@@ -393,12 +401,15 @@ void writeByte(uint16_t address, uint8_t data)
             break;
         case 0xFF4A:
             WX = data;
+            printLCDInfo();
             break;
         case 0xFF4B:
             WY = data;
+            printLCDInfo();
             break;
         
         case 0xFF50:
+            DebugMode = true;
             BootstrapEnable = data;
             break;
         };

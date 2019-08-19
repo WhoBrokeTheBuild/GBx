@@ -10,13 +10,13 @@
 #endif
 
 LCDC_t LCDC = { 
-    .TileDisplay            = false,
-    .SpriteDisplay          = false,
-    .SpriteSize             = 0,
-    .TileMapSelect          = 0,
-    .TileDataSelect         = 0,
-    .WindowDisplay          = false,
-    .WindowTileMapSelect    = 0,
+    .TileDisplayEnable      = false,
+    .SpriteDisplayEnable    = false,
+    .SpriteSize             = SPRITE_SIZE_8X8,
+    .TileMapSelect          = TILE_MAP_9800_9BFF,
+    .TileDataSelect         = TILE_DATA_8800_97FF,
+    .WindowDisplayEnable    = false,
+    .WindowTileMapSelect    = TILE_MAP_9800_9BFF,
     .LCDEnable              = false,
 };
 STAT_t STAT;
@@ -38,6 +38,8 @@ uint8_t OAM[0xA0];
 uint64_t LCDTicks = 0;
 bool LCDLimit = true;
 
+unsigned int LCDModeTicks = 0;
+
 SDL_Window * sdlWindow = NULL;
 SDL_Renderer * sdlRenderer = NULL;
 SDL_Texture * sdlTexture = NULL;
@@ -51,7 +53,7 @@ thrd_t lcdThread;
 void drawTiles()
 {
     int y = 0;
-    if (LCDC.WindowDisplay) {
+    if (LCDC.WindowDisplayEnable) {
         y = LY - WY;
     } else {
         y = SCY + LY;
@@ -61,7 +63,7 @@ void drawTiles()
 
     for (unsigned pixel = 0; pixel < 160; ++pixel) {
         uint8_t x = pixel + SCX;
-        if (LCDC.WindowDisplay) {
+        if (LCDC.WindowDisplayEnable) {
             if (pixel >= WX - 7) {
                 x = pixel - (WX - 7);
             }
@@ -69,7 +71,7 @@ void drawTiles()
 
 
         uint16_t tileBaseAddress;
-        if (LCDC.WindowDisplay) {
+        if (LCDC.WindowDisplayEnable) {
             if (LCDC.WindowTileMapSelect == 0) {
                 tileBaseAddress = 0x9800;
             } else {
@@ -151,7 +153,7 @@ void drawSprites()
         s.Y = readWord(0xFE00 + index) - 16;
         s.X = readWord(0xFE00 + index + 1) - 8;
         s.Pattern = readWord(0xFE00 + index + 2);
-        s.Attrib = readWord(0xFE00 + index + 3);
+        s.Attributes = readWord(0xFE00 + index + 3);
 
         int height = 8;
         if (LCDC.SpriteSize == 1) {
@@ -239,90 +241,144 @@ void lcdRender()
     SDL_RenderPresent(sdlRenderer);
 }
 
-void drawScanline()
+void pollEvents() 
 {
-    if (LCDC.TileDisplay) {
-        drawTiles();
+    SDL_Event evt;
+    while (SDL_PollEvent(&evt)) {
+        if (evt.type == SDL_QUIT) {
+            exit(0);
+            break;
+        }
     }
-
-    if (LCDC.SpriteDisplay) {
-        drawSprites();
-    }
-
-    lcdRender();
 }
 
 void lcdTick(unsigned cycles)
 {
-    const unsigned SCANLINE_TICK_COUNT = 456;
-    static unsigned scanlineCounter = 0;
+    const unsigned HBLANK_TICK_COUNT = 204;
+    const unsigned VBLANK_TICK_COUNT = 456;
+    const unsigned SEARCH_SPRITE_TICK_COUNT = 80;
+    const unsigned DATA_TRANSFER_TICK_COUNT = 172;
 
-    if (!LCDC.LCDEnable) {
-        scanlineCounter = 0;
-        LY = 0;
-        STAT.IntHBlank = false;
-        STAT.IntVBlank = false;
-        STAT.IntSearchSprite = false;
-        STAT.IntLYCLY = false;
-    }
+    pollEvents();
 
     LCDTicks += cycles;
-    scanlineCounter += cycles;
+    LCDModeTicks += cycles;
 
-    uint8_t oldMode = STAT.Mode;
-    bool requestInterrupt = false;
+    switch (STAT.Mode) {
+        case MODE_HBLANK:
+        if (LCDModeTicks >= 204) {
+            LCDModeTicks = 0;
 
-    if (LY >= 144) {
-        STAT.Mode = MODE_VBLANK;
-        requestInterrupt = STAT.IntVBlank;
-    } else {
-        const int MODE2 = 80;
-        const int MODE3 = 252;
-        if (scanlineCounter <= MODE2) {
-            STAT.Mode = MODE_SEARCH_SPRITE;
-            requestInterrupt = STAT.IntSearchSprite;
-        } else if (scanlineCounter <= MODE3) {
-            STAT.Mode = MODE_DATA_TRANSFER;
-        } else {
-            STAT.Mode = MODE_HBLANK;
-            requestInterrupt = STAT.IntHBlank;
+            ++LY;
+            if (LY == 143) {
+                STAT.Mode = MODE_VBLANK;
+                lcdRender();
+            }
+            else {
+                STAT.Mode = MODE_SEARCH_SPRITE;
+            }
         }
-    }
-
-    if (requestInterrupt && (oldMode != STAT.Mode)) {
-        // Inerrupt 1
-    }
-
-    STAT.Coincidence = (LY == LYC);
-    if (STAT.Coincidence && STAT.IntLYCLY) {
-        // Interrupt 1
-    }
-
-    if (scanlineCounter >= SCANLINE_TICK_COUNT) {
-        scanlineCounter = 0;
-
-        ++LY;
-        if (LY > 153) {
-            LY = 0;
-        }
-
-        if (LY == 144) {
-            STAT.Mode = MODE_VBLANK;
+        break;
+        case MODE_VBLANK:
+        if (LCDModeTicks >= 456) {
+            LCDModeTicks = 0;
             
-            //LogInfo("vblank");
-            //lcdRender();
-            // Interrupt 0
+            ++LY;
+            if (LY > 153) {
+                STAT.Mode = MODE_SEARCH_SPRITE;
+                LY = 0;
+            }
         }
-        else if (LY < 144) {
-            drawScanline();
+        break;
+        case MODE_SEARCH_SPRITE:
+        if (LCDModeTicks >= 80) {
+            LCDModeTicks = 0;
+            STAT.Mode = MODE_DATA_TRANSFER;
         }
+        break;
+        case MODE_DATA_TRANSFER:
+        if (LCDModeTicks >= 172) {
+            LCDModeTicks = 0;
+            STAT.Mode = MODE_HBLANK;
+
+            if (LCDC.TileDisplayEnable) {
+                drawTiles();
+            }
+
+            if (LCDC.SpriteDisplayEnable) {
+                drawSprites();
+            }
+        }
+        break;
     }
 
-    //SDL_RenderClear(sdlRenderer);
-    //SDL_RenderPresent(sdlRenderer);
+    // static unsigned scanlineCounter = 0;
+
+    // if (!LCDC.LCDEnable) {
+    //     scanlineCounter = 0;
+    //     LY = 0;
+    //     STAT.IntHBlank = false;
+    //     STAT.IntVBlank = false;
+    //     STAT.IntSearchSprite = false;
+    //     STAT.IntLYCLY = false;
+    // }
+
+    // scanlineCounter += cycles;
+
+    // uint8_t oldMode = STAT.Mode;
+    // bool requestInterrupt = false;
+
+    // if (LY >= 144) {
+    //     STAT.Mode = MODE_VBLANK;
+    //     requestInterrupt = STAT.IntVBlank;
+    // } else {
+    //     const int MODE2 = 80;
+    //     const int MODE3 = 252;
+    //     if (scanlineCounter <= MODE2) {
+    //         STAT.Mode = MODE_SEARCH_SPRITE;
+    //         requestInterrupt = STAT.IntSearchSprite;
+    //     } else if (scanlineCounter <= MODE3) {
+    //         STAT.Mode = MODE_DATA_TRANSFER;
+    //     } else {
+    //         STAT.Mode = MODE_HBLANK;
+    //         requestInterrupt = STAT.IntHBlank;
+    //     }
+    // }
+
+    // if (requestInterrupt && (oldMode != STAT.Mode)) {
+    //     // Inerrupt 1
+    // }
+
+    // STAT.Coincidence = (LY == LYC);
+    // if (STAT.Coincidence && STAT.IntLYCLY) {
+    //     // Interrupt 1
+    // }
+
+    // if (scanlineCounter >= SCANLINE_TICK_COUNT) {
+    //     scanlineCounter = 0;
+
+    //     ++LY;
+    //     if (LY > 153) {
+    //         LY = 0;
+    //     }
+
+    //     if (LY == 144) {
+    //         STAT.Mode = MODE_VBLANK;
+            
+    //         //LogInfo("vblank");
+    //         //lcdRender();
+    //         // Interrupt 0
+    //     }
+    //     else if (LY < 144) {
+    //         drawScanline();
+    //     }
+    // }
+
+    // //SDL_RenderClear(sdlRenderer);
+    // //SDL_RenderPresent(sdlRenderer);
 }
 
-int lcdThreadFunc(void * args)
+void lcdInit()
 {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         LogFatal("failed to initialize SDL2, %s", SDL_GetError());
@@ -350,39 +406,12 @@ int lcdThreadFunc(void * args)
     }
 
     lcdRender();
-
-    SDL_Event evt;
-    bool running = true;
-    while (running) {
-        while (SDL_PollEvent(&evt)) {
-            if (evt.type == SDL_QUIT) {
-                running = false;
-                break;
-            }
-        }
-
-        //if (LCDTicks < CPUTicks) {
-            //LogInfo("%d", CPUTicks - LCDTicks);
-            lcdTick(4);
-        //}
-    }
-
-    SDL_DestroyTexture(sdlTexture);
-
-    SDL_DestroyRenderer(sdlRenderer);
-    SDL_DestroyWindow(sdlWindow);
-
-    exit(0);
-}
-
-void lcdInit()
-{
-    if (thrd_create(&lcdThread, lcdThreadFunc, (void*)0) != thrd_success) {
-        LogFatal("failed to start LCD thread");
-    }
 }
 
 void lcdTerm()
 {
-    thrd_join(lcdThread, NULL);
+    SDL_DestroyTexture(sdlTexture);
+
+    SDL_DestroyRenderer(sdlRenderer);
+    SDL_DestroyWindow(sdlWindow);
 }

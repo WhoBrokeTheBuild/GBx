@@ -7,17 +7,26 @@
 
 typedef union {
     struct {
-        bool TileDisplay:1;
-        bool SpriteDisplay:1;
+        bool TileDisplayEnable:1;
+        bool SpriteDisplayEnable:1;
         uint8_t SpriteSize:1;
         uint8_t TileMapSelect:1;
         uint8_t TileDataSelect:1;
-        bool WindowDisplay:1;
+        bool WindowDisplayEnable:1;
         uint8_t WindowTileMapSelect:1;
         bool LCDEnable:1;
     };
     uint8_t data;
 } LCDC_t;
+
+#define SPRITE_SIZE_8X8  0
+#define SPRITE_SIZE_8X16 1
+
+#define TILE_MAP_9800_9BFF 0
+#define TILE_MAP_9C00_9FFF 1
+
+#define TILE_DATA_8800_97FF 0
+#define TILE_DATA_8000_8FFF 1
 
 typedef union {
     struct {
@@ -60,7 +69,7 @@ typedef union {
                 uint8_t Palette:1;
                 uint8_t _:4;
             };
-            uint8_t Attrib;
+            uint8_t Attributes;
         };
     };
     uint32_t data;
@@ -88,12 +97,31 @@ extern uint64_t LCDTicks;
 static void printLCDC()
 {
     LogDebug("BGWinDisp=%d OBJDisp=%d OBJSize=%d BGTileMap=%s TileData=%s WinDisp=%d WinTileMap=%s LCDEnab=%d",
-        LCDC.TileDisplay, LCDC.SpriteDisplay, LCDC.SpriteSize,
+        LCDC.TileDisplayEnable, LCDC.SpriteDisplayEnable, LCDC.SpriteSize,
         (LCDC.TileMapSelect == 0 ? "9800h-9BFFh" : "9C00h-9FFFh"),
         (LCDC.TileDataSelect == 0 ? "8800h-97FFh" : "8000h-8FFFh"),
-        LCDC.WindowDisplay,
+        LCDC.WindowDisplayEnable,
         (LCDC.WindowTileMapSelect == 0 ? "9C00h-9FFFh" : "9800h-9BFFh"),
         LCDC.LCDEnable);
+}
+
+static void printSTAT() 
+{
+    const char * mode[4] = {
+        "HBlank",
+        "VBlank",
+        "SearchSprite",
+        "DataTransfer",
+    };
+
+    LogDebug("Mode=%s Coinc=%d IntHBlank=%d IntVBlank=%d IntSearchSprite=%d IntLYCLY=%d",
+        mode[STAT.Mode], STAT.Coincidence, STAT.IntHBlank, STAT.IntVBlank, STAT.IntSearchSprite, STAT.IntLYCLY);
+}
+
+static void printLCDInfo()
+{
+    LogDebug("SCY=%d SCX=%d LY=%d LYC=%d WX=%d WY=%d",
+        SCY, SCX, LY, LYC, WX, WY);
 }
 
 void lcdInit();

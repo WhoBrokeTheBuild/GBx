@@ -1,6 +1,8 @@
 #include <SDL.h>
 #include <stdint.h>
 #include <string.h>
+#include <limits.h>
+#include <signal.h>
 
 #include "bootstrap.h"
 #include "cpu.h"
@@ -9,8 +11,16 @@
 #include "log.h"
 #include "memory.h"
 #include "register.h"
+#include "sound.h"
+#include "timer.h"
 #include "usage.h"
 #include "video.h"
+
+void handleSignal(int sig)
+{
+    LogInfo("signal");
+    DebugMode = true;
+}
 
 int main(int argc, char** argv)
 {
@@ -27,21 +37,38 @@ int main(int argc, char** argv)
         LogFatal("failed to load rom");
     }
 
-    if (argc > 2 && strcmp(argv[2], "-d") == 0) {
-        DebugMode = true;
-        B.PC = 0x0000;
+    for (int i = 2; i < argc; ++i) {
+        const char * arg = argv[i];
+        if (strncmp(arg, "-d", 2) == 0
+            || strncmp(arg, "--debug", 7) == 0) {
+            DebugMode = true;
+        }
+        else if (strncmp(arg, "-b", 2) == 0
+            || strncmp(arg, "bootstrap", 11) == 0) {
+            BootstrapEnable = true;
+        }
     }
 
-    R.PC = 0x0000;
+    if (BootstrapEnable) {
+        R.PC = 0x0000;
+    }
+    else {
+        R.PC = 0x0150;
+        bootstrap();
+    }
+
+    if (DebugMode) {
+        signal(SIGINT, handleSignal);
+    }
 
     for (;;) {
-        if (R.PC == B.PC) {
+        if (R.PC == B.PC || DebugMode) {
+            B.PC = USHRT_MAX;
             debugPrompt();
         } else {
             nextInstruction();
         }
     }
-
 
     freeROM();
 
