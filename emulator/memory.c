@@ -409,8 +409,7 @@ void writeByte(uint16_t address, uint8_t data)
             break;
         
         case 0xFF50:
-            DebugMode = true;
-            BootstrapEnable = data;
+            BootstrapEnable = (data == 0);
             break;
         };
     }

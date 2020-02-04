@@ -326,10 +326,14 @@ void cpuTick(unsigned cycles)
 
 uint8_t fetch()
 {
-    uint8_t op = nextByte();
-    LogVerbose("%02X", op);
-    cpuTick(4);
-    return op;
+    if (CPUEnabled) {
+        uint8_t op = nextByte();
+        LogVerbose("%02X", op);
+        cpuTick(4);
+        return op;
+    }
+
+    return 0x00;
 }
 
 void execute(uint8_t op)
@@ -342,14 +346,3 @@ void execute(uint8_t op)
     }
 }
 
-void nextInstruction(int cycles)
-{
-    if (CPUEnabled) {
-        uint8_t op = fetch();
-        execute(op);
-    } else {
-        cpuTick(1);
-    }
-
-    checkInterrupts();
-}

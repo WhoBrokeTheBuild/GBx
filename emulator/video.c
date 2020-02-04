@@ -414,4 +414,6 @@ void lcdTerm()
 
     SDL_DestroyRenderer(sdlRenderer);
     SDL_DestroyWindow(sdlWindow);
+
+    SDL_Quit();
 }

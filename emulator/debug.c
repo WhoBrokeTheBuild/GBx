@@ -31,7 +31,9 @@ void debugPrompt()
         }
 
         if (strlen(input) == 0) {
-            nextInstruction();
+            execute(fetch());
+            B.PC = R.PC;
+            break;
         }
         else if (strcmp(input, "quit") == 0 
             || strcmp(input, "q") == 0) {

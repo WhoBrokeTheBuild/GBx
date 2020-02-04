@@ -66,15 +66,13 @@ int main(int argc, char** argv)
             B.PC = USHRT_MAX;
             debugPrompt();
         } else {
-            nextInstruction();
+            execute(fetch());
         }
     }
 
     freeROM();
 
     lcdTerm();
-
-    SDL_Quit();
 
     return 0;
 }

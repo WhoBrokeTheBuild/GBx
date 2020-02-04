@@ -15,8 +15,7 @@ typedef void(* inst_t)();
 void cpuTick(unsigned cycles);
 
 uint8_t fetch();
-void execute(uint8_t op);
 
-void nextInstruction();
+void execute(uint8_t op);
 
 #endif // CPU_H
