@@ -96,7 +96,7 @@ extern uint64_t LCDTicks;
 
 static void printLCDC()
 {
-    LogDebug("BGWinDisp=%d OBJDisp=%d OBJSize=%d BGTileMap=%s TileData=%s WinDisp=%d WinTileMap=%s LCDEnab=%d",
+    LogInfo("BGWinDisp=%d OBJDisp=%d OBJSize=%d BGTileMap=%s TileData=%s WinDisp=%d WinTileMap=%s LCDEnab=%d",
         LCDC.TileDisplayEnable, LCDC.SpriteDisplayEnable, LCDC.SpriteSize,
         (LCDC.TileMapSelect == 0 ? "9800h-9BFFh" : "9C00h-9FFFh"),
         (LCDC.TileDataSelect == 0 ? "8800h-97FFh" : "8000h-8FFFh"),
@@ -114,13 +114,13 @@ static void printSTAT()
         "DataTransfer",
     };
 
-    LogDebug("Mode=%s Coinc=%d IntHBlank=%d IntVBlank=%d IntSearchSprite=%d IntLYCLY=%d",
+    LogInfo("Mode=%s Coinc=%d IntHBlank=%d IntVBlank=%d IntSearchSprite=%d IntLYCLY=%d",
         mode[STAT.Mode], STAT.Coincidence, STAT.IntHBlank, STAT.IntVBlank, STAT.IntSearchSprite, STAT.IntLYCLY);
 }
 
 static void printLCDInfo()
 {
-    LogDebug("SCY=%d SCX=%d LY=%d LYC=%d WX=%d WY=%d",
+    LogInfo("SCY=%d SCX=%d LY=%d LYC=%d WX=%d WY=%d",
         SCY, SCX, LY, LYC, WX, WY);
 }
 

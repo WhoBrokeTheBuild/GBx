@@ -152,7 +152,9 @@ uint8_t readByte(uint16_t address)
             return NR52;
 
         case 0xFF40:
-            printLCDC();
+            if (DebugMode) {
+                printLCDC();
+            }
             return LCDC.data;
         case 0xFF41:
             return STAT.data;
@@ -187,7 +189,9 @@ uint8_t readByte(uint16_t address)
     }
     else if (address == 0xFFFF) {
         // Interrupt Enable Flag
-        printIE();
+        if (DebugMode) {
+            printIE();
+        }
         return IE.data;
     }
 
@@ -364,23 +368,33 @@ void writeByte(uint16_t address, uint8_t data)
         
         case 0xFF40:
             LCDC.data = data;
-            printLCDC();
+            if (DebugMode) {
+                printLCDC();
+            }
             break;
         case 0xFF41:
             STAT.data = data;
-            printSTAT();
+            if (DebugMode) {
+                printSTAT();
+            }
             break;
         case 0xFF42:
             SCY = data;
-            printLCDInfo();
+            if (DebugMode) {
+                printLCDInfo();
+            }
             break;
         case 0xFF43:
             SCX = data;
-            printLCDInfo();
+            if (DebugMode) {
+                printLCDInfo();
+            }
             break;
         case 0xFF45:
             LYC = data;
-            printLCDInfo();
+            if (DebugMode) {
+                printLCDInfo();
+            }
             break;
         case 0xFF46:
             {
@@ -401,15 +415,19 @@ void writeByte(uint16_t address, uint8_t data)
             break;
         case 0xFF4A:
             WX = data;
-            printLCDInfo();
+            if (DebugMode) {
+                printLCDInfo();
+            }
             break;
         case 0xFF4B:
             WY = data;
-            printLCDInfo();
+            if (DebugMode) {
+                printLCDInfo();
+            }
             break;
         
         case 0xFF50:
-            BootstrapEnable = (data == 0);
+            BootstrapEnable = (data > 0);
             break;
         };
     }
@@ -420,7 +438,9 @@ void writeByte(uint16_t address, uint8_t data)
     else if (address == 0xFFFF) {
         // Interrupt Enable Flag
         IE.data = data;
-        printIE();
+        if (DebugMode) {
+            printIE();
+        }
     }
 }
 

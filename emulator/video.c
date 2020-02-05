@@ -36,7 +36,7 @@ uint8_t BGMapData2[0x400];
 uint8_t OAM[0xA0];
 
 uint64_t LCDTicks = 0;
-bool LCDLimit = true;
+bool LCDLimit = false;
 
 unsigned int LCDModeTicks = 0;
 
@@ -46,7 +46,7 @@ SDL_Texture * sdlTexture = NULL;
 
 uint8_t VRAM[256*256*3];
 
-const int SCALE = 1;
+const int SCALE = 4;
 
 thrd_t lcdThread;
 
@@ -99,7 +99,6 @@ void drawTiles()
         uint8_t line = (y % 8) * 2;
         uint8_t data1 = readByte(tileOffset + line);
         uint8_t data2 = readByte(tileOffset + line + 1);
-        //LogInfo("%02X %02X %04X", data1, data2, tileOffset);
 
         int bit = (x % 8);
         bit -= 7;
@@ -226,6 +225,17 @@ void drawSprites()
     }
 }
 
+void pollEvents() 
+{
+    SDL_Event evt;
+    while (SDL_PollEvent(&evt)) {
+        if (evt.type == SDL_QUIT) {
+            exit(0);
+            break;
+        }
+    }
+}
+
 void lcdRender() 
 {
     uint8_t * pixels = NULL;
@@ -239,17 +249,8 @@ void lcdRender()
     
     SDL_RenderCopy(sdlRenderer, sdlTexture, &src, &dst);
     SDL_RenderPresent(sdlRenderer);
-}
 
-void pollEvents() 
-{
-    SDL_Event evt;
-    while (SDL_PollEvent(&evt)) {
-        if (evt.type == SDL_QUIT) {
-            exit(0);
-            break;
-        }
-    }
+    pollEvents();
 }
 
 void lcdTick(unsigned cycles)
@@ -259,123 +260,56 @@ void lcdTick(unsigned cycles)
     const unsigned SEARCH_SPRITE_TICK_COUNT = 80;
     const unsigned DATA_TRANSFER_TICK_COUNT = 172;
 
-    pollEvents();
-
     LCDTicks += cycles;
     LCDModeTicks += cycles;
 
     switch (STAT.Mode) {
         case MODE_HBLANK:
-        if (LCDModeTicks >= 204) {
-            LCDModeTicks = 0;
+            if (LCDModeTicks >= 204) {
+                LCDModeTicks = 0;
 
-            ++LY;
-            if (LY == 143) {
-                STAT.Mode = MODE_VBLANK;
-                lcdRender();
+                ++LY;
+                if (LY == 143) {
+                    STAT.Mode = MODE_VBLANK;
+                    lcdRender();
+                }
+                else {
+                    STAT.Mode = MODE_SEARCH_SPRITE;
+                }
             }
-            else {
-                STAT.Mode = MODE_SEARCH_SPRITE;
-            }
-        }
         break;
         case MODE_VBLANK:
-        if (LCDModeTicks >= 456) {
-            LCDModeTicks = 0;
-            
-            ++LY;
-            if (LY > 153) {
-                STAT.Mode = MODE_SEARCH_SPRITE;
-                LY = 0;
+            if (LCDModeTicks >= 456) {
+                LCDModeTicks = 0;
+                
+                ++LY;
+                if (LY > 153) {
+                    STAT.Mode = MODE_SEARCH_SPRITE;
+                    LY = 0;
+                }
             }
-        }
         break;
         case MODE_SEARCH_SPRITE:
-        if (LCDModeTicks >= 80) {
-            LCDModeTicks = 0;
-            STAT.Mode = MODE_DATA_TRANSFER;
-        }
+            if (LCDModeTicks >= 80) {
+                LCDModeTicks = 0;
+                STAT.Mode = MODE_DATA_TRANSFER;
+            }
         break;
         case MODE_DATA_TRANSFER:
-        if (LCDModeTicks >= 172) {
-            LCDModeTicks = 0;
-            STAT.Mode = MODE_HBLANK;
+            if (LCDModeTicks >= 172) {
+                LCDModeTicks = 0;
+                STAT.Mode = MODE_HBLANK;
 
-            if (LCDC.TileDisplayEnable) {
-                drawTiles();
-            }
+                if (LCDC.TileDisplayEnable) {
+                    drawTiles();
+                }
 
-            if (LCDC.SpriteDisplayEnable) {
-                drawSprites();
+                if (LCDC.SpriteDisplayEnable) {
+                    drawSprites();
+                }
             }
-        }
         break;
     }
-
-    // static unsigned scanlineCounter = 0;
-
-    // if (!LCDC.LCDEnable) {
-    //     scanlineCounter = 0;
-    //     LY = 0;
-    //     STAT.IntHBlank = false;
-    //     STAT.IntVBlank = false;
-    //     STAT.IntSearchSprite = false;
-    //     STAT.IntLYCLY = false;
-    // }
-
-    // scanlineCounter += cycles;
-
-    // uint8_t oldMode = STAT.Mode;
-    // bool requestInterrupt = false;
-
-    // if (LY >= 144) {
-    //     STAT.Mode = MODE_VBLANK;
-    //     requestInterrupt = STAT.IntVBlank;
-    // } else {
-    //     const int MODE2 = 80;
-    //     const int MODE3 = 252;
-    //     if (scanlineCounter <= MODE2) {
-    //         STAT.Mode = MODE_SEARCH_SPRITE;
-    //         requestInterrupt = STAT.IntSearchSprite;
-    //     } else if (scanlineCounter <= MODE3) {
-    //         STAT.Mode = MODE_DATA_TRANSFER;
-    //     } else {
-    //         STAT.Mode = MODE_HBLANK;
-    //         requestInterrupt = STAT.IntHBlank;
-    //     }
-    // }
-
-    // if (requestInterrupt && (oldMode != STAT.Mode)) {
-    //     // Inerrupt 1
-    // }
-
-    // STAT.Coincidence = (LY == LYC);
-    // if (STAT.Coincidence && STAT.IntLYCLY) {
-    //     // Interrupt 1
-    // }
-
-    // if (scanlineCounter >= SCANLINE_TICK_COUNT) {
-    //     scanlineCounter = 0;
-
-    //     ++LY;
-    //     if (LY > 153) {
-    //         LY = 0;
-    //     }
-
-    //     if (LY == 144) {
-    //         STAT.Mode = MODE_VBLANK;
-            
-    //         //LogInfo("vblank");
-    //         //lcdRender();
-    //         // Interrupt 0
-    //     }
-    //     else if (LY < 144) {
-    //         drawScanline();
-    //     }
-    // }
-
-    // //SDL_RenderClear(sdlRenderer);
-    // //SDL_RenderPresent(sdlRenderer);
 }
 
 void lcdInit()

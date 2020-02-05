@@ -23,7 +23,7 @@ extern InterruptFlags_t IF;
 
 static void printIE() 
 {
-    LogDebug("VBlank=%d STAT=%d Timer=%d Serial=%d Joypad=%d",
+    LogInfo("VBlank=%d STAT=%d Timer=%d Serial=%d Joypad=%d",
         IE.VBlank, IE.STAT, IE.Timer, IE.Serial, IE.Joypad);
 }
 

@@ -323,7 +323,6 @@ void cpuTick(unsigned cycles)
     }
 
     CPUTicks += cycles;
-    // lcdTick(cycles * 10);
     lcdTick(cycles);
 }
 

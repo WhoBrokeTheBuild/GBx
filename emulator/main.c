@@ -49,12 +49,9 @@ int main(int argc, char** argv)
         }
     }
 
-    if (BootstrapEnable) {
-        R.PC = 0x0000;
-    }
-    else {
-        R.PC = 0x0150;
+    if (!BootstrapEnable) {
         bootstrap();
+        setBreakpoint(BKCND_PC_EQ, 0x0150);
     }
 
     if (DebugMode) {
@@ -62,11 +59,10 @@ int main(int argc, char** argv)
     }
 
     for (;;) {
-        if (R.PC == B.PC || DebugMode) {
-            B.PC = USHRT_MAX;
+        if (atBreakpoint() || DebugMode) {
             debugPrompt();
         } else {
-            execute(fetch());
+            nextInstruction();
         }
     }
 
