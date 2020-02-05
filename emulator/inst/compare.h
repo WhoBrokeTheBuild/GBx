@@ -55,10 +55,10 @@ static void _CP_L()
 static void _CP_pHL()
 {
     LogDebug("CP (HL)");
-    uint8_t nn = readByte(R.HL);
+    uint8_t pHL = readByte(R.HL);
     cpuTick(4);
 
-    _CP(nn);
+    _CP(pHL);
 }
 
 static void _CP_n()

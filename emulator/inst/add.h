@@ -58,10 +58,10 @@ static void _ADD_L()
 static void _ADD_pHL()
 {
     LogDebug("ADD A,(HL)");
-    uint8_t nn = readByte(R.HL);
+    uint8_t pHL = readByte(R.HL);
     cpuTick(4);
 
-    _ADD(nn);
+    _ADD(pHL);
 }
 static void _ADD_n()
 {

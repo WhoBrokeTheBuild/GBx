@@ -8,7 +8,7 @@
 #include "../register.h"
 
 #define _XOR(x) \
-    (x) = xor8(R.A, (x))
+    R.A = xor8(R.A, (x))
 
 static void _XOR_A()
 {

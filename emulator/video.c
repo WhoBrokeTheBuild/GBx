@@ -46,7 +46,7 @@ SDL_Texture * sdlTexture = NULL;
 
 uint8_t VRAM[256*256*3];
 
-const int SCALE = 4;
+const int SCALE = 1;
 
 thrd_t lcdThread;
 

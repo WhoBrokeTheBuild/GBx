@@ -8,7 +8,7 @@
 #include "../register.h"
 
 #define _AND(x) \
-    (x) = and8(R.A, (x))
+    R.A = and8(R.A, (x))
 
 static void _AND_A()
 {

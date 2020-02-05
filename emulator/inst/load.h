@@ -580,6 +580,14 @@ static void _LD_SP_nn()
     R.SP = nn;
 }
 
+static void _LD_SP_HL()
+{
+    cpuTick(8);
+    
+    LogDebug("LD SP,HL");
+    R.SP = R.HL;
+}
+
 static void _LD_pnn_SP()
 {
     uint16_t nn = nextWord();

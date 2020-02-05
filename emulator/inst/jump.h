@@ -132,4 +132,15 @@ static void _JR_C_n()
     }
 }
 
+static void _JP_pHL()
+{
+    int16_t pHL = readWord(R.HL);
+    cpuTick(8);
+
+    LogDebug("JP (HL)");
+
+    R.PC = pHL;
+    cpuTick(4);
+}
+
 #endif // JUMP_H

@@ -87,6 +87,8 @@ static void _RST_38()
 {
     LogDebug("RST 38h");
     
+    DebugMode = true;
+
     pushWord(R.PC);
     cpuTick(8);
 

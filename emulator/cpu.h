@@ -18,4 +18,6 @@ uint8_t fetch();
 
 void execute(uint8_t op);
 
+void nextInstruction();
+
 #endif // CPU_H

@@ -10,7 +10,7 @@ static void _RET()
 {
     LogDebug("RET");
 
-    uint8_t nn = popWord();
+    uint16_t nn = popWord();
     cpuTick(4);
 
     R.PC = nn;
@@ -21,7 +21,7 @@ static void _RET_NZ()
 {
     LogDebug("RET NZ");
 
-    uint8_t nn = popWord();
+    uint16_t nn = popWord();
     cpuTick(4);
 
     if (!R.FZ) {
@@ -34,7 +34,7 @@ static void _RET_Z()
 {
     LogDebug("RET Z");
     
-    uint8_t nn = popWord();
+    uint16_t nn = popWord();
     cpuTick(4);
 
     if (R.FZ) {
@@ -47,7 +47,7 @@ static void _RET_NC()
 {
     LogDebug("RET NC");
     
-    uint8_t nn = popWord();
+    uint16_t nn = popWord();
     cpuTick(4);
 
     if (!R.FC) {
@@ -60,7 +60,7 @@ static void _RET_C()
 {
     LogDebug("RET C");
     
-    uint8_t nn = popWord();
+    uint16_t nn = popWord();
     cpuTick(4);
 
     if (R.FC) {
@@ -73,7 +73,7 @@ static void _RETI()
 {
     LogDebug("RETI");
     
-    uint8_t nn = popWord();
+    uint16_t nn = popWord();
     cpuTick(4);
 
     R.PC = nn;

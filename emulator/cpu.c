@@ -85,6 +85,7 @@ inst_t instructions[0x100] = {
     [0x28] = _JR_Z_n,
     [0x30] = _JR_NC_n,
     [0x38] = _JR_C_n,
+    [0xE9] = _JP_pHL,
     // stack
     [0xF5] = _PUSH_AF,
     [0xC5] = _PUSH_BC,
@@ -174,6 +175,7 @@ inst_t instructions[0x100] = {
     [0x11] = _LD_DE_nn,
     [0x21] = _LD_HL_nn,
     [0x31] = _LD_SP_nn,
+    [0xF9] = _LD_SP_HL,
     [0x08] = _LD_pnn_SP,
     [0xEA] = _LD_pnn_A,
     [0xFA] = _LD_A_pnn,
@@ -321,7 +323,8 @@ void cpuTick(unsigned cycles)
     }
 
     CPUTicks += cycles;
-    lcdTick(cycles * 10);
+    // lcdTick(cycles * 10);
+    lcdTick(cycles);
 }
 
 uint8_t fetch()
@@ -342,7 +345,18 @@ void execute(uint8_t op)
     if (inst) {
         inst();
     } else {
-        LogWarn("unknown instruction %02X", op);
+        LogWarn("unknown instruction at %04X, %02X", R.PC, op);
     }
 }
 
+void nextInstruction(int cycles)
+{
+    if (CPUEnabled) {
+        uint8_t op = fetch();
+        execute(op);
+    } else {
+        cpuTick(1);
+    }
+
+    checkInterrupts();
+}

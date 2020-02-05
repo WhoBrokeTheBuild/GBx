@@ -1,16 +1,18 @@
 #include "debug.h"
 
+#include <stdlib.h>
+#include <limits.h>
+
 #include "cpu.h"
 #include "interrupt.h"
 #include "log.h"
 #include "memory.h"
 #include "register.h"
 #include "video.h"
-#include <stdlib.h>
 
 bool DebugMode = false;
 
-breakpoint_t B = { .PC = 0x10000 };
+breakpoint_t B = { .PC = USHRT_MAX };
 
 #if defined(HAVE_READLINE)
 #include <readline/readline.h>
@@ -26,12 +28,13 @@ void debugPrompt()
     uint16_t addr;
     char * input = NULL;
     while ((input = readline(prompt)) != NULL) {
+
         if (strlen(input) > 0) {
             add_history(input);
         }
 
         if (strlen(input) == 0) {
-            execute(fetch());
+            nextInstruction();
             B.PC = R.PC;
             break;
         }
@@ -78,6 +81,8 @@ void debugPrompt()
 
         free(input);
         input = NULL;
+
+        snprintf(prompt, sizeof(prompt), "[%04X]> ", R.PC);
     }
 
     free(input);

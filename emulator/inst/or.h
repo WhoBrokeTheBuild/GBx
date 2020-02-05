@@ -8,7 +8,7 @@
 #include "../register.h"
 
 #define _OR(x) \
-    (x) = or8(R.A, (x))
+    R.A = or8(R.A, (x))
 
 static void _OR_A()
 {
