@@ -97,10 +97,32 @@ bool atBreakpoint()
             return true;
         }
         break;
-    case BKCND_NEXT_OP_EQ:
+    case BKCND_FC_EQ:
+        if (R.FC == B.Value) {
+            return true;
+        }
+        break;
+    case BKCND_FH_EQ:
+        if (R.FH == B.Value) {
+            return true;
+        }
+        break;
+    case BKCND_FN_EQ:
+        if (R.FN == B.Value) {
+            return true;
+        }
+        break;
+    case BKCND_FZ_EQ:
+        if (R.FZ == B.Value) {
+            return true;
+        }
+        break;
+    case BKCND_OP_EQ:
         if (readByte(R.PC) == B.Value) {
             return true;
         }
+        break;
+    default:
         break;
     };
 
@@ -117,15 +139,25 @@ const char * help =
 "  quit         Exit the emulator\n"
 "  continue     Continue normal execution\n"
 "  info         Print information, see `help info`\n"
-"  breakpoint   Set a breakpoint, see `help breakpoint`\n"
+"  break        Set a breakpoint, see `help breakpoint`\n"
 "  read         Read memory, see `help read`\n"
 "  write        Write memory, see `help write`\n";
 
 const char * helpInfo = 
 "  registers    Print all registers and their values\n"
-"  ie           Print IE values\n"
+"  interrupts   Print IE and IF, and IME values\n"
 "  lcd          Print LCDC values and LCD info\n"
 "  stat         Print STAT values\n";
+
+const char * helpBreak = 
+"  break ADDRESS\n"
+"  break LHS=RHS\n"
+"  ADDRESS will be interpreted as a 16-bit hex number\n"
+"  This is a shortcut for saying `break PC=ADDRESS`\n"
+"  LHS can be one of A, B, C, BC, D, E, DE, H, L, HL, FZ, FN, FH, FC, OP\n"
+"  OP checks to the next opcode\n"
+"  RHS will be interpreted as an integer\n"
+"\n";
 
 const char * helpRead = 
 "  read SIZE ADDRESS\n"
@@ -157,8 +189,10 @@ void debugInfo(const char * input)
     if (strncmp(input, "registers", length) == 0) {
         printR();
     }
-    else if (strncmp(input, "ie", length) == 0) {
+    else if (strncmp(input, "interrupts", length) == 0) {
         printIE();
+        printIF();
+        LogInfo("IME=%s", (IME ? "true" : "false"));
     }
     else if (strncmp(input, "lcd", length) == 0) {
         printLCDInfo();
@@ -169,6 +203,102 @@ void debugInfo(const char * input)
     }
     else {
         LogWarn("Unrecognized command 'info %s'", input);
+    }
+}
+
+void debugBreak(const char * input)
+{
+    if (!input) {
+        printf("%s", helpBreak);
+        return;
+    }
+
+    size_t length = strlen(input);
+    
+    if (length == 0) {
+        printf("%s", helpInfo);
+        return;
+    }
+    
+    char * equal = strchr(input, '=');
+    if (equal) {
+        *equal = '\0';
+
+        unsigned int rhs;
+        sscanf(equal + 1, "%04X", &rhs);
+
+        breakpoint_cond_t cond = BKCND_NONE;
+        if (input[0] == 'A') {
+            cond = BKCND_A_EQ;
+        }
+        else if (input[0] == 'B') {
+            if (input[1] == 'C') {
+                cond = BKCND_BC_EQ;
+            }
+            else {
+                cond = BKCND_B_EQ;
+            }
+        }
+        else if (input[0] == 'C') {
+            cond = BKCND_C_EQ;
+        }
+        else if (input[0] == 'D') {
+            if (input[1] == 'E') {
+                cond = BKCND_DE_EQ;
+            }
+            else {
+                cond = BKCND_D_EQ;
+            }
+        }
+        else if (input[0] == 'E') {
+            cond = BKCND_E_EQ;
+        }
+        else if (input[0] == 'H') {
+            if (input[1] == 'L') {
+                cond = BKCND_HL_EQ;
+            }
+            else {
+                cond = BKCND_H_EQ;
+            }
+        }
+        else if (input[0] == 'L') {
+            cond = BKCND_L_EQ;
+        }
+        else if (input[0] == 'S' && input[1] == 'P') {
+            cond = BKCND_SP_EQ;
+        }
+        else if (input[0] == 'P' && input[1] == 'C') {
+            cond = BKCND_PC_EQ;
+        }
+        else if (input[0] == 'F') {
+            if (input[1] == 'C') {
+                cond = BKCND_FC_EQ;
+            }
+            else if (input[1] == 'H') {
+                cond = BKCND_FH_EQ;
+            }
+            else if (input[1] == 'N') {
+                cond = BKCND_FN_EQ;
+            }
+            else if (input[1] == 'Z') {
+                cond = BKCND_FZ_EQ;
+            }
+        }
+        else if (input[0] == 'O' && input[1] == 'P') {
+            cond = BKCND_OP_EQ;
+        }
+        else {
+            LogError("Unknown LHS '%s'", input);
+        }
+
+        LogDebug("Breakpoint set when %s=%04Xh", input, rhs);
+        setBreakpoint(cond, rhs);
+    }
+    else {
+        unsigned int pc;
+        sscanf(input, "%04X", &pc);
+        setBreakpoint(BKCND_PC_EQ, pc);
+        LogDebug("Breakpoint set when PC=%04Xh", pc);
     }
 }
 
@@ -289,10 +419,7 @@ void debugPrompt()
             debugInfo(args);
         }
         else if (strncmp(input, "break", length) == 0) {
-            unsigned int pc;
-            sscanf(input, "%*s %04X", &pc);
-            setBreakpoint(BKCND_PC_EQ, pc);
-            LogDebug("breakpoint set at %04Xh", pc);
+            debugBreak(args);
         }
         else if (strncmp(input, "read", length) == 0) {
             debugRead(args);

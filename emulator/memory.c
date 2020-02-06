@@ -107,6 +107,9 @@ uint8_t readByte(uint16_t address)
         case 0xFF07:
             return TAC.data;
         case 0xFF0F:
+            if (DebugMode) {
+                printIF();
+            }
             return IF.data;
         case 0xFF10:
             return NR10;
@@ -225,11 +228,13 @@ uint16_t nextWord()
 void writeByte(uint16_t address, uint8_t data)
 {
     LogVerbose("write %02X", address);
-    if (address <= 0x00FF) {
-        // Bootstrap / Jump Vectors
+    if (address <= 0x1FFF) {
+        // RAM Enable
+        LogInfo("RAM Enable: %02X", data);
     }
     else if (address <= 0x3FFF) {
-        // ROM Bank 0
+        // ROM Bank Select
+        LogInfo("ROM Bank Select: %02X", data);
     }
     else if (address <= 0x7FFF) {
         // ROM Switchable Bank
@@ -301,6 +306,9 @@ void writeByte(uint16_t address, uint8_t data)
             break;
         case 0xFF0F:
             IF.data = data;
+            if (DebugMode) {
+                printIF();
+            }
             break;
         case 0xFF10:
             NR10 = data;
@@ -484,7 +492,8 @@ bool loadROM(const char * filename)
     size_t size = ftell(file);
     fseek(file, 0, SEEK_SET);
 
-    ROM = ROM0 = (uint8_t *)malloc(size);
+    ROM = (uint8_t *)malloc(size);
+    ROM0 = ROM;
 
     size_t bytesRead = fread(ROM, 1, size, file);
     fclose(file);

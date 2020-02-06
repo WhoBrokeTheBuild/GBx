@@ -352,28 +352,22 @@ static void _LD_pHL_E()
 static void _LD_pHL_H()
 {
     LogDebug("LD (HL),H");
-    uint8_t n = readByte(R.HL);
-    cpuTick(4);
-
-    R.H = n;
+    writeByte(R.HL, R.H);
+    cpuTick(8);
 }
 
 static void _LD_pHL_L()
 {
     LogDebug("LD (HL),L");
-    uint8_t n = readByte(R.HL);
-    cpuTick(4);
-
-    R.L = n;
+    writeByte(R.HL, R.L);
+    cpuTick(8);
 }
 
 static void _LD_pHL_A()
 {
     LogDebug("LD (HL),A");
-    uint8_t n = readByte(R.HL);
-    cpuTick(4);
-
-    R.A = n;
+    writeByte(R.HL, R.A);
+    cpuTick(8);
 }
 
 static void _LD_A_B()
@@ -430,19 +424,15 @@ static void _LD_A_A()
 static void _LD_pBC_A()
 {
     LogDebug("LD (BC),A");
-    uint8_t n = readByte(R.BC);
-    cpuTick(4);
-
-    R.A = n;
+    writeByte(R.BC, R.A);
+    cpuTick(8);
 }
 
 static void _LD_pDE_A()
 {
     LogDebug("LD (DE),A");
-    uint8_t n = readByte(R.DE);
-    cpuTick(4);
-
-    R.A = n;
+    writeByte(R.DE, R.A);
+    cpuTick(8);
 }
 
 static void _LD_B_n()

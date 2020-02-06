@@ -75,7 +75,7 @@ uint8_t xor8(uint8_t a, uint8_t b)
 
 uint8_t inc8(uint8_t a)
 {
-    R.FZ = (a + 1 == 0);
+    R.FZ = ((uint8_t)(a + 1) == 0);
     R.FN = 0;
     R.FH = (((a & 0xF) + 1) & 0x10) == 0x10;
     return ++a;
@@ -83,7 +83,7 @@ uint8_t inc8(uint8_t a)
 
 uint8_t dec8(uint8_t a)
 {
-    R.FZ = (a - 1 == 0);
+    R.FZ = ((uint8_t)(a - 1) == 0);
     R.FN = 1;
     R.FH = ((a & 0xF) - 1) == 0x00;
     return --a;

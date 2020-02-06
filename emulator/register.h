@@ -14,8 +14,8 @@ typedef struct
                 struct {
                     uint8_t _:4;
                     bool FC:1; // Carry Flag
-                    bool FN:1; // Subtract Flag
                     bool FH:1; // Half Carry Flag
+                    bool FN:1; // Subtract Flag
                     bool FZ:1; // Zero Flag
                 };
                 uint8_t F;
@@ -53,8 +53,8 @@ extern reg_t R;
 
 static void printR()
 {
-    LogInfo("AF=%04X BC=%04X DE=%04X HL=%04X SP=%04X PC=%04X FC=%d FN=%d FH=%d FZ=%d",
-        R.AF, R.BC, R.DE, R.HL, R.SP, R.PC, R.FC, R.FN, R.FH, R.FZ);
+    LogInfo("AF=%04X BC=%04X DE=%04X HL=%04X SP=%04X PC=%04X FZ=%d FN=%d FH=%d FC=%d",
+        R.AF, R.BC, R.DE, R.HL, R.SP, R.PC, R.FZ, R.FN, R.FH, R.FC);
 }
 
 #endif // REGISTER_H

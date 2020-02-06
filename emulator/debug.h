@@ -21,7 +21,11 @@ typedef enum {
     BKCND_HL_EQ,
     BKCND_SP_EQ,
     BKCND_PC_EQ,
-    BKCND_NEXT_OP_EQ,
+    BKCND_FC_EQ,
+    BKCND_FH_EQ,
+    BKCND_FN_EQ,
+    BKCND_FZ_EQ,
+    BKCND_OP_EQ,
 
 } breakpoint_cond_t;
 
