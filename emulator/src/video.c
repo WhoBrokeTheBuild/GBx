@@ -3,12 +3,6 @@
 #include "memory.h"
 #include <SDL.h>
 
-#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L) && !defined(__STDC_NO_THREADS__)
-#   include <threads.h>
-#else
-#   include <tinycthread.h>
-#endif
-
 LCDC_t LCDC = { 
     .TileDisplayEnable      = false,
     .SpriteDisplayEnable    = false,
@@ -47,8 +41,6 @@ SDL_Texture * sdlTexture = NULL;
 uint8_t VRAM[256*256*3];
 
 const int SCALE = 4;
-
-thrd_t lcdThread;
 
 void drawTiles()
 {
