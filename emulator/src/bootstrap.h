@@ -6,7 +6,7 @@
 
 extern bool BootstrapEnable;
 
-extern uint8_t BOOTSTRAP[256];
+extern uint8_t BOOTSTRAP[0x100];
 
 void bootstrap();
 

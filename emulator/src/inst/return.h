@@ -5,26 +5,29 @@
 #include "../log.h"
 #include "../memory.h"
 #include "../register.h"
+#include "../interrupt.h"
 
 static void _RET()
 {
     LogDebug("RET");
 
     uint16_t nn = popWord();
-    cpuTick(4);
+    cpuTick(8);
 
     R.PC = nn;
-    cpuTick(4);
+    cpuTick(8);
 }
 
 static void _RET_NZ()
 {
     LogDebug("RET NZ");
 
-    uint16_t nn = popWord();
-    cpuTick(4);
+    cpuTick(8);
 
     if (!R.FZ) {
+        uint16_t nn = popWord();
+        cpuTick(8);
+
         R.PC = nn;
         cpuTick(4);
     }
@@ -33,11 +36,13 @@ static void _RET_NZ()
 static void _RET_Z()
 {
     LogDebug("RET Z");
-    
-    uint16_t nn = popWord();
-    cpuTick(4);
+
+    cpuTick(8);
 
     if (R.FZ) {
+        uint16_t nn = popWord();
+        cpuTick(8);
+
         R.PC = nn;
         cpuTick(4);
     }
@@ -46,11 +51,13 @@ static void _RET_Z()
 static void _RET_NC()
 {
     LogDebug("RET NC");
-    
-    uint16_t nn = popWord();
-    cpuTick(4);
+
+    cpuTick(8);
 
     if (!R.FC) {
+        uint16_t nn = popWord();
+        cpuTick(8);
+
         R.PC = nn;
         cpuTick(4);
     }
@@ -59,11 +66,13 @@ static void _RET_NC()
 static void _RET_C()
 {
     LogDebug("RET C");
-    
-    uint16_t nn = popWord();
-    cpuTick(4);
+
+    cpuTick(8);
 
     if (R.FC) {
+        uint16_t nn = popWord();
+        cpuTick(8);
+
         R.PC = nn;
         cpuTick(4);
     }
@@ -74,10 +83,12 @@ static void _RETI()
     LogDebug("RETI");
     
     uint16_t nn = popWord();
-    cpuTick(4);
+    cpuTick(8);
 
     R.PC = nn;
-    cpuTick(4);
+    cpuTick(8);
+
+    IME = true;
 }
 
 #endif // RET_H

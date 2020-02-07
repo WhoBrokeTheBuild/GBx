@@ -492,8 +492,8 @@ bool loadROM(const char * filename)
     size_t size = ftell(file);
     fseek(file, 0, SEEK_SET);
 
-    ROM = (uint8_t *)malloc(size);
-    ROM0 = ROM;
+    ROM0 = (uint8_t *)malloc(size);
+    ROM = ROM0;
 
     size_t bytesRead = fread(ROM, 1, size, file);
     fclose(file);

@@ -16,6 +16,7 @@ static void _HALT()
 {
     LogDebug("HALT");
     CPUEnabled = false;
+    cpuTick(4);
 }
 
 static void _STOP()
@@ -23,6 +24,7 @@ static void _STOP()
     LogDebug("STOP");
     ++R.PC;
     LCDC.LCDEnable = false;
+    cpuTick(4);
 }
 
 static void _DI()

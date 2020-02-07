@@ -13,47 +13,57 @@ void setup()
 #define MAKE_INC_TEST8(_REG_)               \
     MU_TEST(INC_##_REG_##_00)               \
     {                                       \
+        CPUTicks = 0;                       \
         R._REG_ = 0x00;                     \
         _INC_##_REG_();                     \
         mu_assert_int_eq(R._REG_, 0x01);    \
         mu_check(!R.FZ);                    \
         mu_check(!R.FN);                    \
         mu_check(!R.FH);                    \
+        mu_assert_int_eq(CPUTicks, 4);      \
     }                                       \
                                             \
     MU_TEST(INC_##_REG_##_FE)               \
     {                                       \
+        CPUTicks = 0;                       \
         R._REG_ = 0xFE;                     \
         _INC_##_REG_();                     \
         mu_assert_int_eq(R._REG_, 0xFF);    \
         mu_check(!R.FZ);                    \
         mu_check(!R.FN);                    \
         mu_check(!R.FH);                    \
+        mu_assert_int_eq(CPUTicks, 4);      \
     }                                       \
                                             \
     MU_TEST(INC_##_REG_##_FF)               \
     {                                       \
+        CPUTicks = 0;                       \
         R._REG_ = 0xFF;                     \
         _INC_##_REG_();                     \
         mu_assert_int_eq(R._REG_, 0x00);    \
         mu_check(R.FZ);                     \
         mu_check(!R.FN);                    \
         mu_check(R.FH);                     \
+        mu_assert_int_eq(CPUTicks, 4);      \
     }
 
 #define MAKE_INC_TEST16(_REG_)              \
     MU_TEST(INC_##_REG_##_0000)             \
     {                                       \
+        CPUTicks = 0;                       \
         R._REG_ = 0x0000;                   \
         _INC_##_REG_();                     \
         mu_assert_int_eq(R._REG_, 0x0001);  \
+        mu_assert_int_eq(CPUTicks, 8);      \
     }                                       \
                                             \
     MU_TEST(INC_##_REG_##_FFFF)             \
     {                                       \
+        CPUTicks = 0;                       \
         R._REG_ = 0xFFFF;                   \
         _INC_##_REG_();                     \
         mu_assert_int_eq(R._REG_, 0x0000);  \
+        mu_assert_int_eq(CPUTicks, 8);      \
     }
 
 MAKE_INC_TEST8(A);
@@ -71,18 +81,22 @@ MAKE_INC_TEST16(SP);
 
 MU_TEST(INC_pHL_0000)
 {
+    CPUTicks = 0;
     R.HL = RAM_OFFSET;
-    writeWord(RAM_OFFSET, 0x0000);
+    writeWord(RAM_OFFSET, 0x00);
     _INC_pHL();
-    mu_assert_int_eq(readWord(RAM_OFFSET), 0x0001);
+    mu_assert_int_eq(readWord(RAM_OFFSET), 0x01);
+    mu_assert_int_eq(CPUTicks, 12);
 }
 
 MU_TEST(INC_pHL_FFFF)
 {
+    CPUTicks = 0;
     R.HL = RAM_OFFSET;
     writeByte(RAM_OFFSET, 0xFF);
     _INC_pHL();
     mu_assert_int_eq(readByte(RAM_OFFSET), 0x00);
+    mu_assert_int_eq(CPUTicks, 12);
 }
 
 MU_TEST_SUITE(test_suite)
