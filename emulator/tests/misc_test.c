@@ -16,7 +16,7 @@ MU_TEST(HALT)
     CPUTicks = 0;
     CPUEnabled = true;
     _HALT();
-    mu_check(CPUEnabled);
+    mu_check(!CPUEnabled);
     mu_assert_int_eq(CPUTicks, 4);
 }
 
@@ -24,10 +24,10 @@ MU_TEST(STOP)
 {
     CPUTicks = 0;
     R.PC = 0x0000;
-    LCDC.LCDEnable = false;
+    LCDC.LCDEnable = true;
     _STOP();
     mu_assert_int_eq(R.PC, 0x0001);
-    mu_check(LCDC.LCDEnable);
+    mu_check(!LCDC.LCDEnable);
     mu_assert_int_eq(CPUTicks, 4);
 }
 
