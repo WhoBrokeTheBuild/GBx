@@ -7,13 +7,13 @@ const uint16_t RAM_OFFSET = 0xCFFF;
 
 void setup() 
 {
+    CPUTicks = 0;
     memset(&R, sizeof(R), 0);
     R.SP = 0xFFFE;
 }
 
 MU_TEST(POP_AF)
 {
-    CPUTicks = 0;
     pushWord(0x1234);
     _POP_AF();
     mu_assert_int_eq(R.SP, 0xFFFE);
@@ -23,7 +23,6 @@ MU_TEST(POP_AF)
 
 MU_TEST(POP_BC)
 {
-    CPUTicks = 0;
     pushWord(0x1234);
     _POP_BC();
     mu_assert_int_eq(R.SP, 0xFFFE);
@@ -33,7 +32,6 @@ MU_TEST(POP_BC)
 
 MU_TEST(POP_DE)
 {
-    CPUTicks = 0;
     pushWord(0x1234);
     _POP_DE();
     mu_assert_int_eq(R.SP, 0xFFFE);
@@ -43,7 +41,6 @@ MU_TEST(POP_DE)
 
 MU_TEST(POP_HL)
 {
-    CPUTicks = 0;
     pushWord(0x1234);
     _POP_HL();
     mu_assert_int_eq(R.SP, 0xFFFE);

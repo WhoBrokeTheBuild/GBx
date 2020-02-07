@@ -7,13 +7,13 @@ const uint16_t RAM_OFFSET = 0xCFFF;
 
 void setup() 
 {
+    CPUTicks = 0;
     memset(&R, sizeof(R), 0);
 }
 
 #define MAKE_DEC_TEST8(_REG_)               \
     MU_TEST(DEC_##_REG_##_01)               \
     {                                       \
-        CPUTicks = 0;                       \
         R._REG_ = 0x01;                     \
         _DEC_##_REG_();                     \
         mu_assert_int_eq(R._REG_, 0x00);    \
@@ -25,11 +25,10 @@ void setup()
                                             \
     MU_TEST(DEC_##_REG_##_F1)               \
     {                                       \
-        CPUTicks = 0;                       \
         R._REG_ = 0xF1;                     \
         _DEC_##_REG_();                     \
         mu_assert_int_eq(R._REG_, 0xF0);    \
-        mu_check(!R.FZ);                     \
+        mu_check(!R.FZ);                    \
         mu_check(R.FN);                     \
         mu_check(R.FH);                     \
         mu_assert_int_eq(CPUTicks, 4);      \
@@ -37,7 +36,6 @@ void setup()
                                             \
     MU_TEST(DEC_##_REG_##_00)               \
     {                                       \
-        CPUTicks = 0;                       \
         R._REG_ = 0x00;                     \
         _DEC_##_REG_();                     \
         mu_assert_int_eq(R._REG_, 0xFF);    \
@@ -50,7 +48,6 @@ void setup()
 #define MAKE_DEC_TEST16(_REG_)              \
     MU_TEST(DEC_##_REG_##_0001)             \
     {                                       \
-        CPUTicks = 0;                       \
         R._REG_ = 0x0001;                   \
         _DEC_##_REG_();                     \
         mu_assert_int_eq(R._REG_, 0x0000);  \
@@ -59,7 +56,6 @@ void setup()
                                             \
     MU_TEST(DEC_##_REG_##_0000)             \
     {                                       \
-        CPUTicks = 0;                       \
         R._REG_ = 0x0000;                   \
         _DEC_##_REG_();                     \
         mu_assert_int_eq(R._REG_, 0xFFFF);  \
@@ -81,7 +77,6 @@ MAKE_DEC_TEST16(SP);
 
 MU_TEST(DEC_pHL_0001)
 {
-    CPUTicks = 0;
     R.HL = RAM_OFFSET;
     writeWord(RAM_OFFSET, 0x01);
     _DEC_pHL();
@@ -91,7 +86,6 @@ MU_TEST(DEC_pHL_0001)
 
 MU_TEST(DEC_pHL_0000)
 {
-    CPUTicks = 0;
     R.HL = RAM_OFFSET;
     writeByte(RAM_OFFSET, 0x00);
     _DEC_pHL();

@@ -7,13 +7,13 @@ const uint16_t RAM_OFFSET = 0xCFFF;
 
 void setup() 
 {
+    CPUTicks = 0;
     memset(&R, sizeof(R), 0);
     R.SP = 0xFFFE;
 }
 
 MU_TEST(RET)
 {
-    CPUTicks = 0;
     pushWord(0x1234);
     _RET();
     mu_assert_int_eq(R.PC, 0x1234);
@@ -22,7 +22,6 @@ MU_TEST(RET)
 
 MU_TEST(RET_NZ)
 {
-    CPUTicks = 0;
     pushWord(0x1234);
     R.PC = 0x0000;
     R.FZ = true;
@@ -30,16 +29,14 @@ MU_TEST(RET_NZ)
     mu_assert_int_eq(R.PC, 0x0000);
     mu_assert_int_eq(CPUTicks, 8);
 
-    CPUTicks = 0;
     R.FZ = false;
     _RET_NZ();
     mu_assert_int_eq(R.PC, 0x1234);
-    mu_assert_int_eq(CPUTicks, 20);
+    mu_assert_int_eq(CPUTicks, 8 + 20);
 }
 
 MU_TEST(RET_Z)
 {
-    CPUTicks = 0;
     pushWord(0x1234);
     R.PC = 0x0000;
     R.FZ = false;
@@ -47,16 +44,14 @@ MU_TEST(RET_Z)
     mu_assert_int_eq(R.PC, 0x0000);
     mu_assert_int_eq(CPUTicks, 8);
 
-    CPUTicks = 0;
     R.FZ = true;
     _RET_Z();
     mu_assert_int_eq(R.PC, 0x1234);
-    mu_assert_int_eq(CPUTicks, 20);
+    mu_assert_int_eq(CPUTicks, 8 + 20);
 }
 
 MU_TEST(RET_NC)
 {
-    CPUTicks = 0;
     pushWord(0x1234);
     R.PC = 0x0000;
     R.FC = true;
@@ -64,16 +59,14 @@ MU_TEST(RET_NC)
     mu_assert_int_eq(R.PC, 0x0000);
     mu_assert_int_eq(CPUTicks, 8);
 
-    CPUTicks = 0;
     R.FC = false;
     _RET_NC();
     mu_assert_int_eq(R.PC, 0x1234);
-    mu_assert_int_eq(CPUTicks, 20);
+    mu_assert_int_eq(CPUTicks, 8 + 20);
 }
 
 MU_TEST(RET_C)
 {
-    CPUTicks = 0;
     pushWord(0x1234);
     R.PC = 0x0000;
     R.FC = false;
@@ -81,16 +74,14 @@ MU_TEST(RET_C)
     mu_assert_int_eq(R.PC, 0x0000);
     mu_assert_int_eq(CPUTicks, 8);
 
-    CPUTicks = 0;
     R.FC = true;
     _RET_C();
     mu_assert_int_eq(R.PC, 0x1234);
-    mu_assert_int_eq(CPUTicks, 20);
+    mu_assert_int_eq(CPUTicks, 8 + 20);
 }
 
 MU_TEST(RETI)
 {
-    CPUTicks = 0;
     pushWord(0x1234);
     R.PC = 0x0000;
     _RETI();

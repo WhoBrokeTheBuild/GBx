@@ -8,12 +8,12 @@ const uint16_t RAM_OFFSET = 0xCFFF;
 
 void setup() 
 {
+    CPUTicks = 0;
     memset(&R, sizeof(R), 0);
 }
 
 MU_TEST(HALT)
 {
-    CPUTicks = 0;
     CPUEnabled = true;
     _HALT();
     mu_check(!CPUEnabled);
@@ -22,7 +22,6 @@ MU_TEST(HALT)
 
 MU_TEST(STOP)
 {
-    CPUTicks = 0;
     R.PC = 0x0000;
     LCDC.LCDEnable = true;
     _STOP();
@@ -33,7 +32,6 @@ MU_TEST(STOP)
 
 MU_TEST(DI)
 {
-    CPUTicks = 0;
     IME = true;
     _DI();
     mu_check(!IME);
@@ -42,7 +40,6 @@ MU_TEST(DI)
 
 MU_TEST(EI)
 {
-    CPUTicks = 0;
     IME = false;
     _EI();
     mu_check(IME);
@@ -51,7 +48,6 @@ MU_TEST(EI)
 
 MU_TEST(DAA)
 {
-    CPUTicks = 0;
     // TODO
 }
 

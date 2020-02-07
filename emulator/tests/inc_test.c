@@ -7,13 +7,13 @@ const uint16_t RAM_OFFSET = 0xCFFF;
 
 void setup() 
 {
+    CPUTicks = 0;
     memset(&R, sizeof(R), 0);
 }
 
 #define MAKE_INC_TEST8(_REG_)               \
     MU_TEST(INC_##_REG_##_00)               \
     {                                       \
-        CPUTicks = 0;                       \
         R._REG_ = 0x00;                     \
         _INC_##_REG_();                     \
         mu_assert_int_eq(R._REG_, 0x01);    \
@@ -25,7 +25,6 @@ void setup()
                                             \
     MU_TEST(INC_##_REG_##_0F)               \
     {                                       \
-        CPUTicks = 0;                       \
         R._REG_ = 0x0F;                     \
         _INC_##_REG_();                     \
         mu_assert_int_eq(R._REG_, 0x10);    \
@@ -37,7 +36,6 @@ void setup()
                                             \
     MU_TEST(INC_##_REG_##_FF)               \
     {                                       \
-        CPUTicks = 0;                       \
         R._REG_ = 0xFF;                     \
         _INC_##_REG_();                     \
         mu_assert_int_eq(R._REG_, 0x00);    \
@@ -50,7 +48,6 @@ void setup()
 #define MAKE_INC_TEST16(_REG_)              \
     MU_TEST(INC_##_REG_##_0000)             \
     {                                       \
-        CPUTicks = 0;                       \
         R._REG_ = 0x0000;                   \
         _INC_##_REG_();                     \
         mu_assert_int_eq(R._REG_, 0x0001);  \
@@ -59,7 +56,6 @@ void setup()
                                             \
     MU_TEST(INC_##_REG_##_FFFF)             \
     {                                       \
-        CPUTicks = 0;                       \
         R._REG_ = 0xFFFF;                   \
         _INC_##_REG_();                     \
         mu_assert_int_eq(R._REG_, 0x0000);  \
@@ -81,7 +77,6 @@ MAKE_INC_TEST16(SP);
 
 MU_TEST(INC_pHL_0000)
 {
-    CPUTicks = 0;
     R.HL = RAM_OFFSET;
     writeWord(RAM_OFFSET, 0x00);
     _INC_pHL();
@@ -91,7 +86,6 @@ MU_TEST(INC_pHL_0000)
 
 MU_TEST(INC_pHL_FFFF)
 {
-    CPUTicks = 0;
     R.HL = RAM_OFFSET;
     writeByte(RAM_OFFSET, 0xFF);
     _INC_pHL();
