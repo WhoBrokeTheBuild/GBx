@@ -23,6 +23,18 @@ void setup()
         mu_assert_int_eq(CPUTicks, 4);      \
     }                                       \
                                             \
+    MU_TEST(DEC_##_REG_##_F1)               \
+    {                                       \
+        CPUTicks = 0;                       \
+        R._REG_ = 0xF1;                     \
+        _DEC_##_REG_();                     \
+        mu_assert_int_eq(R._REG_, 0xF0);    \
+        mu_check(!R.FZ);                     \
+        mu_check(R.FN);                     \
+        mu_check(R.FH);                     \
+        mu_assert_int_eq(CPUTicks, 4);      \
+    }                                       \
+                                            \
     MU_TEST(DEC_##_REG_##_00)               \
     {                                       \
         CPUTicks = 0;                       \
@@ -92,24 +104,31 @@ MU_TEST_SUITE(test_suite)
     MU_SUITE_CONFIGURE(&setup, NULL);
 
     MU_RUN_TEST(DEC_A_01);
+    MU_RUN_TEST(DEC_A_F1);
     MU_RUN_TEST(DEC_A_00);
     
     MU_RUN_TEST(DEC_B_01);
+    MU_RUN_TEST(DEC_B_F1);
     MU_RUN_TEST(DEC_B_00);
     
     MU_RUN_TEST(DEC_C_01);
+    MU_RUN_TEST(DEC_C_F1);
     MU_RUN_TEST(DEC_C_00);
     
     MU_RUN_TEST(DEC_D_01);
+    MU_RUN_TEST(DEC_D_F1);
     MU_RUN_TEST(DEC_D_00);
     
     MU_RUN_TEST(DEC_E_01);
+    MU_RUN_TEST(DEC_E_F1);
     MU_RUN_TEST(DEC_E_00);
     
     MU_RUN_TEST(DEC_H_01);
+    MU_RUN_TEST(DEC_H_F1);
     MU_RUN_TEST(DEC_H_00);
 
     MU_RUN_TEST(DEC_L_01);
+    MU_RUN_TEST(DEC_L_F1);
     MU_RUN_TEST(DEC_L_00);
 
     MU_RUN_TEST(DEC_DE_0001);

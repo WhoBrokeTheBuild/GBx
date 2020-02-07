@@ -23,15 +23,15 @@ void setup()
         mu_assert_int_eq(CPUTicks, 4);      \
     }                                       \
                                             \
-    MU_TEST(INC_##_REG_##_FE)               \
+    MU_TEST(INC_##_REG_##_0F)               \
     {                                       \
         CPUTicks = 0;                       \
-        R._REG_ = 0xFE;                     \
+        R._REG_ = 0x0F;                     \
         _INC_##_REG_();                     \
-        mu_assert_int_eq(R._REG_, 0xFF);    \
+        mu_assert_int_eq(R._REG_, 0x10);    \
         mu_check(!R.FZ);                    \
         mu_check(!R.FN);                    \
-        mu_check(!R.FH);                    \
+        mu_check(R.FH);                     \
         mu_assert_int_eq(CPUTicks, 4);      \
     }                                       \
                                             \
@@ -104,31 +104,31 @@ MU_TEST_SUITE(test_suite)
 	MU_SUITE_CONFIGURE(&setup, NULL);
 
 	MU_RUN_TEST(INC_A_00);
-    MU_RUN_TEST(INC_A_FE);
+    MU_RUN_TEST(INC_A_0F);
     MU_RUN_TEST(INC_A_FF);
 	
     MU_RUN_TEST(INC_B_00);
-    MU_RUN_TEST(INC_B_FE);
+    MU_RUN_TEST(INC_B_0F);
     MU_RUN_TEST(INC_B_FF);
 	
     MU_RUN_TEST(INC_C_00);
-    MU_RUN_TEST(INC_C_FE);
+    MU_RUN_TEST(INC_C_0F);
     MU_RUN_TEST(INC_C_FF);
 	
     MU_RUN_TEST(INC_D_00);
-    MU_RUN_TEST(INC_D_FE);
+    MU_RUN_TEST(INC_D_0F);
     MU_RUN_TEST(INC_D_FF);
 	
     MU_RUN_TEST(INC_E_00);
-    MU_RUN_TEST(INC_E_FE);
+    MU_RUN_TEST(INC_E_0F);
     MU_RUN_TEST(INC_E_FF);
 	
     MU_RUN_TEST(INC_H_00);
-    MU_RUN_TEST(INC_H_FE);
+    MU_RUN_TEST(INC_H_0F);
     MU_RUN_TEST(INC_H_FF);
 
 	MU_RUN_TEST(INC_L_00);
-    MU_RUN_TEST(INC_L_FE);
+    MU_RUN_TEST(INC_L_0F);
     MU_RUN_TEST(INC_L_FF);
 
 	MU_RUN_TEST(INC_DE_0000);
