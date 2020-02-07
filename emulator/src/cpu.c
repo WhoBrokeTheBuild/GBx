@@ -3,6 +3,7 @@
 #include "interrupt.h"
 #include "log.h"
 #include "memory.h"
+#include "timer.h"
 
 #include <SDL.h>
 #include <time.h>
@@ -323,6 +324,7 @@ void cpuTick(unsigned cycles)
     }
 
     CPUTicks += cycles;
+    timerTick(cycles);
     lcdTick(cycles);
 }
 

@@ -8,6 +8,7 @@
 #include "log.h"
 #include "memory.h"
 #include "register.h"
+#include "timer.h"
 #include "video.h"
 
 bool DebugMode = false;
@@ -147,7 +148,8 @@ const char * helpInfo =
 "  registers    Print all registers and their values\n"
 "  interrupts   Print IE and IF, and IME values\n"
 "  lcd          Print LCDC values and LCD info\n"
-"  stat         Print STAT values\n";
+"  stat         Print STAT values\n"
+"  timer        Print TAC, TIMA, TMA and DIV info\n";
 
 const char * helpBreak = 
 "  break ADDRESS\n"
@@ -200,6 +202,9 @@ void debugInfo(const char * input)
     }
     else if (strncmp(input, "stat", length) == 0) {
         printSTAT();
+    }
+    else if (strncmp(input, "timer", length) == 0) {
+        printTimer();
     }
     else {
         LogWarn("Unrecognized command 'info %s'", input);

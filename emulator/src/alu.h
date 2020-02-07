@@ -3,8 +3,6 @@
 
 #include <stdint.h>
 
-extern uint8_t DIV;
-
 int8_t add8(int8_t a, int8_t b);
 int8_t sub8(int8_t a, int8_t b);
 

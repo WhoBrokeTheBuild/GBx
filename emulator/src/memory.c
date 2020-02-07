@@ -293,7 +293,7 @@ void writeByte(uint16_t address, uint8_t data)
             SC.data = data;
             break;
         case 0xFF04:
-            DIV = data;
+            DIV = 0;
             break;
         case 0xFF05:
             TIMA = data;
