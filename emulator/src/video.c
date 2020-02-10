@@ -1,6 +1,7 @@
 #include "video.h"
 #include "cpu.h"
 #include "memory.h"
+#include "interrupt.h"
 #include <SDL.h>
 
 LCDC_t LCDC = { 
@@ -255,18 +256,21 @@ void lcdTick(unsigned cycles)
     LCDTicks += cycles;
     LCDModeTicks += cycles;
 
+    bool modeChanged = false;
+
     switch (STAT.Mode) {
         case MODE_HBLANK:
             if (LCDModeTicks >= 204) {
                 LCDModeTicks = 0;
 
                 ++LY;
-                if (LY == 143) {
+                if (LY == 144) {
                     STAT.Mode = MODE_VBLANK;
                     lcdRender();
                 }
                 else {
                     STAT.Mode = MODE_SEARCH_SPRITE;
+                    modeChanged = true;
                 }
             }
         break;
@@ -277,6 +281,7 @@ void lcdTick(unsigned cycles)
                 ++LY;
                 if (LY > 153) {
                     STAT.Mode = MODE_SEARCH_SPRITE;
+                    modeChanged = true;
                     LY = 0;
                 }
             }
@@ -285,12 +290,14 @@ void lcdTick(unsigned cycles)
             if (LCDModeTicks >= 80) {
                 LCDModeTicks = 0;
                 STAT.Mode = MODE_DATA_TRANSFER;
+                modeChanged = true;
             }
         break;
         case MODE_DATA_TRANSFER:
             if (LCDModeTicks >= 172) {
                 LCDModeTicks = 0;
                 STAT.Mode = MODE_HBLANK;
+                modeChanged = true;
 
                 if (LCDC.TileDisplayEnable) {
                     drawTiles();
@@ -302,6 +309,18 @@ void lcdTick(unsigned cycles)
             }
         break;
     }
+
+    if (LY == 144) {
+        IF.VBlank = true;
+    }
+
+    if ((STAT.IntCoincidence && STAT.LYCLY && LY == LYC) ||
+        (STAT.IntCoincidence && !STAT.LYCLY && LY != LYC) ||
+        (STAT.IntHBlank && modeChanged && STAT.Mode == MODE_HBLANK) ||
+        (STAT.IntVBlank && modeChanged && STAT.Mode == MODE_VBLANK) ||
+        (STAT.IntSearchSprite && modeChanged && STAT.Mode == MODE_SEARCH_SPRITE)) {
+        IF.STAT = true;
+    }
 }
 
 void lcdInit()
@@ -310,7 +329,10 @@ void lcdInit()
         LogFatal("failed to initialize SDL2, %s", SDL_GetError());
     }
 
-    sdlWindow = SDL_CreateWindow("GBx", -1, -1, 160 * SCALE, 144 * SCALE, 0);
+    char windowTitle[21];
+    snprintf(windowTitle, sizeof(windowTitle), "GBx - %s", Title);
+
+    sdlWindow = SDL_CreateWindow(windowTitle, -1, -1, 160 * SCALE, 144 * SCALE, 0);
     if (!sdlWindow) {
         LogFatal("failed to create SDL2 window, %s", SDL_GetError());
     }

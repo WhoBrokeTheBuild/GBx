@@ -1,5 +1,6 @@
 #include "timer.h"
 #include "cpu.h"
+#include "interrupt.h"
 
 uint8_t TIMA;
 uint8_t TMA;
@@ -46,7 +47,7 @@ void timerTick(unsigned cycles)
         
         if (TIMA == 0xFF) {
             TIMA = TMA;
-            // Interrupt 2
+            IF.Timer = true;
         }
         else {
             ++TIMA;

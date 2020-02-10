@@ -82,5 +82,6 @@ void bootstrap()
     OBP1.data = 0xFF;
     WY = 0x00;
     WX = 0x00;
+    IF.data = 0x00;
     IE.data = 0x00;
 }

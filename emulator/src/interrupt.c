@@ -11,42 +11,41 @@ InterruptFlags_t IF;
 
 void checkInterrupts()
 {
-    if (IME && IE.data > 0 && IF.data > 0) {
+    if (IME) {
         InterruptFlags_t enabledInts = { 
             .data = IE.data & IF.data,
         };
 
+        if (enabledInts.data > 0) {
+            LogInfo("INT?!");
+        }
+
         if (enabledInts.VBlank) {
-            enabledInts.VBlank = false;
-            IME = false;
+            IF.VBlank = false;
             pushWord(R.PC);
             R.PC = 0x40;
         }
 
         if (enabledInts.STAT) {
-            enabledInts.STAT = false;
-            IME = false;
+            IF.STAT = false;
             pushWord(R.PC);
             R.PC = 0x48;
         }
 
         if (enabledInts.Timer) {
-            enabledInts.Timer = false;
-            IME = false;
+            IF.Timer = false;
             pushWord(R.PC);
             R.PC = 50;
         }
 
         if (enabledInts.Serial) {
-            enabledInts.Serial = false;
-            IME = false;
+            IF.Serial = false;
             pushWord(R.PC);
             R.PC = 59;
         }
 
         if (enabledInts.Joypad) {
-            enabledInts.Joypad = false;
-            IME = false;
+            IF.Joypad = false;
             pushWord(R.PC);
             R.PC = 60;
         }

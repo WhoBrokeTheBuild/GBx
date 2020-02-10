@@ -31,11 +31,11 @@ typedef union {
 typedef union {
     struct {
         uint8_t Mode:2;
-        bool Coincidence:1;
+        bool IntCoincidence:1;
         bool IntHBlank:1;
         bool IntVBlank:1;
         bool IntSearchSprite:1;
-        bool IntLYCLY:1;
+        bool LYCLY:1;
         uint8_t _:1;
     };
     uint8_t data;
@@ -114,8 +114,8 @@ static void printSTAT()
         "DataTransfer",
     };
 
-    LogInfo("Mode=%s Coinc=%d IntHBlank=%d IntVBlank=%d IntSearchSprite=%d IntLYCLY=%d",
-        mode[STAT.Mode], STAT.Coincidence, STAT.IntHBlank, STAT.IntVBlank, STAT.IntSearchSprite, STAT.IntLYCLY);
+    LogInfo("Mode=%s IntCoinc=%d IntHBlank=%d IntVBlank=%d IntSearchSprite=%d LYCLY=%d",
+        mode[STAT.Mode], STAT.IntCoincidence, STAT.IntHBlank, STAT.IntVBlank, STAT.IntSearchSprite, STAT.LYCLY);
 }
 
 static void printLCDInfo()

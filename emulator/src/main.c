@@ -29,13 +29,13 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    lcdInit();
-
     LogInfo("loading rom %s", argv[1]);
 
     if (!loadROM(argv[1])) {
         LogFatal("failed to load rom");
     }
+
+    lcdInit();
 
     for (int i = 2; i < argc; ++i) {
         const char * arg = argv[i];

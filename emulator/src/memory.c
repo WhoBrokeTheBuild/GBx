@@ -13,6 +13,43 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
+#include <string.h>
+
+#define TITLE_OFFSET                0x0134
+
+char Title[15];
+
+#define COLOR_ENABLE_OFFSET         0x0143
+#define SUPER_ENABLE_OFFSET         0x0146
+
+bool ColorEnabled = false;
+bool SuperEnabled = false;
+
+#define CARTRIDGE_TYPE_OFFSET       0x0147
+#define ROM_TYPE_OFFSET             0x0148
+#define RAM_TYPE_OFFSET             0x0149
+
+uint8_t CartridgeType = 0x00;
+uint8_t ROMType = 0x00;
+uint8_t RAMType = 0x00;
+
+typedef struct {
+    struct {
+        union {
+            struct {
+                uint8_t Lower:5;
+                uint8_t Upper:2;
+            };
+            uint8_t Full:7;
+        };
+        bool Mode:1;
+    };
+    uint8_t data;
+} bank_t;
+
+bank_t Bank;
+
+bool RAMEnabled = false;
 
 uint8_t RAM0[0x0FFF];
 uint8_t RAM1[0x0FFF];
@@ -68,15 +105,21 @@ uint8_t readByte(uint16_t address)
     }
     else if (address <= 0xCFFF) {
         // Internal RAM Bank 0
-        return RAM0[address - 0xC000];
+        if (RAMEnabled) {
+            return RAM0[address - 0xC000];
+        }
     }
     else if (address <= 0xDFFF) {
         // Internal RAM Switchable Bank
-        return RAM[address - 0xD000];
+        if (RAMEnabled) {
+            return RAM[address - 0xD000];
+        }
     }
     else if (address <= 0xFDFF) {
         // Echo RAM
-        return RAM0[address - 0xE000];
+        if (RAMEnabled) {
+            return RAM0[address - 0xE000];
+        }
     }
     else if (address <= 0xFE9F) {
         // Object Attribute Memory OAM
@@ -228,16 +271,8 @@ uint16_t nextWord()
 void writeByte(uint16_t address, uint8_t data)
 {
     LogVerbose("write %02X", address);
-    if (address <= 0x1FFF) {
-        // RAM Enable
-        LogInfo("RAM Enable: %02X", data);
-    }
-    else if (address <= 0x3FFF) {
-        // ROM Bank Select
-        LogInfo("ROM Bank Select: %02X", data);
-    }
-    else if (address <= 0x7FFF) {
-        // ROM Switchable Bank
+    if (address <= 0x7FFF) {
+
     }
     else if (address <= 0x97FF) {
         // Character RAM
@@ -259,15 +294,21 @@ void writeByte(uint16_t address, uint8_t data)
     }
     else if (address <= 0xCFFF) {
         // Internal RAM Bank 0
-        RAM0[address - 0xC000] = data;
+        if (RAMEnabled) {
+            RAM0[address - 0xC000] = data;
+        }
     }
     else if (address <= 0xDFFF) {
         // Internal RAM Switchable Bank
-        RAM[address - 0xD000] = data;
+        if (RAMEnabled) {
+            RAM[address - 0xD000] = data;
+        }
     }
     else if (address <= 0xFDFF) {
         // Echo RAM
-        RAM0[address - 0xE000] = data;
+        if (RAMEnabled) {
+            RAM0[address - 0xE000] = data;
+        }
     }
     else if (address <= 0xFE9F) {
         // Object Attribute Memory OAM
@@ -505,10 +546,176 @@ bool loadROM(const char * filename)
         return false;
     }
 
+    strncpy(Title, (char *)ROM0 + TITLE_OFFSET, sizeof(Title) - 1);
+    Title[sizeof(Title) - 1] = '\0';
+
+    ColorEnabled = (ROM0[COLOR_ENABLE_OFFSET] == 0x80);
+    SuperEnabled = (ROM0[SUPER_ENABLE_OFFSET] != 0x00);
+
+    CartridgeType = ROM0[CARTRIDGE_TYPE_OFFSET];
+    ROMType = ROM0[ROM_TYPE_OFFSET];
+    RAMType = ROM0[RAM_TYPE_OFFSET];
+
     return true;
 }
 
 void freeROM() 
 {
     free(ROM);
+}
+
+void printBank()
+{
+    LogInfo("BANK Lower=%02X Upper=%01X Full=%04X Mode=%s", 
+        Bank.Lower, Bank.Upper, Bank.Full, (Bank.Mode ? "RAM" : "ROM"));
+}
+
+void printCartridge()
+{
+    switch (CartridgeType) {
+    case 0x00:
+        LogInfo("Cartridge: ROM Only");
+        break;
+    case 0x01:
+        LogInfo("Cartridge: ROM+MBC1");
+        break;
+    case 0x02:
+        LogInfo("Cartridge: ROM+MBC1+RAM");
+        break;
+    case 0x03:
+        LogInfo("Cartridge: ROM+MBC1+RAM+Battery");
+        break;
+    case 0x05:
+        LogInfo("Cartridge: ROM+MBC2");
+        break;
+    case 0x06:
+        LogInfo("Cartridge: ROM+MBC2+Battery");
+        break;
+    case 0x08:
+        LogInfo("Cartridge: ROM+RAM");
+        break;
+    case 0x09:
+        LogInfo("Cartridge: ROM+RAM+Battery");
+        break;
+    case 0x0B:
+        LogInfo("Cartridge: ROM+MMM01");
+        break;
+    case 0x0C:
+        LogInfo("Cartridge: ROM+MMM01+SRAM");
+        break;
+    case 0x0D:
+        LogInfo("Cartridge: ROM+MMM01+SRAM+Battery");
+        break;
+    case 0x0F:
+        LogInfo("Cartridge: ROM+MBC3+TIMER+Battery");
+        break;
+    case 0x10:
+        LogInfo("Cartridge: ROM+MBC3+TIMER+RAM+Battery");
+        break;
+    case 0x11:
+        LogInfo("Cartridge: ROM+MBC3");
+        break;
+    case 0x12:
+        LogInfo("Cartridge: ROM+MBC3+RAM");
+        break;
+    case 0x13:
+        LogInfo("Cartridge: ROM+MBC3+RAM+Battery");
+        break;
+    case 0x19:
+        LogInfo("Cartridge: ROM+MBC5");
+        break;
+    case 0x1A:
+        LogInfo("Cartridge: ROM+MBC5+RAM");
+        break;
+    case 0x1B:
+        LogInfo("Cartridge: ROM+MBC5+RAM+Battery");
+        break;
+    case 0x1C:
+        LogInfo("Cartridge: ROM+MBC5+Rumble");
+        break;
+    case 0x1D:
+        LogInfo("Cartridge: ROM+MBC5+Rumble+SRAM");
+        break;
+    case 0x1E:
+        LogInfo("Cartridge: ROM+MBC5+Rumble+SRAM+Battery");
+        break;
+    case 0x20:
+        LogInfo("Cartridge: MBC6");
+        break;
+    case 0x22:
+        LogInfo("Cartridge: MBC7+Sensor+Rumble+RAM+Battery");
+        break;
+    case 0xFC:
+        LogInfo("Cartridge: Pocket Camera");
+        break;
+    case 0xFD:
+        LogInfo("Cartridge: Bandai TAMA5");
+        break;
+    case 0xFE:
+        LogInfo("Cartridge: Hudson HuC-3");
+        break;
+    case 0xFF:
+        LogInfo("Cartridge: Hudson HuC-1");
+        break;
+    }
+
+    switch (ROMType) {
+    case 0x00:
+        LogInfo("ROM: 32KB (no banks)");
+        break;
+    case 0x01:
+        LogInfo("ROM: 64KB (4 banks)");
+        break;
+    case 0x02:
+        LogInfo("ROM: 128KB (8 banks)");
+        break;
+    case 0x03:
+        LogInfo("ROM: 256KB (16 banks)");
+        break;
+    case 0x04:
+        LogInfo("ROM: 512KB (32 banks)");
+        break;
+    case 0x05:
+        LogInfo("ROM: 1MB (64 banks)");
+        break;
+    case 0x06:
+        LogInfo("ROM: 2MB (128 banks)");
+        break;
+    case 0x07:
+        LogInfo("ROM: 4MB (256 banks)");
+        break;
+    case 0x08:
+        LogInfo("ROM: 8MB (512 banks)");
+        break;
+    case 0x52:
+        LogInfo("ROM: 1.1MB (72 banks)");
+        break;
+    case 0x53:
+        LogInfo("ROM: 1.2MB (80 banks)");
+        break;
+    case 0x54:
+        LogInfo("ROM: 1.5MB (96 banks)");
+        break;
+    }
+
+    switch (RAMType) {
+    case 0x00:
+        LogInfo("RAM: None");
+        break;
+    case 0x01:
+        LogInfo("RAM: 2KB");
+        break;
+    case 0x02:
+        LogInfo("RAM: 8KB");
+        break;
+    case 0x03:
+        LogInfo("RAM: 32KB (4 banks of 8KB)");
+        break;
+    case 0x04:
+        LogInfo("RAM: 128KB (16 banks of 8KB");
+        break;
+    case 0x05:
+        LogInfo("RAM: 64KB (8 banks of 8KB");
+        break;
+    }
 }
