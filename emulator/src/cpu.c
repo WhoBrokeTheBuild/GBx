@@ -332,7 +332,6 @@ uint8_t fetch()
 {
     if (CPUEnabled) {
         uint8_t op = nextByte();
-        LogVerbose("%02X", op);
         cpuTick(4);
         return op;
     }
@@ -346,7 +345,7 @@ void execute(uint8_t op)
     if (inst) {
         inst();
     } else {
-        LogWarn("unknown instruction at %04X, %02X", R.PC, op);
+        LogFatal("unknown instruction at %04X, %02X", R.PC, op);
     }
 }
 

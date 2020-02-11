@@ -1,10 +1,14 @@
 #include "video.h"
+
+#include "cartridge.h"
 #include "cpu.h"
-#include "memory.h"
 #include "interrupt.h"
+#include "memory.h"
+
 #include <SDL.h>
 
 LCDC_t LCDC = { 
+
     .TileDisplayEnable      = false,
     .SpriteDisplayEnable    = false,
     .SpriteSize             = SPRITE_SIZE_8X8,
@@ -25,9 +29,8 @@ palette_t OBP1 = { .data = 0b11100100 };
 uint8_t WX = 0x00;
 uint8_t WY = 0x00;
 
-uint8_t CharacterRAM[0x1800];
-uint8_t BGMapData1[0x400];
-uint8_t BGMapData2[0x400];
+uint8_t VideoRAM0[0x1FFF];
+uint8_t VideoRAM1[0x1FFF];
 uint8_t OAM[0xA0];
 
 uint64_t LCDTicks = 0;
@@ -39,7 +42,7 @@ SDL_Window * sdlWindow = NULL;
 SDL_Renderer * sdlRenderer = NULL;
 SDL_Texture * sdlTexture = NULL;
 
-uint8_t VRAM[256*256*3];
+uint8_t PixelData[256*256*3];
 
 const int SCALE = 4;
 
@@ -131,9 +134,9 @@ void drawTiles()
         }
 
         unsigned off = (LY * 256*3) + (x * 3);
-        VRAM[off + 0] = color;
-        VRAM[off + 1] = color;
-        VRAM[off + 2] = color;
+        PixelData[off + 0] = color;
+        PixelData[off + 1] = color;
+        PixelData[off + 2] = color;
     }
 }
 
@@ -210,9 +213,9 @@ void drawSprites()
                 int x = -pixel + 7;
 
                 unsigned off = (LY * 256*3) + (x * 3);
-                VRAM[off + 0] = 0x00;
-                VRAM[off + 1] = 0x00;
-                VRAM[off + 2] = 0x00;
+                PixelData[off + 0] = 0x00;
+                PixelData[off + 1] = 0x00;
+                PixelData[off + 2] = 0x00;
             }
         }
     }
@@ -234,7 +237,7 @@ void lcdRender()
     uint8_t * pixels = NULL;
     int pitch = 0;
     SDL_LockTexture(sdlTexture, NULL, (void **)&pixels, &pitch);
-    memcpy(pixels, VRAM, sizeof(VRAM));
+    memcpy(pixels, PixelData, sizeof(PixelData));
     SDL_UnlockTexture(sdlTexture);
 
     SDL_Rect src = { .x = 0, .y = 0, .w = 160, .h = 144 };
@@ -330,7 +333,7 @@ void lcdInit()
     }
 
     char windowTitle[21];
-    snprintf(windowTitle, sizeof(windowTitle), "GBx - %s", Title);
+    snprintf(windowTitle, sizeof(windowTitle), "GBx - %s", CartridgeTitle);
 
     sdlWindow = SDL_CreateWindow(windowTitle, -1, -1, 160 * SCALE, 144 * SCALE, 0);
     if (!sdlWindow) {
@@ -347,9 +350,9 @@ void lcdInit()
     for (unsigned y = 0; y < 144; ++y) {
         for (unsigned x = 0; x < 160; ++x) {
             unsigned off = (y * 256*3) + (x * 3);
-            VRAM[off + 0] = 0xFF;
-            VRAM[off + 1] = 0xFF;
-            VRAM[off + 2] = 0xFF;
+            PixelData[off + 0] = 0xFF;
+            PixelData[off + 1] = 0xFF;
+            PixelData[off + 2] = 0xFF;
         }
     }
 
@@ -364,4 +367,34 @@ void lcdTerm()
     SDL_DestroyWindow(sdlWindow);
 
     SDL_Quit();
+}
+
+void printLCDC()
+{
+    LogInfo("BGWinDisp=%d OBJDisp=%d OBJSize=%d BGTileMap=%s TileData=%s WinDisp=%d WinTileMap=%s LCDEnab=%d",
+        LCDC.TileDisplayEnable, LCDC.SpriteDisplayEnable, LCDC.SpriteSize,
+        (LCDC.TileMapSelect == 0 ? "9800h-9BFFh" : "9C00h-9FFFh"),
+        (LCDC.TileDataSelect == 0 ? "8800h-97FFh" : "8000h-8FFFh"),
+        LCDC.WindowDisplayEnable,
+        (LCDC.WindowTileMapSelect == 0 ? "9C00h-9FFFh" : "9800h-9BFFh"),
+        LCDC.LCDEnable);
+}
+
+void printSTAT() 
+{
+    const char * mode[4] = {
+        "HBlank",
+        "VBlank",
+        "SearchSprite",
+        "DataTransfer",
+    };
+
+    LogInfo("Mode=%s IntCoinc=%d IntHBlank=%d IntVBlank=%d IntSearchSprite=%d LYCLY=%d",
+        mode[STAT.Mode], STAT.IntCoincidence, STAT.IntHBlank, STAT.IntVBlank, STAT.IntSearchSprite, STAT.LYCLY);
+}
+
+void printLCDInfo()
+{
+    LogInfo("SCY=%d SCX=%d LY=%d LYC=%d WX=%d WY=%d",
+        SCY, SCX, LY, LYC, WX, WY);
 }

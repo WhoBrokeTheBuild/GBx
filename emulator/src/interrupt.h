@@ -5,8 +5,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-typedef struct {
-    union {
+typedef union {
+    struct {
         bool VBlank:1;
         bool STAT:1;
         bool Timer:1;
@@ -30,7 +30,7 @@ static void printIE()
 static void printIF() 
 {
     LogInfo("IF VBlank=%d STAT=%d Timer=%d Serial=%d Joypad=%d",
-        IE.VBlank, IE.STAT, IE.Timer, IE.Serial, IE.Joypad);
+        IF.VBlank, IF.STAT, IF.Timer, IF.Serial, IF.Joypad);
 }
 
 void checkInterrupts();

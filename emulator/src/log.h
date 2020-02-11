@@ -86,7 +86,7 @@
     do { fprintf(stderr, COLOR_RED "[ERRO] " M "\n" COLOR_END, ##__VA_ARGS__); } while (0)
 
 #define LogFatal(M, ...) \
-    do { fprintf(stderr, COLOR_RED "[FATA] " M "\n" COLOR_END, ##__VA_ARGS__); exit(1); } while (0)
+    do { fprintf(stderr, COLOR_RED "[FATA] " M "\n" COLOR_END, ##__VA_ARGS__); requestBreakpoint(); } while (0)
 
 #define LogDebug(M, ...) \
     do { if (DebugMode) { printf(COLOR_CYAN "[DEBG] " M "\n" COLOR_END, ##__VA_ARGS__); } } while (0)

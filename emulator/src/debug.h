@@ -35,6 +35,8 @@ void clearBreakpoint();
 
 bool atBreakpoint();
 
+void requestBreakpoint();
+
 void debugPrompt();
 
 #endif // DEBUG_H

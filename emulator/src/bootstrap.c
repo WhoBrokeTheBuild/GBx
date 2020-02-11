@@ -50,6 +50,7 @@ void bootstrap()
     R.BC = 0x0013;
     R.DE = 0x00D8;
     R.HL = 0x014D;
+    R.PC = 0x0150;
     R.SP = 0xFFFE;
     TIMA = 0x00;
     TMA = 0x00;

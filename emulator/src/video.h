@@ -7,14 +7,14 @@
 
 typedef union {
     struct {
-        bool TileDisplayEnable:1;
-        bool SpriteDisplayEnable:1;
+        bool    TileDisplayEnable:1;
+        bool    SpriteDisplayEnable:1;
         uint8_t SpriteSize:1;
         uint8_t TileMapSelect:1;
         uint8_t TileDataSelect:1;
-        bool WindowDisplayEnable:1;
+        bool    WindowDisplayEnable:1;
         uint8_t WindowTileMapSelect:1;
-        bool LCDEnable:1;
+        bool    LCDEnable:1;
     };
     uint8_t data;
 } LCDC_t;
@@ -31,11 +31,11 @@ typedef union {
 typedef union {
     struct {
         uint8_t Mode:2;
-        bool IntCoincidence:1;
-        bool IntHBlank:1;
-        bool IntVBlank:1;
-        bool IntSearchSprite:1;
-        bool LYCLY:1;
+        bool    IntCoincidence:1;
+        bool    IntHBlank:1;
+        bool    IntVBlank:1;
+        bool    IntSearchSprite:1;
+        bool    LYCLY:1;
         uint8_t _:1;
     };
     uint8_t data;
@@ -77,56 +77,32 @@ typedef union {
 
 extern LCDC_t LCDC;
 extern STAT_t STAT;
+
 extern uint8_t SCY;
 extern uint8_t SCX;
 extern uint8_t LY;
 extern uint8_t LYC;
+
 extern palette_t BGP;
 extern palette_t OBP0;
 extern palette_t OBP1;
+
 extern uint8_t WX;
 extern uint8_t WY;
 
-extern uint8_t CharacterRAM[0x1800];
-extern uint8_t BGMapData1[0x400];
-extern uint8_t BGMapData2[0x400];
+extern uint8_t VideoRAM0[0x1FFF];
+extern uint8_t VideoRAM1[0x1FFF];
 extern uint8_t OAM[0xA0];
 
 extern uint64_t LCDTicks;
-
-static void printLCDC()
-{
-    LogInfo("BGWinDisp=%d OBJDisp=%d OBJSize=%d BGTileMap=%s TileData=%s WinDisp=%d WinTileMap=%s LCDEnab=%d",
-        LCDC.TileDisplayEnable, LCDC.SpriteDisplayEnable, LCDC.SpriteSize,
-        (LCDC.TileMapSelect == 0 ? "9800h-9BFFh" : "9C00h-9FFFh"),
-        (LCDC.TileDataSelect == 0 ? "8800h-97FFh" : "8000h-8FFFh"),
-        LCDC.WindowDisplayEnable,
-        (LCDC.WindowTileMapSelect == 0 ? "9C00h-9FFFh" : "9800h-9BFFh"),
-        LCDC.LCDEnable);
-}
-
-static void printSTAT() 
-{
-    const char * mode[4] = {
-        "HBlank",
-        "VBlank",
-        "SearchSprite",
-        "DataTransfer",
-    };
-
-    LogInfo("Mode=%s IntCoinc=%d IntHBlank=%d IntVBlank=%d IntSearchSprite=%d LYCLY=%d",
-        mode[STAT.Mode], STAT.IntCoincidence, STAT.IntHBlank, STAT.IntVBlank, STAT.IntSearchSprite, STAT.LYCLY);
-}
-
-static void printLCDInfo()
-{
-    LogInfo("SCY=%d SCX=%d LY=%d LYC=%d WX=%d WY=%d",
-        SCY, SCX, LY, LYC, WX, WY);
-}
 
 void lcdInit();
 void lcdTerm();
 
 void lcdTick(unsigned cycles);
+
+void printLCDC();
+void printSTAT();
+void printLCDInfo();
 
 #endif // VIDEO_H

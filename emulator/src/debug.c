@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <limits.h>
 
+#include "cartridge.h"
 #include "cpu.h"
 #include "interrupt.h"
 #include "log.h"
@@ -12,6 +13,8 @@
 #include "video.h"
 
 bool DebugMode = false;
+
+bool RequestBreakpoint = false;
 
 typedef struct {
     breakpoint_cond_t Condition;
@@ -37,6 +40,11 @@ void clearBreakpoint()
 
 bool atBreakpoint()
 {
+    if (RequestBreakpoint) {
+        RequestBreakpoint = false;
+        return true;
+    }
+
     switch (B.Condition) {
     case BKCND_A_EQ:
         if (R.A == B.Value) {
@@ -130,6 +138,11 @@ bool atBreakpoint()
     return false;
 }
 
+void requestBreakpoint()
+{
+    RequestBreakpoint = true;
+}
+
 #if defined(HAVE_READLINE)
 
 #include <readline/readline.h>
@@ -141,6 +154,8 @@ const char * help =
 "  continue     Continue normal execution\n"
 "  info         Print information, see `help info`\n"
 "  break        Set a breakpoint, see `help breakpoint`\n"
+"  get          Get a flag or register\n"
+"  set          Set a flag or register\n"
 "  read         Read memory, see `help read`\n"
 "  write        Write memory, see `help write`\n";
 
@@ -322,12 +337,12 @@ void debugRead(const char * input)
         return;
     }
 
-    uint8_t size;
+    int size;
     uint16_t addr;
-    sscanf(input, "%hhu %hX", &size, &addr);
+    sscanf(input, "%d %hX", &size, &addr);
 
     if (size == 8) {
-        uint8_t value = readWord(addr);
+        uint8_t value = readByte(addr);
         LogInfo("(%04X) = %02X", addr, value);
     }
     else if (size == 16) {
@@ -335,7 +350,7 @@ void debugRead(const char * input)
         LogInfo("(%04X) = %04X", addr, value);
     }
     else {
-        LogError("Unsupported size '%hhu'", size);
+        LogError("Unsupported size '%d'", size);
     }
 }
 
@@ -346,9 +361,9 @@ void debugWrite(const char * input)
         return;
     }
     
-    uint8_t size;
+    int size;
     uint16_t addr;
-    sscanf(input, "%hhu %hX", &size, &addr);
+    sscanf(input, "%d %hX", &size, &addr);
 
     if (size == 8) {
         uint8_t value;
@@ -363,7 +378,7 @@ void debugWrite(const char * input)
         writeWord(addr, value);
     }
     else {
-        LogError("Unsupported size '%hhu'", size);
+        LogError("Unsupported size '%d'", size);
     }
 }
 
@@ -433,6 +448,12 @@ void debugPrompt()
         }
         else if (strncmp(input, "break", length) == 0) {
             debugBreak(args);
+        }
+        else if (strncmp(input, "get", length) == 0) {
+            // TODO
+        }
+        else if (strncmp(input, "set", length) == 0) {
+            // TODO
         }
         else if (strncmp(input, "read", length) == 0) {
             debugRead(args);

@@ -16,10 +16,6 @@ void checkInterrupts()
             .data = IE.data & IF.data,
         };
 
-        if (enabledInts.data > 0) {
-            LogInfo("INT?!");
-        }
-
         if (enabledInts.VBlank) {
             IF.VBlank = false;
             pushWord(R.PC);
