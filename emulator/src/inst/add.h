@@ -1,9 +1,9 @@
 #ifndef ADD_H
 #define ADD_H
 
-#include "../alu.h"
 #include "../cpu.h"
 #include "../log.h"
+#include "../math.h"
 #include "../memory.h"
 #include "../register.h"
 

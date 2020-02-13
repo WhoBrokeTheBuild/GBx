@@ -1,7 +1,6 @@
 #ifndef LOAD_H
 #define LOAD_H
 
-#include "../alu.h"
 #include "../cpu.h"
 #include "../log.h"
 #include "../memory.h"

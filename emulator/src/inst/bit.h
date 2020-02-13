@@ -6,9 +6,9 @@
 #include "../memory.h"
 #include "../register.h"
 
-#define _BIT(x, b) \
-    R.FZ = (((x) & (1 << (b))) == 0); \
-    R.FN = false; \
+#define _BIT(x, b)                      \
+    R.FZ = (((x) & (1 << (b))) == 0);   \
+    R.FN = false;                       \
     R.FH = true
 
 static void _BIT_b_A(int bit)

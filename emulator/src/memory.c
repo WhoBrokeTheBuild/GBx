@@ -1,6 +1,5 @@
 #include "memory.h"
 
-#include "alu.h"
 #include "bootstrap.h"
 #include "cartridge.h"
 #include "interrupt.h"

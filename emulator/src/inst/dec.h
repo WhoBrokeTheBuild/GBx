@@ -1,14 +1,16 @@
 #ifndef DEC_H
 #define DEC_H
 
-#include "../alu.h"
 #include "../cpu.h"
 #include "../log.h"
 #include "../memory.h"
 #include "../register.h"
 
-#define _DEC(x) \
-    (x) = dec8((x))
+#define _DEC(x)                     \
+    R.FH = (((x) & 0x10) == 0x10);  \
+    --(x);                          \
+    R.FZ = ((x) == 0);              \
+    R.FN = 1;                       \
 
 static void _DEC_A()
 {

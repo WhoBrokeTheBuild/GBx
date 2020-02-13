@@ -1,14 +1,16 @@
 #ifndef INC_H
 #define INC_H
 
-#include "../alu.h"
 #include "../cpu.h"
 #include "../log.h"
 #include "../memory.h"
 #include "../register.h"
 
-#define _INC(x) \
-    (x) = inc8((x))
+#define _INC(x)                     \
+    R.FH = (((x) & 0xF) == 0xF);    \
+    ++(x);                          \
+    R.FZ = ((x) == 0);              \
+    R.FN = 0;                       \
 
 static void _INC_A()
 {

@@ -1,9 +1,9 @@
 #ifndef SUBTRACT_H
 #define SUBTRACT_H
 
-#include "../alu.h"
 #include "../log.h"
 #include "../cpu.h"
+#include "../math.h"
 #include "../memory.h"
 #include "../register.h"
 

@@ -1,7 +1,6 @@
 #ifndef COMPARE_H
 #define COMPARE_H
 
-#include "../alu.h"
 #include "../cpu.h"
 #include "../log.h"
 #include "../memory.h"
