@@ -1,17 +1,14 @@
 #ifndef XOR_H
 #define XOR_H
 
-#include "../log.h"
+#include "../alu.h"
 #include "../cpu.h"
+#include "../log.h"
 #include "../memory.h"
 #include "../register.h"
 
-#define _XOR(x)         \
-    R.A ^= (x);         \
-    R.FZ = (R.A == 0);  \
-    R.FN = 0;           \
-    R.FH = 0;           \
-    R.FC = 0;           \
+#define _XOR(x) \
+    R.A = xor8(R.A, (x))
 
 static void _XOR_A()
 {

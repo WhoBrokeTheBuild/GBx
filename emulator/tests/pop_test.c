@@ -1,7 +1,7 @@
 #include "inst/pop.h"
 #include "bootstrap.h"
 #include "memory.h"
-#include "minunit.h"
+#include "unit.h"
 
 const uint16_t RAM_OFFSET = 0xCFFF;
 
@@ -12,55 +12,56 @@ void setup()
     R.SP = 0xFFFE;
 }
 
-MU_TEST(POP_AF)
+UNIT_TEST(POP_AF)
 {
     pushWord(0x1234);
     _POP_AF();
-    mu_assert_int_eq(R.SP, 0xFFFE);
-    mu_assert_int_eq(R.AF, 0x1234);
-    mu_assert_int_eq(CPUTicks, 12);
+    unit_assert_hex_eq(0xFFFE, R.SP);
+    unit_assert_hex_eq(0x1234, R.AF);
+    unit_assert_int_eq(12, CPUTicks);
 }
 
-MU_TEST(POP_BC)
+UNIT_TEST(POP_BC)
 {
     pushWord(0x1234);
     _POP_BC();
-    mu_assert_int_eq(R.SP, 0xFFFE);
-    mu_assert_int_eq(R.BC, 0x1234);
-    mu_assert_int_eq(CPUTicks, 12);
+    unit_assert_hex_eq(0xFFFE, R.SP);
+    unit_assert_hex_eq(0x1234, R.BC);
+    unit_assert_int_eq(12, CPUTicks);
 }
 
-MU_TEST(POP_DE)
+UNIT_TEST(POP_DE)
 {
     pushWord(0x1234);
     _POP_DE();
-    mu_assert_int_eq(R.SP, 0xFFFE);
-    mu_assert_int_eq(R.DE, 0x1234);
-    mu_assert_int_eq(CPUTicks, 12);
+    unit_assert_hex_eq(0xFFFE, R.SP);
+    unit_assert_hex_eq(0x1234, R.DE);
+    unit_assert_int_eq(12, CPUTicks);
 }
 
-MU_TEST(POP_HL)
+UNIT_TEST(POP_HL)
 {
     pushWord(0x1234);
     _POP_HL();
-    mu_assert_int_eq(R.SP, 0xFFFE);
-    mu_assert_int_eq(R.HL, 0x1234);
-    mu_assert_int_eq(CPUTicks, 12);
+    unit_assert_int_eq(0xFFFE, R.SP);
+    unit_assert_int_eq(0x1234, R.HL);
+    unit_assert_int_eq(12, CPUTicks);
 }
 
-MU_TEST_SUITE(test_suite)
+UNIT_TEST_SUITE(pop_suite)
 {
-	MU_SUITE_CONFIGURE(&setup, NULL);
+	UNIT_SUITE_SETUP(&setup);
 
-	MU_RUN_TEST(POP_AF);
-	MU_RUN_TEST(POP_BC);
-	MU_RUN_TEST(POP_DE);
-	MU_RUN_TEST(POP_HL);
+	UNIT_RUN_TEST(POP_AF);
+	UNIT_RUN_TEST(POP_BC);
+	UNIT_RUN_TEST(POP_DE);
+	UNIT_RUN_TEST(POP_HL);
 }
 
 int main(int argc, char *argv[])
 {
-	MU_RUN_SUITE(test_suite);
-	MU_REPORT();
-	return MU_EXIT_CODE;
+    DebugMode = true;
+	UNIT_RUN_SUITE(pop_suite);
+	UNIT_REPORT();
+	return UNIT_EXIT_CODE;
 }

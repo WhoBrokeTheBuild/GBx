@@ -1,17 +1,14 @@
 #ifndef OR_H
 #define OR_H
 
+#include "../alu.h"
 #include "../cpu.h"
 #include "../log.h"
 #include "../memory.h"
 #include "../register.h"
 
-#define _OR(x)          \
-    R.A |= (x);         \
-    R.FZ = (R.A == 0);  \
-    R.FN = 0;           \
-    R.FH = 0;           \
-    R.FC = 0;
+#define _OR(x) \
+    R.A = or8(R.A, (x))
 
 static void _OR_A()
 {

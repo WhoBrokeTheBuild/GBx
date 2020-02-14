@@ -2,7 +2,7 @@
 #include "bootstrap.h"
 #include "memory.h"
 #include "video.h"
-#include "minunit.h"
+#include "unit.h"
 
 const uint16_t RAM_OFFSET = 0xCFFF;
 
@@ -12,58 +12,60 @@ void setup()
     memset(&R, sizeof(R), 0);
 }
 
-MU_TEST(HALT)
+UNIT_TEST(HALT)
 {
     CPUEnabled = true;
     _HALT();
-    mu_check(!CPUEnabled);
-    mu_assert_int_eq(CPUTicks, 4);
+    unit_assert_false(CPUEnabled);
+    unit_assert_int_eq(CPUTicks, 0);
 }
 
-MU_TEST(STOP)
+UNIT_TEST(STOP)
 {
     R.PC = 0x0000;
     LCDC.LCDEnable = true;
     _STOP();
-    mu_assert_int_eq(R.PC, 0x0001);
-    mu_check(!LCDC.LCDEnable);
-    mu_assert_int_eq(CPUTicks, 4);
+    unit_assert_hex_eq(R.PC, 0x0001);
+    unit_assert_false(LCDC.LCDEnable);
+    unit_assert_int_eq(CPUTicks, 0);
 }
 
-MU_TEST(DI)
+UNIT_TEST(DI)
 {
     IME = true;
     _DI();
-    mu_check(!IME);
-    mu_assert_int_eq(CPUTicks, 4);
+    unit_assert_false(IME);
+    unit_assert_int_eq(CPUTicks, 0);
 }
 
-MU_TEST(EI)
+UNIT_TEST(EI)
 {
     IME = false;
     _EI();
-    mu_check(IME);
-    mu_assert_int_eq(CPUTicks, 4);
+    unit_assert_true(IME);
+    unit_assert_int_eq(CPUTicks, 0);
 }
 
-MU_TEST(DAA)
+UNIT_TEST(DAA)
 {
     // TODO
 }
 
-MU_TEST_SUITE(test_suite)
+UNIT_TEST_SUITE(misc_suite)
 {
-	MU_SUITE_CONFIGURE(&setup, NULL);
+	UNIT_SUITE_SETUP(&setup);
 
-	MU_RUN_TEST(HALT);
-	MU_RUN_TEST(STOP);
-	MU_RUN_TEST(DI);
-	MU_RUN_TEST(EI);
+	UNIT_RUN_TEST(HALT);
+	UNIT_RUN_TEST(STOP);
+	UNIT_RUN_TEST(DI);
+	UNIT_RUN_TEST(EI);
+	UNIT_RUN_TEST(DAA);
 }
 
 int main(int argc, char *argv[])
 {
-	MU_RUN_SUITE(test_suite);
-	MU_REPORT();
-	return MU_EXIT_CODE;
+    DebugMode = true;
+	UNIT_RUN_SUITE(misc_suite);
+	UNIT_REPORT();
+	return UNIT_EXIT_CODE;
 }

@@ -20,10 +20,10 @@ uint8_t readByte(uint16_t address)
     // LogVerbose("read %02X", address);
 
     if (address <= 0x00FF) {
-        // Bootstrap / Jump Vectors
         if (BootstrapEnable) {
             return BOOTSTRAP[address];
         } else {
+            // Jump Vectors
             return CartridgeROM0[address];
         }
     }
@@ -45,7 +45,6 @@ uint8_t readByte(uint16_t address)
         }
         else {
             LogFatal("Cartridge RAM Not Enabled %04X", address);
-            DebugMode = true;
         }
     }
     else if (address <= 0xCFFF) {

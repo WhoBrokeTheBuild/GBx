@@ -16,7 +16,6 @@ static void _HALT()
 {
     LogDebug("HALT");
     CPUEnabled = false;
-    cpuTick(4);
 }
 
 static void _STOP()
@@ -24,40 +23,39 @@ static void _STOP()
     LogDebug("STOP");
     ++R.PC;
     LCDC.LCDEnable = false;
-    cpuTick(4);
 }
 
 static void _DI()
 {
     LogDebug("DI");
     IME = false;
-    cpuTick(4);
 }
 
 static void _EI()
 {
     LogDebug("EI");
     IME = true;
-    cpuTick(4);
 }
 
 static void _DAA()
 {
     LogDebug("DAA");
-    if (!R.FN) {
+    if (R.FN) {
+        // Subtraction
+        if (R.FC) {
+            R.A -= 0x60;
+        }
+        if (R.FH) {
+            R.A -= 0x06;
+        }
+    } else {
+        // Addition
         if (R.FC || R.A > 0x99) {
             R.A += 0x60;
             R.FC = true;
         }
         if (R.FH || (R.A & 0x0F) > 0x09) {
             R.A += 0x06;
-        }
-    } else {
-        if (R.FC) {
-            R.A -= 0x60;
-        }
-        if (R.FH) {
-            R.A -= 0x06;
         }
     }
 
@@ -67,7 +65,7 @@ static void _DAA()
 
 static void _SCF()
 {
-    LogDebug("CPL");
+    LogDebug("SCF");
     R.FN = false;
     R.FH = false;
     R.FC = true;

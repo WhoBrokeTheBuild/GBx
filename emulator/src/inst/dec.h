@@ -7,7 +7,7 @@
 #include "../register.h"
 
 #define _DEC(x)                     \
-    R.FH = (((x) & 0x10) == 0x10);  \
+    R.FH = (((x) & 0xF) == 0);      \
     --(x);                          \
     R.FZ = ((x) == 0);              \
     R.FN = 1;                       \

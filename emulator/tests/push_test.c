@@ -1,7 +1,7 @@
 #include "inst/push.h"
 #include "bootstrap.h"
 #include "memory.h"
-#include "minunit.h"
+#include "unit.h"
 
 const uint16_t RAM_OFFSET = 0xCFFF;
 
@@ -12,55 +12,56 @@ void setup()
     R.SP = 0xFFFE;
 }
 
-MU_TEST(PUSH_AF)
+UNIT_TEST(PUSH_AF)
 {
     R.AF = 0x1234;
     _PUSH_AF();
-    mu_assert_int_eq(R.SP, 0xFFFC);
-    mu_assert_int_eq(readWord(R.SP), 0x1234);
-    mu_assert_int_eq(CPUTicks, 16);
+    unit_assert_hex_eq(0xFFFC, R.SP);
+    unit_assert_hex_eq(0x1234, readWord(R.SP));
+    unit_assert_int_eq(16, CPUTicks);
 }
 
-MU_TEST(PUSH_BC)
+UNIT_TEST(PUSH_BC)
 {
     R.BC = 0x1234;
     _PUSH_BC();
-    mu_assert_int_eq(R.SP, 0xFFFC);
-    mu_assert_int_eq(readWord(R.SP), 0x1234);
-    mu_assert_int_eq(CPUTicks, 16);
+    unit_assert_hex_eq(0xFFFC, R.SP);
+    unit_assert_hex_eq(0x1234, readWord(R.SP));
+    unit_assert_int_eq(16, CPUTicks);
 }
 
-MU_TEST(PUSH_DE)
+UNIT_TEST(PUSH_DE)
 {
     R.DE = 0x1234;
     _PUSH_DE();
-    mu_assert_int_eq(R.SP, 0xFFFC);
-    mu_assert_int_eq(readWord(R.SP), 0x1234);
-    mu_assert_int_eq(CPUTicks, 16);
+    unit_assert_hex_eq(0xFFFC, R.SP);
+    unit_assert_hex_eq(0x1234, readWord(R.SP));
+    unit_assert_int_eq(16, CPUTicks);
 }
 
-MU_TEST(PUSH_HL)
+UNIT_TEST(PUSH_HL)
 {
     R.HL = 0x1234;
     _PUSH_HL();
-    mu_assert_int_eq(R.SP, 0xFFFC);
-    mu_assert_int_eq(readWord(R.SP), 0x1234);
-    mu_assert_int_eq(CPUTicks, 16);
+    unit_assert_hex_eq(0xFFFC, R.SP);
+    unit_assert_hex_eq(0x1234, readWord(R.SP));
+    unit_assert_int_eq(16, CPUTicks);
 }
 
-MU_TEST_SUITE(test_suite)
+UNIT_TEST_SUITE(push_suite)
 {
-	MU_SUITE_CONFIGURE(&setup, NULL);
+	UNIT_SUITE_SETUP(&setup);
 
-	MU_RUN_TEST(PUSH_AF);
-	MU_RUN_TEST(PUSH_BC);
-	MU_RUN_TEST(PUSH_DE);
-	MU_RUN_TEST(PUSH_HL);
+	UNIT_RUN_TEST(PUSH_AF);
+	UNIT_RUN_TEST(PUSH_BC);
+	UNIT_RUN_TEST(PUSH_DE);
+	UNIT_RUN_TEST(PUSH_HL);
 }
 
 int main(int argc, char *argv[])
 {
-	MU_RUN_SUITE(test_suite);
-	MU_REPORT();
-	return MU_EXIT_CODE;
+    DebugMode = true;
+	UNIT_RUN_SUITE(push_suite);
+	UNIT_REPORT();
+	return UNIT_EXIT_CODE;
 }

@@ -1,9 +1,9 @@
 #ifndef ADD_H
 #define ADD_H
 
+#include "../alu.h"
 #include "../cpu.h"
 #include "../log.h"
-#include "../math.h"
 #include "../memory.h"
 #include "../register.h"
 
@@ -11,7 +11,7 @@
     R.A = add8(R.A, (x))
 
 #define _ADC(x) \
-    R.A = add8(R.A, (x) + (int)R.FC)
+    R.A = add8(R.A, (x) + (uint8_t)R.FC)
 
 static void _ADD_A()
 {
@@ -63,6 +63,7 @@ static void _ADD_pHL()
 
     _ADD(pHL);
 }
+
 static void _ADD_n()
 {
     uint8_t n = nextByte();
@@ -137,32 +138,37 @@ static void _ADC_n()
 #undef _ADD
 #undef _ADC
 
+#define _ADDHL(x) \
+    R.HL = add16(R.HL, (x))
+
 static void _ADD_HL_BC()
 {
     LogDebug("ADD HL,BC");
-    R.HL = add16(R.HL, R.BC);
+    _ADDHL(R.BC);
     cpuTick(4);
 }
 
 static void _ADD_HL_DE()
 {
     LogDebug("ADD HL,DE");
-    R.HL = add16(R.HL, R.DE);
+    _ADDHL(R.DE);
     cpuTick(4);
 }
 
 static void _ADD_HL_HL()
 {
     LogDebug("ADD HL,HL");
-    R.HL = add16(R.HL, R.HL);
+    _ADDHL(R.HL);
     cpuTick(4);
 }
 
 static void _ADD_HL_SP()
 {
     LogDebug("ADD HL,SP");
-    R.HL = add16(R.HL, R.SP);
+    _ADDHL(R.SP);
     cpuTick(4);
 }
+
+#undef _ADDHL
 
 #endif // ADD_H
