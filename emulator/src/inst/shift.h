@@ -6,29 +6,35 @@
 #include "../memory.h"
 #include "../register.h"
 
-#define _SLA(x) \
-    R.FC = ((x) & 0x80) == 0x80; \
-    (x) <<= 1; \
-    R.FZ = ((x) == 0); \
-    R.FN = false; \
+#define _SLA(x)                         \
+    R.FC = ((x) & 0x80) == 0x80;        \
+    (x) <<= 1;                          \
+    R.FZ = ((x) == 0);                  \
+    R.FN = false;                       \
     R.FH = false
 
-#define _SRA(x) \
-    R.FC = ((x) & 0x01) == 0x01; \
-    (x) >>= 1; \
-    R.FZ = ((x) == 0); \
-    R.FN = false; \
+#define _SRA(x)                         \
+    R.FC = ((x) & 0x01) == 0x01;        \
+    (x) >>= 1;                          \
+    R.FZ = ((x) == 0);                  \
+    R.FN = false;                       \
     R.FH = false
 
-#define _SRL(x) \
-    R.FC = ((x) & 0x01) == 0x01; \
-    (x) = ((x) >> 1) | ((x) & 0x80); \
-    R.FZ = ((x) == 0); \
-    R.FN = false; \
+#define _SRL(x)                         \
+    R.FC = ((x) & 0x01) == 0x01;        \
+    (x) = ((x) >> 1) | ((x) & 0x80);    \
+    R.FZ = ((x) == 0);                  \
+    R.FN = false;                       \
     R.FH = false
 
 #define _SWAP(x) \
     (x) = (((x) & 0x0F) << 4) | (((x) & 0xF0) >> 4)
+
+static void _SLA_A()
+{
+    LogDebug("SLA A");
+    _SLA(R.A);
+}
 
 static void _SLA_B()
 {
@@ -78,10 +84,10 @@ static void _SLA_pHL()
     cpuTick(4);
 }
 
-static void _SLA_A()
+static void _SRA_A()
 {
-    LogDebug("SLA A");
-    _SLA(R.A);
+    LogDebug("SRA A");
+    _SRA(R.A);
 }
 
 static void _SRA_B()
@@ -132,10 +138,10 @@ static void _SRA_pHL()
     cpuTick(4);
 }
 
-static void _SRA_A()
+static void _SRL_A()
 {
-    LogDebug("SRA A");
-    _SRA(R.A);
+    LogDebug("SRL A");
+    _SRL(R.A);
 }
 
 static void _SRL_B()
@@ -186,10 +192,11 @@ static void _SRL_pHL()
     cpuTick(4);
 }
 
-static void _SRL_A()
+static void _SWAP_A()
 {
-    LogDebug("SRL A");
-    _SRL(R.A);
+    LogDebug("SWAP A");
+    _SWAP(R.A);
+    cpuTick(4);
 }
 
 static void _SWAP_B()
@@ -247,16 +254,9 @@ static void _SWAP_pHL()
     cpuTick(4);
 }
 
-static void _SWAP_A()
-{
-    LogDebug("SWAP A");
-    _SWAP(R.A);
-    cpuTick(4);
-}
-
-#undef _SLA
-#undef _SRA
-#undef _SRL
 #undef _SWAP
+#undef _SRL
+#undef _SRA
+#undef _SLA
 
 #endif // SHIFT_H

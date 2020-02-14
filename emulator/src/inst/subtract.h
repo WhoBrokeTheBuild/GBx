@@ -135,7 +135,7 @@ static void _SBC_n()
     _SBC(n);
 }
 
-#undef _SUB
 #undef _SBC
+#undef _SUB
 
 #endif // SUBTRACT_H

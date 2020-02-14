@@ -1,15 +1,13 @@
 #include "inst/return.h"
-#include "bootstrap.h"
 #include "memory.h"
 #include "unit.h"
-
-const uint16_t RAM_OFFSET = 0xCFFF;
 
 void setup() 
 {
     CPUTicks = 0;
     memset(&R, sizeof(R), 0);
     R.SP = 0xFFFE;
+    R.PC = 0x0000;
 }
 
 UNIT_TEST(RET)
@@ -23,7 +21,6 @@ UNIT_TEST(RET)
 UNIT_TEST(RET_NZ)
 {
     pushWord(0x1234);
-    R.PC = 0x0000;
     R.FZ = true;
     _RET_NZ();
     unit_assert_hex_eq(0x0000, R.PC);
@@ -38,7 +35,6 @@ UNIT_TEST(RET_NZ)
 UNIT_TEST(RET_Z)
 {
     pushWord(0x1234);
-    R.PC = 0x0000;
     R.FZ = false;
     _RET_Z();
     unit_assert_hex_eq(0x0000, R.PC);
@@ -53,7 +49,6 @@ UNIT_TEST(RET_Z)
 UNIT_TEST(RET_NC)
 {
     pushWord(0x1234);
-    R.PC = 0x0000;
     R.FC = true;
     _RET_NC();
     unit_assert_hex_eq(0x0000, R.PC);
@@ -68,7 +63,6 @@ UNIT_TEST(RET_NC)
 UNIT_TEST(RET_C)
 {
     pushWord(0x1234);
-    R.PC = 0x0000;
     R.FC = false;
     _RET_C();
     unit_assert_hex_eq(0x0000, R.PC);
@@ -83,13 +77,12 @@ UNIT_TEST(RET_C)
 UNIT_TEST(RETI)
 {
     pushWord(0x1234);
-    R.PC = 0x0000;
     _RETI();
     unit_assert_hex_eq(0x1234, R.PC);
     unit_assert_int_eq(16, CPUTicks);
 }
 
-UNIT_TEST_SUITE(return_suite)
+UNIT_TEST_SUITE(RET)
 {
 	UNIT_SUITE_SETUP(&setup);
 
@@ -104,7 +97,7 @@ UNIT_TEST_SUITE(return_suite)
 int main(int argc, char *argv[])
 {
     DebugMode = true;
-	UNIT_RUN_SUITE(return_suite);
+	UNIT_RUN_SUITE(RET);
 	UNIT_REPORT();
 	return UNIT_EXIT_CODE;
 }

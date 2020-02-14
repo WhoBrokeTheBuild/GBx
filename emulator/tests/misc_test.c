@@ -1,10 +1,7 @@
 #include "inst/misc.h"
-#include "bootstrap.h"
 #include "memory.h"
 #include "video.h"
 #include "unit.h"
-
-const uint16_t RAM_OFFSET = 0xCFFF;
 
 void setup() 
 {
@@ -51,7 +48,7 @@ UNIT_TEST(DAA)
     // TODO
 }
 
-UNIT_TEST_SUITE(misc_suite)
+UNIT_TEST_SUITE(MISC)
 {
 	UNIT_SUITE_SETUP(&setup);
 
@@ -65,7 +62,7 @@ UNIT_TEST_SUITE(misc_suite)
 int main(int argc, char *argv[])
 {
     DebugMode = true;
-	UNIT_RUN_SUITE(misc_suite);
+	UNIT_RUN_SUITE(MISC);
 	UNIT_REPORT();
 	return UNIT_EXIT_CODE;
 }

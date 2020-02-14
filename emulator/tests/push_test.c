@@ -1,9 +1,6 @@
 #include "inst/push.h"
-#include "bootstrap.h"
 #include "memory.h"
 #include "unit.h"
-
-const uint16_t RAM_OFFSET = 0xCFFF;
 
 void setup() 
 {
@@ -48,7 +45,7 @@ UNIT_TEST(PUSH_HL)
     unit_assert_int_eq(16, CPUTicks);
 }
 
-UNIT_TEST_SUITE(push_suite)
+UNIT_TEST_SUITE(PUSH)
 {
 	UNIT_SUITE_SETUP(&setup);
 
@@ -61,7 +58,7 @@ UNIT_TEST_SUITE(push_suite)
 int main(int argc, char *argv[])
 {
     DebugMode = true;
-	UNIT_RUN_SUITE(push_suite);
+	UNIT_RUN_SUITE(PUSH);
 	UNIT_REPORT();
 	return UNIT_EXIT_CODE;
 }

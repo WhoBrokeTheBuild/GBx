@@ -1,9 +1,6 @@
 #include "inst/pop.h"
-#include "bootstrap.h"
 #include "memory.h"
 #include "unit.h"
-
-const uint16_t RAM_OFFSET = 0xCFFF;
 
 void setup() 
 {
@@ -48,7 +45,7 @@ UNIT_TEST(POP_HL)
     unit_assert_int_eq(12, CPUTicks);
 }
 
-UNIT_TEST_SUITE(pop_suite)
+UNIT_TEST_SUITE(POP)
 {
 	UNIT_SUITE_SETUP(&setup);
 
@@ -61,7 +58,7 @@ UNIT_TEST_SUITE(pop_suite)
 int main(int argc, char *argv[])
 {
     DebugMode = true;
-	UNIT_RUN_SUITE(pop_suite);
+	UNIT_RUN_SUITE(POP);
 	UNIT_REPORT();
 	return UNIT_EXIT_CODE;
 }

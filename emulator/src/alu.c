@@ -60,4 +60,3 @@ int8_t xor8(int8_t a, int8_t b)
     R.FC = false;
     return a;
 }
-

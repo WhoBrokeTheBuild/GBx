@@ -13,6 +13,9 @@
 #define _ADC(x) \
     R.A = add8(R.A, (x) + (uint8_t)R.FC)
 
+#define _ADDHL(x) \
+    R.HL = add16(R.HL, (x))
+    
 static void _ADD_A()
 {
     LogDebug("ADD A,A");
@@ -135,12 +138,6 @@ static void _ADC_n()
     _ADC(n);
 }
 
-#undef _ADD
-#undef _ADC
-
-#define _ADDHL(x) \
-    R.HL = add16(R.HL, (x))
-
 static void _ADD_HL_BC()
 {
     LogDebug("ADD HL,BC");
@@ -170,5 +167,7 @@ static void _ADD_HL_SP()
 }
 
 #undef _ADDHL
+#undef _ADC
+#undef _ADD
 
 #endif // ADD_H
