@@ -53,7 +53,7 @@ static void _BIT_b_L(int bit)
     _BIT(R.L, bit);
 }
 
-static void _BIT_b_HL(int bit)
+static void _BIT_b_pHL(int bit)
 {
     LogDebug("BIT %d,(HL)", bit);
     uint8_t n = readByte(R.HL);

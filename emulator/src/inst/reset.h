@@ -3,10 +3,11 @@
 
 #include "../cpu.h"
 #include "../log.h"
+#include "../memory.h"
 #include "../register.h"
 
 #define _RES(x, b) \
-    (((x) & ~(1 << (b))) == 0)
+    (x) &= ~(1 << (b))
 
 static void _RES_b_A(int bit)
 {
@@ -50,7 +51,7 @@ static void _RES_b_L(int bit)
     _RES(R.L, bit);
 }
 
-static void _RES_b_HL(int bit)
+static void _RES_b_pHL(int bit)
 {
     LogDebug("RES %d,(HL)", bit);
     uint8_t n = readByte(R.HL);

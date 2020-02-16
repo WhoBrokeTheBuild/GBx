@@ -7,7 +7,7 @@
 #include "../register.h"
 
 #define _SET(x, b) \
-    (((x) | (1 << (b))) == 0)
+    (x) = ((x) | (1 << (b)))
 
 static void _SET_b_A(int bit)
 {
@@ -51,7 +51,7 @@ static void _SET_b_L(int bit)
     _SET(R.L, bit);
 }
 
-static void _SET_b_HL(int bit)
+static void _SET_b_pHL(int bit)
 {
     LogDebug("SET %d,(HL)", bit);
     uint8_t n = readByte(R.HL);

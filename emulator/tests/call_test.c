@@ -84,12 +84,6 @@ UNIT_TEST(CALL_C_uu)
     unit_assert_int_eq(28, CPUTicks);
 }
 
-UNIT_TEST(CALL_pHL)
-{
-    R.PC = RAM_OFFSET;
-    writeWord(R.PC, 0x1234);
-}
-
 UNIT_TEST_SUITE(CALL)
 {
 	UNIT_SUITE_SETUP(&setup);
@@ -99,8 +93,6 @@ UNIT_TEST_SUITE(CALL)
 	UNIT_RUN_TEST(CALL_Z_uu);
 	UNIT_RUN_TEST(CALL_NC_uu);
 	UNIT_RUN_TEST(CALL_C_uu);
-
-	UNIT_RUN_TEST(CALL_pHL);
 }
 
 int main(int argc, char ** argv)

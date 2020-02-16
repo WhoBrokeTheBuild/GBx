@@ -84,7 +84,7 @@ bit_inst_t bit_instructions[24] = {
     _BIT_b_E,
     _BIT_b_H,
     _BIT_b_L,
-    _BIT_b_HL,
+    _BIT_b_pHL,
     _BIT_b_A,
     _RES_b_B,
     _RES_b_C,
@@ -92,7 +92,7 @@ bit_inst_t bit_instructions[24] = {
     _RES_b_E,
     _RES_b_H,
     _RES_b_L,
-    _RES_b_HL,
+    _RES_b_pHL,
     _RES_b_A,
     _SET_b_B,
     _SET_b_C,
@@ -100,7 +100,7 @@ bit_inst_t bit_instructions[24] = {
     _SET_b_E,
     _SET_b_H,
     _SET_b_L,
-    _SET_b_HL,
+    _SET_b_pHL,
     _SET_b_A,
 };
 

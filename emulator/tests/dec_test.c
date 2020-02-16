@@ -11,34 +11,34 @@ void setup()
     R.HL = RAM_OFFSET;
 }
 
-#define MAKE_DEC_TEST8(REG)                       \
-    UNIT_TEST(DEC_##REG##_01)                     \
+#define MAKE_DEC_TEST8(REG)                         \
+    UNIT_TEST(DEC_##REG##_01)                       \
     {                                               \
-        R.REG = 0x01;                             \
-        _DEC_##REG();                             \
-        unit_assert_hex_eq(0x00, R.REG);          \
+        R.REG = 0x01;                               \
+        _DEC_##REG();                               \
+        unit_assert_hex_eq(0x00, R.REG);            \
         unit_assert_true(R.FZ);                     \
         unit_assert_true(R.FN);                     \
         unit_assert_false(R.FH);                    \
         unit_assert_int_eq(4, CPUTicks);            \
     }                                               \
                                                     \
-    UNIT_TEST(DEC_##REG##_F0)                     \
+    UNIT_TEST(DEC_##REG##_F0)                       \
     {                                               \
-        R.REG = 0xF0;                             \
-        _DEC_##REG();                             \
-        unit_assert_hex_eq(0xEF, R.REG);          \
+        R.REG = 0xF0;                               \
+        _DEC_##REG();                               \
+        unit_assert_hex_eq(0xEF, R.REG);            \
         unit_assert_false(R.FZ);                    \
         unit_assert_true(R.FN);                     \
         unit_assert_true(R.FH);                     \
         unit_assert_int_eq(4, CPUTicks);            \
     }                                               \
                                                     \
-    UNIT_TEST(DEC_##REG##_00)                     \
+    UNIT_TEST(DEC_##REG##_00)                       \
     {                                               \
-        R.REG = 0x00;                             \
-        _DEC_##REG();                             \
-        unit_assert_hex_eq(0xFF, R.REG);          \
+        R.REG = 0x00;                               \
+        _DEC_##REG();                               \
+        unit_assert_hex_eq(0xFF, R.REG);            \
         unit_assert_false(R.FZ);                    \
         unit_assert_true(R.FN);                     \
         unit_assert_true(R.FH);                     \
@@ -105,20 +105,20 @@ UNIT_TEST_SUITE(DEC8)
     UNIT_RUN_TEST(DEC_pHL_00);
 }
 
-#define MAKE_DEC_TEST16(REG)                      \
-    UNIT_TEST(DEC_##REG##_0001)                   \
+#define MAKE_DEC_TEST16(REG)                        \
+    UNIT_TEST(DEC_##REG##_0001)                     \
     {                                               \
-        R.REG = 0x0001;                           \
-        _DEC_##REG();                             \
-        unit_assert_hex_eq(0x0000, R.REG);        \
+        R.REG = 0x0001;                             \
+        _DEC_##REG();                               \
+        unit_assert_hex_eq(0x0000, R.REG);          \
         unit_assert_int_eq(8, CPUTicks);            \
     }                                               \
                                                     \
-    UNIT_TEST(DEC_##REG##_0000)                   \
+    UNIT_TEST(DEC_##REG##_0000)                     \
     {                                               \
-        R.REG = 0x0000;                           \
-        _DEC_##REG();                             \
-        unit_assert_hex_eq(0xFFFF, R.REG);        \
+        R.REG = 0x0000;                             \
+        _DEC_##REG();                               \
+        unit_assert_hex_eq(0xFFFF, R.REG);          \
         unit_assert_int_eq(8, CPUTicks);            \
     }
 
