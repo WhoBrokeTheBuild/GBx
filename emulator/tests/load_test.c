@@ -445,7 +445,7 @@ UNIT_TEST_SUITE(LD)
     UNIT_RUN_TEST(LD_HL_SP_s);
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char ** argv)
 {
     DebugMode = true;
 	UNIT_RUN_SUITE(LD);

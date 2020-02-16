@@ -74,7 +74,7 @@ static void _JR_s()
     int8_t s = nextByte();
     cpuTick(4);
 
-    LogDebug("JR %d", s);
+    LogDebug("JR %+d", s);
 
     R.PC += s;
     cpuTick(4);
@@ -85,7 +85,7 @@ static void _JR_NZ_s()
     int8_t s = nextByte();
     cpuTick(4);
 
-    LogDebug("JR NZ,%d", s);
+    LogDebug("JR NZ,%+d", s);
 
     if (!R.FZ) {
         R.PC += s;
@@ -98,7 +98,7 @@ static void _JR_Z_s()
     int8_t s = nextByte();
     cpuTick(4);
 
-    LogDebug("JR Z,%d", s);
+    LogDebug("JR Z,%+d", s);
 
     if (R.FZ) {
         R.PC += s;
@@ -111,7 +111,7 @@ static void _JR_NC_s()
     int8_t s = nextByte();
     cpuTick(4);
 
-    LogDebug("JR NC,%d", s);
+    LogDebug("JR NC,%+d", s);
 
     if (!R.FC) {
         R.PC += s;
@@ -124,7 +124,7 @@ static void _JR_C_s()
     int8_t s = nextByte();
     cpuTick(4);
 
-    LogDebug("JR C,%d", s);
+    LogDebug("JR C,%+d", s);
 
     if (R.FC) {
         R.PC += s;

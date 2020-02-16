@@ -490,7 +490,7 @@ UNIT_TEST_SUITE(SWAP)
     UNIT_RUN_TEST(SWAP_pHL_0A);
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char ** argv)
 {
     DebugMode = true;
     UNIT_RUN_SUITE(SLA);

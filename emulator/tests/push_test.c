@@ -55,7 +55,7 @@ UNIT_TEST_SUITE(PUSH)
 	UNIT_RUN_TEST(PUSH_HL);
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char ** argv)
 {
     DebugMode = true;
 	UNIT_RUN_SUITE(PUSH);

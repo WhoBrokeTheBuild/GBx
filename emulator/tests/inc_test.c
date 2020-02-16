@@ -144,7 +144,7 @@ UNIT_TEST_SUITE(INC16)
     UNIT_RUN_TEST(INC_SP_FFFF);
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char ** argv)
 {
     DebugMode = true;
 	UNIT_RUN_SUITE(INC8);

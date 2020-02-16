@@ -94,7 +94,7 @@ UNIT_TEST_SUITE(RET)
     UNIT_RUN_TEST(RETI);
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char ** argv)
 {
     DebugMode = true;
 	UNIT_RUN_SUITE(RET);

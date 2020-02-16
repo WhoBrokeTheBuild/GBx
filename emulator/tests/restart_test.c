@@ -88,7 +88,7 @@ UNIT_TEST_SUITE(RST)
 	UNIT_RUN_TEST(RST_38);
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char ** argv)
 {
     DebugMode = true;
 	UNIT_RUN_SUITE(RST);

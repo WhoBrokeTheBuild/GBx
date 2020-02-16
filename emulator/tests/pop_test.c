@@ -55,7 +55,7 @@ UNIT_TEST_SUITE(POP)
 	UNIT_RUN_TEST(POP_HL);
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char ** argv)
 {
     DebugMode = true;
 	UNIT_RUN_SUITE(POP);

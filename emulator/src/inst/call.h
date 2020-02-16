@@ -59,7 +59,7 @@ static void _CALL_NC_uu()
 
     LogDebug("CALL NC,%04Xh", uu);
 
-    if (!R.C) {
+    if (!R.FC) {
         pushWord(R.PC);
         cpuTick(8);
 
@@ -75,7 +75,7 @@ static void _CALL_C_uu()
 
     LogDebug("CALL C,%04Xh", uu);
 
-    if (R.C) {
+    if (R.FC) {
         pushWord(R.PC);
         cpuTick(8);
 
