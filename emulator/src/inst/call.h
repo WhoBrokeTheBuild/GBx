@@ -6,80 +6,80 @@
 #include "../memory.h"
 #include "../register.h"
 
-static void _CALL_nn()
+static void _CALL_uu()
 {
-    uint16_t nn = nextWord();
+    uint16_t uu = nextWord();
     cpuTick(8);
 
-    LogDebug("CALL %04Xh", nn);
+    LogDebug("CALL %04Xh", uu);
 
     pushWord(R.PC);
     cpuTick(8);
 
-    R.PC = nn;
+    R.PC = uu;
     cpuTick(4);
 }
 
-static void _CALL_NZ_nn()
+static void _CALL_NZ_uu()
 {
-    uint16_t nn = nextWord();
+    uint16_t uu = nextWord();
     cpuTick(8);
 
-    LogDebug("CALL NZ,%04Xh", nn);
+    LogDebug("CALL NZ,%04Xh", uu);
 
     if (!R.FZ) {
         pushWord(R.PC);
         cpuTick(8);
 
-        R.PC = nn;
+        R.PC = uu;
         cpuTick(4);
     }
 }
 
-static void _CALL_Z_nn()
+static void _CALL_Z_uu()
 {
-    uint16_t nn = nextWord();
+    uint16_t uu = nextWord();
     cpuTick(8);
 
-    LogDebug("CALL Z,%04Xh", nn);
+    LogDebug("CALL Z,%04Xh", uu);
 
     if (R.FZ) {
         pushWord(R.PC);
         cpuTick(8);
 
-        R.PC = nn;
+        R.PC = uu;
         cpuTick(4);
     }
 }
 
-static void _CALL_NC_nn()
+static void _CALL_NC_uu()
 {
-    uint16_t nn = nextWord();
+    uint16_t uu = nextWord();
     cpuTick(8);
 
-    LogDebug("CALL NC,%04Xh", nn);
+    LogDebug("CALL NC,%04Xh", uu);
 
     if (!R.C) {
         pushWord(R.PC);
         cpuTick(8);
 
-        R.PC = nn;
+        R.PC = uu;
         cpuTick(4);
     }
 }
 
-static void _CALL_C_nn()
+static void _CALL_C_uu()
 {
-    uint16_t nn = nextWord();
+    uint16_t uu = nextWord();
     cpuTick(8);
 
-    LogDebug("CALL C,%04Xh", nn);
+    LogDebug("CALL C,%04Xh", uu);
 
     if (R.C) {
         pushWord(R.PC);
         cpuTick(8);
 
-        R.PC = nn;
+        R.PC = uu;
         cpuTick(4);
     }
 }

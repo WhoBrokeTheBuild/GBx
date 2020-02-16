@@ -419,8 +419,8 @@ void writeByte(uint16_t address, uint8_t data)
 
 void writeWord(uint16_t address, uint16_t data) 
 {
-    writeByte(address, (uint8_t)(data & 0x00FF));
-    writeByte(address+1, (uint8_t)(data >> 8));
+    writeByte(address + 1, (uint8_t)(data >> 8));
+    writeByte(address, (uint8_t)(data & 0xFF));
 }
 
 void pushByte(uint8_t data)

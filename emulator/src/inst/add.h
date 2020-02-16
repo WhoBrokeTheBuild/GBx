@@ -67,14 +67,14 @@ static void _ADD_pHL()
     _ADD(pHL);
 }
 
-static void _ADD_n()
+static void _ADD_u()
 {
-    uint8_t n = nextByte();
+    uint8_t u = nextByte();
     cpuTick(4);
 
-    LogDebug("ADD A,%02Xh", n);
+    LogDebug("ADD A,%02Xh", u);
 
-    _ADD(n);
+    _ADD(u);
 }
 
 static void _ADC_A()
@@ -128,14 +128,14 @@ static void _ADC_pHL()
     _ADC(n);
 }
 
-static void _ADC_n()
+static void _ADC_u()
 {
-    uint8_t n = nextByte();
+    uint8_t u = nextByte();
     cpuTick(4);
 
-    LogDebug("ADC A,%02Xh", n);
+    LogDebug("ADC A,%02Xh", u);
 
-    _ADC(n);
+    _ADC(u);
 }
 
 static void _ADD_HL_BC()
@@ -169,5 +169,16 @@ static void _ADD_HL_SP()
 #undef _ADDHL
 #undef _ADC
 #undef _ADD
+
+static void _ADD_SP_s()
+{
+    int8_t s = nextByte();
+    cpuTick(4);
+
+    LogDebug("ADD SP,%d", s);
+
+    R.SP = add16s(R.SP, s);
+    cpuTick(8);
+}
 
 #endif // ADD_H

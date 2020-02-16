@@ -15,20 +15,25 @@
 
 #define _SRA(x)                         \
     R.FC = ((x) & 0x01) == 0x01;        \
-    (x) >>= 1;                          \
+    (x) = ((x) >> 1) | ((x) & 0x80);    \
     R.FZ = ((x) == 0);                  \
     R.FN = false;                       \
     R.FH = false
 
 #define _SRL(x)                         \
     R.FC = ((x) & 0x01) == 0x01;        \
-    (x) = ((x) >> 1) | ((x) & 0x80);    \
+    (x) >>= 1;                          \
     R.FZ = ((x) == 0);                  \
     R.FN = false;                       \
     R.FH = false
 
-#define _SWAP(x) \
-    (x) = (((x) & 0x0F) << 4) | (((x) & 0xF0) >> 4)
+#define _SWAP(x)                        \
+    (x) = (((x) & 0x0F) << 4)           \
+        | (((x) & 0xF0) >> 4);          \
+    R.FZ = ((x) == 0);                  \
+    R.FN = false;                       \
+    R.FH = false;                       \
+    R.FC = false;
 
 static void _SLA_A()
 {

@@ -61,14 +61,14 @@ static void _XOR_pHL()
     _XOR(n);
 }
 
-static void _XOR_n()
+static void _XOR_u()
 {
-    uint8_t n = nextByte();
+    uint8_t u = nextByte();
     cpuTick(4);
 
-    LogDebug("XOR %02Xh", n);
+    LogDebug("XOR %02Xh", u);
 
-    _XOR(n);
+    _XOR(u);
 }
 
 #undef _XOR

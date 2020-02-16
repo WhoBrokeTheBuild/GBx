@@ -7,10 +7,10 @@
 #include "../register.h"
 
 #define _INC(x)                     \
-    R.FH = (((x) & 0xF) == 0xF);    \
+    R.FH = (((x) & 0x0F) == 0x0F);  \
     ++(x);                          \
     R.FZ = ((x) == 0);              \
-    R.FN = 0;                       \
+    R.FN = false
 
 static void _INC_A()
 {

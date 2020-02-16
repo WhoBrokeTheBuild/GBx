@@ -25,7 +25,7 @@ static void usage()
 
 void handleSignal(int sig)
 {
-    LogInfo("Caught Signal %d", sig);
+    LogInfo("Caught signal %d", sig);
 
     DebugMode = true;
     debugPrompt();
@@ -38,10 +38,10 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    LogInfo("loading rom %s", argv[1]);
+    LogInfo("Loading ROM %s", argv[1]);
 
     if (!loadCartridge(argv[1])) {
-        LogFatal("failed to load rom");
+        LogFatal("Failed to load ROM");
     }
 
     lcdInit();
@@ -62,7 +62,7 @@ int main(int argc, char** argv)
         bootstrap();
         setBreakpoint(BKCND_PC_EQ, 0x0150);
     }
-    else {
+    else if (DebugMode) {
         setBreakpoint(BKCND_PC_EQ, 0x0000);
     }
 

@@ -10,7 +10,7 @@
     R.FH = (((x) & 0xF) == 0);      \
     --(x);                          \
     R.FZ = ((x) == 0);              \
-    R.FN = 1;                       \
+    R.FN = true
 
 static void _DEC_A()
 {

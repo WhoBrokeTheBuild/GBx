@@ -61,14 +61,14 @@ static void _OR_pHL()
     _OR(n);
 }
 
-static void _OR_n()
+static void _OR_u()
 {
-    uint8_t n = nextByte();
+    uint8_t u = nextByte();
     cpuTick(4);
 
-    LogDebug("OR %02Xh", n);
+    LogDebug("OR %02Xh", u);
 
-    _OR(n);
+    _OR(u);
 }
 
 #undef _OR

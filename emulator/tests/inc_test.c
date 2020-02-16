@@ -2,7 +2,7 @@
 #include "memory.h"
 #include "unit.h"
 
-const uint16_t RAM_OFFSET = 0xCFFF;
+const uint16_t RAM_OFFSET = 0xC100;
 
 void setup() 
 {
@@ -11,34 +11,34 @@ void setup()
     R.HL = RAM_OFFSET;
 }
 
-#define MAKE_INC_TEST8(REG)                       \
-    UNIT_TEST(INC_##REG##_00)                     \
+#define MAKE_INC_TEST8(REG)                         \
+    UNIT_TEST(INC_##REG##_00)                       \
     {                                               \
-        R.REG = 0x00;                             \
-        _INC_##REG();                             \
-        unit_assert_hex_eq(0x01, R.REG);          \
+        R.REG = 0x00;                               \
+        _INC_##REG();                               \
+        unit_assert_hex_eq(0x01, R.REG);            \
         unit_assert_false(R.FZ);                    \
         unit_assert_false(R.FN);                    \
         unit_assert_false(R.FH);                    \
         unit_assert_int_eq(4, CPUTicks);            \
     }                                               \
                                                     \
-    UNIT_TEST(INC_##REG##_0F)                     \
+    UNIT_TEST(INC_##REG##_0F)                       \
     {                                               \
-        R.REG = 0x0F;                             \
-        _INC_##REG();                             \
-        unit_assert_hex_eq(0x10, R.REG);          \
+        R.REG = 0x0F;                               \
+        _INC_##REG();                               \
+        unit_assert_hex_eq(0x10, R.REG);            \
         unit_assert_false(R.FZ);                    \
         unit_assert_false(R.FN);                    \
         unit_assert_true(R.FH);                     \
         unit_assert_int_eq(4, CPUTicks);            \
     }                                               \
                                                     \
-    UNIT_TEST(INC_##REG##_FF)                     \
+    UNIT_TEST(INC_##REG##_FF)                       \
     {                                               \
-        R.REG = 0xFF;                             \
-        _INC_##REG();                             \
-        unit_assert_hex_eq(0x00, R.REG);          \
+        R.REG = 0xFF;                               \
+        _INC_##REG();                               \
+        unit_assert_hex_eq(0x00, R.REG);            \
         unit_assert_true(R.FZ);                     \
         unit_assert_false(R.FN);                    \
         unit_assert_true(R.FH);                     \
@@ -105,20 +105,20 @@ UNIT_TEST_SUITE(INC8)
 	UNIT_RUN_TEST(INC_pHL_FF);
 }
 
-#define MAKE_INC_TEST16(REG)                      \
-    UNIT_TEST(INC_##REG##_0000)                   \
+#define MAKE_INC_TEST16(REG)                        \
+    UNIT_TEST(INC_##REG##_0000)                     \
     {                                               \
-        R.REG = 0x0000;                           \
-        _INC_##REG();                             \
-        unit_assert_hex_eq(0x0001, R.REG);        \
+        R.REG = 0x0000;                             \
+        _INC_##REG();                               \
+        unit_assert_hex_eq(0x0001, R.REG);          \
         unit_assert_int_eq(8, CPUTicks);            \
     }                                               \
                                                     \
-    UNIT_TEST(INC_##REG##_FFFF)                   \
+    UNIT_TEST(INC_##REG##_FFFF)                     \
     {                                               \
-        R.REG = 0xFFFF;                           \
-        _INC_##REG();                             \
-        unit_assert_hex_eq(0x0000, R.REG);        \
+        R.REG = 0xFFFF;                             \
+        _INC_##REG();                               \
+        unit_assert_hex_eq(0x0000, R.REG);          \
         unit_assert_int_eq(8, CPUTicks);            \
     }
 

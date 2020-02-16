@@ -60,14 +60,14 @@ static void _CP_pHL()
     _CP(pHL);
 }
 
-static void _CP_n()
+static void _CP_u()
 {
-    uint8_t n = nextByte();
+    uint8_t u = nextByte();
     cpuTick(4);
 
-    LogDebug("CP %02Xh", n);
+    LogDebug("CP %02Xh", u);
 
-    _CP(n);
+    _CP(u);
 }
 
 #undef _CP

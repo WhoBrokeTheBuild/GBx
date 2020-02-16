@@ -2,7 +2,7 @@
 #include "memory.h"
 #include "unit.h"
 
-const uint16_t RAM_OFFSET = 0xCFFF;
+const uint16_t RAM_OFFSET = 0xC100;
 
 void setup() 
 {

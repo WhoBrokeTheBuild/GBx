@@ -96,6 +96,8 @@ extern uint8_t OAM[0xA0];
 
 extern uint64_t LCDTicks;
 
+extern bool FPSLimit;
+
 void lcdInit();
 void lcdTerm();
 

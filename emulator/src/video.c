@@ -34,7 +34,8 @@ uint8_t VideoRAM1[0x1FFF];
 uint8_t OAM[0xA0];
 
 uint64_t LCDTicks = 0;
-bool LCDLimit = false;
+
+bool FPSLimit = true;
 
 unsigned int LCDModeTicks = 0;
 
@@ -247,6 +248,10 @@ void lcdRender()
     SDL_RenderPresent(sdlRenderer);
 
     pollEvents();
+
+    if (FPSLimit) {
+        SDL_Delay((1.0 / 59.9) * 1000.0);
+    }
 }
 
 void lcdTick(unsigned cycles)

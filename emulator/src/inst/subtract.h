@@ -64,14 +64,14 @@ static void _SUB_pHL()
     _SUB(n);
 }
 
-static void _SUB_n()
+static void _SUB_u()
 {
-    uint8_t n = nextByte();
+    uint8_t u = nextByte();
     cpuTick(4);
 
-    LogDebug("SUB A,%02Xh", n);
+    LogDebug("SUB A,%02Xh", u);
 
-    _SUB(n);
+    _SUB(u);
 }
 
 static void _SBC_A()
@@ -125,14 +125,14 @@ static void _SBC_pHL()
     _SBC(n);
 }
 
-static void _SBC_n()
+static void _SBC_u()
 {
-    uint8_t n = nextByte();
+    uint8_t u = nextByte();
     cpuTick(4);
 
-    LogDebug("SBC A,%02Xh", n);
+    LogDebug("SBC A,%02Xh", u);
 
-    _SBC(n);
+    _SBC(u);
 }
 
 #undef _SBC

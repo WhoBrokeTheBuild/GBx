@@ -18,11 +18,11 @@ static int unit_assert = 0;
 static int unit_fail = 0;
 static int unit_status = 0;
 
-static void (*unit_setup)(void) = NULL;
-static void (*unit_teardown)(void) = NULL;
+static void (*unit_setup)() = NULL;
+static void (*unit_teardown)() = NULL;
 
-#define UNIT_TEST(test_name) static void TEST_##test_name(void)
-#define UNIT_TEST_SUITE(suite_name) static void SUITE_##suite_name(void)
+#define UNIT_TEST(test_name) static void TEST_##test_name()
+#define UNIT_TEST_SUITE(suite_name) static void SUITE_##suite_name()
 
 #define UNIT_EXIT_CODE unit_fail
 
@@ -134,10 +134,10 @@ static void (*unit_teardown)(void) = NULL;
         const char * tmp_expected = (expected);                     \
         const char * tmp_result = (result);                         \
         fflush(stdout);                                             \
-        if (!tmp_expected) { tmp_expected = "<null>"; }             \
-        if (!tmp_result) { tmp_result = "<null>"; }                 \
         if (strcmp(tmp_expected, tmp_result)) {                     \
             unit_status = 1;                                        \
+            if (!tmp_expected) { tmp_expected = "<null>"; }         \
+            if (!tmp_result) { tmp_result = "<null>"; }             \
             snprintf(unit_message, UNIT_MESSAGE_LEN,                \
                 "%s:%d %s expected but was %s\n",                   \
                 __FILE__, __LINE__, tmp_expected, tmp_result);      \

@@ -30,7 +30,6 @@
 #define GB_CLOCK_SPEED 4194304 // Hz
 
 bool CPUEnabled = true;
-bool CPULimit = false;
 
 uint32_t ClockSpeed = GB_CLOCK_SPEED;
 uint64_t CPUTicks = 0;
@@ -49,11 +48,11 @@ inst_t instructions[0x100] = {
     [0x2F] = _CPL,
     [0x3F] = _CCF,
     // call
-    [0xCD] = _CALL_nn,
-    [0xC4] = _CALL_NZ_nn,
-    [0xCC] = _CALL_Z_nn,
-    [0xD4] = _CALL_NC_nn,
-    [0xDC] = _CALL_C_nn,
+    [0xCD] = _CALL_uu,
+    [0xC4] = _CALL_NZ_uu,
+    [0xCC] = _CALL_Z_uu,
+    [0xD4] = _CALL_NC_uu,
+    [0xDC] = _CALL_C_uu,
     // restart
     [0xC7] = _RST_00,
     [0xCF] = _RST_08,
@@ -76,16 +75,16 @@ inst_t instructions[0x100] = {
     [0x17] = _RLA,
     [0x1F] = _RRA,
     // jump
-    [0xC3] = _JP_nn,
-    [0xC2] = _JP_NZ_nn,
-    [0xCA] = _JP_Z_nn,
-    [0xD2] = _JP_NC_nn,
-    [0xDA] = _JP_C_nn,
-    [0x18] = _JR_n,
-    [0x20] = _JR_NZ_n,
-    [0x28] = _JR_Z_n,
-    [0x30] = _JR_NC_n,
-    [0x38] = _JR_C_n,
+    [0xC3] = _JP_uu,
+    [0xC2] = _JP_NZ_uu,
+    [0xCA] = _JP_Z_uu,
+    [0xD2] = _JP_NC_uu,
+    [0xDA] = _JP_C_uu,
+    [0x18] = _JR_s,
+    [0x20] = _JR_NZ_s,
+    [0x28] = _JR_Z_s,
+    [0x30] = _JR_NC_s,
+    [0x38] = _JR_C_s,
     [0xE9] = _JP_pHL,
     // stack
     [0xF5] = _PUSH_AF,
@@ -162,32 +161,33 @@ inst_t instructions[0x100] = {
     [0x7F] = _LD_A_A,
     [0x02] = _LD_pBC_A,
     [0x12] = _LD_pDE_A,
-    [0x06] = _LD_B_n,
-    [0x0E] = _LD_C_n,
-    [0x16] = _LD_D_n,
-    [0x1E] = _LD_E_n,
-    [0x26] = _LD_H_n,
-    [0x2E] = _LD_L_n,
-    [0x36] = _LD_pHL_n,
-    [0x3E] = _LD_A_n,
+    [0x06] = _LD_B_u,
+    [0x0E] = _LD_C_u,
+    [0x16] = _LD_D_u,
+    [0x1E] = _LD_E_u,
+    [0x26] = _LD_H_u,
+    [0x2E] = _LD_L_u,
+    [0x36] = _LD_pHL_u,
+    [0x3E] = _LD_A_u,
     [0x0A] = _LD_A_pBC,
     [0x1A] = _LD_A_pDE,
-    [0x01] = _LD_BC_nn,
-    [0x11] = _LD_DE_nn,
-    [0x21] = _LD_HL_nn,
-    [0x31] = _LD_SP_nn,
+    [0x01] = _LD_BC_uu,
+    [0x11] = _LD_DE_uu,
+    [0x21] = _LD_HL_uu,
+    [0x31] = _LD_SP_uu,
     [0xF9] = _LD_SP_HL,
-    [0x08] = _LD_pnn_SP,
-    [0xEA] = _LD_pnn_A,
-    [0xFA] = _LD_A_pnn,
+    [0x08] = _LD_puu_SP,
+    [0xEA] = _LD_puu_A,
+    [0xFA] = _LD_A_puu,
     [0x22] = _LDI_pHL_A,
     [0x32] = _LDD_pHL_A,
     [0x2A] = _LDI_A_pHL,
     [0x3A] = _LDD_A_pHL,
-    [0xE0] = _LDH_pn_A,
-    [0xF0] = _LDH_A_pn,
+    [0xE0] = _LDH_pu_A,
+    [0xF0] = _LDH_A_pu,
     [0xE2] = _LDH_pC_A,
     [0xF2] = _LDH_A_pC,
+    [0xF8] = _LD_HL_SP_s,
     // add
     [0x80] = _ADD_B,
     [0x81] = _ADD_C,
@@ -197,7 +197,7 @@ inst_t instructions[0x100] = {
     [0x85] = _ADD_L,
     [0x86] = _ADD_pHL,
     [0x87] = _ADD_A,
-    [0xC6] = _ADD_n,
+    [0xC6] = _ADD_u,
     [0x88] = _ADC_B,
     [0x89] = _ADC_C,
     [0x8A] = _ADC_D,
@@ -206,11 +206,12 @@ inst_t instructions[0x100] = {
     [0x8D] = _ADC_L,
     [0x8E] = _ADC_pHL,
     [0x8F] = _ADC_A,
-    [0xCE] = _ADC_n,
+    [0xCE] = _ADC_u,
     [0x09] = _ADD_HL_BC,
     [0x19] = _ADD_HL_DE,
     [0x29] = _ADD_HL_HL,
     [0x39] = _ADD_HL_SP,
+    [0xE8] = _ADD_SP_s,
     // subtract
     [0x90] = _SUB_B,
     [0x91] = _SUB_C,
@@ -220,7 +221,7 @@ inst_t instructions[0x100] = {
     [0x95] = _SUB_L,
     [0x96] = _SUB_pHL,
     [0x97] = _SUB_A,
-    [0xD6] = _SUB_n,
+    [0xD6] = _SUB_u,
     [0x98] = _SBC_B,
     [0x99] = _SBC_C,
     [0x9A] = _SBC_D,
@@ -229,7 +230,7 @@ inst_t instructions[0x100] = {
     [0x9D] = _SBC_L,
     [0x9E] = _SBC_pHL,
     [0x9F] = _SBC_A,
-    [0xDE] = _SBC_n,
+    [0xDE] = _SBC_u,
     // inc
     [0x04] = _INC_B,
     [0x0C] = _INC_C,
@@ -265,7 +266,7 @@ inst_t instructions[0x100] = {
     [0xBD] = _CP_L,
     [0xBE] = _CP_pHL,
     [0xBF] = _CP_A,
-    [0xFE] = _CP_n,
+    [0xFE] = _CP_u,
     // and
     [0xA0] = _AND_B,
     [0xA1] = _AND_C,
@@ -275,7 +276,7 @@ inst_t instructions[0x100] = {
     [0xA5] = _AND_L,
     [0xA6] = _AND_pHL,
     [0xA7] = _AND_A,
-    [0xE6] = _AND_n,
+    [0xE6] = _AND_u,
     // or
     [0xB0] = _OR_B,
     [0xB1] = _OR_C,
@@ -285,7 +286,7 @@ inst_t instructions[0x100] = {
     [0xB5] = _OR_L,
     [0xB6] = _OR_pHL,
     [0xB7] = _OR_A,
-    [0xF6] = _OR_n,
+    [0xF6] = _OR_u,
     // xor
     [0xA8] = _XOR_B,
     [0xA9] = _XOR_C,
@@ -295,7 +296,7 @@ inst_t instructions[0x100] = {
     [0xAD] = _XOR_L,
     [0xAE] = _XOR_pHL,
     [0xAF] = _XOR_A,
-    [0xEE] = _XOR_n,
+    [0xEE] = _XOR_u,
     // null
     [0xD3] = NULL,
     [0xDB] = NULL,
@@ -312,17 +313,6 @@ inst_t instructions[0x100] = {
 
 void cpuTick(unsigned cycles)
 {
-    if (CPULimit) {
-        double length = 1.0 / (ClockSpeed / 4.0);
-        
-        struct timespec ts, ts2;
-        ts.tv_sec  = 0;
-        ts.tv_nsec = (length * 1000000000.0) * cycles;
-        if (nanosleep(&ts, &ts2) < 0) {
-            LogError("nanosleep failed");
-        }
-    }
-
     CPUTicks += cycles;
     timerTick(cycles);
     lcdTick(cycles);
@@ -345,7 +335,7 @@ void execute(uint8_t op)
     if (inst) {
         inst();
     } else {
-        LogFatal("unknown instruction at %04X, %02X", R.PC, op);
+        LogFatal("uuknown instruction at %04X, %02X", R.PC, op);
     }
 }
 

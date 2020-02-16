@@ -5,7 +5,6 @@
 #include <stdbool.h>
 
 extern bool CPUEnabled;
-extern bool CPULimit;
 
 extern uint32_t ClockSpeed;
 extern uint64_t CPUTicks;

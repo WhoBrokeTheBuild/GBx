@@ -61,14 +61,14 @@ static void _AND_pHL()
     _AND(n);
 }
 
-static void _AND_n()
+static void _AND_u()
 {
-    uint8_t n = nextByte();
+    uint8_t u = nextByte();
     cpuTick(4);
 
-    LogDebug("AND %02Xh", n);
+    LogDebug("AND %02Xh", u);
 
-    _AND(n);
+    _AND(u);
 }
 
 #undef _AND

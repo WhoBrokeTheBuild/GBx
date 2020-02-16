@@ -6,128 +6,128 @@
 #include "../memory.h"
 #include "../register.h"
 
-static void _JP_nn()
+static void _JP_uu()
 {
-    uint16_t nn = nextWord();
+    uint16_t uu = nextWord();
     cpuTick(8);
 
-    LogDebug("JP %04Xh", nn);
+    LogDebug("JP %04Xh", uu);
 
-    R.PC = nn;
+    R.PC = uu;
     cpuTick(4);
 }
 
-static void _JP_NZ_nn()
+static void _JP_NZ_uu()
 {
-    uint16_t nn = nextWord();
+    uint16_t uu = nextWord();
     cpuTick(8);
 
-    LogDebug("JP NZ,%04Xh", nn);
+    LogDebug("JP NZ,%04Xh", uu);
 
     if (!R.FZ) {
-        R.PC = nn;
+        R.PC = uu;
         cpuTick(4);
     }
 }
 
-static void _JP_Z_nn()
+static void _JP_Z_uu()
 {
-    uint16_t nn = nextWord();
+    uint16_t uu = nextWord();
     cpuTick(8);
 
-    LogDebug("JP Z,%04Xh", nn);
+    LogDebug("JP Z,%04Xh", uu);
 
     if (R.FZ) {
-        R.PC = nn;
+        R.PC = uu;
         cpuTick(4);
     }
 }
 
-static void _JP_NC_nn()
+static void _JP_NC_uu()
 {
-    uint16_t nn = nextWord();
+    uint16_t uu = nextWord();
     cpuTick(8);
 
-    LogDebug("JP NC,%04Xh", nn);
+    LogDebug("JP NC,%04Xh", uu);
 
     if (!R.FC) {
-        R.PC = nn;
+        R.PC = uu;
         cpuTick(4);
     }
 }
 
-static void _JP_C_nn()
+static void _JP_C_uu()
 {
-    uint16_t nn = nextWord();
+    uint16_t uu = nextWord();
     cpuTick(8);
 
-    LogDebug("JP C,%04Xh", nn);
+    LogDebug("JP C,%04Xh", uu);
 
     if (R.FC) {
-        R.PC = nn;
+        R.PC = uu;
         cpuTick(4);
     }
 }
 
-static void _JR_n()
+static void _JR_s()
 {
-    int8_t n = nextByte();
+    int8_t s = nextByte();
     cpuTick(4);
 
-    LogDebug("JR %d", n);
+    LogDebug("JR %d", s);
 
-    R.PC += n;
+    R.PC += s;
     cpuTick(4);
 }
 
-static void _JR_NZ_n()
+static void _JR_NZ_s()
 {
-    int8_t n = nextByte();
+    int8_t s = nextByte();
     cpuTick(4);
 
-    LogDebug("JR NZ,%d", n);
+    LogDebug("JR NZ,%d", s);
 
     if (!R.FZ) {
-        R.PC += n;
+        R.PC += s;
         cpuTick(4);
     }
 }
 
-static void _JR_Z_n()
+static void _JR_Z_s()
 {
-    int8_t n = nextByte();
+    int8_t s = nextByte();
     cpuTick(4);
 
-    LogDebug("JR Z,%d", n);
+    LogDebug("JR Z,%d", s);
 
     if (R.FZ) {
-        R.PC += n;
+        R.PC += s;
         cpuTick(4);
     }
 }
 
-static void _JR_NC_n()
+static void _JR_NC_s()
 {
-    int8_t n = nextByte();
+    int8_t s = nextByte();
     cpuTick(4);
 
-    LogDebug("JR NC,%d", n);
+    LogDebug("JR NC,%d", s);
 
     if (!R.FC) {
-        R.PC += n;
+        R.PC += s;
         cpuTick(4);
     }
 }
 
-static void _JR_C_n()
+static void _JR_C_s()
 {
-    int8_t n = nextByte();
+    int8_t s = nextByte();
     cpuTick(4);
 
-    LogDebug("JR C,%d", n);
+    LogDebug("JR C,%d", s);
 
     if (R.FC) {
-        R.PC += n;
+        R.PC += s;
         cpuTick(4);
     }
 }
