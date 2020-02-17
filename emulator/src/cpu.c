@@ -335,7 +335,7 @@ void execute(uint8_t op)
     if (inst) {
         inst();
     } else {
-        LogFatal("uuknown instruction at %04X, %02X", R.PC, op);
+        LogFatal("unknown instruction at %04X, %02X", R.PC, op);
     }
 }
 
