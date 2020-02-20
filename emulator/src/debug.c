@@ -1,16 +1,16 @@
 #include "debug.h"
 
-#include <stdlib.h>
 #include <limits.h>
+#include <stdlib.h>
 
 #include "cartridge.h"
 #include "cpu.h"
 #include "interrupt.h"
+#include "lcd.h"
 #include "log.h"
 #include "memory.h"
 #include "register.h"
 #include "timer.h"
-#include "video.h"
 
 bool DebugMode = false;
 

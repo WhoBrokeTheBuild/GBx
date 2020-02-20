@@ -1,8 +1,8 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 extern bool DebugMode;
 

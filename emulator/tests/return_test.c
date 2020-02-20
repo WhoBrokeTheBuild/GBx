@@ -1,4 +1,5 @@
 #include "inst/return.h"
+#include "clock.h"
 #include "memory.h"
 #include "unit.h"
 
@@ -6,7 +7,7 @@ const uint16_t RAM_OFFSET = 0xC100;
 
 void setup() 
 {
-    CPUTicks = 0;
+    Ticks = 0;
     memset(&R, sizeof(R), 0);
     R.PC = RAM_OFFSET;
     R.SP = RAM_OFFSET + 0x0100;
@@ -17,7 +18,7 @@ UNIT_TEST(RET)
     pushWord(0x1234);
     _RET();
     unit_assert_hex_eq(0x1234, R.PC);
-    unit_assert_int_eq(16, CPUTicks);
+    unit_assert_int_eq(16, Ticks);
 }
 
 UNIT_TEST(RET_NZ_true)
@@ -26,7 +27,7 @@ UNIT_TEST(RET_NZ_true)
     R.FZ = true;
     _RET_NZ();
     unit_assert_hex_eq(0x0000, R.PC);
-    unit_assert_int_eq(8, CPUTicks);
+    unit_assert_int_eq(8, Ticks);
 }
 
 UNIT_TEST(RET_NZ_false)
@@ -35,7 +36,7 @@ UNIT_TEST(RET_NZ_false)
     R.FZ = false;
     _RET_NZ();
     unit_assert_hex_eq(0x1234, R.PC);
-    unit_assert_int_eq(20, CPUTicks);
+    unit_assert_int_eq(20, Ticks);
 }
 
 UNIT_TEST(RET_Z_false)
@@ -44,7 +45,7 @@ UNIT_TEST(RET_Z_false)
     R.FZ = false;
     _RET_Z();
     unit_assert_hex_eq(0x0000, R.PC);
-    unit_assert_int_eq(8, CPUTicks);
+    unit_assert_int_eq(8, Ticks);
 }
 
 UNIT_TEST(RET_Z_true)
@@ -53,7 +54,7 @@ UNIT_TEST(RET_Z_true)
     R.FZ = true;
     _RET_Z();
     unit_assert_hex_eq(0x1234, R.PC);
-    unit_assert_int_eq(20, CPUTicks);
+    unit_assert_int_eq(20, Ticks);
 }
 
 UNIT_TEST(RET_NC_true)
@@ -62,7 +63,7 @@ UNIT_TEST(RET_NC_true)
     R.FC = true;
     _RET_NC();
     unit_assert_hex_eq(0x0000, R.PC);
-    unit_assert_int_eq(8, CPUTicks);
+    unit_assert_int_eq(8, Ticks);
 }
 
 UNIT_TEST(RET_NC_false)
@@ -71,7 +72,7 @@ UNIT_TEST(RET_NC_false)
     R.FC = false;
     _RET_NC();
     unit_assert_hex_eq(0x1234, R.PC);
-    unit_assert_int_eq(20, CPUTicks);
+    unit_assert_int_eq(20, Ticks);
 }
 
 UNIT_TEST(RET_C_false)
@@ -80,7 +81,7 @@ UNIT_TEST(RET_C_false)
     R.FC = false;
     _RET_C();
     unit_assert_hex_eq(0x0000, R.PC);
-    unit_assert_int_eq(8, CPUTicks);
+    unit_assert_int_eq(8, Ticks);
 }
 
 UNIT_TEST(RET_C_true)
@@ -89,7 +90,7 @@ UNIT_TEST(RET_C_true)
     R.FC = true;
     _RET_C();
     unit_assert_hex_eq(0x1234, R.PC);
-    unit_assert_int_eq(20, CPUTicks);
+    unit_assert_int_eq(20, Ticks);
 }
 
 UNIT_TEST(RETI)
@@ -97,7 +98,7 @@ UNIT_TEST(RETI)
     pushWord(0x1234);
     _RETI();
     unit_assert_hex_eq(0x1234, R.PC);
-    unit_assert_int_eq(16, CPUTicks);
+    unit_assert_int_eq(16, Ticks);
 }
 
 UNIT_TEST_SUITE(RET)

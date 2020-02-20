@@ -1,5 +1,6 @@
 #include "timer.h"
-#include "cpu.h"
+
+#include "clock.h"
 #include "interrupt.h"
 
 uint8_t TIMA;

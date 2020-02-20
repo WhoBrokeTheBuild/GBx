@@ -1,7 +1,7 @@
 #ifndef RESET_H
 #define RESET_H
 
-#include "../cpu.h"
+#include "../clock.h"
 #include "../log.h"
 #include "../memory.h"
 #include "../register.h"
@@ -55,12 +55,12 @@ static void _RES_b_pHL(int bit)
 {
     LogDebug("RES %d,(HL)", bit);
     uint8_t n = readByte(R.HL);
-    cpuTick(4);
+    tick(4);
 
     _RES(n, bit);
 
     writeByte(R.HL, n);
-    cpuTick(4);
+    tick(4);
 }
 
 #endif // RESET_H

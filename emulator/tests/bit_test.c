@@ -1,4 +1,5 @@
 #include "inst/bit.h"
+#include "clock.h"
 #include "memory.h"
 #include "unit.h"
 
@@ -6,7 +7,7 @@ const uint16_t RAM_OFFSET = 0xC100;
 
 void setup() 
 {
-    CPUTicks = 0;
+    Ticks = 0;
     memset(&R, sizeof(R), 0);
     R.HL = RAM_OFFSET;
 }
@@ -53,14 +54,14 @@ MAKE_BIT_REG_TEST_LIST(L);
         unit_assert_false(R.FZ);                    \
         unit_assert_false(R.FN);                    \
         unit_assert_true(R.FH);                     \
-        unit_assert_int_eq(CPUTicks, 4);            \
+        unit_assert_int_eq(Ticks, 4);            \
                                                     \
         writeByte(RAM_OFFSET, 0);                   \
         _BIT_b_pHL(BIT);                            \
         unit_assert_true(R.FZ);                     \
         unit_assert_false(R.FN);                    \
         unit_assert_true(R.FH);                     \
-        unit_assert_int_eq(CPUTicks, 8);            \
+        unit_assert_int_eq(Ticks, 8);            \
     }
 
 MAKE_BIT_pHL_TEST(0)

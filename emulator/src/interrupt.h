@@ -1,9 +1,8 @@
 #ifndef INTERRUPT_H
 #define INTERRUPT_H
 
-#include "log.h"
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 typedef union {
     struct {
@@ -15,24 +14,16 @@ typedef union {
         uint8_t _:3;
     };
     uint8_t data;
-} InterruptFlags_t;
+} int_flags_t;
 
 extern bool IME;
-extern InterruptFlags_t IE;
-extern InterruptFlags_t IF;
 
-static void printIE() 
-{
-    LogInfo("IE VBlank=%d STAT=%d Timer=%d Serial=%d Joypad=%d",
-        IE.VBlank, IE.STAT, IE.Timer, IE.Serial, IE.Joypad);
-}
-
-static void printIF() 
-{
-    LogInfo("IF VBlank=%d STAT=%d Timer=%d Serial=%d Joypad=%d",
-        IF.VBlank, IF.STAT, IF.Timer, IF.Serial, IF.Joypad);
-}
+extern int_flags_t IE;
+extern int_flags_t IF;
 
 void checkInterrupts();
+
+void printIE();
+void printIF();
 
 #endif // INTERRUPT_H

@@ -1,18 +1,14 @@
-#include <SDL.h>
-#include <stdint.h>
-#include <string.h>
-#include <limits.h>
-#include <signal.h>
-
+#include "apu.h"
 #include "bootstrap.h"
-#include "cpu.h"
 #include "cartridge.h"
+#include "cpu.h"
 #include "debug.h"
+#include "lcd.h"
 #include "log.h"
-#include "memory.h"
-#include "video.h"
-#include "sound.h"
-#include "interrupt.h"
+#include "register.h"
+
+#include <SDL.h>
+#include <signal.h>
 
 static void usage() 
 {
@@ -49,7 +45,8 @@ int main(int argc, char** argv)
         LogFatal("failed to initialize SDL2, %s", SDL_GetError());
     }
 
-    videoInit();
+    lcdInit();
+    apuInit();
 
     for (int i = 2; i < argc; ++i) {
         const char * arg = argv[i];
@@ -65,22 +62,13 @@ int main(int argc, char** argv)
 
     if (!BootstrapEnable) {
         bootstrap();
-        setBreakpoint(BKCND_PC_EQ, 0x0150);
     }
-    else if (DebugMode) {
-        setBreakpoint(BKCND_PC_EQ, 0x0000);
-    }
-
-    printWave1();
-    printWave2();
-    printWave3();
-    printNoise();
-    printVolumeControl();
-    printWaveRAM();
-
+    
     if (DebugMode) {
         signal(SIGINT, handleSignal);
         signal(SIGSEGV, handleSignal);
+        
+        setBreakpoint(BKCND_PC_EQ, R.PC);
     }
 
     for (;;) {
@@ -91,7 +79,8 @@ int main(int argc, char** argv)
         }
     }
 
-    videoTerm();
+    apuTerm();
+    lcdTerm();
 
     freeCartridge();
 

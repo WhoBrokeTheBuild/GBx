@@ -1,10 +1,11 @@
 #include "inst/push.h"
+#include "clock.h"
 #include "memory.h"
 #include "unit.h"
 
 void setup() 
 {
-    CPUTicks = 0;
+    Ticks = 0;
     memset(&R, sizeof(R), 0);
     R.SP = 0xFFFE;
 }
@@ -15,7 +16,7 @@ UNIT_TEST(PUSH_AF)
     _PUSH_AF();
     unit_assert_hex_eq(0xFFFC, R.SP);
     unit_assert_hex_eq(0x1234, readWord(R.SP));
-    unit_assert_int_eq(16, CPUTicks);
+    unit_assert_int_eq(16, Ticks);
 }
 
 UNIT_TEST(PUSH_BC)
@@ -24,7 +25,7 @@ UNIT_TEST(PUSH_BC)
     _PUSH_BC();
     unit_assert_hex_eq(0xFFFC, R.SP);
     unit_assert_hex_eq(0x1234, readWord(R.SP));
-    unit_assert_int_eq(16, CPUTicks);
+    unit_assert_int_eq(16, Ticks);
 }
 
 UNIT_TEST(PUSH_DE)
@@ -33,7 +34,7 @@ UNIT_TEST(PUSH_DE)
     _PUSH_DE();
     unit_assert_hex_eq(0xFFFC, R.SP);
     unit_assert_hex_eq(0x1234, readWord(R.SP));
-    unit_assert_int_eq(16, CPUTicks);
+    unit_assert_int_eq(16, Ticks);
 }
 
 UNIT_TEST(PUSH_HL)
@@ -42,7 +43,7 @@ UNIT_TEST(PUSH_HL)
     _PUSH_HL();
     unit_assert_hex_eq(0xFFFC, R.SP);
     unit_assert_hex_eq(0x1234, readWord(R.SP));
-    unit_assert_int_eq(16, CPUTicks);
+    unit_assert_int_eq(16, Ticks);
 }
 
 UNIT_TEST_SUITE(PUSH)

@@ -1,10 +1,11 @@
 #include "inst/misc.h"
+#include "clock.h"
 #include "memory.h"
 #include "unit.h"
 
 void setup() 
 {
-    CPUTicks = 0;
+    Ticks = 0;
     memset(&R, sizeof(R), 0);
 }
 
@@ -13,7 +14,7 @@ UNIT_TEST(HALT)
     CPUEnabled = true;
     _HALT();
     unit_assert_false(CPUEnabled);
-    unit_assert_int_eq(CPUTicks, 0);
+    unit_assert_int_eq(Ticks, 0);
 }
 
 UNIT_TEST(STOP)
@@ -23,7 +24,7 @@ UNIT_TEST(STOP)
     _STOP();
     unit_assert_hex_eq(R.PC, 0x0001);
     unit_assert_false(LCDC.LCDEnable);
-    unit_assert_int_eq(CPUTicks, 0);
+    unit_assert_int_eq(Ticks, 0);
 }
 
 UNIT_TEST(DI)
@@ -31,7 +32,7 @@ UNIT_TEST(DI)
     IME = true;
     _DI();
     unit_assert_false(IME);
-    unit_assert_int_eq(CPUTicks, 0);
+    unit_assert_int_eq(Ticks, 0);
 }
 
 UNIT_TEST(EI)
@@ -39,7 +40,7 @@ UNIT_TEST(EI)
     IME = false;
     _EI();
     unit_assert_true(IME);
-    unit_assert_int_eq(CPUTicks, 0);
+    unit_assert_int_eq(Ticks, 0);
 }
 
 UNIT_TEST(DAA)

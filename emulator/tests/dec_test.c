@@ -1,4 +1,5 @@
 #include "inst/dec.h"
+#include "clock.h"
 #include "memory.h"
 #include "unit.h"
 
@@ -6,7 +7,7 @@ const uint16_t RAM_OFFSET = 0xC100;
 
 void setup() 
 {
-    CPUTicks = 0;
+    Ticks = 0;
     memset(&R, sizeof(R), 0);
     R.HL = RAM_OFFSET;
 }
@@ -20,7 +21,7 @@ void setup()
         unit_assert_true(R.FZ);                     \
         unit_assert_true(R.FN);                     \
         unit_assert_false(R.FH);                    \
-        unit_assert_int_eq(4, CPUTicks);            \
+        unit_assert_int_eq(4, Ticks);            \
     }                                               \
                                                     \
     UNIT_TEST(DEC_##REG##_F0)                       \
@@ -31,7 +32,7 @@ void setup()
         unit_assert_false(R.FZ);                    \
         unit_assert_true(R.FN);                     \
         unit_assert_true(R.FH);                     \
-        unit_assert_int_eq(4, CPUTicks);            \
+        unit_assert_int_eq(4, Ticks);            \
     }                                               \
                                                     \
     UNIT_TEST(DEC_##REG##_00)                       \
@@ -42,7 +43,7 @@ void setup()
         unit_assert_false(R.FZ);                    \
         unit_assert_true(R.FN);                     \
         unit_assert_true(R.FH);                     \
-        unit_assert_int_eq(4, CPUTicks);            \
+        unit_assert_int_eq(4, Ticks);            \
     }
 
 MAKE_DEC_TEST8(A);
@@ -58,7 +59,7 @@ UNIT_TEST(DEC_pHL_01)
     writeByte(R.HL, 0x01);
     _DEC_pHL();
     unit_assert_hex_eq(0x00, readByte(R.HL));
-    unit_assert_int_eq(12, CPUTicks);
+    unit_assert_int_eq(12, Ticks);
 }
 
 UNIT_TEST(DEC_pHL_00)
@@ -66,7 +67,7 @@ UNIT_TEST(DEC_pHL_00)
     writeByte(R.HL, 0x00);
     _DEC_pHL();
     unit_assert_hex_eq(0xFF, readByte(R.HL));
-    unit_assert_int_eq(12, CPUTicks);
+    unit_assert_int_eq(12, Ticks);
 }
 
 UNIT_TEST_SUITE(DEC8)
@@ -111,7 +112,7 @@ UNIT_TEST_SUITE(DEC8)
         R.REG = 0x0001;                             \
         _DEC_##REG();                               \
         unit_assert_hex_eq(0x0000, R.REG);          \
-        unit_assert_int_eq(8, CPUTicks);            \
+        unit_assert_int_eq(8, Ticks);            \
     }                                               \
                                                     \
     UNIT_TEST(DEC_##REG##_0000)                     \
@@ -119,7 +120,7 @@ UNIT_TEST_SUITE(DEC8)
         R.REG = 0x0000;                             \
         _DEC_##REG();                               \
         unit_assert_hex_eq(0xFFFF, R.REG);          \
-        unit_assert_int_eq(8, CPUTicks);            \
+        unit_assert_int_eq(8, Ticks);            \
     }
 
 MAKE_DEC_TEST16(BC);

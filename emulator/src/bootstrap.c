@@ -1,10 +1,10 @@
 #include "bootstrap.h"
 
+#include "apu.h"
 #include "interrupt.h"
+#include "lcd.h"
 #include "register.h"
-#include "sound.h"
 #include "timer.h"
-#include "video.h"
 
 bool BootstrapEnable = false;
 

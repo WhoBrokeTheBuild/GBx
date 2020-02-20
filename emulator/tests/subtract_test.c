@@ -1,4 +1,5 @@
 #include "inst/subtract.h"
+#include "clock.h"
 #include "memory.h"
 #include "unit.h"
 
@@ -6,7 +7,7 @@ const uint16_t RAM_OFFSET = 0xC100;
 
 void setup() 
 {
-    CPUTicks = 0;
+    Ticks = 0;
     memset(&R, sizeof(R), 0);
     R.HL = RAM_OFFSET;
 }

@@ -1,23 +1,24 @@
-#include "video.h"
+#include "lcd.h"
 
 #include "cartridge.h"
 #include "cpu.h"
 #include "interrupt.h"
+#include "log.h"
 #include "memory.h"
 
 #include <SDL.h>
 
 LCDC_t LCDC = { 
-
     .TileDisplayEnable      = false,
     .SpriteDisplayEnable    = false,
-    .SpriteSize             = SPRITE_SIZE_8X8,
-    .TileMapSelect          = TILE_MAP_9800_9BFF,
-    .TileDataSelect         = TILE_DATA_8800_97FF,
+    .SpriteSize             = false,
+    .TileMapSelect          = false,
+    .TileDataSelect         = false,
     .WindowDisplayEnable    = false,
-    .WindowTileMapSelect    = TILE_MAP_9800_9BFF,
+    .WindowTileMapSelect    = false,
     .LCDEnable              = false,
 };
+
 STAT_t STAT;
 uint8_t SCY = 0x00;
 uint8_t SCX = 0x00;
@@ -32,8 +33,6 @@ uint8_t WY = 0x00;
 uint8_t VideoRAM0[0x1FFF];
 uint8_t VideoRAM1[0x1FFF];
 uint8_t OAM[0xA0];
-
-uint64_t LCDTicks = 0;
 
 bool FPSLimit = true;
 
@@ -69,28 +68,28 @@ void drawTiles()
 
         uint16_t tileBaseAddress;
         if (LCDC.WindowDisplayEnable) {
-            if (LCDC.WindowTileMapSelect == 0) {
-                tileBaseAddress = 0x9800;
-            } else {
+            if (LCDC.WindowTileMapSelect) {
                 tileBaseAddress = 0x9C00;
+            } else {
+                tileBaseAddress = 0x9800;
             }
         } else {
-            if (LCDC.TileMapSelect == 0) {
-                tileBaseAddress = 0x9800;
-            } else {
+            if (LCDC.TileMapSelect) {
                 tileBaseAddress = 0x9C00;
+            } else {
+                tileBaseAddress = 0x9800;
             }
         }
 
         uint16_t col = x / 8;
 
         uint16_t tileOffset;
-        if (LCDC.TileDataSelect == 0) {
-            int8_t tileIndex = (int8_t)readByte(tileBaseAddress + row + col);
-            tileOffset = 0x8800 + ((tileIndex + 128) * 16);
-        } else {
+        if (LCDC.TileDataSelect) {
             uint8_t tileIndex = readByte(tileBaseAddress + row + col);
             tileOffset = 0x8000 + (tileIndex * 16);
+        } else {
+            int8_t tileIndex = (int8_t)readByte(tileBaseAddress + row + col);
+            tileOffset = 0x8800 + ((tileIndex + 128) * 16);
         }
 
         uint8_t line = (y % 8) * 2;
@@ -178,7 +177,7 @@ void drawSprites()
                 uint8_t colorIndex = ((data2 & (1 << bit)) ? 2 : 0) | 
                                     ((data1 & (1 << bit)) ? 1 : 0);
                 
-                palette_t * pal = (s.Palette == 0 ? &OBP0 : &OBP1);
+                palette_t * pal = (s.Palette ? &OBP1 : &OBP0);
 
                 uint8_t color = 0;
                 switch (colorIndex) {
@@ -254,57 +253,56 @@ void render()
     }
 }
 
-void videoTick(unsigned cycles)
+void lcdTick(unsigned cycles)
 {
     const unsigned HBLANK_TICK_COUNT = 204;
     const unsigned VBLANK_TICK_COUNT = 456;
     const unsigned SEARCH_SPRITE_TICK_COUNT = 80;
     const unsigned DATA_TRANSFER_TICK_COUNT = 172;
 
-    LCDTicks += cycles;
     LCDModeTicks += cycles;
 
     bool modeChanged = false;
 
     switch (STAT.Mode) {
-        case MODE_HBLANK:
+        case STAT_MODE_HBLANK:
             if (LCDModeTicks >= 204) {
                 LCDModeTicks = 0;
 
                 ++LY;
                 if (LY == 144) {
-                    STAT.Mode = MODE_VBLANK;
+                    STAT.Mode = STAT_MODE_VBLANK;
                     render();
                 }
                 else {
-                    STAT.Mode = MODE_SEARCH_SPRITE;
+                    STAT.Mode = STAT_MODE_SEARCH_SPRITE;
                     modeChanged = true;
                 }
             }
         break;
-        case MODE_VBLANK:
+        case STAT_MODE_VBLANK:
             if (LCDModeTicks >= 456) {
                 LCDModeTicks = 0;
                 
                 ++LY;
                 if (LY > 153) {
-                    STAT.Mode = MODE_SEARCH_SPRITE;
+                    STAT.Mode = STAT_MODE_SEARCH_SPRITE;
                     modeChanged = true;
                     LY = 0;
                 }
             }
         break;
-        case MODE_SEARCH_SPRITE:
+        case STAT_MODE_SEARCH_SPRITE:
             if (LCDModeTicks >= 80) {
                 LCDModeTicks = 0;
-                STAT.Mode = MODE_DATA_TRANSFER;
+                STAT.Mode = STAT_MODE_DATA_TRANSFER;
                 modeChanged = true;
             }
         break;
-        case MODE_DATA_TRANSFER:
+        case STAT_MODE_DATA_TRANSFER:
             if (LCDModeTicks >= 172) {
                 LCDModeTicks = 0;
-                STAT.Mode = MODE_HBLANK;
+                STAT.Mode = STAT_MODE_HBLANK;
                 modeChanged = true;
 
                 if (LCDC.TileDisplayEnable) {
@@ -324,14 +322,14 @@ void videoTick(unsigned cycles)
 
     if ((STAT.IntCoincidence && STAT.LYCLY && LY == LYC) ||
         (STAT.IntCoincidence && !STAT.LYCLY && LY != LYC) ||
-        (STAT.IntHBlank && modeChanged && STAT.Mode == MODE_HBLANK) ||
-        (STAT.IntVBlank && modeChanged && STAT.Mode == MODE_VBLANK) ||
-        (STAT.IntSearchSprite && modeChanged && STAT.Mode == MODE_SEARCH_SPRITE)) {
+        (STAT.IntHBlank && modeChanged && STAT.Mode == STAT_MODE_HBLANK) ||
+        (STAT.IntVBlank && modeChanged && STAT.Mode == STAT_MODE_VBLANK) ||
+        (STAT.IntSearchSprite && modeChanged && STAT.Mode == STAT_MODE_SEARCH_SPRITE)) {
         IF.STAT = true;
     }
 }
 
-void videoInit()
+void lcdInit()
 {
 
     char windowTitle[21];
@@ -361,7 +359,7 @@ void videoInit()
     render();
 }
 
-void videoTerm()
+void lcdTerm()
 {
     SDL_DestroyTexture(sdlTexture);
 
@@ -371,12 +369,13 @@ void videoTerm()
 
 void printLCDC()
 {
-    LogInfo("BGWinDisp=%d OBJDisp=%d OBJSize=%d BGTileMap=%s TileData=%s WinDisp=%d WinTileMap=%s LCDEnab=%d",
-        LCDC.TileDisplayEnable, LCDC.SpriteDisplayEnable, LCDC.SpriteSize,
-        (LCDC.TileMapSelect == 0 ? "9800h-9BFFh" : "9C00h-9FFFh"),
-        (LCDC.TileDataSelect == 0 ? "8800h-97FFh" : "8000h-8FFFh"),
+    LogInfo("BGWinDisp=%d OBJDisp=%d OBJSize=%s BGTileMap=%s TileData=%s WinDisp=%d WinTileMap=%s LCDEnab=%d",
+        LCDC.TileDisplayEnable, LCDC.SpriteDisplayEnable, 
+        (LCDC.SpriteSize ? "8x16" : "8x8"),
+        (LCDC.TileMapSelect ? "9C00h-9FFFh" : "9800h-9BFFh"),
+        (LCDC.TileDataSelect ? "8000h-8FFFh" : "8800h-97FFh"),
         LCDC.WindowDisplayEnable,
-        (LCDC.WindowTileMapSelect == 0 ? "9C00h-9FFFh" : "9800h-9BFFh"),
+        (LCDC.WindowTileMapSelect ? "9800h-9BFFh" : "9C00h-9FFFh"),
         LCDC.LCDEnable);
 }
 

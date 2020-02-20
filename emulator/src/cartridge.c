@@ -1,5 +1,6 @@
 #include "cartridge.h"
 
+#include "clock.h"
 #include "log.h"
 
 #include <stdio.h>
@@ -135,6 +136,10 @@ bool loadCartridge(const char * filename)
 
     ColorEnabled = (CartridgeROM0[COLOR_ENABLE_OFFSET] == 0x80);
     SuperEnabled = (CartridgeROM0[SUPER_ENABLE_OFFSET] != 0x00);
+    
+    if (SuperEnabled) {
+        ClockSpeed = SGB_CLOCK_SPEED;
+    }
 
     CartridgeType = CartridgeROM0[CARTRIDGE_TYPE_OFFSET];
     ROMType = CartridgeROM0[ROM_TYPE_OFFSET];

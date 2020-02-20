@@ -1,7 +1,7 @@
 #ifndef SHIFT_H
 #define SHIFT_H
 
-#include "../cpu.h"
+#include "../clock.h"
 #include "../log.h"
 #include "../memory.h"
 #include "../register.h"
@@ -81,12 +81,12 @@ static void _SLA_pHL()
 {
     LogDebug("SLA (HL)");
     uint8_t n = readByte(R.HL);
-    cpuTick(4);
+    tick(4);
 
     _SLA(n);
 
     writeByte(R.HL, n);
-    cpuTick(4);
+    tick(4);
 }
 
 static void _SRA_A()
@@ -135,12 +135,12 @@ static void _SRA_pHL()
 {
     LogDebug("_SRA (HL)");
     uint8_t n = readByte(R.HL);
-    cpuTick(4);
+    tick(4);
 
     _SRA(n);
 
     writeByte(R.HL, n);
-    cpuTick(4);
+    tick(4);
 }
 
 static void _SRL_A()
@@ -189,74 +189,74 @@ static void _SRL_pHL()
 {
     LogDebug("_SRL (HL)");
     uint8_t n = readByte(R.HL);
-    cpuTick(4);
+    tick(4);
 
     _SRL(n);
 
     writeByte(R.HL, n);
-    cpuTick(4);
+    tick(4);
 }
 
 static void _SWAP_A()
 {
     LogDebug("SWAP A");
     _SWAP(R.A);
-    cpuTick(4);
+    tick(4);
 }
 
 static void _SWAP_B()
 {
     LogDebug("SWAP B");
     _SWAP(R.B);
-    cpuTick(4);
+    tick(4);
 }
 
 static void _SWAP_C()
 {
     LogDebug("SWAP C");
     _SWAP(R.C);
-    cpuTick(4);
+    tick(4);
 }
 
 static void _SWAP_D()
 {
     LogDebug("SWAP D");
     _SWAP(R.D);
-    cpuTick(4);
+    tick(4);
 }
 
 static void _SWAP_E()
 {
     LogDebug("SWAP E");
     _SWAP(R.E);
-    cpuTick(4);
+    tick(4);
 }
 
 static void _SWAP_H()
 {
     LogDebug("SWAP H");
     _SWAP(R.H);
-    cpuTick(4);
+    tick(4);
 }
 
 static void _SWAP_L()
 {
     LogDebug("SWAP L");
     _SWAP(R.L);
-    cpuTick(4);
+    tick(4);
 }
 
 static void _SWAP_pHL()
 {
     LogDebug("SWAP (HL)");
     uint8_t n = readByte(R.HL);
-    cpuTick(4);
+    tick(4);
 
     _SWAP(n);
-    cpuTick(4);
+    tick(4);
 
     writeByte(R.HL, n);
-    cpuTick(4);
+    tick(4);
 }
 
 #undef _SWAP

@@ -1,14 +1,14 @@
 #include "memory.h"
 
+#include "apu.h"
 #include "bootstrap.h"
 #include "cartridge.h"
 #include "interrupt.h"
 #include "io.h"
+#include "lcd.h"
 #include "log.h"
 #include "register.h"
-#include "sound.h"
 #include "timer.h"
-#include "video.h"
 
 uint8_t InternalRAM0[0x7FF8];
 uint8_t * InternalRAM = InternalRAM0 + 0x0FFF; // Default to Bank 1

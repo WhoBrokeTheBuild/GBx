@@ -56,7 +56,7 @@ static void _OR_pHL()
 {
     LogDebug("OR HL");
     uint8_t n = readByte(R.HL);
-    cpuTick(4);
+    tick(4);
 
     _OR(n);
 }
@@ -64,7 +64,7 @@ static void _OR_pHL()
 static void _OR_u()
 {
     uint8_t u = nextByte();
-    cpuTick(4);
+    tick(4);
 
     LogDebug("OR %02Xh", u);
 

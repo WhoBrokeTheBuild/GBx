@@ -1,8 +1,9 @@
 #ifndef TIMER_H
 #define TIMER_H
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
+
 #include "log.h"
 
 enum {

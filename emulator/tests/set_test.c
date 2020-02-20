@@ -1,4 +1,5 @@
 #include "inst/set.h"
+#include "clock.h"
 #include "memory.h"
 #include "unit.h"
 
@@ -6,7 +7,7 @@ const uint16_t RAM_OFFSET = 0xC100;
 
 void setup() 
 {
-    CPUTicks = 0;
+    Ticks = 0;
     memset(&R, sizeof(R), 0);
     R.HL = RAM_OFFSET;
 }
@@ -43,7 +44,7 @@ MAKE_SET_REG_TEST_LIST(L);
         writeByte(RAM_OFFSET, 0);                           \
         _SET_b_pHL(SET);                                    \
         unit_assert_hex_eq(1 << SET, readByte(RAM_OFFSET)); \
-        unit_assert_int_eq(CPUTicks, 8);                    \
+        unit_assert_int_eq(Ticks, 8);                    \
     }
 
 MAKE_SET_pHL_TEST(0)

@@ -1,12 +1,11 @@
 #include "cpu.h"
 
+#include "apu.h"
 #include "interrupt.h"
+#include "lcd.h"
 #include "log.h"
 #include "memory.h"
 #include "timer.h"
-
-#include <SDL.h>
-#include <time.h>
 
 #include "inst/CB.h"
 #include "inst/add.h"
@@ -27,12 +26,7 @@
 #include "inst/subtract.h"
 #include "inst/xor.h"
 
-#define GB_CLOCK_SPEED 4194304 // Hz
-
 bool CPUEnabled = true;
-
-uint32_t ClockSpeed = GB_CLOCK_SPEED;
-uint64_t CPUTicks = 0;
 
 inst_t instructions[0x100] = {
     // CB
@@ -311,18 +305,11 @@ inst_t instructions[0x100] = {
     [0xFD] = NULL,
 };
 
-void cpuTick(unsigned cycles)
-{
-    CPUTicks += cycles;
-    timerTick(cycles);
-    videoTick(cycles);
-}
-
 uint8_t fetch()
 {
     if (CPUEnabled) {
         uint8_t op = nextByte();
-        cpuTick(4);
+        tick(4);
         return op;
     }
 
@@ -345,7 +332,7 @@ void nextInstruction(int cycles)
         uint8_t op = fetch();
         execute(op);
     } else {
-        cpuTick(1);
+        tick(1);
     }
 
     checkInterrupts();

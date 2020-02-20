@@ -1,8 +1,8 @@
 #ifndef SOUND_H
 #define SOUND_H
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 typedef union {
     struct {
@@ -76,6 +76,11 @@ typedef union {
 extern volume_control_t VolumeControl;
 
 extern uint8_t WaveRAM[0x10];
+
+void apuInit();
+void apuTerm();
+
+void apuTick(unsigned cycles);
 
 void printWave1();
 void printWave2();

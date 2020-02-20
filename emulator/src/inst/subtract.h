@@ -2,7 +2,7 @@
 #define SUBTRACT_H
 
 #include "../alu.h"
-#include "../cpu.h"
+#include "../clock.h"
 #include "../log.h"
 #include "../memory.h"
 #include "../register.h"
@@ -59,7 +59,7 @@ static void _SUB_pHL()
 {
     LogDebug("SUB A,(HL)");
     uint8_t n = readByte(R.HL);
-    cpuTick(4);
+    tick(4);
 
     _SUB(n);
 }
@@ -67,7 +67,7 @@ static void _SUB_pHL()
 static void _SUB_u()
 {
     uint8_t u = nextByte();
-    cpuTick(4);
+    tick(4);
 
     LogDebug("SUB A,%02Xh", u);
 
@@ -120,7 +120,7 @@ static void _SBC_pHL()
 {
     LogDebug("SBC A,(HL)");
     uint8_t n = readByte(R.HL);
-    cpuTick(4);
+    tick(4);
 
     _SBC(n);
 }
@@ -128,7 +128,7 @@ static void _SBC_pHL()
 static void _SBC_u()
 {
     uint8_t u = nextByte();
-    cpuTick(4);
+    tick(4);
 
     LogDebug("SBC A,%02Xh", u);
 

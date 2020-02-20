@@ -1,5 +1,8 @@
-#include "sound.h"
+#include "apu.h"
+
 #include "log.h"
+
+#include <SDL.h>
 
 square_wave_t Wave1;
 square_wave_t Wave2;
@@ -8,6 +11,21 @@ noise_t Noise;
 volume_control_t VolumeControl;
 
 uint8_t WaveRAM[0x10];
+
+void apuInit()
+{
+    
+}
+
+void apuTerm()
+{
+    
+}
+
+void apuTick(unsigned cycles)
+{
+    
+}
 
 void printWave1()
 {

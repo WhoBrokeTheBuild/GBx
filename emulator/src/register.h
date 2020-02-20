@@ -1,10 +1,8 @@
 #ifndef REGISTER_H
 #define REGISTER_H
 
-#include "log.h"
-
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 typedef struct
 {
@@ -51,10 +49,6 @@ typedef struct
 
 extern reg_t R;
 
-static void printR()
-{
-    LogInfo("AF=%04X BC=%04X DE=%04X HL=%04X SP=%04X PC=%04X FZ=%d FN=%d FH=%d FC=%d",
-        R.AF, R.BC, R.DE, R.HL, R.SP, R.PC, R.FZ, R.FN, R.FH, R.FC);
-}
+void printR();
 
 #endif // REGISTER_H

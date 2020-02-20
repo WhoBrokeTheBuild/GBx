@@ -5,7 +5,7 @@
 #include "../log.h"
 #include "../interrupt.h"
 #include "../register.h"
-#include "../video.h"
+#include "../lcd.h"
 
 static void _NOP()
 {

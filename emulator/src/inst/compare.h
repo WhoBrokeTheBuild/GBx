@@ -2,7 +2,7 @@
 #define COMPARE_H
 
 #include "../alu.h"
-#include "../cpu.h"
+#include "../clock.h"
 #include "../log.h"
 #include "../memory.h"
 #include "../register.h"
@@ -56,7 +56,7 @@ static void _CP_pHL()
 {
     LogDebug("CP (HL)");
     uint8_t pHL = readByte(R.HL);
-    cpuTick(4);
+    tick(4);
 
     _CP(pHL);
 }
@@ -64,7 +64,7 @@ static void _CP_pHL()
 static void _CP_u()
 {
     uint8_t u = nextByte();
-    cpuTick(4);
+    tick(4);
 
     LogDebug("CP %02Xh", u);
 

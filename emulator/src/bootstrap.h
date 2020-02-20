@@ -1,8 +1,8 @@
 #ifndef BOOTSTRAP_H
 #define BOOTSTRAP_H
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 extern bool BootstrapEnable;
 

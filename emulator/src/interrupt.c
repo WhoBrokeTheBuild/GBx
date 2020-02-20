@@ -1,18 +1,20 @@
 #include "interrupt.h"
-#include "log.h"
+
 #include "cpu.h"
+#include "lcd.h"
+#include "log.h"
 #include "memory.h"
 #include "register.h"
-#include "video.h"
 
 bool IME = true;
-InterruptFlags_t IE;
-InterruptFlags_t IF;
+
+int_flags_t IE;
+int_flags_t IF;
 
 void checkInterrupts()
 {
     if (IME) {
-        InterruptFlags_t enabledInts = { 
+        int_flags_t enabledInts = { 
             .data = IE.data & IF.data,
         };
 
@@ -46,4 +48,16 @@ void checkInterrupts()
             R.PC = 60;
         }
     }
+}
+
+void printIE() 
+{
+    LogInfo("IE VBlank=%d STAT=%d Timer=%d Serial=%d Joypad=%d",
+        IE.VBlank, IE.STAT, IE.Timer, IE.Serial, IE.Joypad);
+}
+
+void printIF() 
+{
+    LogInfo("IF VBlank=%d STAT=%d Timer=%d Serial=%d Joypad=%d",
+        IF.VBlank, IF.STAT, IF.Timer, IF.Serial, IF.Joypad);
 }

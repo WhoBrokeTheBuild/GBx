@@ -1,7 +1,7 @@
 #ifndef SET_H
 #define SET_H
 
-#include "../cpu.h"
+#include "../clock.h"
 #include "../log.h"
 #include "../memory.h"
 #include "../register.h"
@@ -55,12 +55,12 @@ static void _SET_b_pHL(int bit)
 {
     LogDebug("SET %d,(HL)", bit);
     uint8_t n = readByte(R.HL);
-    cpuTick(4);
+    tick(4);
 
     _SET(n, bit);
 
     writeByte(R.HL, n);
-    cpuTick(4);
+    tick(4);
 }
 
 #endif // SET_H

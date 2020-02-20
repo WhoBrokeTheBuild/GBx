@@ -2,7 +2,7 @@
 #define AND_H
 
 #include "../alu.h"
-#include "../cpu.h"
+#include "../clock.h"
 #include "../log.h"
 #include "../memory.h"
 #include "../register.h"
@@ -56,7 +56,7 @@ static void _AND_pHL()
 {
     LogDebug("AND HL");
     uint8_t n = readByte(R.HL);
-    cpuTick(4);
+    tick(4);
 
     _AND(n);
 }
@@ -64,7 +64,7 @@ static void _AND_pHL()
 static void _AND_u()
 {
     uint8_t u = nextByte();
-    cpuTick(4);
+    tick(4);
 
     LogDebug("AND %02Xh", u);
 

@@ -2,7 +2,7 @@
 #define ADD_H
 
 #include "../alu.h"
-#include "../cpu.h"
+#include "../clock.h"
 #include "../log.h"
 #include "../memory.h"
 #include "../register.h"
@@ -62,7 +62,7 @@ static void _ADD_pHL()
 {
     LogDebug("ADD A,(HL)");
     uint8_t pHL = readByte(R.HL);
-    cpuTick(4);
+    tick(4);
 
     _ADD(pHL);
 }
@@ -70,7 +70,7 @@ static void _ADD_pHL()
 static void _ADD_u()
 {
     uint8_t u = nextByte();
-    cpuTick(4);
+    tick(4);
 
     LogDebug("ADD A,%02Xh", u);
 
@@ -123,7 +123,7 @@ static void _ADC_pHL()
 {
     LogDebug("ADC A,(HL)");
     uint8_t n = readByte(R.HL);
-    cpuTick(4);
+    tick(4);
 
     _ADC(n);
 }
@@ -131,7 +131,7 @@ static void _ADC_pHL()
 static void _ADC_u()
 {
     uint8_t u = nextByte();
-    cpuTick(4);
+    tick(4);
 
     LogDebug("ADC A,%02Xh", u);
 
@@ -142,28 +142,28 @@ static void _ADD_HL_BC()
 {
     LogDebug("ADD HL,BC");
     _ADDHL(R.BC);
-    cpuTick(4);
+    tick(4);
 }
 
 static void _ADD_HL_DE()
 {
     LogDebug("ADD HL,DE");
     _ADDHL(R.DE);
-    cpuTick(4);
+    tick(4);
 }
 
 static void _ADD_HL_HL()
 {
     LogDebug("ADD HL,HL");
     _ADDHL(R.HL);
-    cpuTick(4);
+    tick(4);
 }
 
 static void _ADD_HL_SP()
 {
     LogDebug("ADD HL,SP");
     _ADDHL(R.SP);
-    cpuTick(4);
+    tick(4);
 }
 
 #undef _ADDHL
@@ -173,12 +173,12 @@ static void _ADD_HL_SP()
 static void _ADD_SP_s()
 {
     int8_t s = nextByte();
-    cpuTick(4);
+    tick(4);
 
     LogDebug("ADD SP,%d", s);
 
     R.SP = add16s(R.SP, s);
-    cpuTick(8);
+    tick(8);
 }
 
 #endif // ADD_H

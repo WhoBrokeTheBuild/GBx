@@ -1,7 +1,7 @@
 #ifndef BIT_H
 #define BIT_H
 
-#include "../cpu.h"
+#include "../clock.h"
 #include "../log.h"
 #include "../memory.h"
 #include "../register.h"
@@ -57,7 +57,7 @@ static void _BIT_b_pHL(int bit)
 {
     LogDebug("BIT %d,(HL)", bit);
     uint8_t n = readByte(R.HL);
-    cpuTick(4);
+    tick(4);
 
     _BIT(n, bit);
 }
