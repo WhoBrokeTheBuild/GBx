@@ -233,7 +233,7 @@ void pollEvents()
     }
 }
 
-void lcdRender() 
+void render() 
 {
     uint8_t * pixels = NULL;
     int pitch = 0;
@@ -254,7 +254,7 @@ void lcdRender()
     }
 }
 
-void lcdTick(unsigned cycles)
+void videoTick(unsigned cycles)
 {
     const unsigned HBLANK_TICK_COUNT = 204;
     const unsigned VBLANK_TICK_COUNT = 456;
@@ -274,7 +274,7 @@ void lcdTick(unsigned cycles)
                 ++LY;
                 if (LY == 144) {
                     STAT.Mode = MODE_VBLANK;
-                    lcdRender();
+                    render();
                 }
                 else {
                     STAT.Mode = MODE_SEARCH_SPRITE;
@@ -331,11 +331,8 @@ void lcdTick(unsigned cycles)
     }
 }
 
-void lcdInit()
+void videoInit()
 {
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-        LogFatal("failed to initialize SDL2, %s", SDL_GetError());
-    }
 
     char windowTitle[21];
     snprintf(windowTitle, sizeof(windowTitle), "GBx - %s", CartridgeTitle);
@@ -361,17 +358,15 @@ void lcdInit()
         }
     }
 
-    lcdRender();
+    render();
 }
 
-void lcdTerm()
+void videoTerm()
 {
     SDL_DestroyTexture(sdlTexture);
 
     SDL_DestroyRenderer(sdlRenderer);
     SDL_DestroyWindow(sdlWindow);
-
-    SDL_Quit();
 }
 
 void printLCDC()

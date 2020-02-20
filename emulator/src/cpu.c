@@ -315,7 +315,7 @@ void cpuTick(unsigned cycles)
 {
     CPUTicks += cycles;
     timerTick(cycles);
-    lcdTick(cycles);
+    videoTick(cycles);
 }
 
 uint8_t fetch()

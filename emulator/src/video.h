@@ -98,10 +98,10 @@ extern uint64_t LCDTicks;
 
 extern bool FPSLimit;
 
-void lcdInit();
-void lcdTerm();
+void videoInit();
+void videoTerm();
 
-void lcdTick(unsigned cycles);
+void videoTick(unsigned cycles);
 
 void printLCDC();
 void printSTAT();

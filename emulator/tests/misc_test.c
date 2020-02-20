@@ -1,6 +1,5 @@
 #include "inst/misc.h"
 #include "memory.h"
-#include "video.h"
 #include "unit.h"
 
 void setup() 

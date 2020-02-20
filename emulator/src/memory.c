@@ -93,47 +93,47 @@ uint8_t readByte(uint16_t address)
             }
             return IF.data;
         case 0xFF10:
-            return NR10;
+            return Wave1.data[0];
         case 0xFF11:
-            return NR11;
+            return Wave1.data[1];
         case 0xFF12:
-            return NR12;
+            return Wave1.data[2];
         case 0xFF13:
-            return NR13;
+            return Wave1.data[3];
         case 0xFF14:
-            return NR14;
+            return Wave1.data[4];
         case 0xFF16:
-            return NR21;
+            return Wave2.data[1];
         case 0xFF17:
-            return NR22;
+            return Wave2.data[2];
         case 0xFF18:
-            return NR23;
+            return Wave2.data[3];
         case 0xFF19:
-            return NR24;
-        case 0xFF1A:
-            return NR30;
-        case 0xFF1B:
-            return NR31;
-        case 0xFF1C:
-            return NR32;
-        case 0xFF1D:
-            return NR33;
-        case 0xFF1E:
-            return NR34;
+            return Wave2.data[4];
         case 0xFF20:
-            return NR41;
+            return Noise.data[0];
         case 0xFF21:
-            return NR42;
+            return Noise.data[1];
         case 0xFF22:
-            return NR43;
+            return Noise.data[2];
         case 0xFF23:
-            return NR44;
+            return Noise.data[3];
         case 0xFF24:
-            return NR50;
+            return VolumeControl.data;
         case 0xFF25:
-            return NR51;
+            // return NR51;
         case 0xFF26:
-            return NR52;
+            // return NR52;
+        case 0xFF1A:
+            return Wave3.data[0];
+        case 0xFF1B:
+            return Wave3.data[1];
+        case 0xFF1C:
+            return Wave3.data[2];
+        case 0xFF1D:
+            return Wave3.data[3];
+        case 0xFF1E:
+            return Wave3.data[4];
 
         case 0xFF40:
             if (DebugMode) {
@@ -277,67 +277,67 @@ void writeByte(uint16_t address, uint8_t data)
             }
             break;
         case 0xFF10:
-            NR10 = data;
+            Wave1.data[0] = data;
             break;
         case 0xFF11:
-            NR11 = data;
+            Wave1.data[1] = data;
             break;
         case 0xFF12:
-            NR12 = data;
+            Wave1.data[2] = data;
             break;
         case 0xFF13:
-            NR13 = data;
+            Wave1.data[3] = data;
             break;
         case 0xFF14:
-            NR14 = data;
+            Wave1.data[4] = data;
             break;
         case 0xFF16:
-            NR21 = data;
+            Wave2.data[1] = data;
             break;
         case 0xFF17:
-            NR22 = data;
+            Wave2.data[2] = data;
             break;
         case 0xFF18:
-            NR23 = data;
+            Wave2.data[3] = data;
             break;
         case 0xFF19:
-            NR24 = data;
-            break;
-        case 0xFF1A:
-            NR30 = data;
-            break;
-        case 0xFF1B:
-            NR31 = data;
-            break;
-        case 0xFF1C:
-            NR32 = data;
-            break;
-        case 0xFF1D:
-            NR33 = data;
-            break;
-        case 0xFF1E:
-            NR34 = data;
+            Wave2.data[4] = data;
             break;
         case 0xFF20:
-            NR41 = data;
+            Noise.data[0] = data;
             break;
         case 0xFF21:
-            NR42 = data;
+            Noise.data[1] = data;
             break;
         case 0xFF22:
-            NR43 = data;
+            Noise.data[2] = data;
             break;
         case 0xFF23:
-            NR44 = data;
+            Noise.data[3] = data;
             break;
         case 0xFF24:
-            NR50 = data;
+            VolumeControl.data = data;
             break;
         case 0xFF25:
-            NR51 = data;
+            // NR51 = data;
             break;
         case 0xFF26:
-            NR52 = data;
+            // NR52 = data;
+            break;
+        case 0xFF1A:
+            Wave3.data[0] = data;
+            break;
+        case 0xFF1B:
+            Wave3.data[1] = data;
+            break;
+        case 0xFF1C:
+            Wave3.data[2] = data;
+            break;
+        case 0xFF1D:
+            Wave3.data[3] = data;
+            break;
+        case 0xFF1E:
+            Wave3.data[4] = data;
             break;
         
         case 0xFF40:

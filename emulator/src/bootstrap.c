@@ -55,25 +55,26 @@ void bootstrap()
     TIMA = 0x00;
     TMA = 0x00;
     TAC.data = 0x00;
-    NR10 = 0x80;
-    NR11 = 0xBF;
-    NR12 = 0xF3;
-    NR14 = 0xBF;
-    NR21 = 0x3F;
-    NR22 = 0x00;
-    NR24 = 0xBF;
-    NR30 = 0x7F;
-    NR31 = 0xFF;
-    NR32 = 0x9F;
-    NR33 = 0xBF;
-    NR41 = 0xFF;
-    NR42 = 0x00;
-    NR44 = 0x00;
-    NR30 = 0xBF;
-    NR50 = 0x77;
-    NR51 = 0xF3;
-    // ?
-    // NR52 = 0xF1;
+    Wave1.data[0] = 0x80; // NR10
+    Wave1.data[1] = 0xBF; // NR11
+    Wave1.data[2] = 0xF3; // NR12
+    // NR13
+    Wave1.data[4] = 0xBF; // NR14
+    Wave2.data[0] = 0x3F; // NR21
+    Wave2.data[1] = 0x00; // NR22
+    Wave2.data[3] = 0xBF; // NR24
+    Wave3.data[0] = 0x7F; // NR30
+    Wave3.data[1] = 0xFF; // NR31
+    Wave3.data[2] = 0x9F; // NR32
+    Wave3.data[3] = 0xBF; // NR33
+    // NR34
+    Noise.data[0] = 0xFF; // NR41
+    Noise.data[1] = 0x00; // NR42
+    Noise.data[2] = 0x00; // NR43
+    Noise.data[3] = 0xBF; // NR44
+    VolumeControl.data = 0x77; // NR50
+    // = 0xF3; // NR51
+    // = 0xF1; // NR52
     LCDC.data = 0x91;
     SCY = 0x00;
     SCX = 0x00;

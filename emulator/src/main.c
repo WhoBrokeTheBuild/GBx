@@ -11,6 +11,7 @@
 #include "log.h"
 #include "memory.h"
 #include "video.h"
+#include "sound.h"
 #include "interrupt.h"
 
 static void usage() 
@@ -44,7 +45,11 @@ int main(int argc, char** argv)
         LogFatal("Failed to load ROM");
     }
 
-    lcdInit();
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER) < 0) {
+        LogFatal("failed to initialize SDL2, %s", SDL_GetError());
+    }
+
+    videoInit();
 
     for (int i = 2; i < argc; ++i) {
         const char * arg = argv[i];
@@ -66,6 +71,13 @@ int main(int argc, char** argv)
         setBreakpoint(BKCND_PC_EQ, 0x0000);
     }
 
+    printWave1();
+    printWave2();
+    printWave3();
+    printNoise();
+    printVolumeControl();
+    printWaveRAM();
+
     if (DebugMode) {
         signal(SIGINT, handleSignal);
         signal(SIGSEGV, handleSignal);
@@ -79,9 +91,11 @@ int main(int argc, char** argv)
         }
     }
 
+    videoTerm();
+
     freeCartridge();
 
-    lcdTerm();
+    SDL_Quit();
 
     return 0;
 }
