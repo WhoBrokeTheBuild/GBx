@@ -110,7 +110,7 @@ UNIT_TEST_SUITE(CALL)
 
 int main(int argc, char ** argv)
 {
-    DebugMode = true;
+    DebugEnable = true;
 	UNIT_RUN_SUITE(CALL);
 	UNIT_REPORT();
 	return UNIT_EXIT_CODE;

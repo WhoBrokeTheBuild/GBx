@@ -8,7 +8,7 @@
 
 static void _RST_00()
 {
-    LogDebug("RST 00h");
+    LogVerbose(3, "RST 00h");
 
     pushWord(R.PC);
     tick(8);
@@ -19,7 +19,7 @@ static void _RST_00()
 
 static void _RST_08()
 {
-    LogDebug("RST 08h");
+    LogVerbose(3, "RST 08h");
 
     pushWord(R.PC);
     tick(8);
@@ -30,7 +30,7 @@ static void _RST_08()
 
 static void _RST_10()
 {
-    LogDebug("RST 10h");
+    LogVerbose(3, "RST 10h");
 
     pushWord(R.PC);
     tick(8);
@@ -41,7 +41,7 @@ static void _RST_10()
 
 static void _RST_18()
 {
-    LogDebug("RST 18h");
+    LogVerbose(3, "RST 18h");
     
     pushWord(R.PC);
     tick(8);
@@ -52,7 +52,7 @@ static void _RST_18()
 
 static void _RST_20()
 {
-    LogDebug("RST 20h");
+    LogVerbose(3, "RST 20h");
     
     pushWord(R.PC);
     tick(8);
@@ -63,7 +63,7 @@ static void _RST_20()
 
 static void _RST_28()
 {
-    LogDebug("RST 28h");
+    LogVerbose(3, "RST 28h");
     
     pushWord(R.PC);
     tick(8);
@@ -74,7 +74,7 @@ static void _RST_28()
 
 static void _RST_30()
 {
-    LogDebug("RST 30h");
+    LogVerbose(3, "RST 30h");
     
     pushWord(R.PC);
     tick(8);
@@ -85,9 +85,9 @@ static void _RST_30()
 
 static void _RST_38()
 {
-    LogDebug("RST 38h");
+    LogVerbose(3, "RST 38h");
     
-    DebugMode = true;
+    DebugEnable = true;
 
     pushWord(R.PC);
     tick(8);

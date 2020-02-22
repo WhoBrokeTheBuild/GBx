@@ -9,49 +9,49 @@
 
 static void _LD_A_A()
 {
-    LogDebug("LD A,A");
+    LogVerbose(3, "LD A,A");
     R.A = R.A;
 }
 
 static void _LD_A_B()
 {
-    LogDebug("LD A,B");
+    LogVerbose(3, "LD A,B");
     R.A = R.B;
 }
 
 static void _LD_A_C()
 {
-    LogDebug("LD A,C");
+    LogVerbose(3, "LD A,C");
     R.A = R.C;
 }
 
 static void _LD_A_D()
 {
-    LogDebug("LD A,D");
+    LogVerbose(3, "LD A,D");
     R.A = R.D;
 }
 
 static void _LD_A_E()
 {
-    LogDebug("LD A,E");
+    LogVerbose(3, "LD A,E");
     R.A = R.E;
 }
 
 static void _LD_A_H()
 {
-    LogDebug("LD A,H");
+    LogVerbose(3, "LD A,H");
     R.A = R.H;
 }
 
 static void _LD_A_L()
 {
-    LogDebug("LD A,L");
+    LogVerbose(3, "LD A,L");
     R.A = R.L;
 }
 
 static void _LD_A_pHL()
 {
-    LogDebug("LD A,(HL)");
+    LogVerbose(3, "LD A,(HL)");
     uint8_t n = readByte(R.HL);
     tick(4);
 
@@ -60,49 +60,49 @@ static void _LD_A_pHL()
 
 static void _LD_B_A()
 {
-    LogDebug("LD B,A");
+    LogVerbose(3, "LD B,A");
     R.B = R.A;
 }
 
 static void _LD_B_B()
 {
-    LogDebug("LD B,B");
+    LogVerbose(3, "LD B,B");
     R.B = R.B;
 }
 
 static void _LD_B_C()
 {
-    LogDebug("LD B,C");
+    LogVerbose(3, "LD B,C");
     R.B = R.C;
 }
 
 static void _LD_B_D()
 {
-    LogDebug("LD B,D");
+    LogVerbose(3, "LD B,D");
     R.B = R.D;
 }
 
 static void _LD_B_E()
 {
-    LogDebug("LD B,E");
+    LogVerbose(3, "LD B,E");
     R.B = R.E;
 }
 
 static void _LD_B_H()
 {
-    LogDebug("LD B,H");
+    LogVerbose(3, "LD B,H");
     R.B = R.H;
 }
 
 static void _LD_B_L()
 {
-    LogDebug("LD B,L");
+    LogVerbose(3, "LD B,L");
     R.B = R.L;
 }
 
 static void _LD_B_pHL()
 {
-    LogDebug("LD B,(HL)");
+    LogVerbose(3, "LD B,(HL)");
     uint8_t n = readByte(R.HL);
     tick(4);
 
@@ -111,49 +111,49 @@ static void _LD_B_pHL()
 
 static void _LD_C_A()
 {
-    LogDebug("LD C,A");
+    LogVerbose(3, "LD C,A");
     R.C = R.A;
 }
 
 static void _LD_C_B()
 {
-    LogDebug("LD C,B");
+    LogVerbose(3, "LD C,B");
     R.C = R.B;
 }
 
 static void _LD_C_C()
 {
-    LogDebug("LD C,C");
+    LogVerbose(3, "LD C,C");
     R.C = R.C;
 }
 
 static void _LD_C_D()
 {
-    LogDebug("LD C,D");
+    LogVerbose(3, "LD C,D");
     R.C = R.D;
 }
 
 static void _LD_C_E()
 {
-    LogDebug("LD C,E");
+    LogVerbose(3, "LD C,E");
     R.C = R.E;
 }
 
 static void _LD_C_H()
 {
-    LogDebug("LD C,H");
+    LogVerbose(3, "LD C,H");
     R.C = R.H;
 }
 
 static void _LD_C_L()
 {
-    LogDebug("LD C,L");
+    LogVerbose(3, "LD C,L");
     R.C = R.L;
 }
 
 static void _LD_C_pHL()
 {
-    LogDebug("LD C,(HL)");
+    LogVerbose(3, "LD C,(HL)");
     uint8_t n = readByte(R.HL);
     tick(4);
 
@@ -162,49 +162,49 @@ static void _LD_C_pHL()
 
 static void _LD_D_A()
 {
-    LogDebug("LD D,A");
+    LogVerbose(3, "LD D,A");
     R.D = R.A;
 }
 
 static void _LD_D_B()
 {
-    LogDebug("LD D,B");
+    LogVerbose(3, "LD D,B");
     R.D = R.B;
 }
 
 static void _LD_D_C()
 {
-    LogDebug("LD D,C");
+    LogVerbose(3, "LD D,C");
     R.D = R.C;
 }
 
 static void _LD_D_D()
 {
-    LogDebug("LD D,D");
+    LogVerbose(3, "LD D,D");
     R.D = R.D;
 }
 
 static void _LD_D_E()
 {
-    LogDebug("LD D,E");
+    LogVerbose(3, "LD D,E");
     R.D = R.E;
 }
 
 static void _LD_D_H()
 {
-    LogDebug("LD D,H");
+    LogVerbose(3, "LD D,H");
     R.D = R.H;
 }
 
 static void _LD_D_L()
 {
-    LogDebug("LD D,L");
+    LogVerbose(3, "LD D,L");
     R.D = R.L;
 }
 
 static void _LD_D_pHL()
 {
-    LogDebug("LD D,(HL)");
+    LogVerbose(3, "LD D,(HL)");
     uint8_t n = readByte(R.HL);
     tick(4);
 
@@ -213,49 +213,49 @@ static void _LD_D_pHL()
 
 static void _LD_E_A()
 {
-    LogDebug("LD E,A");
+    LogVerbose(3, "LD E,A");
     R.E = R.A;
 }
 
 static void _LD_E_B()
 {
-    LogDebug("LD E,B");
+    LogVerbose(3, "LD E,B");
     R.E = R.B;
 }
 
 static void _LD_E_C()
 {
-    LogDebug("LD E,C");
+    LogVerbose(3, "LD E,C");
     R.E = R.C;
 }
 
 static void _LD_E_D()
 {
-    LogDebug("LD E,D");
+    LogVerbose(3, "LD E,D");
     R.E = R.D;
 }
 
 static void _LD_E_E()
 {
-    LogDebug("LD E,E");
+    LogVerbose(3, "LD E,E");
     R.E = R.E;
 }
 
 static void _LD_E_H()
 {
-    LogDebug("LD E,H");
+    LogVerbose(3, "LD E,H");
     R.E = R.H;
 }
 
 static void _LD_E_L()
 {
-    LogDebug("LD E,L");
+    LogVerbose(3, "LD E,L");
     R.E = R.L;
 }
 
 static void _LD_E_pHL()
 {
-    LogDebug("LD E,(HL)");
+    LogVerbose(3, "LD E,(HL)");
     uint8_t n = readByte(R.HL);
     tick(4);
 
@@ -264,49 +264,49 @@ static void _LD_E_pHL()
 
 static void _LD_H_A()
 {
-    LogDebug("LD H,A");
+    LogVerbose(3, "LD H,A");
     R.H = R.A;
 }
 
 static void _LD_H_B()
 {
-    LogDebug("LD H,B");
+    LogVerbose(3, "LD H,B");
     R.H = R.B;
 }
 
 static void _LD_H_C()
 {
-    LogDebug("LD H,C");
+    LogVerbose(3, "LD H,C");
     R.H = R.C;
 }
 
 static void _LD_H_D()
 {
-    LogDebug("LD H,D");
+    LogVerbose(3, "LD H,D");
     R.H = R.D;
 }
 
 static void _LD_H_E()
 {
-    LogDebug("LD H,E");
+    LogVerbose(3, "LD H,E");
     R.H = R.E;
 }
 
 static void _LD_H_H()
 {
-    LogDebug("LD H,H");
+    LogVerbose(3, "LD H,H");
     R.H = R.H;
 }
 
 static void _LD_H_L()
 {
-    LogDebug("LD H,L");
+    LogVerbose(3, "LD H,L");
     R.H = R.L;
 }
 
 static void _LD_H_pHL()
 {
-    LogDebug("LD H,(HL)");
+    LogVerbose(3, "LD H,(HL)");
     uint8_t n = readByte(R.HL);
     tick(4);
 
@@ -315,49 +315,49 @@ static void _LD_H_pHL()
 
 static void _LD_L_A()
 {
-    LogDebug("LD L,A");
+    LogVerbose(3, "LD L,A");
     R.L = R.A;
 }
 
 static void _LD_L_B()
 {
-    LogDebug("LD L,B");
+    LogVerbose(3, "LD L,B");
     R.L = R.B;
 }
 
 static void _LD_L_C()
 {
-    LogDebug("LD L,C");
+    LogVerbose(3, "LD L,C");
     R.L = R.C;
 }
 
 static void _LD_L_D()
 {
-    LogDebug("LD L,D");
+    LogVerbose(3, "LD L,D");
     R.L = R.D;
 }
 
 static void _LD_L_E()
 {
-    LogDebug("LD L,E");
+    LogVerbose(3, "LD L,E");
     R.L = R.E;
 }
 
 static void _LD_L_H()
 {
-    LogDebug("LD L,H");
+    LogVerbose(3, "LD L,H");
     R.L = R.H;
 }
 
 static void _LD_L_L()
 {
-    LogDebug("LD L,L");
+    LogVerbose(3, "LD L,L");
     R.L = R.L;
 }
 
 static void _LD_L_pHL()
 {
-    LogDebug("LD L,(HL)");
+    LogVerbose(3, "LD L,(HL)");
     uint8_t n = readByte(R.HL);
     tick(4);
 
@@ -366,63 +366,63 @@ static void _LD_L_pHL()
 
 static void _LD_pHL_A()
 {
-    LogDebug("LD (HL),A");
+    LogVerbose(3, "LD (HL),A");
     writeByte(R.HL, R.A);
     tick(8);
 }
 
 static void _LD_pHL_B()
 {
-    LogDebug("LD (HL),B");
+    LogVerbose(3, "LD (HL),B");
     writeByte(R.HL, R.B);
     tick(8);
 }
 
 static void _LD_pHL_C()
 {
-    LogDebug("LD (HL),C");
+    LogVerbose(3, "LD (HL),C");
     writeByte(R.HL, R.C);
     tick(8);
 }
 
 static void _LD_pHL_D()
 {
-    LogDebug("LD (HL),D");
+    LogVerbose(3, "LD (HL),D");
     writeByte(R.HL, R.D);
     tick(8);
 }
 
 static void _LD_pHL_E()
 {
-    LogDebug("LD (HL),E");
+    LogVerbose(3, "LD (HL),E");
     writeByte(R.HL, R.E);
     tick(8);
 }
 
 static void _LD_pHL_H()
 {
-    LogDebug("LD (HL),H");
+    LogVerbose(3, "LD (HL),H");
     writeByte(R.HL, R.H);
     tick(8);
 }
 
 static void _LD_pHL_L()
 {
-    LogDebug("LD (HL),L");
+    LogVerbose(3, "LD (HL),L");
     writeByte(R.HL, R.L);
     tick(8);
 }
 
 static void _LD_pBC_A()
 {
-    LogDebug("LD (BC),A");
+    LogVerbose(3, "LD (BC),A");
     writeByte(R.BC, R.A);
     tick(8);
 }
 
 static void _LD_pDE_A()
 {
-    LogDebug("LD (DE),A");
+    LogVerbose(3, "LD (DE),A");
     writeByte(R.DE, R.A);
     tick(8);
 }
@@ -432,7 +432,7 @@ static void _LD_A_u()
     uint8_t u = nextByte();
     tick(4);
 
-    LogDebug("LD A,%02Xh", u);
+    LogVerbose(3, "LD A,%02Xh", u);
 
     R.A = u;
 }
@@ -442,7 +442,7 @@ static void _LD_B_u()
     uint8_t u = nextByte();
     tick(4);
 
-    LogDebug("LD B,%02Xh", u);
+    LogVerbose(3, "LD B,%02Xh", u);
 
     R.B = u;
 }
@@ -452,7 +452,7 @@ static void _LD_C_u()
     uint8_t u = nextByte();
     tick(4);
 
-    LogDebug("LD C,%02Xh", u);
+    LogVerbose(3, "LD C,%02Xh", u);
 
     R.C = u;
 }
@@ -462,7 +462,7 @@ static void _LD_D_u()
     uint8_t u = nextByte();
     tick(4);
 
-    LogDebug("LD D,%02Xh", u);
+    LogVerbose(3, "LD D,%02Xh", u);
 
     R.D = u;
 }
@@ -472,7 +472,7 @@ static void _LD_E_u()
     uint8_t u = nextByte();
     tick(4);
 
-    LogDebug("LD E,%02Xh", u);
+    LogVerbose(3, "LD E,%02Xh", u);
 
     R.E = u;
 }
@@ -482,7 +482,7 @@ static void _LD_H_u()
     uint8_t u = nextByte();
     tick(4);
 
-    LogDebug("LD H,%02Xh", u);
+    LogVerbose(3, "LD H,%02Xh", u);
 
     R.H = u;
 }
@@ -492,7 +492,7 @@ static void _LD_L_u()
     uint8_t u = nextByte();
     tick(4);
 
-    LogDebug("LD L,%02Xh", u);
+    LogVerbose(3, "LD L,%02Xh", u);
 
     R.L = u;
 }
@@ -502,7 +502,7 @@ static void _LD_pHL_u()
     uint8_t u = nextByte();
     tick(4);
 
-    LogDebug("LD (HL),%02Xh", u);
+    LogVerbose(3, "LD (HL),%02Xh", u);
 
     writeByte(R.HL, u);
     tick(4);
@@ -510,7 +510,7 @@ static void _LD_pHL_u()
 
 static void _LD_A_pBC()
 {
-    LogDebug("LD A,(BC)");
+    LogVerbose(3, "LD A,(BC)");
     uint8_t n = readByte(R.BC);
     tick(4);
 
@@ -519,7 +519,7 @@ static void _LD_A_pBC()
 
 static void _LD_A_pDE()
 {
-    LogDebug("LD A,(DE)");
+    LogVerbose(3, "LD A,(DE)");
     uint8_t n = readByte(R.DE);
     tick(4);
 
@@ -531,7 +531,7 @@ static void _LD_BC_uu()
     uint16_t uu = nextWord();
     tick(8);
 
-    LogDebug("LD BC,%04Xh", uu);
+    LogVerbose(3, "LD BC,%04Xh", uu);
     R.BC = uu;
 }
 
@@ -540,7 +540,7 @@ static void _LD_DE_uu()
     uint16_t uu = nextWord();
     tick(8);
 
-    LogDebug("LD DE,%04Xh", uu);
+    LogVerbose(3, "LD DE,%04Xh", uu);
     R.DE = uu;
 }
 
@@ -549,7 +549,7 @@ static void _LD_HL_uu()
     uint16_t uu = nextWord();
     tick(8);
 
-    LogDebug("LD HL,%04Xh", uu);
+    LogVerbose(3, "LD HL,%04Xh", uu);
     R.HL = uu;
 }
 
@@ -558,7 +558,7 @@ static void _LD_SP_uu()
     uint16_t uu = nextWord();
     tick(8);
 
-    LogDebug("LD SP,%04Xh", uu);
+    LogVerbose(3, "LD SP,%04Xh", uu);
     R.SP = uu;
 }
 
@@ -566,7 +566,7 @@ static void _LD_SP_HL()
 {
     tick(4);
     
-    LogDebug("LD SP,HL");
+    LogVerbose(3, "LD SP,HL");
     R.SP = R.HL;
 }
 
@@ -575,7 +575,7 @@ static void _LD_puu_SP()
     uint16_t uu = nextWord();
     tick(8);
 
-    LogDebug("LD (%04Xh),SP", uu);
+    LogVerbose(3, "LD (%04Xh),SP", uu);
     
     writeWord(uu, R.SP);
     tick(8);
@@ -586,7 +586,7 @@ static void _LD_puu_A()
     uint16_t uu = nextWord();
     tick(8);
 
-    LogDebug("LD (%04Xh),A", uu);
+    LogVerbose(3, "LD (%04Xh),A", uu);
 
     writeByte(uu, R.A);
     tick(4);
@@ -597,7 +597,7 @@ static void _LD_A_puu()
     uint16_t uu = nextWord();
     tick(4);
 
-    LogDebug("LD A,(%04Xh)", uu);
+    LogVerbose(3, "LD A,(%04Xh)", uu);
 
     uint8_t n = readByte(uu);
     tick(4);
@@ -608,7 +608,7 @@ static void _LD_A_puu()
 
 static void _LDI_pHL_A()
 {
-    LogDebug("LDI (HL),A");
+    LogVerbose(3, "LDI (HL),A");
     writeByte(R.HL, R.A);
     ++R.HL;
     tick(4);
@@ -616,7 +616,7 @@ static void _LDI_pHL_A()
 
 static void _LDD_pHL_A()
 {
-    LogDebug("LDD (HL),A");
+    LogVerbose(3, "LDD (HL),A");
     writeByte(R.HL, R.A);
     --R.HL;
     tick(4);
@@ -624,7 +624,7 @@ static void _LDD_pHL_A()
 
 static void _LDI_A_pHL()
 {
-    LogDebug("LDI A,(HL)");
+    LogVerbose(3, "LDI A,(HL)");
     R.A = readByte(R.HL);
     ++R.HL;
     tick(4);
@@ -632,7 +632,7 @@ static void _LDI_A_pHL()
 
 static void _LDD_A_pHL()
 {
-    LogDebug("LDD A,(HL)");
+    LogVerbose(3, "LDD A,(HL)");
     R.A = readByte(R.HL);;
     --R.HL;
     tick(4);
@@ -643,7 +643,7 @@ static void _LDH_pu_A()
     uint8_t u = nextByte();
     tick(4);
 
-    LogDebug("LDH (%02Xh),A", u);
+    LogVerbose(3, "LDH (%02Xh),A", u);
 
     writeByte(0xFF00 + u, R.A);
     tick(4);
@@ -654,7 +654,7 @@ static void _LDH_A_pu()
     uint8_t u = nextByte();
     tick(4);
 
-    LogDebug("LDH A,(%02Xh)", u);
+    LogVerbose(3, "LDH A,(%02Xh)", u);
 
     R.A = readByte(0xFF00 + u);
     tick(4);
@@ -662,14 +662,14 @@ static void _LDH_A_pu()
 
 static void _LDH_pC_A()
 {
-    LogDebug("LDH (C),A");
+    LogVerbose(3, "LDH (C),A");
     R.A = readByte(0xFF00 + R.C);
     tick(4);
 }
 
 static void _LDH_A_pC()
 {
-    LogDebug("LDH A,(C)");
+    LogVerbose(3, "LDH A,(C)");
     writeByte(0xFF00 + R.C, R.A);
     tick(4);
 }
@@ -679,7 +679,7 @@ static void _LD_HL_SP_s()
     int8_t s = nextByte();
     tick(4);
 
-    LogDebug("LD HL,SP%+d", s);
+    LogVerbose(3, "LD HL,SP%+d", s);
 
     R.HL = add16s(R.SP, s);
     R.FZ = false;

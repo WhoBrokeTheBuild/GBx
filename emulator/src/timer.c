@@ -47,6 +47,7 @@ void timerTick(unsigned cycles)
         timerCounter -= speed;
         
         if (TIMA == 0xFF) {
+            LogVerbose(2, "Timer Rollover");
             TIMA = TMA;
             IF.Timer = true;
         }

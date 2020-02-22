@@ -9,7 +9,7 @@
 
 static void _RET()
 {
-    LogDebug("RET");
+    LogVerbose(3, "RET");
 
     uint16_t nn = popWord();
     tick(8);
@@ -20,7 +20,7 @@ static void _RET()
 
 static void _RET_NZ()
 {
-    LogDebug("RET NZ");
+    LogVerbose(3, "RET NZ");
 
     tick(8);
 
@@ -35,7 +35,7 @@ static void _RET_NZ()
 
 static void _RET_Z()
 {
-    LogDebug("RET Z");
+    LogVerbose(3, "RET Z");
 
     tick(8);
 
@@ -50,7 +50,7 @@ static void _RET_Z()
 
 static void _RET_NC()
 {
-    LogDebug("RET NC");
+    LogVerbose(3, "RET NC");
 
     tick(8);
 
@@ -65,7 +65,7 @@ static void _RET_NC()
 
 static void _RET_C()
 {
-    LogDebug("RET C");
+    LogVerbose(3, "RET C");
 
     tick(8);
 
@@ -80,7 +80,7 @@ static void _RET_C()
 
 static void _RETI()
 {
-    LogDebug("RETI");
+    LogVerbose(3, "RETI");
     
     uint16_t nn = popWord();
     tick(8);

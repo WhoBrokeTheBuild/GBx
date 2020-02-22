@@ -304,7 +304,7 @@ UNIT_TEST_SUITE(JR)
 
 int main(int argc, char ** argv)
 {
-    DebugMode = true;
+    DebugEnable = true;
 	UNIT_RUN_SUITE(JP);
 	UNIT_RUN_SUITE(JR);
 	UNIT_REPORT();

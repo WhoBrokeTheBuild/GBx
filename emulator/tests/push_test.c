@@ -58,7 +58,7 @@ UNIT_TEST_SUITE(PUSH)
 
 int main(int argc, char ** argv)
 {
-    DebugMode = true;
+    DebugEnable = true;
 	UNIT_RUN_SUITE(PUSH);
 	UNIT_REPORT();
 	return UNIT_EXIT_CODE;

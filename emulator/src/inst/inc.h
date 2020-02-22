@@ -14,56 +14,56 @@
 
 static void _INC_A()
 {
-    LogDebug("INC A");
+    LogVerbose(3, "INC A");
     _INC(R.A);
     tick(4);
 }
 
 static void _INC_B()
 {
-    LogDebug("INC B");
+    LogVerbose(3, "INC B");
     _INC(R.B);
     tick(4);
 }
 
 static void _INC_C()
 {
-    LogDebug("INC C");
+    LogVerbose(3, "INC C");
     _INC(R.C);
     tick(4);
 }
 
 static void _INC_D()
 {
-    LogDebug("INC D");
+    LogVerbose(3, "INC D");
     _INC(R.D);
     tick(4);
 }
 
 static void _INC_E()
 {
-    LogDebug("INC E");
+    LogVerbose(3, "INC E");
     _INC(R.E);
     tick(4);
 }
 
 static void _INC_H()
 {
-    LogDebug("INC H");
+    LogVerbose(3, "INC H");
     _INC(R.H);
     tick(4);
 }
 
 static void _INC_L()
 {
-    LogDebug("INC L");
+    LogVerbose(3, "INC L");
     _INC(R.L);
     tick(4);
 }
 
 static void _INC_pHL()
 {
-    LogDebug("INC (HL)");
+    LogVerbose(3, "INC (HL)");
     uint8_t n = readByte(R.HL);
     tick(8);
 
@@ -75,28 +75,28 @@ static void _INC_pHL()
 
 static void _INC_BC()
 {
-    LogDebug("INC BC");
+    LogVerbose(3, "INC BC");
     ++R.BC;
     tick(8);
 }
 
 static void _INC_DE()
 {
-    LogDebug("INC DE");
+    LogVerbose(3, "INC DE");
     ++R.DE;
     tick(8);
 }
 
 static void _INC_HL()
 {
-    LogDebug("INC HL");
+    LogVerbose(3, "INC HL");
     ++R.HL;
     tick(8);
 }
 
 static void _INC_SP()
 {
-    LogDebug("INC SP");
+    LogVerbose(3, "INC SP");
     ++R.SP;
     tick(8);
 }

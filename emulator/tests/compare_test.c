@@ -162,7 +162,7 @@ UNIT_TEST_SUITE(CP)
 
 int main(int argc, char ** argv)
 {
-    DebugMode = true;
+    DebugEnable = true;
 	UNIT_RUN_SUITE(CP);
 	UNIT_REPORT();
 	return UNIT_EXIT_CODE;

@@ -17,7 +17,7 @@ uint8_t ZeroPage[127];
 
 uint8_t readByte(uint16_t address)
 {
-    // LogVerbose("read %02X", address);
+    LogVerbose(4, "Read %02X", address);
 
     if (address <= 0x00FF) {
         if (BootstrapEnable) {
@@ -88,9 +88,6 @@ uint8_t readByte(uint16_t address)
         case 0xFF07:
             return TAC.data;
         case 0xFF0F:
-            if (DebugMode) {
-                printIF();
-            }
             return IF.data;
         case 0xFF10:
             return Wave1.data[0];
@@ -136,9 +133,6 @@ uint8_t readByte(uint16_t address)
             return Wave3.data[4];
 
         case 0xFF40:
-            if (DebugMode) {
-                printLCDC();
-            }
             return LCDC.data;
         case 0xFF41:
             return STAT.data;
@@ -172,9 +166,6 @@ uint8_t readByte(uint16_t address)
     }
     else if (address == 0xFFFF) {
         // Interrupt Enable Flag
-        if (DebugMode) {
-            printIE();
-        }
         return IE.data;
     }
 
@@ -205,7 +196,7 @@ uint16_t nextWord()
 
 void writeByte(uint16_t address, uint8_t data)
 {
-    // LogVerbose("write %02X", address);
+    LogVerbose(4, "Write %02X to %02X", data, address);
 
     if (address <= 0x7FFF) {
         writeCartridgeMBC(address, data);
@@ -271,52 +262,93 @@ void writeByte(uint16_t address, uint8_t data)
             break;
         case 0xFF0F:
             IF.data = data;
-            if (DebugMode) {
-                LogInfo("%02X", data);
+            if (VerboseLevel >= 2) {
                 printIF();
             }
             break;
         case 0xFF10:
             Wave1.data[0] = data;
+            if (VerboseLevel >= 2) {
+                printWave1();
+            }
             break;
         case 0xFF11:
             Wave1.data[1] = data;
+            if (VerboseLevel >= 2) {
+                printWave1();
+            }
             break;
         case 0xFF12:
             Wave1.data[2] = data;
+            if (VerboseLevel >= 2) {
+                printWave1();
+            }
             break;
         case 0xFF13:
             Wave1.data[3] = data;
+            if (VerboseLevel >= 2) {
+                printWave1();
+            }
             break;
         case 0xFF14:
             Wave1.data[4] = data;
+            if (VerboseLevel >= 2) {
+                printWave1();
+            }
             break;
         case 0xFF16:
             Wave2.data[1] = data;
+            if (VerboseLevel >= 2) {
+                printWave2();
+            }
             break;
         case 0xFF17:
             Wave2.data[2] = data;
+            if (VerboseLevel >= 2) {
+                printWave2();
+            }
             break;
         case 0xFF18:
             Wave2.data[3] = data;
+            if (VerboseLevel >= 2) {
+                printWave2();
+            }
             break;
         case 0xFF19:
             Wave2.data[4] = data;
+            if (VerboseLevel >= 2) {
+                printWave2();
+            }
             break;
         case 0xFF20:
             Noise.data[0] = data;
+            if (VerboseLevel >= 2) {
+                printNoise();
+            }
             break;
         case 0xFF21:
             Noise.data[1] = data;
+            if (VerboseLevel >= 2) {
+                printNoise();
+            }
             break;
         case 0xFF22:
             Noise.data[2] = data;
+            if (VerboseLevel >= 2) {
+                printNoise();
+            }
             break;
         case 0xFF23:
             Noise.data[3] = data;
+            if (VerboseLevel >= 2) {
+                printNoise();
+            }
             break;
         case 0xFF24:
             VolumeControl.data = data;
+            if (VerboseLevel >= 2) {
+                printVolumeControl();
+            }
             break;
         case 0xFF25:
             // NR51 = data;
@@ -326,52 +358,68 @@ void writeByte(uint16_t address, uint8_t data)
             break;
         case 0xFF1A:
             Wave3.data[0] = data;
+            if (VerboseLevel >= 2) {
+                printWave3();
+            }
             break;
         case 0xFF1B:
             Wave3.data[1] = data;
+            if (VerboseLevel >= 2) {
+                printWave3();
+            }
             break;
         case 0xFF1C:
             Wave3.data[2] = data;
+            if (VerboseLevel >= 2) {
+                printWave3();
+            }
             break;
         case 0xFF1D:
             Wave3.data[3] = data;
+            if (VerboseLevel >= 2) {
+                printWave3();
+            }
             break;
         case 0xFF1E:
             Wave3.data[4] = data;
+            if (VerboseLevel >= 2) {
+                printWave3();
+            }
             break;
         
         case 0xFF40:
             LCDC.data = data;
-            if (DebugMode) {
+            if (VerboseLevel >= 2) {
                 printLCDC();
             }
             break;
         case 0xFF41:
             STAT.data = data;
-            if (DebugMode) {
+            if (VerboseLevel >= 2) {
                 printSTAT();
             }
             break;
         case 0xFF42:
             SCY = data;
-            if (DebugMode) {
+            if (VerboseLevel >= 2) {
                 printLCDInfo();
             }
             break;
         case 0xFF43:
             SCX = data;
-            if (DebugMode) {
+            if (VerboseLevel >= 2) {
                 printLCDInfo();
             }
             break;
         case 0xFF45:
             LYC = data;
-            if (DebugMode) {
+            if (VerboseLevel >= 2) {
                 printLCDInfo();
             }
             break;
         case 0xFF46:
             {
+                // TODO: Investigate
                 uint16_t addr = data << 8;
                 for (unsigned i = 0; i < 0xA0; ++i) {
                     writeByte(0xFE00 + i, readByte(addr + 1));
@@ -389,13 +437,13 @@ void writeByte(uint16_t address, uint8_t data)
             break;
         case 0xFF4A:
             WX = data;
-            if (DebugMode) {
+            if (VerboseLevel >= 2) {
                 printLCDInfo();
             }
             break;
         case 0xFF4B:
             WY = data;
-            if (DebugMode) {
+            if (VerboseLevel >= 2) {
                 printLCDInfo();
             }
             break;
@@ -411,7 +459,7 @@ void writeByte(uint16_t address, uint8_t data)
     else if (address == 0xFFFF) {
         // Interrupt Enable Flag
         IE.data = data;
-        if (DebugMode) {
+        if (VerboseLevel >= 2) {
             printIE();
         }
     }

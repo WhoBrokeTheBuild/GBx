@@ -37,49 +37,49 @@
 
 static void _SLA_A()
 {
-    LogDebug("SLA A");
+    LogVerbose(3, "SLA A");
     _SLA(R.A);
 }
 
 static void _SLA_B()
 {
-    LogDebug("SLA B");
+    LogVerbose(3, "SLA B");
     _SLA(R.B);
 }
 
 static void _SLA_C()
 {
-    LogDebug("SLA C");
+    LogVerbose(3, "SLA C");
     _SLA(R.C);
 }
 
 static void _SLA_D()
 {
-    LogDebug("SLA D");
+    LogVerbose(3, "SLA D");
     _SLA(R.D);
 }
 
 static void _SLA_E()
 {
-    LogDebug("SLA E");
+    LogVerbose(3, "SLA E");
     _SLA(R.E);
 }
 
 static void _SLA_H()
 {
-    LogDebug("SLA H");
+    LogVerbose(3, "SLA H");
     _SLA(R.H);
 }
 
 static void _SLA_L()
 {
-    LogDebug("SLA L");
+    LogVerbose(3, "SLA L");
     _SLA(R.L);
 }
 
 static void _SLA_pHL()
 {
-    LogDebug("SLA (HL)");
+    LogVerbose(3, "SLA (HL)");
     uint8_t n = readByte(R.HL);
     tick(4);
 
@@ -91,49 +91,49 @@ static void _SLA_pHL()
 
 static void _SRA_A()
 {
-    LogDebug("SRA A");
+    LogVerbose(3, "SRA A");
     _SRA(R.A);
 }
 
 static void _SRA_B()
 {
-    LogDebug("SRA B");
+    LogVerbose(3, "SRA B");
     _SRA(R.B);
 }
 
 static void _SRA_C()
 {
-    LogDebug("SRA C");
+    LogVerbose(3, "SRA C");
     _SRA(R.C);
 }
 
 static void _SRA_D()
 {
-    LogDebug("SRA D");
+    LogVerbose(3, "SRA D");
     _SRA(R.D);
 }
 
 static void _SRA_E()
 {
-    LogDebug("SRA E");
+    LogVerbose(3, "SRA E");
     _SRA(R.E);
 }
 
 static void _SRA_H()
 {
-    LogDebug("SRA H");
+    LogVerbose(3, "SRA H");
     _SRA(R.H);
 }
 
 static void _SRA_L()
 {
-    LogDebug("SRA L");
+    LogVerbose(3, "SRA L");
     _SRA(R.L);
 }
 
 static void _SRA_pHL()
 {
-    LogDebug("_SRA (HL)");
+    LogVerbose(3, "_SRA (HL)");
     uint8_t n = readByte(R.HL);
     tick(4);
 
@@ -145,49 +145,49 @@ static void _SRA_pHL()
 
 static void _SRL_A()
 {
-    LogDebug("SRL A");
+    LogVerbose(3, "SRL A");
     _SRL(R.A);
 }
 
 static void _SRL_B()
 {
-    LogDebug("SRL B");
+    LogVerbose(3, "SRL B");
     _SRL(R.B);
 }
 
 static void _SRL_C()
 {
-    LogDebug("SRL C");
+    LogVerbose(3, "SRL C");
     _SRL(R.C);
 }
 
 static void _SRL_D()
 {
-    LogDebug("SRL D");
+    LogVerbose(3, "SRL D");
     _SRL(R.D);
 }
 
 static void _SRL_E()
 {
-    LogDebug("SRL E");
+    LogVerbose(3, "SRL E");
     _SRL(R.E);
 }
 
 static void _SRL_H()
 {
-    LogDebug("SRL H");
+    LogVerbose(3, "SRL H");
     _SRL(R.H);
 }
 
 static void _SRL_L()
 {
-    LogDebug("SRL L");
+    LogVerbose(3, "SRL L");
     _SRL(R.L);
 }
 
 static void _SRL_pHL()
 {
-    LogDebug("_SRL (HL)");
+    LogVerbose(3, "_SRL (HL)");
     uint8_t n = readByte(R.HL);
     tick(4);
 
@@ -199,56 +199,56 @@ static void _SRL_pHL()
 
 static void _SWAP_A()
 {
-    LogDebug("SWAP A");
+    LogVerbose(3, "SWAP A");
     _SWAP(R.A);
     tick(4);
 }
 
 static void _SWAP_B()
 {
-    LogDebug("SWAP B");
+    LogVerbose(3, "SWAP B");
     _SWAP(R.B);
     tick(4);
 }
 
 static void _SWAP_C()
 {
-    LogDebug("SWAP C");
+    LogVerbose(3, "SWAP C");
     _SWAP(R.C);
     tick(4);
 }
 
 static void _SWAP_D()
 {
-    LogDebug("SWAP D");
+    LogVerbose(3, "SWAP D");
     _SWAP(R.D);
     tick(4);
 }
 
 static void _SWAP_E()
 {
-    LogDebug("SWAP E");
+    LogVerbose(3, "SWAP E");
     _SWAP(R.E);
     tick(4);
 }
 
 static void _SWAP_H()
 {
-    LogDebug("SWAP H");
+    LogVerbose(3, "SWAP H");
     _SWAP(R.H);
     tick(4);
 }
 
 static void _SWAP_L()
 {
-    LogDebug("SWAP L");
+    LogVerbose(3, "SWAP L");
     _SWAP(R.L);
     tick(4);
 }
 
 static void _SWAP_pHL()
 {
-    LogDebug("SWAP (HL)");
+    LogVerbose(3, "SWAP (HL)");
     uint8_t n = readByte(R.HL);
     tick(4);
 

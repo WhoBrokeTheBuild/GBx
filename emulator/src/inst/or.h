@@ -12,49 +12,49 @@
 
 static void _OR_A()
 {
-    LogDebug("OR A");
+    LogVerbose(3, "OR A");
     _OR(R.A);
 }
 
 static void _OR_B()
 {
-    LogDebug("OR B");
+    LogVerbose(3, "OR B");
     _OR(R.B);
 }
 
 static void _OR_C()
 {
-    LogDebug("OR C");
+    LogVerbose(3, "OR C");
     _OR(R.C);
 }
 
 static void _OR_D()
 {
-    LogDebug("OR D");
+    LogVerbose(3, "OR D");
     _OR(R.D);
 }
 
 static void _OR_E()
 {
-    LogDebug("OR E");
+    LogVerbose(3, "OR E");
     _OR(R.E);
 }
 
 static void _OR_H()
 {
-    LogDebug("OR H");
+    LogVerbose(3, "OR H");
     _OR(R.H);
 }
 
 static void _OR_L()
 {
-    LogDebug("OR L");
+    LogVerbose(3, "OR L");
     _OR(R.L);
 }
 
 static void _OR_pHL()
 {
-    LogDebug("OR HL");
+    LogVerbose(3, "OR HL");
     uint8_t n = readByte(R.HL);
     tick(4);
 
@@ -66,7 +66,7 @@ static void _OR_u()
     uint8_t u = nextByte();
     tick(4);
 
-    LogDebug("OR %02Xh", u);
+    LogVerbose(3, "OR %02Xh", u);
 
     _OR(u);
 }

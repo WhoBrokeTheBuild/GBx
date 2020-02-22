@@ -12,7 +12,8 @@
 #include "register.h"
 #include "timer.h"
 
-bool DebugMode = false;
+bool DebugEnable = false;
+int VerboseLevel = 0;
 
 bool RequestBreakpoint = false;
 
@@ -319,14 +320,14 @@ void debugBreak(const char * input)
             LogError("Unknown LHS '%s'", input);
         }
 
-        LogDebug("Breakpoint set when %s=%04Xh", input, rhs);
+        LogInfo("Breakpoint set when %s=%04Xh", input, rhs);
         setBreakpoint(cond, rhs);
     }
     else {
         unsigned int pc;
         sscanf(input, "%04X", &pc);
         setBreakpoint(BKCND_PC_EQ, pc);
-        LogDebug("Breakpoint set when PC=%04Xh", pc);
+        LogInfo("Breakpoint set when PC=%04Xh", pc);
     }
 }
 
@@ -409,7 +410,7 @@ void debugHelp(const char * input)
 
 void debugPrompt() 
 {
-    DebugMode = true;
+    DebugEnable = true;
 
     char prompt[2048];
     snprintf(prompt, sizeof(prompt), "[%04X]> ", R.PC);
@@ -440,7 +441,7 @@ void debugPrompt()
             exit(0);
         }
         else if (strncmp(input, "continue", length) == 0) {
-            DebugMode = false;
+            DebugEnable = false;
             break;
         }
         else if (strncmp(input, "info", length) == 0) {

@@ -152,7 +152,7 @@ UNIT_TEST_SUITE(BIT)
 
 int main(int argc, char ** argv)
 {
-    DebugMode = true;
+    DebugEnable = true;
 	UNIT_RUN_SUITE(BIT);
 	UNIT_REPORT();
 	return UNIT_EXIT_CODE;

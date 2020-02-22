@@ -38,43 +38,43 @@
 
 static void _RLC_B()
 {
-    LogDebug("RLC B");
+    LogVerbose(3, "RLC B");
     _RLC(R.B);
 }
 
 static void _RLC_C()
 {
-    LogDebug("RLC C");
+    LogVerbose(3, "RLC C");
     _RLC(R.C);
 }
 
 static void _RLC_D()
 {
-    LogDebug("RLC D");
+    LogVerbose(3, "RLC D");
     _RLC(R.D);
 }
 
 static void _RLC_E()
 {
-    LogDebug("RLC E");
+    LogVerbose(3, "RLC E");
     _RLC(R.E);
 }
 
 static void _RLC_H()
 {
-    LogDebug("RLC H");
+    LogVerbose(3, "RLC H");
     _RLC(R.H);
 }
 
 static void _RLC_L()
 {
-    LogDebug("RLC L");
+    LogVerbose(3, "RLC L");
     _RLC(R.L);
 }
 
 static void _RLC_pHL()
 {
-    LogDebug("RLC (HL)");
+    LogVerbose(3, "RLC (HL)");
     uint8_t n = readByte(R.HL);
     tick(4);
 
@@ -86,55 +86,55 @@ static void _RLC_pHL()
 
 static void _RLC_A()
 {
-    LogDebug("RLC A");
+    LogVerbose(3, "RLC A");
     _RLC(R.A);
 }
 
 static void _RLCA()
 {
-    LogDebug("RLCA");
+    LogVerbose(3, "RLCA");
     _RLC(R.A);
 }
 
 static void _RRC_B()
 {
-    LogDebug("RRC B");
+    LogVerbose(3, "RRC B");
     _RRC(R.B);
 }
 
 static void _RRC_C()
 {
-    LogDebug("RRC C");
+    LogVerbose(3, "RRC C");
     _RRC(R.C);
 }
 
 static void _RRC_D()
 {
-    LogDebug("RRC D");
+    LogVerbose(3, "RRC D");
     _RRC(R.D);
 }
 
 static void _RRC_E()
 {
-    LogDebug("RRC E");
+    LogVerbose(3, "RRC E");
     _RRC(R.E);
 }
 
 static void _RRC_H()
 {
-    LogDebug("RRC H");
+    LogVerbose(3, "RRC H");
     _RRC(R.H);
 }
 
 static void _RRC_L()
 {
-    LogDebug("RRC L");
+    LogVerbose(3, "RRC L");
     _RRC(R.L);
 }
 
 static void _RRC_pHL()
 {
-    LogDebug("RRC (HL)");
+    LogVerbose(3, "RRC (HL)");
     uint8_t n = readByte(R.HL);
     tick(4);
 
@@ -146,55 +146,55 @@ static void _RRC_pHL()
 
 static void _RRC_A()
 {
-    LogDebug("RRC A");
+    LogVerbose(3, "RRC A");
     _RRC(R.A);
 }
 
 static void _RRCA()
 {
-    LogDebug("RRCA");
+    LogVerbose(3, "RRCA");
     _RRC(R.A);
 }
 
 static void _RL_B()
 {
-    LogDebug("RL B");
+    LogVerbose(3, "RL B");
     _RL(R.B);
 }
 
 static void _RL_C()
 {
-    LogDebug("RL C");
+    LogVerbose(3, "RL C");
     _RL(R.C);
 }
 
 static void _RL_D()
 {
-    LogDebug("RL D");
+    LogVerbose(3, "RL D");
     _RL(R.D);
 }
 
 static void _RL_E()
 {
-    LogDebug("RL E");
+    LogVerbose(3, "RL E");
     _RL(R.E);
 }
 
 static void _RL_H()
 {
-    LogDebug("RL H");
+    LogVerbose(3, "RL H");
     _RL(R.H);
 }
 
 static void _RL_L()
 {
-    LogDebug("RL L");
+    LogVerbose(3, "RL L");
     _RL(R.L);
 }
 
 static void _RL_pHL()
 {
-    LogDebug("RL (HL)");
+    LogVerbose(3, "RL (HL)");
     uint8_t n = readByte(R.HL);
     tick(4);
 
@@ -206,55 +206,55 @@ static void _RL_pHL()
 
 static void _RL_A()
 {
-    LogDebug("RL A");
+    LogVerbose(3, "RL A");
     _RL(R.A);
 }
 
 static void _RLA()
 {
-    LogDebug("RL A");
+    LogVerbose(3, "RL A");
     _RL(R.A);
 }
 
 static void _RR_B()
 {
-    LogDebug("RR B");
+    LogVerbose(3, "RR B");
     _RR(R.B);
 }
 
 static void _RR_C()
 {
-    LogDebug("RR C");
+    LogVerbose(3, "RR C");
     _RR(R.C);
 }
 
 static void _RR_D()
 {
-    LogDebug("RR D");
+    LogVerbose(3, "RR D");
     _RR(R.D);
 }
 
 static void _RR_E()
 {
-    LogDebug("RR E");
+    LogVerbose(3, "RR E");
     _RR(R.E);
 }
 
 static void _RR_H()
 {
-    LogDebug("RR H");
+    LogVerbose(3, "RR H");
     _RR(R.H);
 }
 
 static void _RR_L()
 {
-    LogDebug("RR L");
+    LogVerbose(3, "RR L");
     _RR(R.L);
 }
 
 static void _RR_pHL()
 {
-    LogDebug("RR (HL)");
+    LogVerbose(3, "RR (HL)");
     uint8_t n = readByte(R.HL);
     tick(4);
 
@@ -266,13 +266,13 @@ static void _RR_pHL()
 
 static void _RR_A()
 {
-    LogDebug("RR A");
+    LogVerbose(3, "RR A");
     _RR(R.A);
 }
 
 static void _RRA()
 {
-    LogDebug("RR A");
+    LogVerbose(3, "RR A");
     _RR(R.A);
 }
 

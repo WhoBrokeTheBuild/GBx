@@ -14,56 +14,56 @@
 
 static void _DEC_A()
 {
-    LogDebug("DEC A");
+    LogVerbose(3, "DEC A");
     _DEC(R.A);
     tick(4);
 }
 
 static void _DEC_B()
 {
-    LogDebug("DEC B");
+    LogVerbose(3, "DEC B");
     _DEC(R.B);
     tick(4);
 }
 
 static void _DEC_C()
 {
-    LogDebug("DEC C");
+    LogVerbose(3, "DEC C");
     _DEC(R.C);
     tick(4);
 }
 
 static void _DEC_D()
 {
-    LogDebug("DEC D");
+    LogVerbose(3, "DEC D");
     _DEC(R.D);
     tick(4);
 }
 
 static void _DEC_E()
 {
-    LogDebug("DEC E");
+    LogVerbose(3, "DEC E");
     _DEC(R.E);
     tick(4);
 }
 
 static void _DEC_H()
 {
-    LogDebug("DEC H");
+    LogVerbose(3, "DEC H");
     _DEC(R.H);
     tick(4);
 }
 
 static void _DEC_L()
 {
-    LogDebug("DEC L");
+    LogVerbose(3, "DEC L");
     _DEC(R.L);
     tick(4);
 }
 
 static void _DEC_pHL()
 {
-    LogDebug("DEC (HL)");
+    LogVerbose(3, "DEC (HL)");
     uint8_t n = readByte(R.HL);
     tick(8);
 
@@ -75,28 +75,28 @@ static void _DEC_pHL()
 
 static void _DEC_BC()
 {
-    LogDebug("DEC BC");
+    LogVerbose(3, "DEC BC");
     --R.BC;
     tick(8);
 }
 
 static void _DEC_DE()
 {
-    LogDebug("DEC DE");
+    LogVerbose(3, "DEC DE");
     --R.DE;
     tick(8);
 }
 
 static void _DEC_HL()
 {
-    LogDebug("DEC HL");
+    LogVerbose(3, "DEC HL");
     --R.HL;
     tick(8);
 }
 
 static void _DEC_SP()
 {
-    LogDebug("DEC SP");
+    LogVerbose(3, "DEC SP");
     --R.SP;
     tick(8);
 }

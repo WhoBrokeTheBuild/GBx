@@ -9,66 +9,80 @@
 
 #include <SDL.h>
 #include <signal.h>
+#include <cflags.h>
 
-static void usage() 
-{
-    printf(
-        "usage: GBx FILENAME [-d]\n"
-        "\n"
-        "-b     Run with the original bootstrap code\n"
-        "-d     Run with the built-in debugger\n"
-    );
-}
+#if defined(HAVE_READLINE)
+
+#include <readline/readline.h>
+
+#endif
 
 void handleSignal(int sig)
 {
     LogInfo("Caught signal %d", sig);
 
-    DebugMode = true;
+    DebugEnable = true;
     debugPrompt();
 }
 
 int main(int argc, char** argv)
 {
-    if (argc == 1) {
-        usage();
+    cflags_t * flags = cflags_init();
+
+    cflags_add_bool(flags, 'd', "debug", &DebugEnable, "Enable Debug Mode");
+    cflags_add_bool(flags, 'b', "bootstrap", &BootstrapEnable, "Enable the original GameBoy Bootstrap");
+    cflags_flag_t * verbose = cflags_add_bool(flags, 'v', "verbose", NULL, "Enables verbose output, repeat up to 4 times for more verbosity");
+
+    bool breakAtStart = false;
+    cflags_add_bool(flags, '\0', "break-start", &breakAtStart, "Breakpoint when application starts, implies Debug Mode");
+
+    cflags_parse(flags, argc, argv);
+    VerboseLevel = verbose->count;
+
+    if (flags->argc == 0) {
+        cflags_print_usage(flags,
+            "[OPTION]... ROM_FILENAME",
+            "A Toy GameBoy Emulator",
+            "Additional information about this program can be found by contacting:\n"
+            "  sdl.slane@gmail.com");
         return 0;
     }
 
-    LogInfo("Loading ROM %s", argv[1]);
-
-    if (!loadCartridge(argv[1])) {
-        LogFatal("Failed to load ROM");
-    }
-
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER) < 0) {
-        LogFatal("failed to initialize SDL2, %s", SDL_GetError());
+        LogFatal("Failed to initialize SDL2, %s", SDL_GetError());
     }
+
+    SDL_version sdlVer;
+    SDL_GetVersion(&sdlVer);
+    LogVerbose(1, "SDL Version: %d.%d.%d",
+        sdlVer.major, sdlVer.minor, sdlVer.patch);
+
+    #if defined(HAVE_READLINE)
+        LogVerbose(1, "Readline Version: %s", rl_library_version);
+    #endif
 
     lcdInit();
     apuInit();
 
-    for (int i = 2; i < argc; ++i) {
-        const char * arg = argv[i];
-        if (strncmp(arg, "-d", 2) == 0
-            || strncmp(arg, "--debug", 7) == 0) {
-            DebugMode = true;
-        }
-        else if (strncmp(arg, "-b", 2) == 0
-            || strncmp(arg, "bootstrap", 11) == 0) {
-            BootstrapEnable = true;
-        }
+    if (!loadCartridge(flags->argv[0])) {
+        exit(1);
     }
 
     if (!BootstrapEnable) {
         bootstrap();
     }
+
+    if (breakAtStart) {
+        DebugEnable = true;
+    }
     
-    if (DebugMode) {
+    if (DebugEnable) {
         signal(SIGINT, handleSignal);
         signal(SIGSEGV, handleSignal);
         
-        setBreakpoint(BKCND_PC_EQ, R.PC);
+        if (breakAtStart) {
+            setBreakpoint(BKCND_PC_EQ, R.PC);
+        }
     }
 
     for (;;) {
@@ -85,6 +99,8 @@ int main(int argc, char** argv)
     freeCartridge();
 
     SDL_Quit();
+
+    cflags_free(flags);
 
     return 0;
 }

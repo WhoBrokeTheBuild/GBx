@@ -147,7 +147,7 @@ UNIT_TEST_SUITE(DEC16)
 
 int main(int argc, char ** argv)
 {
-    DebugMode = true;
+    DebugEnable = true;
     UNIT_RUN_SUITE(DEC8);
     UNIT_RUN_SUITE(DEC16);
     UNIT_REPORT();

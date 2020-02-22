@@ -110,13 +110,15 @@ void writeCartridgeMBC(uint16_t address, uint8_t data)
 
 bool loadCartridge(const char * filename)
 {
+    LogVerbose(1, "Opening ROM: '%s'", filename);
+
     FILE * file = fopen(filename, "rb");
 
     fseek(file, 0, SEEK_END);
     size_t size = ftell(file);
     fseek(file, 0, SEEK_SET);
 
-    LogVerbose("ROM Size %zu", size);
+    LogVerbose(1, "ROM Size %zu", size);
 
     CartridgeROM0 = (uint8_t *)malloc(size);
     CartridgeROM = CartridgeROM0 + 0x4000; // Default to Bank 1
@@ -124,10 +126,10 @@ bool loadCartridge(const char * filename)
     size_t bytesRead = fread(CartridgeROM0, 1, size, file);
     fclose(file);
 
-    LogVerbose("read %zu bytes", bytesRead);
+    LogVerbose(1, "Read %zu bytes", bytesRead);
 
     if (bytesRead < size) {
-        LogError("failed to load %s", filename);
+        LogFatal("Failed to load ROM: '%s'", filename);
         return false;
     }
 
@@ -309,6 +311,10 @@ bool loadCartridge(const char * filename)
         break;
     default:
         break;
+    }
+
+    if (VerboseLevel >= 1) {
+        printCartridge();
     }
 
     return true;

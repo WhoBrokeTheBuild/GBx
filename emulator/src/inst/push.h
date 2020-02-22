@@ -8,28 +8,28 @@
 
 static void _PUSH_AF()
 {
-    LogDebug("PUSH AF");
+    LogVerbose(3, "PUSH AF");
     pushWord(R.AF);
     tick(16);
 }
 
 static void _PUSH_BC()
 {
-    LogDebug("PUSH BC");
+    LogVerbose(3, "PUSH BC");
     pushWord(R.BC);
     tick(16);
 }
 
 static void _PUSH_DE()
 {
-    LogDebug("PUSH DE");
+    LogVerbose(3, "PUSH DE");
     pushWord(R.DE);
     tick(16);
 }
 
 static void _PUSH_HL()
 {
-    LogDebug("PUSH HL");
+    LogVerbose(3, "PUSH HL");
     pushWord(R.HL);
     tick(16);
 }

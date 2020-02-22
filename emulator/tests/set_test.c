@@ -135,7 +135,7 @@ UNIT_TEST_SUITE(SET)
 
 int main(int argc, char ** argv)
 {
-    DebugMode = true;
+    DebugEnable = true;
 	UNIT_RUN_SUITE(SET);
 	UNIT_REPORT();
 	return UNIT_EXIT_CODE;

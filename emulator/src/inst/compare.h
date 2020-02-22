@@ -12,49 +12,49 @@
 
 static void _CP_A()
 {
-    LogDebug("CP A");
+    LogVerbose(3, "CP A");
     _CP(R.A);
 }
 
 static void _CP_B()
 {
-    LogDebug("CP B");
+    LogVerbose(3, "CP B");
     _CP(R.B);
 }
 
 static void _CP_C()
 {
-    LogDebug("CP C");
+    LogVerbose(3, "CP C");
     _CP(R.C);
 }
 
 static void _CP_D()
 {
-    LogDebug("CP D");
+    LogVerbose(3, "CP D");
     _CP(R.D);
 }
 
 static void _CP_E()
 {
-    LogDebug("CP E");
+    LogVerbose(3, "CP E");
     _CP(R.E);
 }
 
 static void _CP_H()
 {
-    LogDebug("CP H");
+    LogVerbose(3, "CP H");
     _CP(R.H);
 }
 
 static void _CP_L()
 {
-    LogDebug("CP L");
+    LogVerbose(3, "CP L");
     _CP(R.L);
 }
 
 static void _CP_pHL()
 {
-    LogDebug("CP (HL)");
+    LogVerbose(3, "CP (HL)");
     uint8_t pHL = readByte(R.HL);
     tick(4);
 
@@ -66,7 +66,7 @@ static void _CP_u()
     uint8_t u = nextByte();
     tick(4);
 
-    LogDebug("CP %02Xh", u);
+    LogVerbose(3, "CP %02Xh", u);
 
     _CP(u);
 }

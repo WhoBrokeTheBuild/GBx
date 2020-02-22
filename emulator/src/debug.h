@@ -4,7 +4,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-extern bool DebugMode;
+extern bool DebugEnable;
+extern int VerboseLevel;
 
 typedef enum {
     BKCND_NONE,

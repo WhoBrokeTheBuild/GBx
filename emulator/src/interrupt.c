@@ -19,30 +19,35 @@ void checkInterrupts()
         };
 
         if (enabledInts.VBlank) {
+            LogVerbose(2, "VBlank Interrupt");
             IF.VBlank = false;
             pushWord(R.PC);
             R.PC = 0x40;
         }
 
         if (enabledInts.STAT) {
+            LogVerbose(2, "STAT Interrupt");
             IF.STAT = false;
             pushWord(R.PC);
             R.PC = 0x48;
         }
 
         if (enabledInts.Timer) {
+            LogVerbose(2, "Timer Interrupt");
             IF.Timer = false;
             pushWord(R.PC);
             R.PC = 50;
         }
 
         if (enabledInts.Serial) {
+            LogVerbose(2, "Serial Interrupt");
             IF.Serial = false;
             pushWord(R.PC);
             R.PC = 59;
         }
 
         if (enabledInts.Joypad) {
+            LogVerbose(2, "Joypad Interrupt");
             IF.Joypad = false;
             pushWord(R.PC);
             R.PC = 60;
