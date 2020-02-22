@@ -59,6 +59,7 @@ void writeCartridgeMBC(uint16_t address, uint8_t data)
     if (MBCType == MBC_MBC1) {
         if (address <= 0x1FFF) {
             // RAM Enable
+            LogInfo("%04X %02X", address, data);
             CartridgeRAMEnabled = ((data & 0x0F) == 0x0A);
             LogInfo("Cart RAM Enabled:%s", CartridgeRAMEnabled ? "true" : "false");
         }

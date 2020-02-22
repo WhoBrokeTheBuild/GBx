@@ -9,7 +9,7 @@ void setup()
 {
     Ticks = 0;
     memset(&R, sizeof(R), 0);
-    R.PC = RAM_OFFSET;
+    R.PC = 0x0000;
     R.SP = RAM_OFFSET + 0x0100;
 }
 
@@ -119,7 +119,7 @@ UNIT_TEST_SUITE(RET)
 
 int main(int argc, char ** argv)
 {
-    DebugEnable = true;
+    VerboseLevel = 4;
 	UNIT_RUN_SUITE(RET);
 	UNIT_REPORT();
 	return UNIT_EXIT_CODE;

@@ -147,7 +147,7 @@ UNIT_TEST_SUITE(INC16)
 
 int main(int argc, char ** argv)
 {
-    DebugEnable = true;
+    VerboseLevel = 4;
 	UNIT_RUN_SUITE(INC8);
 	UNIT_RUN_SUITE(INC16);
 	UNIT_REPORT();

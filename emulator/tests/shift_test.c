@@ -493,7 +493,7 @@ UNIT_TEST_SUITE(SWAP)
 
 int main(int argc, char ** argv)
 {
-    DebugEnable = true;
+    VerboseLevel = 4;
     UNIT_RUN_SUITE(SLA);
     UNIT_RUN_SUITE(SRA);
     UNIT_RUN_SUITE(SRL);

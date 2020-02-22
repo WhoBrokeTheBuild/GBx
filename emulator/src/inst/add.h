@@ -64,6 +64,8 @@ static void _ADD_pHL()
     uint8_t pHL = readByte(R.HL);
     tick(4);
 
+    LogInfo("Adding %02X to A(%02X)", pHL, R.A);
+
     _ADD(pHL);
 }
 
@@ -122,10 +124,10 @@ static void _ADC_L()
 static void _ADC_pHL()
 {
     LogVerbose(3, "ADC A,(HL)");
-    uint8_t n = readByte(R.HL);
+    uint8_t pHL = readByte(R.HL);
     tick(4);
 
-    _ADC(n);
+    _ADC(pHL);
 }
 
 static void _ADC_u()

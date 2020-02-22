@@ -171,7 +171,7 @@ UNIT_TEST_SUITE(CP)
 
 int main(int argc, char ** argv)
 {
-    DebugEnable = true;
+    VerboseLevel = 4;
 	UNIT_RUN_SUITE(CP);
 	UNIT_REPORT();
 	return UNIT_EXIT_CODE;

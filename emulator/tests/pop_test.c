@@ -58,7 +58,7 @@ UNIT_TEST_SUITE(POP)
 
 int main(int argc, char ** argv)
 {
-    DebugEnable = true;
+    VerboseLevel = 4;
 	UNIT_RUN_SUITE(POP);
 	UNIT_REPORT();
 	return UNIT_EXIT_CODE;

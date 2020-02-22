@@ -40,7 +40,7 @@ SDL_Window * sdlWindow = NULL;
 SDL_Renderer * sdlRenderer = NULL;
 SDL_Texture * sdlTexture = NULL;
 
-bool FPSLimit = true;
+bool FPSLimit = false;
 
 uint8_t PixelData[256*256*3];
 
@@ -394,4 +394,22 @@ void printLCDInfo()
 {
     LogInfo("SCY=%d SCX=%d LY=%d LYC=%d WX=%d WY=%d",
         SCY, SCX, LY, LYC, WX, WY);
+}
+
+void printBGP()
+{
+    LogInfo("BGP Color00=%d Color01=%d Color10=%d Color11=%d",
+        BGP.Color00, BGP.Color01, BGP.Color10, BGP.Color11);
+}
+
+void printOBP0()
+{
+    LogInfo("OBP0 Color00=%d Color01=%d Color10=%d Color11=%d",
+        OBP0.Color00, OBP0.Color01, OBP0.Color10, OBP0.Color11);
+}
+
+void printOBP1()
+{
+    LogInfo("OBP1 Color00=%d Color01=%d Color10=%d Color11=%d",
+        OBP1.Color00, OBP1.Color01, OBP1.Color10, OBP1.Color11);
 }

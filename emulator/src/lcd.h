@@ -96,5 +96,8 @@ void lcdTick(unsigned cycles);
 void printLCDC();
 void printSTAT();
 void printLCDInfo();
+void printBGP();
+void printOBP0();
+void printOBP1();
 
 #endif // LCD_H

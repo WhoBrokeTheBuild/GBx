@@ -135,7 +135,7 @@ UNIT_TEST_SUITE(RES)
 
 int main(int argc, char ** argv)
 {
-    DebugEnable = true;
+    VerboseLevel = 4;
 	UNIT_RUN_SUITE(RES);
 	UNIT_REPORT();
 	return UNIT_EXIT_CODE;

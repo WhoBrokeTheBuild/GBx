@@ -253,12 +253,21 @@ void writeByte(uint16_t address, uint8_t data)
             break;
         case 0xFF05:
             TIMA = data;
+            if (VerboseLevel >= 2) {
+                printTimer();
+            }
             break;
         case 0xFF06:
             TMA = data;
+            if (VerboseLevel >= 2) {
+                printTimer();
+            }
             break;
         case 0xFF07:
             TAC.data = data;
+            if (VerboseLevel >= 2) {
+                printTimer();
+            }
             break;
         case 0xFF0F:
             IF.data = data;
@@ -428,12 +437,21 @@ void writeByte(uint16_t address, uint8_t data)
             break;
         case 0xFF47:
             BGP.data = data;
+            if (VerboseLevel >= 2) {
+                printBGP();
+            }
             break;
         case 0xFF48:
             OBP0.data = data;
+            if (VerboseLevel >= 2) {
+                printOBP0();
+            }
             break;
         case 0xFF49:
             OBP1.data = data;
+            if (VerboseLevel >= 2) {
+                printOBP1();
+            }
             break;
         case 0xFF4A:
             WX = data;
@@ -449,7 +467,8 @@ void writeByte(uint16_t address, uint8_t data)
             break;
         
         case 0xFF50:
-            BootstrapEnable = (data > 0);
+            BootstrapEnable = (data == 0);
+            LogVerbose(2, "Bootstrap %s", (BootstrapEnable ? "Enabled" : "Disabled"));
             break;
         };
     }

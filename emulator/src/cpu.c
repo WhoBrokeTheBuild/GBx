@@ -308,6 +308,8 @@ inst_t instructions[0x100] = {
 uint8_t fetch()
 {
     if (CPUEnabled) {
+        LogVerbose(3, "Read opcode at %04X", R.PC);
+
         uint8_t op = nextByte();
         tick(4);
         return op;

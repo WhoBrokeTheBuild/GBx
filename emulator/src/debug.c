@@ -410,7 +410,9 @@ void debugHelp(const char * input)
 
 void debugPrompt() 
 {
+    int oldVerboseLevel = VerboseLevel;
     DebugEnable = true;
+    VerboseLevel = 4;
 
     char prompt[2048];
     snprintf(prompt, sizeof(prompt), "[%04X]> ", R.PC);
@@ -442,6 +444,7 @@ void debugPrompt()
         }
         else if (strncmp(input, "continue", length) == 0) {
             DebugEnable = false;
+            VerboseLevel = oldVerboseLevel;
             break;
         }
         else if (strncmp(input, "info", length) == 0) {

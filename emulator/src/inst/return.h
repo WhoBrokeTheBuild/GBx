@@ -22,14 +22,14 @@ static void _RET_NZ()
 {
     LogVerbose(3, "RET NZ");
 
+    uint16_t nn = popWord();
     tick(8);
 
     if (!R.FZ) {
-        uint16_t nn = popWord();
-        tick(8);
+        tick(4);
 
         R.PC = nn;
-        tick(4);
+        tick(8);
     }
 }
 
@@ -37,14 +37,14 @@ static void _RET_Z()
 {
     LogVerbose(3, "RET Z");
 
+    uint16_t nn = popWord();
     tick(8);
 
     if (R.FZ) {
-        uint16_t nn = popWord();
-        tick(8);
+        tick(4);
 
         R.PC = nn;
-        tick(4);
+        tick(8);
     }
 }
 
@@ -52,14 +52,14 @@ static void _RET_NC()
 {
     LogVerbose(3, "RET NC");
 
+    uint16_t nn = popWord();
     tick(8);
 
     if (!R.FC) {
-        uint16_t nn = popWord();
-        tick(8);
+        tick(4);
 
         R.PC = nn;
-        tick(4);
+        tick(8);
     }
 }
 
@@ -67,14 +67,14 @@ static void _RET_C()
 {
     LogVerbose(3, "RET C");
 
+    uint16_t nn = popWord();
     tick(8);
 
     if (R.FC) {
-        uint16_t nn = popWord();
-        tick(8);
+        tick(4);
 
         R.PC = nn;
-        tick(4);
+        tick(8);
     }
 }
 

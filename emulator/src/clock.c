@@ -13,4 +13,5 @@ void tick(unsigned cycles)
     timerTick(cycles);
     lcdTick(cycles);
     apuTick(cycles);
+    Ticks += cycles;
 }
