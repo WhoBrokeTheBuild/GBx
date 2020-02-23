@@ -8,28 +8,28 @@
 
 static void _POP_AF()
 {
-    LogVerbose(3, "POP AF");
+    LogInst("POP AF");
     R.AF = popWord();
     tick(12);
 }
 
 static void _POP_BC()
 {
-    LogVerbose(3, "POP BC");
+    LogInst("POP BC");
     R.BC = popWord();
     tick(12);
 }
 
 static void _POP_DE()
 {
-    LogVerbose(3, "POP DE");
+    LogInst("POP DE");
     R.DE = popWord();
     tick(12);
 }
 
 static void _POP_HL()
 {
-    LogVerbose(3, "POP HL");
+    LogInst("POP HL");
     R.HL = popWord();
     tick(12);
 }

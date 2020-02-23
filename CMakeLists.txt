@@ -7,7 +7,7 @@ SET(CMAKE_C_STANDARD 11)
 LIST(INSERT CMAKE_MODULE_PATH 0 "${CMAKE_SOURCE_DIR}/cmake")
 
 OPTION(BUILD_TOOLS      "Build tool executables."       OFF)
-OPTION(BUILD_TESTS      "Build Tests"                   ON)
+OPTION(BUILD_TESTS      "Build Tests"                   OFF)
 
 IF(BUILD_TESTS)
     ENABLE_TESTING()

@@ -12,49 +12,49 @@
 
 static void _AND_A()
 {
-    LogVerbose(3, "AND A");
+    LogInst("AND A");
     _AND(R.A);
 }
 
 static void _AND_B()
 {
-    LogVerbose(3, "AND B");
+    LogInst("AND B");
     _AND(R.B);
 }
 
 static void _AND_C()
 {
-    LogVerbose(3, "AND C");
+    LogInst("AND C");
     _AND(R.C);
 }
 
 static void _AND_D()
 {
-    LogVerbose(3, "AND D");
+    LogInst("AND D");
     _AND(R.D);
 }
 
 static void _AND_E()
 {
-    LogVerbose(3, "AND E");
+    LogInst("AND E");
     _AND(R.E);
 }
 
 static void _AND_H()
 {
-    LogVerbose(3, "AND H");
+    LogInst("AND H");
     _AND(R.H);
 }
 
 static void _AND_L()
 {
-    LogVerbose(3, "AND L");
+    LogInst("AND L");
     _AND(R.L);
 }
 
 static void _AND_pHL()
 {
-    LogVerbose(3, "AND HL");
+    LogInst("AND HL");
     uint8_t n = readByte(R.HL);
     tick(4);
 
@@ -66,7 +66,7 @@ static void _AND_u()
     uint8_t u = nextByte();
     tick(4);
 
-    LogVerbose(3, "AND %02Xh", u);
+    LogInst("AND %02Xh", u);
 
     _AND(u);
 }

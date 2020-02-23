@@ -2,6 +2,9 @@
 #define LOG_H
 
 #include "debug.h"
+#include "cpu.h"
+#include "register.h"
+#include "gbx.h"
 
 #include <stdio.h>
 
@@ -44,6 +47,7 @@
             SetConsoleTextAttribute(hConsole, COLOR_RED);           \
             fprintf(stderr, "[FATA] " M "\n", ##__VA_ARGS__);       \
             SetConsoleTextAttribute(hConsole, COLOR_DEFAULT);       \
+            setBreakpoint(R.PC);                                    \
         } while (0)
 
     #define LogVerbose(LVL, M, ...)                             \
@@ -71,11 +75,14 @@
         do { fprintf(stderr, COLOR_RED "[ERRO] " M "\n" COLOR_END, ##__VA_ARGS__); } while (0)
     
     #define LogFatal(M, ...) \
-        do { fprintf(stderr, COLOR_RED "[FATA] " M "\n" COLOR_END, ##__VA_ARGS__); requestBreakpoint(); } while (0)
+        do { fprintf(stderr, COLOR_RED "[FATA] " M "\n" COLOR_END, ##__VA_ARGS__); setBreakpoint(R.PC); } while (0)
     
     #define LogVerbose(LVL, M, ...) \
         if (VerboseLevel >= LVL) { printf(COLOR_CYAN "[VERB] " M "\n" COLOR_END, ##__VA_ARGS__); }
 
 #endif // WIN32
+
+#define LogInst(M, ...) \
+    do { logInstruction("%04X: " M, LastInstructionAddress, ##__VA_ARGS__); } while (0)
 
 #endif // LOG_H

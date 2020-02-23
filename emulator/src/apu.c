@@ -1,6 +1,7 @@
 #include "apu.h"
 
 #include "log.h"
+#include "math.h"
 
 #include <SDL.h>
 
@@ -12,14 +13,39 @@ volume_control_t VolumeControl;
 
 uint8_t WaveRAM[0x10];
 
+SDL_AudioSpec sdlAudioSpec;
+SDL_AudioDeviceID sdlAudioDev;
+
+void sdlAudioCallback(void * userdata, Uint8 * stream, int length)
+{
+    memset(stream, 0, length);
+}
+
 void apuInit()
 {
-    
+    SDL_AudioSpec request;
+    memset(&request, 0, sizeof(request));
+
+    request.freq = 44100;
+    request.format = AUDIO_U8;
+    request.channels = 1;
+    request.samples = 32;
+    request.callback = sdlAudioCallback;
+    sdlAudioDev = SDL_OpenAudioDevice(NULL, 0, &request, &sdlAudioSpec, SDL_AUDIO_ALLOW_FORMAT_CHANGE);
+
+    LogInfo("AudioDevice Frequency=%d Format=%d Channels=%d Samples=%d",
+        sdlAudioSpec.freq,
+        sdlAudioSpec.format,
+        sdlAudioSpec.channels,
+        sdlAudioSpec.samples
+    );
+
+    SDL_PauseAudioDevice(sdlAudioDev, false);
 }
 
 void apuTerm()
 {
-    
+    SDL_CloseAudioDevice(sdlAudioDev);
 }
 
 void apuTick(unsigned cycles)

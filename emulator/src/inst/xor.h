@@ -12,49 +12,49 @@
 
 static void _XOR_A()
 {
-    LogVerbose(3, "XOR A");
+    LogInst("XOR A");
     _XOR(R.A);
 }
 
 static void _XOR_B()
 {
-    LogVerbose(3, "XOR B");
+    LogInst("XOR B");
     _XOR(R.B);
 }
 
 static void _XOR_C()
 {
-    LogVerbose(3, "XOR C");
+    LogInst("XOR C");
     _XOR(R.C);
 }
 
 static void _XOR_D()
 {
-    LogVerbose(3, "XOR D");
+    LogInst("XOR D");
     _XOR(R.D);
 }
 
 static void _XOR_E()
 {
-    LogVerbose(3, "XOR E");
+    LogInst("XOR E");
     _XOR(R.E);
 }
 
 static void _XOR_H()
 {
-    LogVerbose(3, "XOR H");
+    LogInst("XOR H");
     _XOR(R.H);
 }
 
 static void _XOR_L()
 {
-    LogVerbose(3, "XOR L");
+    LogInst("XOR L");
     _XOR(R.L);
 }
 
 static void _XOR_pHL()
 {
-    LogVerbose(3, "XOR HL");
+    LogInst("XOR HL");
     uint8_t n = readByte(R.HL);
     tick(4);
 
@@ -66,7 +66,7 @@ static void _XOR_u()
     uint8_t u = nextByte();
     tick(4);
 
-    LogVerbose(3, "XOR %02Xh", u);
+    LogInst("XOR %02Xh", u);
 
     _XOR(u);
 }

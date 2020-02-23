@@ -13,49 +13,49 @@
 
 static void _BIT_b_A(int bit)
 {
-    LogVerbose(3, "BIT %d,A", bit);
+    LogInst("BIT %d,A", bit);
     _BIT(R.A, bit);
 }
 
 static void _BIT_b_B(int bit)
 {
-    LogVerbose(3, "BIT %d,B", bit);
+    LogInst("BIT %d,B", bit);
     _BIT(R.B, bit);
 }
 
 static void _BIT_b_C(int bit)
 {
-    LogVerbose(3, "BIT %d,C", bit);
+    LogInst("BIT %d,C", bit);
     _BIT(R.C, bit);
 }
 
 static void _BIT_b_D(int bit)
 {
-    LogVerbose(3, "BIT %d,D", bit);
+    LogInst("BIT %d,D", bit);
     _BIT(R.D, bit);
 }
 
 static void _BIT_b_E(int bit)
 {
-    LogVerbose(3, "BIT %d,E", bit);
+    LogInst("BIT %d,E", bit);
     _BIT(R.E, bit);
 }
 
 static void _BIT_b_H(int bit)
 {
-    LogVerbose(3, "BIT %d,H", bit);
+    LogInst("BIT %d,H", bit);
     _BIT(R.H, bit);
 }
 
 static void _BIT_b_L(int bit)
 {
-    LogVerbose(3, "BIT %d,L", bit);
+    LogInst("BIT %d,L", bit);
     _BIT(R.L, bit);
 }
 
 static void _BIT_b_pHL(int bit)
 {
-    LogVerbose(3, "BIT %d,(HL)", bit);
+    LogInst("BIT %d,(HL)", bit);
     uint8_t n = readByte(R.HL);
     tick(4);
 

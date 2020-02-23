@@ -5,38 +5,16 @@
 #include <stdint.h>
 
 extern bool DebugEnable;
-extern int VerboseLevel;
 
-typedef enum {
-    BKCND_NONE,
-    
-    BKCND_A_EQ,
-    BKCND_B_EQ,
-    BKCND_C_EQ,
-    BKCND_BC_EQ,
-    BKCND_D_EQ,
-    BKCND_E_EQ,
-    BKCND_DE_EQ,
-    BKCND_H_EQ,
-    BKCND_L_EQ,
-    BKCND_HL_EQ,
-    BKCND_SP_EQ,
-    BKCND_PC_EQ,
-    BKCND_FC_EQ,
-    BKCND_FH_EQ,
-    BKCND_FN_EQ,
-    BKCND_FZ_EQ,
-    BKCND_OP_EQ,
+void debugInit();
+void debugTerm();
 
-} breakpoint_cond_t;
-
-void setBreakpoint(breakpoint_cond_t cond, uint32_t value);
-
+void setBreakpoint(uint16_t address);
 void clearBreakpoint();
-
 bool atBreakpoint();
 
-void requestBreakpoint();
+void logInstruction(const char * format, ...);
+void printInstructionLog();
 
 void debugPrompt();
 

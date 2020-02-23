@@ -27,13 +27,13 @@ typedef enum {
 
 typedef union {
     struct {
-        stat_mode_t     Mode:2;
-        bool            IntCoincidence:1;
-        bool            IntHBlank:1;
-        bool            IntVBlank:1;
-        bool            IntSearchSprite:1;
-        bool            LYCLY:1;
-        uint8_t         _:1;
+        stat_mode_t Mode:2;
+        bool        IntCoincidence:1;
+        bool        IntHBlank:1;
+        bool        IntVBlank:1;
+        bool        IntSearchSprite:1;
+        bool        LYCLY:1;
+        uint8_t     _:1;
     };
     uint8_t data;
 } STAT_t;

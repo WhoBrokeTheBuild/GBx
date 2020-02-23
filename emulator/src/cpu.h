@@ -6,6 +6,8 @@
 
 extern bool CPUEnabled;
 
+extern uint16_t LastInstructionAddress;
+
 typedef void(* inst_t)();
 
 uint8_t fetch();

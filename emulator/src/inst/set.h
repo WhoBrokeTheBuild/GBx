@@ -11,49 +11,49 @@
 
 static void _SET_b_A(int bit)
 {
-    LogVerbose(3, "SET %d,A", bit);
+    LogInst("SET %d,A", bit);
     _SET(R.A, bit);
 }
 
 static void _SET_b_B(int bit)
 {
-    LogVerbose(3, "SET %d,B", bit);
+    LogInst("SET %d,B", bit);
     _SET(R.B, bit);
 }
 
 static void _SET_b_C(int bit)
 {
-    LogVerbose(3, "SET %d,C", bit);
+    LogInst("SET %d,C", bit);
     _SET(R.C, bit);
 }
 
 static void _SET_b_D(int bit)
 {
-    LogVerbose(3, "SET %d,D", bit);
+    LogInst("SET %d,D", bit);
     _SET(R.D, bit);
 }
 
 static void _SET_b_E(int bit)
 {
-    LogVerbose(3, "SET %d,E", bit);
+    LogInst("SET %d,E", bit);
     _SET(R.E, bit);
 }
 
 static void _SET_b_H(int bit)
 {
-    LogVerbose(3, "SET %d,H", bit);
+    LogInst("SET %d,H", bit);
     _SET(R.H, bit);
 }
 
 static void _SET_b_L(int bit)
 {
-    LogVerbose(3, "SET %d,L", bit);
+    LogInst("SET %d,L", bit);
     _SET(R.L, bit);
 }
 
 static void _SET_b_pHL(int bit)
 {
-    LogVerbose(3, "SET %d,(HL)", bit);
+    LogInst("SET %d,(HL)", bit);
     uint8_t n = readByte(R.HL);
     tick(4);
 

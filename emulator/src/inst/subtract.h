@@ -15,49 +15,49 @@
 
 static void _SUB_A()
 {
-    LogVerbose(3, "SUB A,A");
+    LogInst("SUB A,A");
     _SUB(R.A);
 }
 
 static void _SUB_B()
 {
-    LogVerbose(3, "SUB A,B");
+    LogInst("SUB A,B");
     _SUB(R.B);
 }
 
 static void _SUB_C()
 {
-    LogVerbose(3, "SUB A,C");
+    LogInst("SUB A,C");
     _SUB(R.C);
 }
 
 static void _SUB_D()
 {
-    LogVerbose(3, "SUB A,D");
+    LogInst("SUB A,D");
     _SUB(R.D);
 }
 
 static void _SUB_E()
 {
-    LogVerbose(3, "SUB A,E");
+    LogInst("SUB A,E");
     _SUB(R.E);
 }
 
 static void _SUB_H()
 {
-    LogVerbose(3, "SUB A,H");
+    LogInst("SUB A,H");
     _SUB(R.H);
 }
 
 static void _SUB_L()
 {
-    LogVerbose(3, "SUB A,L");
+    LogInst("SUB A,L");
     _SUB(R.L);
 }
 
 static void _SUB_pHL()
 {
-    LogVerbose(3, "SUB A,(HL)");
+    LogInst("SUB A,(HL)");
     uint8_t n = readByte(R.HL);
     tick(4);
 
@@ -69,56 +69,56 @@ static void _SUB_u()
     uint8_t u = nextByte();
     tick(4);
 
-    LogVerbose(3, "SUB A,%02Xh", u);
+    LogInst("SUB A,%02Xh", u);
 
     _SUB(u);
 }
 
 static void _SBC_A()
 {
-    LogVerbose(3, "SBC A,A");
+    LogInst("SBC A,A");
     _SBC(R.A);
 }
 
 static void _SBC_B()
 {
-    LogVerbose(3, "SBC A,B");
+    LogInst("SBC A,B");
     _SBC(R.B);
 }
 
 static void _SBC_C()
 {
-    LogVerbose(3, "SBC A,C");
+    LogInst("SBC A,C");
     _SBC(R.C);
 }
 
 static void _SBC_D()
 {
-    LogVerbose(3, "SBC A,D");
+    LogInst("SBC A,D");
     _SBC(R.D);
 }
 
 static void _SBC_E()
 {
-    LogVerbose(3, "SBC A,E");
+    LogInst("SBC A,E");
     _SBC(R.E);
 }
 
 static void _SBC_H()
 {
-    LogVerbose(3, "SBC A,H");
+    LogInst("SBC A,H");
     _SBC(R.H);
 }
 
 static void _SBC_L()
 {
-    LogVerbose(3, "SBC A,L");
+    LogInst("SBC A,L");
     _SBC(R.L);
 }
 
 static void _SBC_pHL()
 {
-    LogVerbose(3, "SBC A,(HL)");
+    LogInst("SBC A,(HL)");
     uint8_t n = readByte(R.HL);
     tick(4);
 
@@ -130,7 +130,7 @@ static void _SBC_u()
     uint8_t u = nextByte();
     tick(4);
 
-    LogVerbose(3, "SBC A,%02Xh", u);
+    LogInst("SBC A,%02Xh", u);
 
     _SBC(u);
 }

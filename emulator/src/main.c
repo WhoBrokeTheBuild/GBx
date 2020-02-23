@@ -3,27 +3,19 @@
 #include "cartridge.h"
 #include "cpu.h"
 #include "debug.h"
+#include "gbx.h"
 #include "lcd.h"
 #include "log.h"
 #include "register.h"
 
 #include <SDL.h>
-#include <signal.h>
 #include <cflags.h>
 
-#if defined(HAVE_READLINE)
+#ifdef HAVE_READLINE
 
 #include <readline/readline.h>
 
 #endif
-
-void handleSignal(int sig)
-{
-    LogInfo("Caught signal %d", sig);
-
-    DebugEnable = true;
-    debugPrompt();
-}
 
 int main(int argc, char** argv)
 {
@@ -62,10 +54,10 @@ int main(int argc, char** argv)
     #endif
 
     lcdInit();
-    apuInit();
+    // apuInit();
 
     if (!loadCartridge(flags->argv[0])) {
-        exit(1);
+        return 1;
     }
 
     if (!BootstrapEnable) {
@@ -77,24 +69,21 @@ int main(int argc, char** argv)
     }
     
     if (DebugEnable) {
-        signal(SIGINT, handleSignal);
-        signal(SIGSEGV, handleSignal);
+        debugInit();
         
         if (breakAtStart) {
-            setBreakpoint(BKCND_PC_EQ, R.PC);
+            setBreakpoint(R.PC);
         }
     }
 
-    for (;;) {
-        if (atBreakpoint()) {
-            debugPrompt();
-        } else {
-            nextInstruction();
-        }
-    }
+    run();
 
     apuTerm();
     lcdTerm();
+
+    if (DebugEnable) {
+        debugTerm();
+    }
 
     freeCartridge();
 

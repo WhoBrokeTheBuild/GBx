@@ -9,37 +9,37 @@
 
 static void _NOP()
 {
-    LogVerbose(3, "NOP");
+    LogInst("NOP");
 }
 
 static void _HALT()
 {
-    LogVerbose(3, "HALT");
+    LogInst("HALT");
     CPUEnabled = false;
 }
 
 static void _STOP()
 {
-    LogVerbose(3, "STOP");
+    LogInst("STOP");
     ++R.PC;
     LCDC.LCDEnable = false;
 }
 
 static void _DI()
 {
-    LogVerbose(3, "DI");
+    LogInst("DI");
     IME = false;
 }
 
 static void _EI()
 {
-    LogVerbose(3, "EI");
+    LogInst("EI");
     IME = true;
 }
 
 static void _DAA()
 {
-    LogVerbose(3, "DAA");
+    LogInst("DAA");
     if (R.FN) {
         // Subtraction
         if (R.FC) {
@@ -65,7 +65,7 @@ static void _DAA()
 
 static void _SCF()
 {
-    LogVerbose(3, "SCF");
+    LogInst("SCF");
     R.FN = false;
     R.FH = false;
     R.FC = true;
@@ -73,7 +73,7 @@ static void _SCF()
 
 static void _CPL()
 {
-    LogVerbose(3, "CPL");
+    LogInst("CPL");
     R.A = ~R.A;
     R.FN = true;
     R.FH = true;
@@ -81,7 +81,7 @@ static void _CPL()
 
 static void _CCF()
 {
-    LogVerbose(3, "CCF");
+    LogInst("CCF");
     R.FN = false;
     R.FH = false;
     R.FC = ~R.C;

@@ -5,6 +5,7 @@
 
 #include "cartridge.h"
 #include "cpu.h"
+#include "gbx.h"
 #include "interrupt.h"
 #include "lcd.h"
 #include "log.h"
@@ -12,142 +13,97 @@
 #include "register.h"
 #include "timer.h"
 
+#include <SDL.h>
+#include <signal.h>
+#include <stdarg.h>
+
+#ifdef HAVE_READLINE
+
+    #include <readline/readline.h>
+    #include <readline/history.h>
+
+    #define HISTORY_FILE ".gbx_history"
+
+#endif
+
 bool DebugEnable = false;
-int VerboseLevel = 0;
 
-bool RequestBreakpoint = false;
+uint16_t breakpointAddress = UINT16_MAX;
 
-typedef struct {
-    breakpoint_cond_t Condition;
-    uint32_t Value;
+#define INSTRUCTION_LOG_COUNT        20
+#define INSTRUCTION_LOG_ENTRY_LENGTH 64
 
-} breakpoint_t;
+unsigned instructionLogIndex = 0;
+char instructionLog[INSTRUCTION_LOG_COUNT][INSTRUCTION_LOG_ENTRY_LENGTH];
 
-breakpoint_t B = {
-    .Condition = BKCND_NONE,
-    .Value = 0,
-};
-
-void setBreakpoint(breakpoint_cond_t cond, uint32_t value)
+void handleSignal(int sig)
 {
-    B.Condition = cond;
-    B.Value = value;
+    LogInfo("Caught signal %d", sig);
+
+    debugPrompt();
+}
+
+void debugInit()
+{
+    signal(SIGINT, handleSignal);
+    signal(SIGSEGV, handleSignal);
+
+    for (unsigned i = 0; i < INSTRUCTION_LOG_COUNT; ++i) {
+        instructionLog[i][0] = '\0';
+    }
+
+    #ifdef HAVE_READLINE
+        read_history(HISTORY_FILE);
+    #endif
+}
+
+void debugTerm()
+{
+
+    #ifdef HAVE_READLINE
+        write_history(HISTORY_FILE);
+    #endif
+}
+
+void setBreakpoint(uint16_t address)
+{
+    breakpointAddress = address;
 }
 
 void clearBreakpoint()
 {
-    B.Condition = BKCND_NONE;
+    breakpointAddress = UINT16_MAX;
 }
 
 bool atBreakpoint()
 {
-    if (RequestBreakpoint) {
-        RequestBreakpoint = false;
-        return true;
-    }
-
-    switch (B.Condition) {
-    case BKCND_A_EQ:
-        if (R.A == B.Value) {
-            return true;
-        }
-        break;
-    case BKCND_B_EQ:
-        if (R.B == B.Value) {
-            return true;
-        }
-        break;
-    case BKCND_C_EQ:
-        if (R.C == B.Value) {
-            return true;
-        }
-        break;
-    case BKCND_BC_EQ:
-        if (R.BC == B.Value) {
-            return true;
-        }
-        break;
-    case BKCND_D_EQ:
-        if (R.D == B.Value) {
-            return true;
-        }
-        break;
-    case BKCND_E_EQ:
-        if (R.E == B.Value) {
-            return true;
-        }
-        break;
-    case BKCND_DE_EQ:
-        if (R.DE == B.Value) {
-            return true;
-        }
-        break;
-    case BKCND_H_EQ:
-        if (R.H == B.Value) {
-            return true;
-        }
-        break;
-    case BKCND_L_EQ:
-        if (R.L == B.Value) {
-            return true;
-        }
-        break;
-    case BKCND_HL_EQ:
-        if (R.HL == B.Value) {
-            return true;
-        }
-        break;
-    case BKCND_SP_EQ:
-        if (R.SP == B.Value) {
-            return true;
-        }
-        break;
-    case BKCND_PC_EQ:
-        if (R.PC == B.Value) {
-            return true;
-        }
-        break;
-    case BKCND_FC_EQ:
-        if (R.FC == B.Value) {
-            return true;
-        }
-        break;
-    case BKCND_FH_EQ:
-        if (R.FH == B.Value) {
-            return true;
-        }
-        break;
-    case BKCND_FN_EQ:
-        if (R.FN == B.Value) {
-            return true;
-        }
-        break;
-    case BKCND_FZ_EQ:
-        if (R.FZ == B.Value) {
-            return true;
-        }
-        break;
-    case BKCND_OP_EQ:
-        if (readByte(R.PC) == B.Value) {
-            return true;
-        }
-        break;
-    default:
-        break;
-    };
-
-    return false;
+    return (R.PC == breakpointAddress);
 }
 
-void requestBreakpoint()
+void logInstruction(const char * format, ...)
 {
-    RequestBreakpoint = true;
+    va_list args;
+    va_start(args, format);
+
+    vsnprintf(instructionLog[instructionLogIndex], 
+        INSTRUCTION_LOG_ENTRY_LENGTH, format, args);
+
+    LogVerbose(3, "%s", instructionLog[instructionLogIndex]);
+
+    instructionLogIndex = (instructionLogIndex + 1) % INSTRUCTION_LOG_COUNT;
 }
 
-#if defined(HAVE_READLINE)
+void printinstructionLog()
+{
+    for (unsigned i = 1; i <= INSTRUCTION_LOG_COUNT; ++i) {
+        int index = (instructionLogIndex - i) % INSTRUCTION_LOG_COUNT;
+        if (instructionLog[index][0] == '\0') {
+            break;
+        }
 
-#include <readline/readline.h>
-#include <readline/history.h>
+        printf("%s\n", instructionLog[index]);
+    }
+}
 
 const char * help = 
 "  help         Print this information\n"
@@ -164,6 +120,7 @@ const char * helpInfo =
 "  registers    Print all registers and their values\n"
 "  interrupts   Print IE and IF, and IME values\n"
 "  lcd          Print LCDC values and LCD info\n"
+"  lcd          Print LCDC values and LCD info\n"
 "  stat         Print STAT values\n"
 "  timer        Print TAC, TIMA, TMA and DIV info\n"
 "  bank         Print ROM/RAM Bank info\n"
@@ -171,12 +128,7 @@ const char * helpInfo =
 
 const char * helpBreak = 
 "  break ADDRESS\n"
-"  break LHS=RHS\n"
 "  ADDRESS will be interpreted as a 16-bit hex number\n"
-"  This is a shortcut for saying `break PC=ADDRESS`\n"
-"  LHS can be one of A, B, C, BC, D, E, DE, H, L, HL, FZ, FN, FH, FC, OP\n"
-"  OP checks to the next opcode\n"
-"  RHS will be interpreted as an integer\n"
 "\n";
 
 const char * helpRead = 
@@ -192,7 +144,7 @@ const char * helpWrite =
 "  ADDRESS will be interpreted as a 16-bit hex number\n"
 "  VALUE will be interpreted as an 8-bit or 16-bit number, depending on SIZE\n";
 
-void debugInfo(const char * input)
+void infoPrompt(const char * input)
 {
     if (!input) {
         printf("%s", helpInfo);
@@ -235,7 +187,7 @@ void debugInfo(const char * input)
     }
 }
 
-void debugBreak(const char * input)
+void breakPrompt(const char * input)
 {
     if (!input) {
         printf("%s", helpBreak);
@@ -251,87 +203,23 @@ void debugBreak(const char * input)
     
     char * equal = strchr(input, '=');
     if (equal) {
-        *equal = '\0';
+        // *equal = '\0';
 
-        unsigned int rhs;
-        sscanf(equal + 1, "%04X", &rhs);
+        // unsigned int rhs;
+        // sscanf(equal + 1, "%04X", &rhs);
 
-        breakpoint_cond_t cond = BKCND_NONE;
-        if (input[0] == 'A') {
-            cond = BKCND_A_EQ;
-        }
-        else if (input[0] == 'B') {
-            if (input[1] == 'C') {
-                cond = BKCND_BC_EQ;
-            }
-            else {
-                cond = BKCND_B_EQ;
-            }
-        }
-        else if (input[0] == 'C') {
-            cond = BKCND_C_EQ;
-        }
-        else if (input[0] == 'D') {
-            if (input[1] == 'E') {
-                cond = BKCND_DE_EQ;
-            }
-            else {
-                cond = BKCND_D_EQ;
-            }
-        }
-        else if (input[0] == 'E') {
-            cond = BKCND_E_EQ;
-        }
-        else if (input[0] == 'H') {
-            if (input[1] == 'L') {
-                cond = BKCND_HL_EQ;
-            }
-            else {
-                cond = BKCND_H_EQ;
-            }
-        }
-        else if (input[0] == 'L') {
-            cond = BKCND_L_EQ;
-        }
-        else if (input[0] == 'S' && input[1] == 'P') {
-            cond = BKCND_SP_EQ;
-        }
-        else if (input[0] == 'P' && input[1] == 'C') {
-            cond = BKCND_PC_EQ;
-        }
-        else if (input[0] == 'F') {
-            if (input[1] == 'C') {
-                cond = BKCND_FC_EQ;
-            }
-            else if (input[1] == 'H') {
-                cond = BKCND_FH_EQ;
-            }
-            else if (input[1] == 'N') {
-                cond = BKCND_FN_EQ;
-            }
-            else if (input[1] == 'Z') {
-                cond = BKCND_FZ_EQ;
-            }
-        }
-        else if (input[0] == 'O' && input[1] == 'P') {
-            cond = BKCND_OP_EQ;
-        }
-        else {
-            LogError("Unknown LHS '%s'", input);
-        }
-
-        LogInfo("Breakpoint set when %s=%04Xh", input, rhs);
-        setBreakpoint(cond, rhs);
+        // LogInfo("Breakpoint set when %s=%04Xh", input, rhs);
+        // addBreakpoint(cond, rhs);
     }
     else {
         unsigned int pc;
         sscanf(input, "%04X", &pc);
-        setBreakpoint(BKCND_PC_EQ, pc);
+        setBreakpoint(pc);
         LogInfo("Breakpoint set when PC=%04Xh", pc);
     }
 }
 
-void debugRead(const char * input)
+void readPrompt(const char * input)
 {
     if (!input || strlen(input) == 0) {
         printf("%s", helpRead);
@@ -355,7 +243,7 @@ void debugRead(const char * input)
     }
 }
 
-void debugWrite(const char * input)
+void writePrompt(const char * input)
 {
     if (!input || strlen(input) == 0) {
         printf("%s", helpRead);
@@ -383,7 +271,7 @@ void debugWrite(const char * input)
     }
 }
 
-void debugHelp(const char * input)
+void helpPrompt(const char * input)
 {
     if (!input) {
         printf("%s", help);
@@ -410,8 +298,11 @@ void debugHelp(const char * input)
 
 void debugPrompt() 
 {
+    printinstructionLog();
+
+#ifdef HAVE_READLINE
+
     int oldVerboseLevel = VerboseLevel;
-    DebugEnable = true;
     VerboseLevel = 4;
 
     char prompt[2048];
@@ -420,7 +311,6 @@ void debugPrompt()
     uint16_t addr;
     char * input = NULL;
     while ((input = readline(prompt)) != NULL) {
-
         size_t length = 0;
         char * sep = strchr(input, ' ');
         char * args = NULL;
@@ -439,19 +329,20 @@ void debugPrompt()
         if (length == 0) {
             nextInstruction();
         }
-        else if (strncmp(input, "quit", length) == 0) {
-            exit(0);
+        else if (strncmp(input, "quit", length) == 0
+            || strncmp(input, "exit", length) == 0) {
+            stop();
+            break;
         }
         else if (strncmp(input, "continue", length) == 0) {
-            DebugEnable = false;
             VerboseLevel = oldVerboseLevel;
             break;
         }
         else if (strncmp(input, "info", length) == 0) {
-            debugInfo(args);
+            infoPrompt(args);
         }
         else if (strncmp(input, "break", length) == 0) {
-            debugBreak(args);
+            breakPrompt(args);
         }
         else if (strncmp(input, "get", length) == 0) {
             // TODO
@@ -459,14 +350,17 @@ void debugPrompt()
         else if (strncmp(input, "set", length) == 0) {
             // TODO
         }
+        else if (strncmp(input, "reset", length) == 0) {
+            reset();
+        }
         else if (strncmp(input, "read", length) == 0) {
-            debugRead(args);
+            readPrompt(args);
         }
         else if (strncmp(input, "write", length) == 0) {
-            debugWrite(args);
+            writePrompt(args);
         }
         else if (strncmp(input, "help", length) == 0) {
-            debugHelp(args);
+            helpPrompt(args);
         }
 
         free(input);
@@ -476,11 +370,21 @@ void debugPrompt()
     }
 
     free(input);
-}
-
-#else
-
-void debugPrompt()
-{ }
 
 #endif
+}
+
+void showinstructionLogWindow()
+{
+
+}
+
+void showStatusWindow()
+{
+
+}
+
+void showVideoRAMWindow()
+{
+
+}

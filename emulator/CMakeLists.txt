@@ -8,7 +8,10 @@ FILE(
     src/*.c
 )
 
-LIST(REMOVE_ITEM _SOURCES "src/main.c")
+LIST(REMOVE_ITEM 
+    _SOURCES 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/main.c
+)
 
 ADD_LIBRARY(
     libGBx
@@ -23,13 +26,23 @@ TARGET_INCLUDE_DIRECTORIES(
 
 TARGET_LINK_LIBRARIES(
     libGBx
-    SDL2::SDL2
+    PUBLIC
+        SDL2::SDL2
 )
+
+IF(NOT WIN32)
+    TARGET_LINK_LIBRARIES(
+        libGBx
+        PUBLIC
+            m
+    )
+ENDIF()
 
 IF(Readline_FOUND)
     TARGET_LINK_LIBRARIES(
         libGBx
-        Readline::Readline
+        PUBLIC
+            Readline::Readline
     )
     TARGET_COMPILE_DEFINITIONS(
         libGBx
@@ -58,6 +71,14 @@ TARGET_LINK_LIBRARIES(
     libGBx
 )
 
+IF(TARGET SDL2::SDL2main)
+    TARGET_LINK_LIBRARIES(
+        GBx
+        PUBLIC
+            SDL2::SDL2main
+    )
+ENDIF()
+
 # Tests
 
 IF(BUILD_TESTS)
@@ -79,6 +100,14 @@ IF(BUILD_TESTS)
             PRIVATE
                 libGBx
         )
+
+        IF(TARGET SDL2::SDL2main)
+            TARGET_LINK_LIBRARIES(
+                ${test_target}
+                PUBLIC
+                    SDL2::SDL2main
+            )
+        ENDIF()
 
         ADD_TEST(
             NAME ${test_target}

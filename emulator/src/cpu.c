@@ -28,6 +28,8 @@
 
 bool CPUEnabled = true;
 
+uint16_t LastInstructionAddress = 0x0000;
+
 inst_t instructions[0x100] = {
     // CB
     [0xCB] = _CB,
@@ -309,6 +311,8 @@ uint8_t fetch()
 {
     if (CPUEnabled) {
         LogVerbose(3, "Read opcode at %04X", R.PC);
+
+        LastInstructionAddress = R.PC;
 
         uint8_t op = nextByte();
         tick(4);
