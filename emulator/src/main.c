@@ -53,12 +53,12 @@ int main(int argc, char** argv)
         LogVerbose(1, "Readline Version: %s", rl_library_version);
     #endif
 
-    lcdInit();
-    // apuInit();
-
     if (!loadCartridge(flags->argv[0])) {
         return 1;
     }
+
+    lcdInit();
+    apuInit();
 
     if (!BootstrapEnable) {
         bootstrap();
@@ -78,12 +78,12 @@ int main(int argc, char** argv)
 
     run();
 
-    apuTerm();
-    lcdTerm();
-
     if (DebugEnable) {
         debugTerm();
     }
+
+    apuTerm();
+    lcdTerm();
 
     freeCartridge();
 

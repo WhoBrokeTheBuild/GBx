@@ -3,6 +3,7 @@
 #include <limits.h>
 #include <stdlib.h>
 
+#include "apu.h"
 #include "cartridge.h"
 #include "cpu.h"
 #include "gbx.h"
@@ -41,6 +42,10 @@ void handleSignal(int sig)
     LogInfo("Caught signal %d", sig);
 
     debugPrompt();
+
+    if (sig == SIGSEGV) {
+        exit(1);
+    }
 }
 
 void debugInit()
@@ -117,6 +122,7 @@ const char * help =
 "  write        Write memory, see `help write`\n";
 
 const char * helpInfo = 
+"  apu          Print tone, wave, noise, and volume registers\n"
 "  registers    Print all registers and their values\n"
 "  interrupts   Print IE and IF, and IME values\n"
 "  lcd          Print LCDC values and LCD info\n"
@@ -158,7 +164,14 @@ void infoPrompt(const char * input)
         return;
     }
 
-    if (strncmp(input, "registers", length) == 0) {
+    if (strncmp(input, "apu", length) == 0) {
+        printTone1();
+        printTone2();
+        printWave();
+        printWaveRAM();
+        printVolumeControl();
+    }
+    else if (strncmp(input, "registers", length) == 0) {
         printR();
     }
     else if (strncmp(input, "interrupts", length) == 0) {

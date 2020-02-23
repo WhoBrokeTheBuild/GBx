@@ -6,57 +6,57 @@
 
 typedef union {
     struct {
-        uint8_t  Shift:3;
+        unsigned Shift:3;
         bool     Negate:1;
-        uint8_t  SweepPeriod:3;
-        uint8_t  _2:1;
-        uint8_t  LengthLoad:6;
-        uint8_t  Duty:2;
-        uint8_t  Period:3;
+        unsigned SweepPeriod:3;
+        unsigned :1;
+        unsigned LengthLoad:6;
+        unsigned Duty:2;
+        unsigned Period:3;
         bool     EnvelopeAddMode:1;
-        uint8_t  Volume:4;
-        uint16_t Frequency:11;
-        uint8_t  _1:3;
+        unsigned Volume:4;
+        unsigned Frequency:11;
+        unsigned :3;
         bool     LengthEnable:1;
         bool     Trigger:1;
     };
     uint8_t data[5];
-} square_wave_t;
+} tone_t;
 
-extern square_wave_t Wave1;
-extern square_wave_t Wave2;
+extern tone_t Tone1;
+extern tone_t Tone2;
 
 typedef union {
     struct {
-        uint8_t  _1:7;
+        unsigned :7;
         bool     DACPower:1;
-        uint8_t  LengthLoad;
-        uint8_t  _2:5;
-        uint8_t  VolumeCode:2;
-        uint8_t  _3:1;
-        uint16_t Frequency:11;
-        uint8_t  _4:3;
+        unsigned LengthLoad;
+        unsigned :5;
+        unsigned VolumeCode:2;
+        unsigned :1;
+        unsigned Frequency:11;
+        unsigned :3;
         bool     LengthEnable:1;
         bool     Trigger:1;
     };
     uint8_t data[5];
 } wave_t;
 
-extern wave_t Wave3;
+extern wave_t Wave;
 
 typedef union {
     struct {
-        uint8_t LengthLoad:6;
-        uint8_t _1:2;
-        uint8_t Period:3;
-        bool    EnvelopeAddMode:1;
-        uint8_t Volume:4;
-        uint8_t DivisorCode:3;
-        bool    LFSRWidthMode:1;
-        uint8_t ClockShift:4;
-        uint8_t _2:6;
-        bool    LengthEnable:1;
-        bool    Trigger:1;
+        unsigned LengthLoad:6;
+        unsigned :2;
+        unsigned Period:3;
+        bool     EnvelopeAddMode:1;
+        unsigned Volume:4;
+        unsigned DivisorCode:3;
+        bool     LFSRWidthMode:1;
+        unsigned ClockShift:4;
+        unsigned :6;
+        bool     LengthEnable:1;
+        bool     Trigger:1;
     };
     uint8_t data[4];
 } noise_t;
@@ -75,6 +75,7 @@ typedef union {
 
 extern volume_control_t VolumeControl;
 
+
 extern uint8_t WaveRAM[0x10];
 
 void apuInit();
@@ -82,9 +83,12 @@ void apuTerm();
 
 void apuTick(unsigned cycles);
 
-void printWave1();
-void printWave2();
-void printWave3();
+void apuPause();
+void apuPlay();
+
+void printTone1();
+void printTone2();
+void printWave();
 void printNoise();
 void printVolumeControl();
 void printWaveRAM();

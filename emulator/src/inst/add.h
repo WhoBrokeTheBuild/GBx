@@ -178,7 +178,7 @@ static void _ADD_SP_s()
     LogInst("ADD SP,%d", s);
 
     R.SP = add16s(R.SP, s);
-    tick(8);
+    tick(4);
 }
 
 #endif // ADD_H

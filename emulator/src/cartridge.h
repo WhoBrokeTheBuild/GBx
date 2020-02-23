@@ -4,12 +4,29 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-extern char CartridgeTitle[15];
+typedef union {
+    struct {
+        uint8_t Code[4];
+        uint8_t Magic[48];
+        uint8_t Title[15];
+        uint8_t ColorEnabled;
+        uint8_t SuperEnabled;
+        uint8_t CartridgeType;
+        uint8_t ROMType;
+        uint8_t RAMType;
+        uint8_t Region;
+        uint8_t License;
+        uint8_t ROMMask;
+        uint8_t ComplementCheck;
+        uint8_t Checksum[2];
+    };
+    uint8_t data[80];
+} cartridge_header_t;
+
+extern cartridge_header_t CartridgeHeader;
 
 extern bool ColorEnabled;
 extern bool SuperEnabled;
-
-extern uint8_t CartridgeType;
 
 extern bool CartridgeRAMEnabled;
 
@@ -18,20 +35,6 @@ extern uint8_t * CartridgeRAM;
 
 extern uint8_t * CartridgeROM0;
 extern uint8_t * CartridgeROM;
-
-typedef enum {
-    MBC_NONE,
-    MBC_MBC1,
-    MBC_MBC2,
-    MBC_MBC3,
-    MBC_MBC5,
-    MBC_MBC6,
-    MBC_MBC7,
-    MBC_MMM01,
-    
-} mbc_type_t;
-
-extern mbc_type_t CartridgeMBCType;
 
 void writeCartridgeMBC(uint16_t address, uint8_t data);
 

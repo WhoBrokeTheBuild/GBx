@@ -6,14 +6,14 @@
 
 typedef union {
     struct {
-        bool TileDisplayEnable:1;
-        bool SpriteDisplayEnable:1;
-        bool SpriteSize:1;
-        bool TileMapSelect:1;
-        bool TileDataSelect:1;
-        bool WindowDisplayEnable:1;
-        bool WindowTileMapSelect:1;
-        bool LCDEnable:1;
+        bool     TileDisplayEnable:1;
+        bool     SpriteDisplayEnable:1;
+        unsigned SpriteSize:1;
+        unsigned TileMapSelect:1;
+        unsigned TileDataSelect:1;
+        bool     WindowDisplayEnable:1;
+        unsigned WindowTileMapSelect:1;
+        bool     LCDEnable:1;
     };
     uint8_t data;
 } LCDC_t;
@@ -33,17 +33,17 @@ typedef union {
         bool        IntVBlank:1;
         bool        IntSearchSprite:1;
         bool        LYCLY:1;
-        uint8_t     _:1;
+        unsigned    :1;
     };
     uint8_t data;
 } STAT_t;
 
 typedef union {
     struct {
-        uint8_t Color00:2;
-        uint8_t Color01:2;
-        uint8_t Color10:2;
-        uint8_t Color11:2;
+        unsigned Color00:2;
+        unsigned Color01:2;
+        unsigned Color10:2;
+        unsigned Color11:2;
     };
     uint8_t data;
 } palette_t;
@@ -55,11 +55,11 @@ typedef union {
         uint8_t Pattern;
         union {
             struct {
-                bool Priority:1;
-                bool YFlip:1;
-                bool XFlip:1;
-                bool Palette:1;
-                uint8_t _:4;
+                bool     Priority:1;
+                bool     YFlip:1;
+                bool     XFlip:1;
+                bool     Palette:1;
+                unsigned :4;
             };
             uint8_t Attributes;
         };

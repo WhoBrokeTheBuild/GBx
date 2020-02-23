@@ -682,7 +682,6 @@ static void _LD_HL_SP_s()
     LogInst("LD HL,SP%+d", s);
 
     R.HL = add16s(R.SP, s);
-    R.FZ = false;
     tick(4);
 }
 

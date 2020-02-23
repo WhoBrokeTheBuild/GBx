@@ -90,23 +90,23 @@ uint8_t readByte(uint16_t address)
         case 0xFF0F:
             return IF.data;
         case 0xFF10:
-            return Wave1.data[0];
+            return Tone1.data[0];
         case 0xFF11:
-            return Wave1.data[1];
+            return Tone1.data[1];
         case 0xFF12:
-            return Wave1.data[2];
+            return Tone1.data[2];
         case 0xFF13:
-            return Wave1.data[3];
+            return Tone1.data[3];
         case 0xFF14:
-            return Wave1.data[4];
+            return Tone1.data[4];
         case 0xFF16:
-            return Wave2.data[1];
+            return Tone2.data[1];
         case 0xFF17:
-            return Wave2.data[2];
+            return Tone2.data[2];
         case 0xFF18:
-            return Wave2.data[3];
+            return Tone2.data[3];
         case 0xFF19:
-            return Wave2.data[4];
+            return Tone2.data[4];
         case 0xFF20:
             return Noise.data[0];
         case 0xFF21:
@@ -122,16 +122,15 @@ uint8_t readByte(uint16_t address)
         case 0xFF26:
             // return NR52;
         case 0xFF1A:
-            return Wave3.data[0];
+            return Wave.data[0];
         case 0xFF1B:
-            return Wave3.data[1];
+            return Wave.data[1];
         case 0xFF1C:
-            return Wave3.data[2];
+            return Wave.data[2];
         case 0xFF1D:
-            return Wave3.data[3];
+            return Wave.data[3];
         case 0xFF1E:
-            return Wave3.data[4];
-
+            return Wave.data[4];
         case 0xFF40:
             return LCDC.data;
         case 0xFF41:
@@ -276,57 +275,60 @@ void writeByte(uint16_t address, uint8_t data)
             }
             break;
         case 0xFF10:
-            Wave1.data[0] = data;
+            Tone1.data[0] = data;
             if (VerboseLevel >= 2) {
-                printWave1();
+                printTone1();
             }
             break;
         case 0xFF11:
-            Wave1.data[1] = data;
+            Tone1.data[1] = data;
             if (VerboseLevel >= 2) {
-                printWave1();
+                printTone1();
             }
             break;
         case 0xFF12:
-            Wave1.data[2] = data;
+            Tone1.data[2] = data;
             if (VerboseLevel >= 2) {
-                printWave1();
+                printTone1();
             }
             break;
         case 0xFF13:
-            Wave1.data[3] = data;
+            Tone1.data[3] = data;
             if (VerboseLevel >= 2) {
-                printWave1();
+                printTone1();
             }
             break;
         case 0xFF14:
-            Wave1.data[4] = data;
+            Tone1.data[4] = data;
             if (VerboseLevel >= 2) {
-                printWave1();
+                printTone1();
             }
             break;
+        case 0xFF15:
+            LogWarn("Attempting to access Tone2's Sweep Controls");
+            break;
         case 0xFF16:
-            Wave2.data[1] = data;
+            Tone2.data[1] = data;
             if (VerboseLevel >= 2) {
-                printWave2();
+                printTone2();
             }
             break;
         case 0xFF17:
-            Wave2.data[2] = data;
+            Tone2.data[2] = data;
             if (VerboseLevel >= 2) {
-                printWave2();
+                printTone2();
             }
             break;
         case 0xFF18:
-            Wave2.data[3] = data;
+            Tone2.data[3] = data;
             if (VerboseLevel >= 2) {
-                printWave2();
+                printTone2();
             }
             break;
         case 0xFF19:
-            Wave2.data[4] = data;
+            Tone2.data[4] = data;
             if (VerboseLevel >= 2) {
-                printWave2();
+                printTone2();
             }
             break;
         case 0xFF20:
@@ -366,33 +368,33 @@ void writeByte(uint16_t address, uint8_t data)
             // NR52 = data;
             break;
         case 0xFF1A:
-            Wave3.data[0] = data;
+            Wave.data[0] = data;
             if (VerboseLevel >= 2) {
-                printWave3();
+                printWave();
             }
             break;
         case 0xFF1B:
-            Wave3.data[1] = data;
+            Wave.data[1] = data;
             if (VerboseLevel >= 2) {
-                printWave3();
+                printWave();
             }
             break;
         case 0xFF1C:
-            Wave3.data[2] = data;
+            Wave.data[2] = data;
             if (VerboseLevel >= 2) {
-                printWave3();
+                printWave();
             }
             break;
         case 0xFF1D:
-            Wave3.data[3] = data;
+            Wave.data[3] = data;
             if (VerboseLevel >= 2) {
-                printWave3();
+                printWave();
             }
             break;
         case 0xFF1E:
-            Wave3.data[4] = data;
+            Wave.data[4] = data;
             if (VerboseLevel >= 2) {
-                printWave3();
+                printWave();
             }
             break;
         

@@ -30,11 +30,16 @@ uint8_t OAM[0xA0];
 
 bool FPSLimit = false;
 
-const char * lcdModeStr[4] = {
+const char * LCD_MODE_STR[4] = {
     "HBlank",
     "VBlank",
     "SearchSprite",
     "DataTransfer",
+};
+
+uint16_t TILE_MAP_ADDR[2] = {
+    0x9800,
+    0x9C00,
 };
 
 SDL_Window * sdlWindow     = NULL;
@@ -57,20 +62,12 @@ void drawTiles()
         y = SCY + LY;
     }
 
-    uint16_t tileBaseAddress;
-    if (LCDC.WindowDisplayEnable) {
-        if (LCDC.WindowTileMapSelect) {
-            tileBaseAddress = 0x9C00;
-        } else {
-            tileBaseAddress = 0x9800;
-        }
-    } else {
-        if (LCDC.TileMapSelect) {
-            tileBaseAddress = 0x9C00;
-        } else {
-            tileBaseAddress = 0x9800;
-        }
-    }
+    uint16_t tileBaseAddress = TILE_MAP_ADDR[
+        LCDC.WindowDisplayEnable 
+        ? LCDC.WindowTileMapSelect 
+        : LCDC.TileMapSelect
+    ];
+
     uint16_t row = (y / 8) * 32;
 
     for (unsigned pixel = 0; pixel < 160; ++pixel) {
@@ -212,9 +209,9 @@ void drawSprites()
                 int x = -pixel + 7;
 
                 unsigned off = (LY * 256*3) + (x * 3);
-                pixelData[off + 0] = 0x00;
-                pixelData[off + 1] = 0x00;
-                pixelData[off + 2] = 0x00;
+                pixelData[off + 0] = color;
+                pixelData[off + 1] = color;
+                pixelData[off + 2] = color;
             }
         }
     }
@@ -279,7 +276,7 @@ void render()
 
 void lcdTick(unsigned cycles)
 {
-    static lcdModeTicks = 0;
+    static int lcdModeTicks = 0;
 
     const unsigned HBLANK_TICK_COUNT = 204;
     const unsigned VBLANK_TICK_COUNT = 456;
@@ -355,14 +352,14 @@ void lcdTick(unsigned cycles)
     }
 
     if (modeChanged) {
-        LogVerbose(3, "LCD Mode Changed: %s", lcdModeStr[STAT.Mode]);
+        LogVerbose(3, "LCD Mode Changed: %s", LCD_MODE_STR[STAT.Mode]);
     }
 }
 
 void lcdInit()
 {
     char windowTitle[21];
-    snprintf(windowTitle, sizeof(windowTitle), "GBx - %s", CartridgeTitle);
+    snprintf(windowTitle, sizeof(windowTitle), "GBx - %.*s", 15, CartridgeHeader.Title);
 
     sdlWindow = SDL_CreateWindow(windowTitle, -1, -1, winWidth, winHeight, SDL_WINDOW_RESIZABLE);
     if (!sdlWindow) {
@@ -414,7 +411,7 @@ void printSTAT()
 {
 
     LogInfo("Mode=%s IntCoinc=%d IntHBlank=%d IntVBlank=%d IntSearchSprite=%d LYCLY=%d",
-        lcdModeStr[STAT.Mode], STAT.IntCoincidence, STAT.IntHBlank, STAT.IntVBlank, STAT.IntSearchSprite, STAT.LYCLY);
+        LCD_MODE_STR[STAT.Mode], STAT.IntCoincidence, STAT.IntHBlank, STAT.IntVBlank, STAT.IntSearchSprite, STAT.LYCLY);
 }
 
 void printLCDInfo()

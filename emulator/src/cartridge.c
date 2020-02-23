@@ -7,14 +7,21 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define TITLE_OFFSET                0x0134
-#define COLOR_ENABLE_OFFSET         0x0143
-#define SUPER_ENABLE_OFFSET         0x0146
-#define CARTRIDGE_TYPE_OFFSET       0x0147
-#define ROM_TYPE_OFFSET             0x0148
-#define RAM_TYPE_OFFSET             0x0149
+#define HEADER_OFFSET 0x0100
 
-char CartridgeTitle[15] = { '\0' };
+typedef enum {
+    MBC_NONE,
+    MBC_MBC1,
+    MBC_MBC2,
+    MBC_MBC3,
+    MBC_MBC5,
+    MBC_MBC6,
+    MBC_MBC7,
+    MBC_MMM01,
+    
+} mbc_type_t;
+
+cartridge_header_t CartridgeHeader;
 
 bool ColorEnabled = false;
 bool SuperEnabled = false;
@@ -134,21 +141,20 @@ bool loadCartridge(const char * filename)
         return false;
     }
 
-    strncpy(CartridgeTitle, (char *)CartridgeROM0 + TITLE_OFFSET, sizeof(CartridgeTitle) - 1);
-    CartridgeTitle[sizeof(CartridgeTitle) - 1] = '\0';
+    memcpy(CartridgeHeader.data, CartridgeROM0 + HEADER_OFFSET, sizeof(CartridgeHeader));
 
-    ColorEnabled = (CartridgeROM0[COLOR_ENABLE_OFFSET] == 0x80);
-    SuperEnabled = (CartridgeROM0[SUPER_ENABLE_OFFSET] != 0x00);
+    LogVerbose(1, "ROM Title: %.*s", 15, CartridgeHeader.Title);
+
+    ColorEnabled = (CartridgeHeader.ColorEnabled == 0x80);
+    SuperEnabled = (CartridgeHeader.SuperEnabled != 0x00);
     
     if (SuperEnabled) {
         ClockSpeed = SGB_CLOCK_SPEED;
     }
 
-    CartridgeType = CartridgeROM0[CARTRIDGE_TYPE_OFFSET];
-    ROMType = CartridgeROM0[ROM_TYPE_OFFSET];
-    RAMType = CartridgeROM0[RAM_TYPE_OFFSET];
+    // CartridgeHeader.ROMType
 
-    switch (CartridgeType) {
+    switch (CartridgeHeader.CartridgeType) {
     case 0x00:
         // ROM Only
         break;
@@ -284,7 +290,7 @@ bool loadCartridge(const char * filename)
         break;
     }
 
-    switch (RAMType) {
+    switch (CartridgeHeader.RAMType) {
     case 0x01:
         // 2KB
         CartridgeRAM0 = (uint8_t *)malloc(2048);
