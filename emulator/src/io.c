@@ -1,7 +1,7 @@
 #include "io.h"
 
-P1_t P1;
+// P1_t P1;
 
-uint8_t SB;
+// uint8_t SB;
 
-SC_t SC;
+// SC_t SC;

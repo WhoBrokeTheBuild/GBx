@@ -74,11 +74,11 @@ uint8_t readByte(uint16_t address)
 
         switch (address) {
         case 0xFF00:
-            return P1.data;
+            // return P1.data;
         case 0xFF01:
-            return SB;
+            // return SB;
         case 0xFF02:
-            return SC.data;
+            // return SC.data;
         case 0xFF04:
             return DIV;
         case 0xFF05:
@@ -239,13 +239,13 @@ void writeByte(uint16_t address, uint8_t data)
 
         switch (address) {
         case 0xFF00:
-            P1.data = data;
+            // P1.data = data;
             break;
         case 0xFF01:
-            SB = data;
+            // SB = data;
             break;
         case 0xFF02:
-            SC.data = data;
+            // SC.data = data;
             break;
         case 0xFF04:
             DIV = 0;
