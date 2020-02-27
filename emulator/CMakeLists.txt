@@ -8,7 +8,8 @@ FILE(
     src/*.c
 )
 
-LIST(REMOVE_ITEM 
+LIST(
+    REMOVE_ITEM 
     _SOURCES 
     ${CMAKE_CURRENT_SOURCE_DIR}/src/main.c
 )
@@ -28,15 +29,8 @@ TARGET_LINK_LIBRARIES(
     libGBx
     PUBLIC
         SDL2::SDL2
+        cflags::cflags
 )
-
-IF(NOT WIN32)
-    TARGET_LINK_LIBRARIES(
-        libGBx
-        PUBLIC
-            m
-    )
-ENDIF()
 
 IF(Readline_FOUND)
     TARGET_LINK_LIBRARIES(
@@ -68,8 +62,18 @@ ADD_EXECUTABLE(
 
 TARGET_LINK_LIBRARIES(
     GBx
-    libGBx
+    PUBLIC
+        libGBx
 )
+
+IF(MSVC)
+    SET_TARGET_PROPERTIES(
+        GBx
+        PROPERTIES 
+            VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            VS_DEBUGGER_ENVIRONMENT "PATH=%PATH%;${RUNTIME_SEARCH_PATH}"
+    )
+ENDIF()
 
 IF(TARGET SDL2::SDL2main)
     TARGET_LINK_LIBRARIES(

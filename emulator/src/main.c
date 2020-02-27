@@ -17,7 +17,7 @@
 
 #endif
 
-int main(int argc, char** argv)
+int main(int argc, char ** argv)
 {
     cflags_t * flags = cflags_init();
 

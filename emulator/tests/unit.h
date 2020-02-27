@@ -89,8 +89,8 @@ static void (*unit_teardown)() = NULL;
 #define unit_assert_int_eq(expected, result)                        \
     do {                                                            \
         ++unit_assert;                                              \
-        int tmp_expected = (expected);                              \
-        int tmp_result = (result);                                  \
+        int tmp_expected = (int)(expected);                         \
+        int tmp_result = (int)(result);                             \
         fflush(stdout);                                             \
         if (tmp_expected != tmp_result) {                           \
             unit_status = 1;                                        \
@@ -103,8 +103,8 @@ static void (*unit_teardown)() = NULL;
 #define unit_assert_hex_eq(expected, result)                        \
     do {                                                            \
         ++unit_assert;                                              \
-        int tmp_expected = (expected);                              \
-        int tmp_result = (result);                                  \
+        int tmp_expected = (int)(expected);                         \
+        int tmp_result = (int)(result);                             \
         fflush(stdout);                                             \
         if (tmp_expected != tmp_result) {                           \
             unit_status = 1;                                        \
@@ -117,8 +117,8 @@ static void (*unit_teardown)() = NULL;
 #define unit_assert_double_eq(expected, result)                     \
     do {                                                            \
         ++unit_assert;                                              \
-        double tmp_expected = (expected);                           \
-        double tmp_result = (result);                               \
+        double tmp_expected = (double)(expected);                   \
+        double tmp_result = (double)(result);                       \
         fflush(stdout);                                             \
         if (tmp_expected != tmp_result) {                           \
             unit_status = 1;                                        \
@@ -131,8 +131,8 @@ static void (*unit_teardown)() = NULL;
 #define unit_assert_string_eq(expected, result)                     \
     do {                                                            \
         ++unit_assert;                                              \
-        const char * tmp_expected = (expected);                     \
-        const char * tmp_result = (result);                         \
+        const char * tmp_expected = (const char *)(expected);       \
+        const char * tmp_result = (const char *)(result);           \
         fflush(stdout);                                             \
         if (strcmp(tmp_expected, tmp_result)) {                     \
             unit_status = 1;                                        \

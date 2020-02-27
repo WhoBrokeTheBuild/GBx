@@ -40,7 +40,7 @@ void timerTick(unsigned cycles)
         return;
     }
 
-    unsigned speed = ClockSpeed / TAC.Type;
+    int speed = ClockSpeed / TAC.Type;
 
     timerCounter += cycles;
     if (timerCounter > speed) {
