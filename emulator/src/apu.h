@@ -65,16 +65,15 @@ extern noise_t Noise;
 
 typedef union {
     struct {
-        uint8_t RightVolume:3;
-        bool    RightVinEnable:1;
-        uint8_t LeftVolume:3;
-        bool    LeftVinEnable:1;
+        unsigned RightVolume:3;
+        bool     RightVinEnable:1;
+        unsigned LeftVolume:3;
+        bool     LeftVinEnable:1;
     };
     uint8_t data;
 } volume_control_t;
 
 extern volume_control_t VolumeControl;
-
 
 extern uint8_t WaveRAM[0x10];
 

@@ -18,22 +18,20 @@ typedef union {
     uint8_t data;
 } LCDC_t;
 
-typedef enum {
-    STAT_MODE_HBLANK         = 0b00,
-    STAT_MODE_VBLANK         = 0b01,
-    STAT_MODE_SEARCH_SPRITE  = 0b10,
-    STAT_MODE_DATA_TRANSFER  = 0b11,
-} stat_mode_t;
+#define STAT_MODE_HBLANK         (0b00)
+#define STAT_MODE_VBLANK         (0b01)
+#define STAT_MODE_SEARCH_SPRITE  (0b10)
+#define STAT_MODE_DATA_TRANSFER  (0b11)
 
 typedef union {
     struct {
-        stat_mode_t Mode:2;
-        bool        IntCoincidence:1;
-        bool        IntHBlank:1;
-        bool        IntVBlank:1;
-        bool        IntSearchSprite:1;
-        bool        LYCLY:1;
-        unsigned    :1;
+        unsigned Mode:2;
+        bool     IntCoincidence:1;
+        bool     IntHBlank:1;
+        bool     IntVBlank:1;
+        bool     IntSearchSprite:1;
+        bool     LYCLY:1;
+        unsigned :1;
     };
     uint8_t data;
 } STAT_t;

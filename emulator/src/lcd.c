@@ -361,7 +361,7 @@ void lcdInit()
     char windowTitle[21];
     snprintf(windowTitle, sizeof(windowTitle), "GBx - %.*s", 15, CartridgeHeader.Title);
 
-    sdlWindow = SDL_CreateWindow(windowTitle, -1, -1, winWidth, winHeight, SDL_WINDOW_RESIZABLE);
+    sdlWindow = SDL_CreateWindow(windowTitle, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, winWidth, winHeight, SDL_WINDOW_RESIZABLE);
     if (!sdlWindow) {
         LogFatal("Failed to create SDL2 Window, %s", SDL_GetError());
     }

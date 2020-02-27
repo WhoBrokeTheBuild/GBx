@@ -4,17 +4,16 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-typedef struct
-{
+typedef struct {
     union {
         struct {
             union {
                 struct {
-                    uint8_t _:4;
-                    bool FC:1; // Carry Flag
-                    bool FH:1; // Half Carry Flag
-                    bool FN:1; // Subtract Flag
-                    bool FZ:1; // Zero Flag
+                    unsigned :4;
+                    bool     FC:1; // Carry Flag
+                    bool     FH:1; // Half Carry Flag
+                    bool     FN:1; // Subtract Flag
+                    bool     FZ:1; // Zero Flag
                 };
                 uint8_t F;
             };
