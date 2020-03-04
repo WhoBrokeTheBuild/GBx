@@ -1,7 +1,6 @@
 #include "apu.h"
 
 #include "log.h"
-#include "math.h"
 
 #include <SDL.h>
 
@@ -34,9 +33,6 @@ uint8_t duties[4][8] = {
     { 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00 },
     { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00 },
 };
-
-#include <time.h>
-#include <math.h>
 
 void sdlAudioCallback(void * userdata, uint8_t * stream, int length)
 {

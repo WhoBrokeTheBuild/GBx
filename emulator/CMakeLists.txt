@@ -45,14 +45,6 @@ IF(Readline_FOUND)
     )
 ENDIF()
 
-IF(VERBOSE)
-    TARGET_COMPILE_DEFINITIONS(
-        libGBx
-        PUBLIC
-            -DVERBOSE
-    )
-ENDIF()
-
 # GBx
 
 ADD_EXECUTABLE(
