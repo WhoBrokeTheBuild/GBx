@@ -28,13 +28,13 @@ extern cartridge_header_t CartridgeHeader;
 extern bool ColorEnabled;
 extern bool SuperEnabled;
 
-extern bool CartridgeRAMEnabled;
+extern bool SRAMEnabled;
 
-extern uint8_t * CartridgeRAM0;
-extern uint8_t * CartridgeRAM;
+extern uint8_t * SRAM0;
+extern uint8_t * SRAM;
 
-extern uint8_t * CartridgeROM0;
-extern uint8_t * CartridgeROM;
+extern uint8_t * ROM0;
+extern uint8_t * ROM;
 
 void writeCartridgeMBC(uint16_t address, uint8_t data);
 

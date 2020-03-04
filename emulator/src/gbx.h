@@ -9,4 +9,8 @@ void run();
 
 void stop();
 
+void load(const char * filename);
+
+void save(const char * filename);
+
 #endif // GBX_H

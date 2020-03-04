@@ -30,7 +30,7 @@ typedef union {
         bool     IntHBlank:1;
         bool     IntVBlank:1;
         bool     IntSearchSprite:1;
-        bool     LYCLY:1;
+        bool     Coincidence:1;
         unsigned :1;
     };
     uint8_t data;
@@ -80,8 +80,10 @@ extern palette_t OBP1;
 extern uint8_t WX;
 extern uint8_t WY;
 
-extern uint8_t VideoRAM0[0x1FFF];
-extern uint8_t VideoRAM1[0x1FFF];
+extern uint8_t VRAM0[0x1FFF];
+extern uint8_t VRAM1[0x1FFF];
+extern uint8_t * VRAM;
+
 extern uint8_t OAM[0xA0];
 
 extern bool FPSLimit;

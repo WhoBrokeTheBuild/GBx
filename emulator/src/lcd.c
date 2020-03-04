@@ -24,8 +24,10 @@ palette_t BGP  = { .data = 0b11100100 };
 palette_t OBP0 = { .data = 0b11100100 };
 palette_t OBP1 = { .data = 0b11100100 };
 
-uint8_t VideoRAM0[0x1FFF];
-uint8_t VideoRAM1[0x1FFF];
+uint8_t VRAM0[0x1FFF];
+uint8_t VRAM1[0x1FFF];
+uint8_t * VRAM = VRAM0;
+
 uint8_t OAM[0xA0];
 
 bool FPSLimit = false;
@@ -50,8 +52,20 @@ uint8_t pixelData[256*256*3];
 
 #define DEFAULT_SCALE 4
 
-unsigned winWidth  = 160 * DEFAULT_SCALE;
-unsigned winHeight = 144 * DEFAULT_SCALE;
+#define SCREEN_WIDTH  (160)
+#define SCREEN_HEIGHT (144)
+
+unsigned winWidth  = SCREEN_WIDTH * DEFAULT_SCALE;
+unsigned winHeight = SCREEN_HEIGHT * DEFAULT_SCALE;
+
+unsigned lcdModeTicks = 0;
+
+#define HBLANK_TICK_COUNT        (204)
+#define VBLANK_TICK_COUNT        (456) // 1/10 of VBlank Period
+#define SEARCH_SPRITE_TICK_COUNT (80)
+#define DATA_TRANSFER_TICK_COUNT (172)
+
+#define MAX_LY (154)
 
 void drawTiles()
 {
@@ -274,59 +288,67 @@ void render()
     }
 }
 
+void updateCoincidence()
+{
+    STAT.Coincidence = (LY == LYC);
+    if (STAT.IntCoincidence && STAT.Coincidence) {
+        IF.STAT = true;
+    }
+}
+
 void lcdTick(unsigned cycles)
 {
-    static int lcdModeTicks = 0;
-
-    const unsigned HBLANK_TICK_COUNT = 204;
-    const unsigned VBLANK_TICK_COUNT = 456;
-    const unsigned SEARCH_SPRITE_TICK_COUNT = 80;
-    const unsigned DATA_TRANSFER_TICK_COUNT = 172;
-
     lcdModeTicks += cycles;
-
-    bool modeChanged = false;
 
     switch (STAT.Mode) {
         case STAT_MODE_HBLANK:
-            if (lcdModeTicks >= 204) {
-                lcdModeTicks = 0;
+            if (lcdModeTicks >= HBLANK_TICK_COUNT) {
+                lcdModeTicks -= HBLANK_TICK_COUNT;
 
                 ++LY;
-                if (LY == 144) {
+                updateCoincidence();
+
+                if (LY == SCREEN_HEIGHT) {
                     STAT.Mode = STAT_MODE_VBLANK;
+                    if (STAT.IntVBlank) {
+                        IF.STAT = true;
+                    }
+
                     render();
                 }
                 else {
                     STAT.Mode = STAT_MODE_SEARCH_SPRITE;
-                    modeChanged = true;
+                    if (STAT.IntSearchSprite) {
+                        IF.STAT = true;
+                    }
                 }
             }
         break;
         case STAT_MODE_VBLANK:
-            if (lcdModeTicks >= 456) {
-                lcdModeTicks = 0;
+            if (lcdModeTicks >= VBLANK_TICK_COUNT) {
+                lcdModeTicks -= VBLANK_TICK_COUNT;
                 
-                ++LY;
-                if (LY > 153) {
+                LY = (LY + 1) % MAX_LY;
+                updateCoincidence();
+
+                if (LY == 0) {
                     STAT.Mode = STAT_MODE_SEARCH_SPRITE;
-                    modeChanged = true;
-                    LY = 0;
+                    if (STAT.IntSearchSprite) {
+                        IF.STAT = true;
+                    }
                 }
             }
         break;
         case STAT_MODE_SEARCH_SPRITE:
-            if (lcdModeTicks >= 80) {
-                lcdModeTicks = 0;
+            if (lcdModeTicks >= SEARCH_SPRITE_TICK_COUNT) {
+                lcdModeTicks -= SEARCH_SPRITE_TICK_COUNT;
+
                 STAT.Mode = STAT_MODE_DATA_TRANSFER;
-                modeChanged = true;
             }
         break;
         case STAT_MODE_DATA_TRANSFER:
-            if (lcdModeTicks >= 172) {
-                lcdModeTicks = 0;
-                STAT.Mode = STAT_MODE_HBLANK;
-                modeChanged = true;
+            if (lcdModeTicks >= DATA_TRANSFER_TICK_COUNT) {
+                lcdModeTicks -= DATA_TRANSFER_TICK_COUNT;
 
                 if (LCDC.TileDisplayEnable) {
                     drawTiles();
@@ -335,24 +357,10 @@ void lcdTick(unsigned cycles)
                 if (LCDC.SpriteDisplayEnable) {
                     drawSprites();
                 }
+
+                STAT.Mode = STAT_MODE_HBLANK;
             }
         break;
-    }
-
-    if (LY == 144) {
-        IF.VBlank = true;
-    }
-
-    if ((STAT.IntCoincidence && STAT.LYCLY && LY == LYC) ||
-        (STAT.IntCoincidence && !STAT.LYCLY && LY != LYC) ||
-        (STAT.IntHBlank && modeChanged && STAT.Mode == STAT_MODE_HBLANK) ||
-        (STAT.IntVBlank && modeChanged && STAT.Mode == STAT_MODE_VBLANK) ||
-        (STAT.IntSearchSprite && modeChanged && STAT.Mode == STAT_MODE_SEARCH_SPRITE)) {
-        IF.STAT = true;
-    }
-
-    if (modeChanged) {
-        LogVerbose(3, "LCD Mode Changed: %s", LCD_MODE_STR[STAT.Mode]);
     }
 }
 
@@ -410,8 +418,8 @@ void printLCDC()
 void printSTAT() 
 {
 
-    LogInfo("Mode=%s IntCoinc=%d IntHBlank=%d IntVBlank=%d IntSearchSprite=%d LYCLY=%d",
-        LCD_MODE_STR[STAT.Mode], STAT.IntCoincidence, STAT.IntHBlank, STAT.IntVBlank, STAT.IntSearchSprite, STAT.LYCLY);
+    LogInfo("Mode=%s IntCoinc=%d IntHBlank=%d IntVBlank=%d IntSearchSprite=%d Coincidence=%d",
+        LCD_MODE_STR[STAT.Mode], STAT.IntCoincidence, STAT.IntHBlank, STAT.IntVBlank, STAT.IntSearchSprite, STAT.Coincidence);
 }
 
 void printLCDInfo()

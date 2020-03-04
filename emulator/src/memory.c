@@ -10,10 +10,10 @@
 #include "register.h"
 #include "timer.h"
 
-uint8_t InternalRAM0[0x7FF8];
-uint8_t * InternalRAM = InternalRAM0 + 0x0FFF; // Default to Bank 1
+uint8_t WRAM0[0x7FF8];
+uint8_t * WRAM = WRAM0 + 0x0FFF; // Default to Bank 1
 
-uint8_t ZeroPage[127];
+uint8_t HRAM[127];
 
 uint8_t readByte(uint16_t address)
 {
@@ -24,43 +24,43 @@ uint8_t readByte(uint16_t address)
             return BOOTSTRAP[address];
         } else {
             // Jump Vectors
-            return CartridgeROM0[address];
+            return ROM0[address];
         }
     }
     else if (address <= 0x3FFF) {
         // Cartridge ROM Bank 0
-        return CartridgeROM0[address];
+        return ROM0[address];
     }
     else if (address <= 0x7FFF) {
-        // Cartridge ROM Switchable Bank
-        return CartridgeROM[address - 0x4000];
+        // Switchable Cartridge ROM
+        return ROM[address - 0x4000];
     }
     else if (address <= 0x9FFF) {
-        return VideoRAM0[address - 0x8000];
+        return VRAM0[address - 0x8000];
     }
     else if (address <= 0xBFFF) {
-        // Cartridge RAM
-        if (CartridgeRAMEnabled) {
-            return CartridgeRAM[address - 0xA000];
+        // External Cartridge RAM
+        if (SRAMEnabled) {
+            return SRAM[address - 0xA000];
         }
         else {
             LogFatal("Cartridge RAM Not Enabled %04X", address);
         }
     }
     else if (address <= 0xCFFF) {
-        // Internal RAM Bank 0
-        return InternalRAM0[address - 0xC000];
+        // Work RAM Bank 0
+        return WRAM0[address - 0xC000];
     }
     else if (address <= 0xDFFF) {
-        // Internal RAM Switchable Bank
-        return InternalRAM[address - 0xD000];
+        // Switchable Work RAM
+        return WRAM[address - 0xD000];
     }
     else if (address <= 0xFDFF) {
         // Echo RAM
-        return InternalRAM0[address - 0xE000];
+        return WRAM0[address - 0xE000];
     }
     else if (address <= 0xFE9F) {
-        // Object Attribute Memory OAM
+        // Object Attribute Memory
         return OAM[address - 0xFE00];
     }
     else if (address <= 0xFEFF) {
@@ -161,7 +161,7 @@ uint8_t readByte(uint16_t address)
         };
     }
     else if (address <= 0xFFFE) {
-        return ZeroPage[address - 0xFF80];
+        return HRAM[address - 0xFF80];
     }
     else if (address == 0xFFFF) {
         // Interrupt Enable Flag
@@ -201,31 +201,31 @@ void writeByte(uint16_t address, uint8_t data)
         writeCartridgeMBC(address, data);
     }
     else if (address <= 0x9FFF) {
-        VideoRAM0[address - 0x8000] = data;
+        VRAM[address - 0x8000] = data;
     }
     else if (address <= 0xBFFF) {
         // Cartridge RAM
-        if (CartridgeRAMEnabled) {
-            CartridgeRAM[address - 0xA000] = data;
+        if (SRAMEnabled) {
+            SRAM[address - 0xA000] = data;
         }
         else {
             LogFatal("Cartridge RAM Not Enabled %04X", address);
         }
     }
     else if (address <= 0xCFFF) {
-        // Internal RAM Bank 0
-        InternalRAM0[address - 0xC000] = data;
+        // Work RAM Bank 0
+        WRAM0[address - 0xC000] = data;
     }
     else if (address <= 0xDFFF) {
-        // Internal RAM Switchable Bank
-        InternalRAM[address - 0xD000] = data;
+        // Switchable Work RAM Bank
+        WRAM[address - 0xD000] = data;
     }
     else if (address <= 0xFDFF) {
         // Echo RAM
-        InternalRAM0[address - 0xE000] = data;
+        WRAM0[address - 0xE000] = data;
     }
     else if (address <= 0xFE9F) {
-        // Object Attribute Memory OAM
+        // Object Attribute Memory
         OAM[address - 0xFE00] = data;
     }
     else if (address <= 0xFEFF) {
@@ -475,7 +475,7 @@ void writeByte(uint16_t address, uint8_t data)
         };
     }
     else if (address <= 0xFFFE) {
-        ZeroPage[address - 0xFF80] = data;
+        HRAM[address - 0xFF80] = data;
     }
     else if (address == 0xFFFF) {
         // Interrupt Enable Flag

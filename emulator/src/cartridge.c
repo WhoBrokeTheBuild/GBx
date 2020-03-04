@@ -32,7 +32,7 @@ uint8_t RAMType       = 0x00;
 
 bool HasCartridgeBattery = false;
 bool HasCartridgeTimer   = false;
-bool HasCartridgeRAM     = false;
+bool HasSRAM     = false;
 bool HasCartridgeSRAM    = false;
 
 mbc_type_t MBCType = MBC_NONE;
@@ -53,13 +53,13 @@ typedef struct {
 
 bank_t Bank;
 
-bool CartridgeRAMEnabled = false;
+bool SRAMEnabled = false;
 
-uint8_t * CartridgeRAM0 = NULL;
-uint8_t * CartridgeRAM = NULL;
+uint8_t * SRAM0 = NULL;
+uint8_t * SRAM = NULL;
 
-uint8_t * CartridgeROM0 = NULL;
-uint8_t * CartridgeROM = NULL;
+uint8_t * ROM0 = NULL;
+uint8_t * ROM = NULL;
 
 void writeCartridgeMBC(uint16_t address, uint8_t data)
 {
@@ -67,8 +67,8 @@ void writeCartridgeMBC(uint16_t address, uint8_t data)
         if (address <= 0x1FFF) {
             // RAM Enable
             LogInfo("%04X %02X", address, data);
-            CartridgeRAMEnabled = ((data & 0x0F) == 0x0A);
-            LogInfo("Cart RAM Enabled:%s", CartridgeRAMEnabled ? "true" : "false");
+            SRAMEnabled = ((data & 0x0F) == 0x0A);
+            LogInfo("SRAM Enabled:%s", SRAMEnabled ? "true" : "false");
         }
         else if (address <= 0x3FFF) {
             // Cartridge ROM Bank Number
@@ -77,20 +77,20 @@ void writeCartridgeMBC(uint16_t address, uint8_t data)
             }
             
             Bank.Lower = data;
-            CartridgeROM = CartridgeROM0 + (0x4000 * Bank.Full);
+            ROM = ROM0 + (0x4000 * Bank.Full);
         }
         else if (address <= 0x5FFF) {
-            // RAM Bank Number or CartridgeROM Upper Bank Number
+            // RAM Bank Number or ROM Upper Bank Number
             Bank.Upper = data;
             if (Bank.RAMMode) {
-                CartridgeRAM = CartridgeRAM0 + (0x2000 * Bank.Upper);
+                SRAM = SRAM0 + (0x2000 * Bank.Upper);
             }
             else {
-                CartridgeROM = CartridgeROM0 + (0x4000 * Bank.Full);
+                ROM = ROM0 + (0x4000 * Bank.Full);
             }
         }
         else {
-            // CartridgeROM/RAM Mode Select
+            // ROM/RAM Mode Select
             Bank.RAMMode = (data == 1);
         }
     }
@@ -100,7 +100,7 @@ void writeCartridgeMBC(uint16_t address, uint8_t data)
     else if (MBCType == MBC_MBC3) {
         if (address <= 0x1FFF) {
             // RAM Enable
-            CartridgeRAMEnabled = ((data & 0x0F) == 0x0A);
+            SRAMEnabled = ((data & 0x0F) == 0x0A);
         }
         else if (address <= 0x3FFF) {
             // Cartridge ROM Bank Number
@@ -109,7 +109,7 @@ void writeCartridgeMBC(uint16_t address, uint8_t data)
             }
             
             Bank.Full = data;
-            CartridgeROM = CartridgeROM0 + (0x4000 * Bank.Full);
+            ROM = ROM0 + (0x4000 * Bank.Full);
         }
         else if (address <= 0x5FFF) {
         }
@@ -128,10 +128,10 @@ bool loadCartridge(const char * filename)
 
     LogVerbose(1, "ROM Size %zu", size);
 
-    CartridgeROM0 = (uint8_t *)malloc(size);
-    CartridgeROM = CartridgeROM0 + 0x4000; // Default to Bank 1
+    ROM0 = (uint8_t *)malloc(size);
+    ROM = ROM0 + 0x4000; // Default to Bank 1
 
-    size_t bytesRead = fread(CartridgeROM0, 1, size, file);
+    size_t bytesRead = fread(ROM0, 1, size, file);
     fclose(file);
 
     LogVerbose(1, "Read %zu bytes", bytesRead);
@@ -141,7 +141,7 @@ bool loadCartridge(const char * filename)
         return false;
     }
 
-    memcpy(CartridgeHeader.data, CartridgeROM0 + HEADER_OFFSET, sizeof(CartridgeHeader));
+    memcpy(CartridgeHeader.data, ROM0 + HEADER_OFFSET, sizeof(CartridgeHeader));
 
     LogVerbose(1, "ROM Title: %.*s", 15, CartridgeHeader.Title);
 
@@ -165,12 +165,12 @@ bool loadCartridge(const char * filename)
     case 0x02:
         // MBC1+RAM
         MBCType = MBC_MBC1;
-        HasCartridgeRAM = true;
+        HasSRAM = true;
         break;
     case 0x03:
         // MBC1+RAM+Battery
         MBCType = MBC_MBC1;
-        HasCartridgeRAM = true;
+        HasSRAM = true;
         HasCartridgeBattery = true;
         break;
     case 0x05:
@@ -184,11 +184,11 @@ bool loadCartridge(const char * filename)
         break;
     case 0x08:
         // RAM
-        HasCartridgeRAM = true;
+        HasSRAM = true;
         break;
     case 0x09:
         // RAM+Battery
-        HasCartridgeRAM = true;
+        HasSRAM = true;
         HasCartridgeBattery = true;
         break;
     case 0x0B:
@@ -216,7 +216,7 @@ bool loadCartridge(const char * filename)
         // MBC3+Timer+RAM+Battery
         MBCType = MBC_MBC3;
         HasCartridgeTimer = true;
-        HasCartridgeRAM = true;
+        HasSRAM = true;
         HasCartridgeBattery = true;
         break;
     case 0x11:
@@ -226,12 +226,12 @@ bool loadCartridge(const char * filename)
     case 0x12:
         // MBC3+RAM
         MBCType = MBC_MBC3;
-        HasCartridgeRAM = true;
+        HasSRAM = true;
         break;
     case 0x13:
         // MBC3+RAM+Battery
         MBCType = MBC_MBC3;
-        HasCartridgeRAM = true;
+        HasSRAM = true;
         HasCartridgeBattery = true;
         break;
     case 0x19:
@@ -241,12 +241,12 @@ bool loadCartridge(const char * filename)
     case 0x1A:
         // MBC5+RAM
         MBCType = MBC_MBC5;
-        HasCartridgeRAM = true;
+        HasSRAM = true;
         break;
     case 0x1B:
         // MBC5+RAM+Battery
         MBCType = MBC_MBC5;
-        HasCartridgeRAM = true;
+        HasSRAM = true;
         HasCartridgeBattery = true;
         break;
     case 0x1C:
@@ -271,7 +271,7 @@ bool loadCartridge(const char * filename)
     case 0x22:
         // MBC7+Sensor+Rumble+RAM+Battery
         MBCType = MBC_MBC7;
-        HasCartridgeRAM = true;
+        HasSRAM = true;
         HasCartridgeBattery = true;
         break;
     case 0xFC:
@@ -293,28 +293,28 @@ bool loadCartridge(const char * filename)
     switch (CartridgeHeader.RAMType) {
     case 0x01:
         // 2KB
-        CartridgeRAM0 = (uint8_t *)malloc(2048);
-        CartridgeRAMEnabled = true;
+        SRAM0 = (uint8_t *)malloc(2048);
+        SRAMEnabled = true;
         break;
     case 0x02:
         // 8KB
-        CartridgeRAM0 = (uint8_t *)malloc(8120);
-        CartridgeRAMEnabled = true;
+        SRAM0 = (uint8_t *)malloc(8120);
+        SRAMEnabled = true;
         break;
     case 0x03:
         // 32KB (4 banks of 8KB)
-        CartridgeRAM0 = (uint8_t *)malloc(32768);
-        CartridgeRAMEnabled = true;
+        SRAM0 = (uint8_t *)malloc(32768);
+        SRAMEnabled = true;
         break;
     case 0x04:
         // 128KB (16 banks of 8KB
-        CartridgeRAM0 = (uint8_t *)malloc(131072);
-        CartridgeRAMEnabled = true;
+        SRAM0 = (uint8_t *)malloc(131072);
+        SRAMEnabled = true;
         break;
     case 0x05:
         // 64KB (8 banks of 8KB
-        CartridgeRAM0 = (uint8_t *)malloc(65536);
-        CartridgeRAMEnabled = true;
+        SRAM0 = (uint8_t *)malloc(65536);
+        SRAMEnabled = true;
         break;
     default:
         break;
@@ -329,11 +329,11 @@ bool loadCartridge(const char * filename)
 
 void freeCartridge() 
 {
-    free(CartridgeROM0);
-    CartridgeROM0 = NULL;
+    free(ROM0);
+    ROM0 = NULL;
 
-    free(CartridgeRAM0);
-    CartridgeRAM0 = NULL;
+    free(SRAM0);
+    SRAM0 = NULL;
 }
 
 void printBank()
