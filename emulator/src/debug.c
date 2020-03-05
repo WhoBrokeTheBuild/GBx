@@ -11,7 +11,6 @@
 #include "lcd.h"
 #include "log.h"
 #include "memory.h"
-#include "register.h"
 #include "timer.h"
 
 #include <SDL.h>

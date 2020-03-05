@@ -5,7 +5,6 @@
 #include "../cpu.h"
 #include "../log.h"
 #include "../memory.h"
-#include "../register.h"
 
 #define _XOR(x) \
     R.A = xor8(R.A, (x))

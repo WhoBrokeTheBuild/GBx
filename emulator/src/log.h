@@ -3,7 +3,7 @@
 
 #include "debug.h"
 #include "cpu.h"
-#include "register.h"
+#include "cpu.h"
 #include "gbx.h"
 
 #include <stdio.h>

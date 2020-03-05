@@ -3,9 +3,9 @@
 
 #include "../alu.h"
 #include "../clock.h"
+#include "../cpu.h"
 #include "../log.h"
 #include "../memory.h"
-#include "../register.h"
 
 static void _LD_A_A()
 {

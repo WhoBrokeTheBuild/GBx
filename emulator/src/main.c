@@ -6,7 +6,6 @@
 #include "gbx.h"
 #include "lcd.h"
 #include "log.h"
-#include "register.h"
 
 #include <SDL.h>
 #include <cflags.h>

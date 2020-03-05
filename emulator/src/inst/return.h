@@ -2,9 +2,9 @@
 #define RET_H
 
 #include "../clock.h"
+#include "../cpu.h"
 #include "../log.h"
 #include "../memory.h"
-#include "../register.h"
 #include "../interrupt.h"
 
 static void _RET()

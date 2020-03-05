@@ -2,9 +2,9 @@
 #define DEC_H
 
 #include "../clock.h"
+#include "../cpu.h"
 #include "../log.h"
 #include "../memory.h"
-#include "../register.h"
 
 #define _DEC(x)                     \
     R.FH = (((x) & 0xF) == 0);      \

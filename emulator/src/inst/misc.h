@@ -4,7 +4,6 @@
 #include "../cpu.h"
 #include "../log.h"
 #include "../interrupt.h"
-#include "../register.h"
 #include "../lcd.h"
 
 static void _NOP()

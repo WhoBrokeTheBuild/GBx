@@ -1,6 +1,6 @@
 #include "alu.h"
 
-#include "register.h"
+#include "cpu.h"
 
 uint16_t add16(uint16_t a, uint16_t b)
 {

@@ -1,11 +1,14 @@
 #include "CB.h"
+
 #include "bit.h"
 #include "reset.h"
 #include "rotate.h"
 #include "set.h"
 #include "shift.h"
+
 #include "../cpu.h"
 
+typedef void(* inst_t)();
 typedef void(* bit_inst_t)(int);
 
 inst_t CB_instructions[0x40] = {

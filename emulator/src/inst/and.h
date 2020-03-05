@@ -3,9 +3,9 @@
 
 #include "../alu.h"
 #include "../clock.h"
+#include "../cpu.h"
 #include "../log.h"
 #include "../memory.h"
-#include "../register.h"
 
 #define _AND(x) \
     R.A = and8(R.A, (x))

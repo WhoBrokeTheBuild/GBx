@@ -4,7 +4,6 @@
 #include "lcd.h"
 #include "log.h"
 #include "memory.h"
-#include "register.h"
 
 bool IME = true;
 

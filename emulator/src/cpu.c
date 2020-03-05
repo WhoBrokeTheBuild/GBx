@@ -26,9 +26,13 @@
 #include "inst/subtract.h"
 #include "inst/xor.h"
 
+reg_t R;
+
 bool CPUEnabled = true;
 
 uint16_t LastInstructionAddress = 0x0000;
+
+typedef void(* inst_t)();
 
 inst_t instructions[0x100] = {
     // CB
@@ -334,12 +338,18 @@ void execute(uint8_t op)
 
 void nextInstruction(int cycles)
 {
+    checkInterrupts();
+
     if (CPUEnabled) {
         uint8_t op = fetch();
         execute(op);
     } else {
         tick(1);
     }
+}
 
-    checkInterrupts();
+void printR()
+{
+    LogInfo("AF=%04X BC=%04X DE=%04X HL=%04X SP=%04X PC=%04X FZ=%d FN=%d FH=%d FC=%d",
+        R.AF, R.BC, R.DE, R.HL, R.SP, R.PC, R.FZ, R.FN, R.FH, R.FC);
 }

@@ -5,7 +5,6 @@
 #include "../cpu.h"
 #include "../log.h"
 #include "../memory.h"
-#include "../register.h"
 
 #define _OR(x) \
     R.A = or8(R.A, (x))

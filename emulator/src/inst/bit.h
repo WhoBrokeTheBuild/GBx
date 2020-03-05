@@ -2,9 +2,9 @@
 #define BIT_H
 
 #include "../clock.h"
+#include "../cpu.h"
 #include "../log.h"
 #include "../memory.h"
-#include "../register.h"
 
 #define _BIT(x, b)                      \
     R.FZ = (((x) & (1 << (b))) == 0);   \

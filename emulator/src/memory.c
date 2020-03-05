@@ -3,11 +3,11 @@
 #include "apu.h"
 #include "bootstrap.h"
 #include "cartridge.h"
+#include "clock.h"
 #include "interrupt.h"
 #include "io.h"
 #include "lcd.h"
 #include "log.h"
-#include "register.h"
 #include "timer.h"
 
 uint8_t WRAM0[0x7FF8];

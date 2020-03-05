@@ -2,9 +2,9 @@
 #define INC_H
 
 #include "../clock.h"
+#include "../cpu.h"
 #include "../log.h"
 #include "../memory.h"
-#include "../register.h"
 
 #define _INC(x)                     \
     R.FH = (((x) & 0x0F) == 0x0F);  \

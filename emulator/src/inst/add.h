@@ -3,15 +3,15 @@
 
 #include "../alu.h"
 #include "../clock.h"
+#include "../cpu.h"
 #include "../log.h"
 #include "../memory.h"
-#include "../register.h"
 
 #define _ADD(x) \
     R.A = add8(R.A, (x))
 
 #define _ADC(x) \
-    R.A = add8(R.A, (x) + (uint8_t)R.FC)
+    R.A = add8(R.A, (x) + R.FC)
 
 #define _ADDHL(x) \
     R.HL = add16(R.HL, (x))

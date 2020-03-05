@@ -1,9 +1,9 @@
 #include "bootstrap.h"
 
 #include "apu.h"
+#include "cpu.h"
 #include "interrupt.h"
 #include "lcd.h"
-#include "register.h"
 #include "timer.h"
 
 bool BootstrapEnable = false;
