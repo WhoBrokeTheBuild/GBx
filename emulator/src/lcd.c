@@ -301,7 +301,7 @@ void render()
     pollEvents();
 
     if (FPSLimit) {
-        SDL_Delay((1.0 / 59.9) * 1000.0);
+        SDL_Delay((1.0 / 59.73) * 1000.0);
     }
 }
 

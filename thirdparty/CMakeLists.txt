@@ -33,12 +33,8 @@ SET(SDL2_BINARY_DIR ${CMAKE_BINARY_DIR}/SDL2_bin)
 FIND_PACKAGE(SDL2 2.0.6 CONFIG QUIET)
 
 IF(NOT SDL2_FOUND)
-    SET(SDL2_PATCH ${CMAKE_SOURCE_DIR}/SDL2-vcruntime.patch)
-
     IF(MSVC) 
-        SET(SDL2_PATCH_COMMAND ${GIT_EXECUTABLE} apply --ignore-space-change --ignore-whitespace -v ${SDL2_PATCH} || ver > nul)
-    ELSE()
-        SET(SDL2_PATCH_COMMAND patch -p0 --forward < ${SDL2_PATCH} || true)
+        SET(SDL2_PATCH_COMMAND ${GIT_EXECUTABLE} apply --ignore-space-change --ignore-whitespace -v ${CMAKE_SOURCE_DIR}/SDL2-vcruntime.patch || ver > nul)
     ENDIF()
 
     ExternalProject_Add(
