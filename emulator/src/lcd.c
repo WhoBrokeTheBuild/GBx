@@ -1,6 +1,7 @@
 #include "lcd.h"
 
 #include "cartridge.h"
+#include "clock.h"
 #include "cpu.h"
 #include "debug.h"
 #include "interrupt.h"
@@ -40,77 +41,93 @@ const char * LCD_MODE_STR[4] = {
 };
 
 uint16_t TILE_MAP_ADDR[2] = {
-    0x9800,
-    0x9C00,
+    0x9800, // 9800-9BFF
+    0x9C00, // 9C00-9FFF
 };
 
-SDL_Window * sdlWindow     = NULL;
+uint16_t TILE_DATA_ADDR[2] = {
+    0x9000, // 8800-97FF
+    0x8000, // 8000-8FFF
+};
+
+SDL_Window   * sdlWindow   = NULL;
 SDL_Renderer * sdlRenderer = NULL;
-SDL_Texture * sdlTexture   = NULL;
+SDL_Texture  * sdlTexture  = NULL;
 
-uint8_t pixelData[256*256*3];
+#define DEFAULT_SCALE (4)
 
-#define DEFAULT_SCALE 4
+#define BACKBUFFER_WIDTH  (256)
+#define BACKBUFFER_HEIGHT (256)
 
 #define SCREEN_WIDTH  (160)
 #define SCREEN_HEIGHT (144)
 
-unsigned winWidth  = SCREEN_WIDTH * DEFAULT_SCALE;
-unsigned winHeight = SCREEN_HEIGHT * DEFAULT_SCALE;
+uint8_t pixelData[BACKBUFFER_WIDTH * BACKBUFFER_HEIGHT * 3];
 
-unsigned lcdModeTicks = 0;
+unsigned winWidth  = SCREEN_WIDTH  * DEFAULT_SCALE;
+unsigned winHeight = SCREEN_HEIGHT * DEFAULT_SCALE;
 
 #define HBLANK_TICK_COUNT        (204)
 #define VBLANK_TICK_COUNT        (456) // 1/10 of VBlank Period
 #define SEARCH_SPRITE_TICK_COUNT (80)
 #define DATA_TRANSFER_TICK_COUNT (172)
 
+unsigned lcdModeTicks = 0;
+
 #define MAX_LY (154)
+
+#define TILE_WIDTH     (8)
+#define TILE_HEIGHT    (8)
+#define TILES_PER_ROW  (32)
+#define TILE_DATA_SIZE (16)
+
+#define COLOR_WHITE      (0xFF)
+#define COLOR_LIGHT_GRAY (0xCC)
+#define COLOR_DARK_GRAY  (0x77)
+#define COLOR_BLACK      (0x00)
 
 void drawTiles()
 {
-    int y = 0;
+    int wx7 = WX - 7;
+
+    unsigned mapSelect = (LCDC.WindowDisplayEnable ? LCDC.WindowTileMapSelect : LCDC.TileMapSelect);
+    uint16_t mapBaseAddress = TILE_MAP_ADDR[mapSelect];
+    uint16_t dataBaseAddress = TILE_DATA_ADDR[LCDC.TileDataSelect];
+
+    int srcY = LY;
+    int dstY = LY + SCY;
     if (LCDC.WindowDisplayEnable) {
-        y = LY - WY;
-    } else {
-        y = SCY + LY;
+        dstY = LY - WY;
     }
 
-    uint16_t tileBaseAddress = TILE_MAP_ADDR[
-        LCDC.WindowDisplayEnable 
-        ? LCDC.WindowTileMapSelect 
-        : LCDC.TileMapSelect
-    ];
+    uint16_t yOffset = (dstY / TILE_HEIGHT) * TILES_PER_ROW;
+    uint16_t lineOffset = (dstY % TILE_HEIGHT) * 2;
 
-    uint16_t row = (y / 8) * 32;
+    for (unsigned srcX = 0; srcX < SCREEN_WIDTH; ++srcX) {
 
-    for (unsigned pixel = 0; pixel < 160; ++pixel) {
-        uint8_t x = pixel + SCX;
-        if (LCDC.WindowDisplayEnable) {
-            if (pixel >= WX - 7) {
-                x = pixel - (WX - 7);
-            }
-        }
-        uint16_t col = x / 8;
-
-        uint16_t tileOffset;
-        if (LCDC.TileDataSelect) {
-            uint8_t tileIndex = readByte(tileBaseAddress + row + col);
-            tileOffset = 0x8000 + (tileIndex * 16);
-        } else {
-            int8_t tileIndex = (int8_t)readByte(tileBaseAddress + row + col);
-            tileOffset = 0x8800 + ((tileIndex + 128) * 16);
+        int dstX = srcX + SCX;
+        if (LCDC.WindowDisplayEnable && srcX >= wx7) {
+            dstX = srcX - wx7;
         }
 
-        uint8_t line = (y % 8) * 2;
-        uint8_t data1 = readByte(tileOffset + line);
-        uint8_t data2 = readByte(tileOffset + line + 1);
+        uint16_t xOffset = dstX / TILE_WIDTH;
 
-        int bit = (x % 8);
-        bit -= 7;
-        bit *= -1;
-        bit = 1 << bit;
-        uint8_t colorIndex = ((data2 & bit) ? 2 : 0) | ((data1 & bit) ? 1 : 0);
+        int tileIndex = readByte(mapBaseAddress + yOffset + xOffset);
+        if (LCDC.TileDataSelect == 0) {
+            tileIndex = (int8_t)tileIndex; // Convert to [-128, 127]
+        }
+
+        uint16_t dataOffset = dataBaseAddress + (tileIndex * TILE_DATA_SIZE);
+
+        uint8_t data1 = readByte(dataOffset + lineOffset);
+        uint8_t data2 = readByte(dataOffset + lineOffset + 1);
+
+        int bit = 0x80 >> (srcX % TILE_WIDTH);
+        bool high = (data2 & bit);
+        bool low  = (data1 & bit);
+        uint8_t colorIndex = 
+            (high ? 0b10 : 0b00) | 
+            (low  ? 0b01 : 0b00);
         
         uint8_t color = 0;
         switch (colorIndex) {
@@ -130,20 +147,20 @@ void drawTiles()
 
         switch (colorIndex) {
         case 0b00:
-            color = 0xFF;
+            color = COLOR_WHITE;
             break;
         case 0b01:
-            color = 0xCC;
+            color = COLOR_LIGHT_GRAY;
             break;
         case 0b10:
-            color = 0x77;
+            color = COLOR_DARK_GRAY;
             break;
         case 0b11:
-            color = 0x00;
+            color = COLOR_BLACK;
             break;
         }
 
-        unsigned off = (LY * 256*3) + (x * 3);
+        unsigned off = (srcY * BACKBUFFER_WIDTH * 3) + (srcX * 3);
         pixelData[off + 0] = color;
         pixelData[off + 1] = color;
         pixelData[off + 2] = color;
@@ -207,16 +224,16 @@ void drawSprites()
 
                 switch (colorIndex) {
                 case 0b00:
-                    color = 0xFF;
+                    color = COLOR_WHITE;
                     break;
                 case 0b01:
-                    color = 0xCC;
+                    color = COLOR_LIGHT_GRAY;
                     break;
                 case 0b10:
-                    color = 0x77;
+                    color = COLOR_DARK_GRAY;
                     break;
                 case 0b11:
-                    color = 0x00;
+                    color = COLOR_BLACK;
                     break;
                 }
 
@@ -301,6 +318,28 @@ void lcdTick(unsigned cycles)
     lcdModeTicks += cycles;
 
     switch (STAT.Mode) {
+        case STAT_MODE_SEARCH_SPRITE:
+            if (lcdModeTicks >= SEARCH_SPRITE_TICK_COUNT) {
+                lcdModeTicks -= SEARCH_SPRITE_TICK_COUNT;
+
+                STAT.Mode = STAT_MODE_DATA_TRANSFER;
+            }
+        break;
+        case STAT_MODE_DATA_TRANSFER:
+            if (lcdModeTicks >= DATA_TRANSFER_TICK_COUNT) {
+                lcdModeTicks -= DATA_TRANSFER_TICK_COUNT;
+
+                if (LCDC.TileDisplayEnable) {
+                    drawTiles();
+                }
+
+                if (LCDC.SpriteDisplayEnable) {
+                    drawSprites();
+                }
+
+                STAT.Mode = STAT_MODE_HBLANK;
+            }
+        break;
         case STAT_MODE_HBLANK:
             if (lcdModeTicks >= HBLANK_TICK_COUNT) {
                 lcdModeTicks -= HBLANK_TICK_COUNT;
@@ -337,28 +376,6 @@ void lcdTick(unsigned cycles)
                         IF.STAT = true;
                     }
                 }
-            }
-        break;
-        case STAT_MODE_SEARCH_SPRITE:
-            if (lcdModeTicks >= SEARCH_SPRITE_TICK_COUNT) {
-                lcdModeTicks -= SEARCH_SPRITE_TICK_COUNT;
-
-                STAT.Mode = STAT_MODE_DATA_TRANSFER;
-            }
-        break;
-        case STAT_MODE_DATA_TRANSFER:
-            if (lcdModeTicks >= DATA_TRANSFER_TICK_COUNT) {
-                lcdModeTicks -= DATA_TRANSFER_TICK_COUNT;
-
-                if (LCDC.TileDisplayEnable) {
-                    drawTiles();
-                }
-
-                if (LCDC.SpriteDisplayEnable) {
-                    drawSprites();
-                }
-
-                STAT.Mode = STAT_MODE_HBLANK;
             }
         break;
     }

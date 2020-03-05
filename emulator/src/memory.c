@@ -430,10 +430,10 @@ void writeByte(uint16_t address, uint8_t data)
             break;
         case 0xFF46:
             {
-                // TODO: Investigate
                 uint16_t addr = data << 8;
                 for (unsigned i = 0; i < 0xA0; ++i) {
                     writeByte(0xFE00 + i, readByte(addr + 1));
+                    tick(4);
                 }
             }
             break;

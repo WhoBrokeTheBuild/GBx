@@ -76,6 +76,7 @@ void bootstrap()
     // = 0xF3; // NR51
     // = 0xF1; // NR52
     LCDC.data = 0x91;
+    STAT.Mode = STAT_MODE_SEARCH_SPRITE;
     SCY = 0x00;
     SCX = 0x00;
     LYC = 0x00;
