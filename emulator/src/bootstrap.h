@@ -6,7 +6,9 @@
 
 extern bool BootstrapEnable;
 
-extern uint8_t BOOTSTRAP[0x100];
+extern uint8_t Bootstrap[0x100];
+
+bool loadBootstrap(const char * filename);
 
 void bootstrap();
 

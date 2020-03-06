@@ -17,7 +17,7 @@ typedef union {
         bool     Enable:1;
         unsigned :5;
     };
-    uint8_t data;
+    uint8_t raw;
 } TAC_t;
 
 extern uint8_t TIMA; // Timer Counter

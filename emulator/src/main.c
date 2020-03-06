@@ -21,8 +21,10 @@ int main(int argc, char ** argv)
     cflags_t * flags = cflags_init();
 
     cflags_add_bool(flags, 'd', "debug", &DebugEnable, "Enable Debug Mode");
-    cflags_add_bool(flags, 'b', "bootstrap", &BootstrapEnable, "Enable the original GameBoy Bootstrap");
     cflags_flag_t * verbose = cflags_add_bool(flags, 'v', "verbose", NULL, "Enables verbose output, repeat up to 4 times for more verbosity");
+
+    const char * bootstrapFilename = NULL;
+    cflags_add_string(flags, 'b', "bootstrap", &bootstrapFilename, "Load a Bootstrap ROM");
 
     bool breakAtStart = false;
     cflags_add_bool(flags, '\0', "break-start", &breakAtStart, "Breakpoint when application starts, implies Debug Mode");
@@ -59,7 +61,10 @@ int main(int argc, char ** argv)
     lcdInit();
     apuInit();
 
-    if (!BootstrapEnable) {
+    if (bootstrapFilename) {
+        loadBootstrap(bootstrapFilename);
+    }
+    else {
         bootstrap();
     }
 

@@ -14,7 +14,7 @@ void checkInterrupts()
 {
     if (IME) {
         int_flags_t enabledInts = { 
-            .data = IE.data & IF.data,
+            .raw = IE.raw & IF.raw,
         };
 
         if (enabledInts.VBlank) {

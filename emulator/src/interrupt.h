@@ -13,7 +13,7 @@ typedef union {
         bool     Joypad:1;
         unsigned :3;
     };
-    uint8_t data;
+    uint8_t raw;
 } int_flags_t;
 
 extern bool IME;

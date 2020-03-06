@@ -18,7 +18,7 @@ typedef enum {
     MBC_MBC6,
     MBC_MBC7,
     MBC_MMM01,
-    
+
 } mbc_type_t;
 
 cartridge_header_t CartridgeHeader;
@@ -26,13 +26,9 @@ cartridge_header_t CartridgeHeader;
 bool ColorEnabled = false;
 bool SuperEnabled = false;
 
-uint8_t CartridgeType = 0x00;
-uint8_t ROMType       = 0x00;
-uint8_t RAMType       = 0x00;
-
 bool HasCartridgeBattery = false;
 bool HasCartridgeTimer   = false;
-bool HasSRAM     = false;
+bool HasSRAM             = false;
 bool HasCartridgeSRAM    = false;
 
 mbc_type_t MBCType = MBC_NONE;
@@ -141,7 +137,7 @@ bool loadCartridge(const char * filename)
         return false;
     }
 
-    memcpy(CartridgeHeader.data, ROM0 + HEADER_OFFSET, sizeof(CartridgeHeader));
+    memcpy(CartridgeHeader.raw, ROM0 + HEADER_OFFSET, sizeof(CartridgeHeader));
 
     LogVerbose(1, "ROM Title: %.*s", 15, CartridgeHeader.Title);
 
@@ -345,7 +341,7 @@ void printBank()
 
 void printCartridge()
 {
-    switch (CartridgeType) {
+    switch (CartridgeHeader.CartridgeType) {
     case 0x00:
         LogInfo("Cartridge: ROM Only");
         break;
@@ -431,11 +427,11 @@ void printCartridge()
         LogInfo("Cartridge: Hudson HuC-1");
         break;
     default:
-        LogInfo("Cartridge: Type %02X unknown", CartridgeType);
+        LogInfo("Cartridge: Type %02X unknown", CartridgeHeader.CartridgeType);
         break;
     }
 
-    switch (ROMType) {
+    switch (CartridgeHeader.ROMType) {
     case 0x00:
         LogInfo("ROM: 32KB (no banks)");
         break;
@@ -473,11 +469,11 @@ void printCartridge()
         LogInfo("ROM: 1.5MB (96 banks)");
         break;
     default:
-        LogInfo("ROM: Type %02X unknown", ROMType);
+        LogInfo("ROM: Type %02X unknown", CartridgeHeader.ROMType);
         break;
     }
 
-    switch (RAMType) {
+    switch (CartridgeHeader.RAMType) {
     case 0x00:
         LogInfo("RAM: None");
         break;
@@ -497,7 +493,7 @@ void printCartridge()
         LogInfo("RAM: 64KB (8 banks of 8KB");
         break;
     default:
-        LogInfo("RAM: Type %02X unknown", RAMType);
+        LogInfo("RAM: Type %02X unknown", CartridgeHeader.RAMType);
         break;
     }
 }

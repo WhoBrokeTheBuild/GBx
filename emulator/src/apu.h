@@ -1,5 +1,5 @@
-#ifndef SOUND_H
-#define SOUND_H
+#ifndef APU_H
+#define APU_H
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -20,7 +20,7 @@ typedef union {
         bool     LengthEnable:1;
         bool     Trigger:1;
     };
-    uint8_t data[5];
+    uint8_t raw[5];
 } tone_t;
 
 extern tone_t Tone1;
@@ -39,7 +39,7 @@ typedef union {
         bool     LengthEnable:1;
         bool     Trigger:1;
     };
-    uint8_t data[5];
+    uint8_t raw[5];
 } wave_t;
 
 extern wave_t Wave;
@@ -58,7 +58,7 @@ typedef union {
         bool     LengthEnable:1;
         bool     Trigger:1;
     };
-    uint8_t data[4];
+    uint8_t raw[4];
 } noise_t;
 
 extern noise_t Noise;
@@ -70,7 +70,7 @@ typedef union {
         unsigned LeftVolume:3;
         bool     LeftVinEnable:1;
     };
-    uint8_t data;
+    uint8_t raw;
 } volume_control_t;
 
 extern volume_control_t VolumeControl;
@@ -92,4 +92,4 @@ void printNoise();
 void printVolumeControl();
 void printWaveRAM();
 
-#endif // SOUND_H
+#endif // APU_H

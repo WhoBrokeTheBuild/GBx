@@ -20,13 +20,18 @@ typedef union {
         uint8_t ComplementCheck;
         uint8_t Checksum[2];
     };
-    uint8_t data[80];
+    uint8_t raw[80];
 } cartridge_header_t;
 
 extern cartridge_header_t CartridgeHeader;
 
 extern bool ColorEnabled;
 extern bool SuperEnabled;
+
+extern bool HasCartridgeBattery;
+extern bool HasCartridgeTimer;
+extern bool HasSRAM;
+extern bool HasCartridgeSRAM;
 
 extern bool SRAMEnabled;
 

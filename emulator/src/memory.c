@@ -21,7 +21,7 @@ uint8_t readByte(uint16_t address)
 
     if (address <= 0x00FF) {
         if (BootstrapEnable) {
-            return BOOTSTRAP[address];
+            return Bootstrap[address];
         } else {
             // Jump Vectors
             return ROM0[address];
@@ -74,11 +74,11 @@ uint8_t readByte(uint16_t address)
 
         switch (address) {
         case 0xFF00:
-            // return P1.data;
+            // return P1.raw;
         case 0xFF01:
             // return SB;
         case 0xFF02:
-            // return SC.data;
+            // return SC.raw;
         case 0xFF04:
             return DIV;
         case 0xFF05:
@@ -86,55 +86,55 @@ uint8_t readByte(uint16_t address)
         case 0xFF06:
             return TMA;
         case 0xFF07:
-            return TAC.data;
+            return TAC.raw;
         case 0xFF0F:
-            return IF.data;
+            return IF.raw;
         case 0xFF10:
-            return Tone1.data[0];
+            return Tone1.raw[0];
         case 0xFF11:
-            return Tone1.data[1];
+            return Tone1.raw[1];
         case 0xFF12:
-            return Tone1.data[2];
+            return Tone1.raw[2];
         case 0xFF13:
-            return Tone1.data[3];
+            return Tone1.raw[3];
         case 0xFF14:
-            return Tone1.data[4];
+            return Tone1.raw[4];
         case 0xFF16:
-            return Tone2.data[1];
+            return Tone2.raw[1];
         case 0xFF17:
-            return Tone2.data[2];
+            return Tone2.raw[2];
         case 0xFF18:
-            return Tone2.data[3];
+            return Tone2.raw[3];
         case 0xFF19:
-            return Tone2.data[4];
+            return Tone2.raw[4];
         case 0xFF20:
-            return Noise.data[0];
+            return Noise.raw[0];
         case 0xFF21:
-            return Noise.data[1];
+            return Noise.raw[1];
         case 0xFF22:
-            return Noise.data[2];
+            return Noise.raw[2];
         case 0xFF23:
-            return Noise.data[3];
+            return Noise.raw[3];
         case 0xFF24:
-            return VolumeControl.data;
+            return VolumeControl.raw;
         case 0xFF25:
             // return NR51;
         case 0xFF26:
             // return NR52;
         case 0xFF1A:
-            return Wave.data[0];
+            return Wave.raw[0];
         case 0xFF1B:
-            return Wave.data[1];
+            return Wave.raw[1];
         case 0xFF1C:
-            return Wave.data[2];
+            return Wave.raw[2];
         case 0xFF1D:
-            return Wave.data[3];
+            return Wave.raw[3];
         case 0xFF1E:
-            return Wave.data[4];
+            return Wave.raw[4];
         case 0xFF40:
-            return LCDC.data;
+            return LCDC.raw;
         case 0xFF41:
-            return STAT.data;
+            return STAT.raw;
         case 0xFF42:
             return SCY;
         case 0xFF43:
@@ -144,11 +144,11 @@ uint8_t readByte(uint16_t address)
         case 0xFF45:
             return LYC;
         case 0xFF47:
-            return BGP.data;
+            return BGP.raw;
         case 0xFF48:
-            return OBP0.data;
+            return OBP0.raw;
         case 0xFF49:
-            return OBP1.data;
+            return OBP1.raw;
         case 0xFF4A:
             return WX;
             break;
@@ -165,7 +165,7 @@ uint8_t readByte(uint16_t address)
     }
     else if (address == 0xFFFF) {
         // Interrupt Enable Flag
-        return IE.data;
+        return IE.raw;
     }
 
     return 0;
@@ -239,13 +239,13 @@ void writeByte(uint16_t address, uint8_t data)
 
         switch (address) {
         case 0xFF00:
-            // P1.data = data;
+            // P1.raw = data;
             break;
         case 0xFF01:
             // SB = data;
             break;
         case 0xFF02:
-            // SC.data = data;
+            // SC.raw = data;
             break;
         case 0xFF04:
             DIV = 0;
@@ -263,43 +263,43 @@ void writeByte(uint16_t address, uint8_t data)
             }
             break;
         case 0xFF07:
-            TAC.data = data;
+            TAC.raw = data;
             if (VerboseLevel >= 2) {
                 printTimer();
             }
             break;
         case 0xFF0F:
-            IF.data = data;
+            IF.raw = data;
             if (VerboseLevel >= 2) {
                 printIF();
             }
             break;
         case 0xFF10:
-            Tone1.data[0] = data;
+            Tone1.raw[0] = data;
             if (VerboseLevel >= 2) {
                 printTone1();
             }
             break;
         case 0xFF11:
-            Tone1.data[1] = data;
+            Tone1.raw[1] = data;
             if (VerboseLevel >= 2) {
                 printTone1();
             }
             break;
         case 0xFF12:
-            Tone1.data[2] = data;
+            Tone1.raw[2] = data;
             if (VerboseLevel >= 2) {
                 printTone1();
             }
             break;
         case 0xFF13:
-            Tone1.data[3] = data;
+            Tone1.raw[3] = data;
             if (VerboseLevel >= 2) {
                 printTone1();
             }
             break;
         case 0xFF14:
-            Tone1.data[4] = data;
+            Tone1.raw[4] = data;
             if (VerboseLevel >= 2) {
                 printTone1();
             }
@@ -308,55 +308,55 @@ void writeByte(uint16_t address, uint8_t data)
             LogWarn("Attempting to access Tone2's Sweep Controls");
             break;
         case 0xFF16:
-            Tone2.data[1] = data;
+            Tone2.raw[1] = data;
             if (VerboseLevel >= 2) {
                 printTone2();
             }
             break;
         case 0xFF17:
-            Tone2.data[2] = data;
+            Tone2.raw[2] = data;
             if (VerboseLevel >= 2) {
                 printTone2();
             }
             break;
         case 0xFF18:
-            Tone2.data[3] = data;
+            Tone2.raw[3] = data;
             if (VerboseLevel >= 2) {
                 printTone2();
             }
             break;
         case 0xFF19:
-            Tone2.data[4] = data;
+            Tone2.raw[4] = data;
             if (VerboseLevel >= 2) {
                 printTone2();
             }
             break;
         case 0xFF20:
-            Noise.data[0] = data;
+            Noise.raw[0] = data;
             if (VerboseLevel >= 2) {
                 printNoise();
             }
             break;
         case 0xFF21:
-            Noise.data[1] = data;
+            Noise.raw[1] = data;
             if (VerboseLevel >= 2) {
                 printNoise();
             }
             break;
         case 0xFF22:
-            Noise.data[2] = data;
+            Noise.raw[2] = data;
             if (VerboseLevel >= 2) {
                 printNoise();
             }
             break;
         case 0xFF23:
-            Noise.data[3] = data;
+            Noise.raw[3] = data;
             if (VerboseLevel >= 2) {
                 printNoise();
             }
             break;
         case 0xFF24:
-            VolumeControl.data = data;
+            VolumeControl.raw = data;
             if (VerboseLevel >= 2) {
                 printVolumeControl();
             }
@@ -368,44 +368,44 @@ void writeByte(uint16_t address, uint8_t data)
             // NR52 = data;
             break;
         case 0xFF1A:
-            Wave.data[0] = data;
+            Wave.raw[0] = data;
             if (VerboseLevel >= 2) {
                 printWave();
             }
             break;
         case 0xFF1B:
-            Wave.data[1] = data;
+            Wave.raw[1] = data;
             if (VerboseLevel >= 2) {
                 printWave();
             }
             break;
         case 0xFF1C:
-            Wave.data[2] = data;
+            Wave.raw[2] = data;
             if (VerboseLevel >= 2) {
                 printWave();
             }
             break;
         case 0xFF1D:
-            Wave.data[3] = data;
+            Wave.raw[3] = data;
             if (VerboseLevel >= 2) {
                 printWave();
             }
             break;
         case 0xFF1E:
-            Wave.data[4] = data;
+            Wave.raw[4] = data;
             if (VerboseLevel >= 2) {
                 printWave();
             }
             break;
         
         case 0xFF40:
-            LCDC.data = data;
+            LCDC.raw = data;
             if (VerboseLevel >= 2) {
                 printLCDC();
             }
             break;
         case 0xFF41:
-            STAT.data = data;
+            STAT.raw = data;
             if (VerboseLevel >= 2) {
                 printSTAT();
             }
@@ -438,19 +438,19 @@ void writeByte(uint16_t address, uint8_t data)
             }
             break;
         case 0xFF47:
-            BGP.data = data;
+            BGP.raw = data;
             if (VerboseLevel >= 2) {
                 printBGP();
             }
             break;
         case 0xFF48:
-            OBP0.data = data;
+            OBP0.raw = data;
             if (VerboseLevel >= 2) {
                 printOBP0();
             }
             break;
         case 0xFF49:
-            OBP1.data = data;
+            OBP1.raw = data;
             if (VerboseLevel >= 2) {
                 printOBP1();
             }
@@ -479,7 +479,7 @@ void writeByte(uint16_t address, uint8_t data)
     }
     else if (address == 0xFFFF) {
         // Interrupt Enable Flag
-        IE.data = data;
+        IE.raw = data;
         if (VerboseLevel >= 2) {
             printIE();
         }

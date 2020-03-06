@@ -15,7 +15,7 @@ typedef union {
         unsigned WindowTileMapSelect:1;
         bool     LCDEnable:1;
     };
-    uint8_t data;
+    uint8_t raw;
 } LCDC_t;
 
 #define STAT_MODE_HBLANK         (0b00)
@@ -33,7 +33,7 @@ typedef union {
         bool     Coincidence:1;
         unsigned :1;
     };
-    uint8_t data;
+    uint8_t raw;
 } STAT_t;
 
 typedef union {
@@ -43,7 +43,7 @@ typedef union {
         unsigned Color10:2;
         unsigned Color11:2;
     };
-    uint8_t data;
+    uint8_t raw;
 } palette_t;
 
 typedef union {
@@ -62,7 +62,7 @@ typedef union {
             uint8_t Attributes;
         };
     };
-    uint32_t data;
+    uint32_t raw;
 } sprite_t;
 
 extern LCDC_t LCDC;

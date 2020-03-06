@@ -21,9 +21,9 @@ uint8_t LYC = 0x00;
 uint8_t WX  = 0x00;
 uint8_t WY  = 0x00;
 
-palette_t BGP  = { .data = 0b11100100 };
-palette_t OBP0 = { .data = 0b11100100 };
-palette_t OBP1 = { .data = 0b11100100 };
+palette_t BGP  = { .raw = 0b11100100 };
+palette_t OBP0 = { .raw = 0b11100100 };
+palette_t OBP1 = { .raw = 0b11100100 };
 
 uint8_t VRAM0[0x1FFF];
 uint8_t VRAM1[0x1FFF];
