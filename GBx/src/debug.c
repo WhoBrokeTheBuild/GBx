@@ -30,9 +30,11 @@ void handleSignal(int sig)
 {
     LogInfo("Caught signal %d", sig);
 
-    debugPrompt();
-
-    if (sig == SIGSEGV) {
+    if (sig == SIGINT) {
+        setBreakpoint(R.PC);
+    }
+    else {
+        debugPrompt();
         exit(1);
     }
 }
@@ -275,6 +277,8 @@ void debugPrompt()
 {
 #ifdef HAVE_READLINE
 
+    signal(SIGINT, SIG_DFL);
+
     int oldVerboseLevel = VerboseLevel;
     VerboseLevel = 4;
 
@@ -346,6 +350,8 @@ void debugPrompt()
 
     free(input);
 
+    signal(SIGINT, handleSignal);
+    
 #endif
 }
 

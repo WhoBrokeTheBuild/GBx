@@ -27,9 +27,8 @@ void * runThread(void * ptr)
         if (atBreakpoint()) {
             debugPrompt();
         }
-        else {
-            nextInstruction();
-        }
+        
+        nextInstruction();
     }
 
     if (DebugEnable) {
@@ -101,8 +100,6 @@ int main(int argc, char ** argv)
         pollEvents();
         
         render();
-        
-        SDL_Delay((1.0 / 60.0) * 1000.0);
     }
     
     pthread_join(thread, NULL);

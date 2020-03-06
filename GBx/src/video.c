@@ -25,7 +25,7 @@ void videoInit()
         LogFatal("Failed to create SDL2 Window, %s", SDL_GetError());
     }
     
-    sdlRenderer = SDL_CreateRenderer(sdlWindow, 0, SDL_RENDERER_ACCELERATED);
+    sdlRenderer = SDL_CreateRenderer(sdlWindow, 0, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (!sdlRenderer) {
         LogFatal("Failed to create SDL2 Renderer, %s", SDL_GetError());
     }
