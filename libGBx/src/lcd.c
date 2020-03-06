@@ -292,34 +292,34 @@ void lcdTick(unsigned cycles)
                     }
 
                     static struct timespec last;
-                    static double fpsTotal = 0.0;
-                    static long fpsCount = 0;
+                    // static double fpsTotal = 0.0;
+                    // static long fpsCount = 0;
                     
-                    if (last.tv_nsec == 0) {
-                        clock_gettime(CLOCK_MONOTONIC, &last);
-                    }
-                    else {
+                    // if (last.tv_nsec == 0) {
+                    //     clock_gettime(CLOCK_MONOTONIC, &last);
+                    // }
+                    // else {
                         struct timespec now;
                     
                         clock_gettime(CLOCK_MONOTONIC, &now);
                         struct timespec delta = diff(last, now);
                         last = now;
                         
-                        float fps = 1.0 / (delta.tv_nsec / 1000000000.0);
-                        // LogInfo("VBL %ld %f", delta.tv_nsec, fps);
+                    //     float fps = 1.0 / (delta.tv_nsec / 1000000000.0);
+                    //     // LogInfo("VBL %ld %f", delta.tv_nsec, fps);
                         
-                        fpsTotal += fps;
-                        ++fpsCount;
+                    //     fpsTotal += fps;
+                    //     ++fpsCount;
                         
-                        if (fpsCount == 386) {
-                            LogInfo("Average FPS %f", fpsTotal / fpsCount);
-                        }
-                    }
+                    //     if (fpsCount == 386) {
+                    //         LogInfo("Average FPS %f", fpsTotal / fpsCount);
+                    //     }
+                    // }
                     
-                    // struct timespec wait;
-                    // wait.tv_sec = 0;
-                    // wait.tv_nsec = 16666667 - delta.tv_nsec;
-                    // clock_nanosleep(CLOCK_MONOTONIC, 0, &wait, NULL);
+                    struct timespec wait;
+                    wait.tv_sec = 0;
+                    wait.tv_nsec = 16750419 - delta.tv_nsec;
+                    clock_nanosleep(CLOCK_MONOTONIC, 0, &wait, NULL);
                 }
                 else {
                     STAT.Mode = STAT_MODE_SEARCH_SPRITE;

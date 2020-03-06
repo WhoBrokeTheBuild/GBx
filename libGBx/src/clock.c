@@ -8,26 +8,26 @@
 
 uint64_t TotalTicks = 0;
 
-unsigned ticksSinceLastSleep = 0;
+// unsigned ticksSinceLastSleep = 0;
 
-#define TICKS_PER_SLEEP (1024 * 16)
+// #define TICKS_PER_SLEEP (1024 * 16)
 
 unsigned ClockSpeed = GB_CLOCK_SPEED;
 
-#define NS_PER_TICK (1000000000.0 / ClockSpeed)
+// #define NS_PER_TICK (1000000000.0 / ClockSpeed)
 
-struct timespec diffTimespec(struct timespec start, struct timespec end)
-{
-	struct timespec temp;
-	if ((end.tv_nsec-start.tv_nsec)<0) {
-		temp.tv_sec = end.tv_sec-start.tv_sec-1;
-		temp.tv_nsec = 1000000000+end.tv_nsec-start.tv_nsec;
-	} else {
-		temp.tv_sec = end.tv_sec-start.tv_sec;
-		temp.tv_nsec = end.tv_nsec-start.tv_nsec;
-	}
-	return temp;
-}
+// struct timespec diffTimespec(struct timespec start, struct timespec end)
+// {
+// 	struct timespec temp;
+// 	if ((end.tv_nsec-start.tv_nsec)<0) {
+// 		temp.tv_sec = end.tv_sec-start.tv_sec-1;
+// 		temp.tv_nsec = 1000000000+end.tv_nsec-start.tv_nsec;
+// 	} else {
+// 		temp.tv_sec = end.tv_sec-start.tv_sec;
+// 		temp.tv_nsec = end.tv_nsec-start.tv_nsec;
+// 	}
+// 	return temp;
+// }
 
 void tick(unsigned ticks)
 {
@@ -36,29 +36,29 @@ void tick(unsigned ticks)
     apuTick(ticks);
     TotalTicks += ticks;
     
-    ticksSinceLastSleep += ticks;
-    if (ticksSinceLastSleep > TICKS_PER_SLEEP) {
-        struct timespec now;
-        clock_gettime(CLOCK_MONOTONIC, &now);
+    // ticksSinceLastSleep += ticks;
+    // if (ticksSinceLastSleep > TICKS_PER_SLEEP) {
+    //     struct timespec now;
+    //     clock_gettime(CLOCK_MONOTONIC, &now);
         
-        struct timespec end = now;
-        end.tv_nsec += NS_PER_TICK * ticksSinceLastSleep;
-        if (end.tv_nsec > 1000000000) {
-            ++end.tv_sec;
-            end.tv_nsec -= 1000000000;
-        }
+    //     struct timespec end = now;
+    //     end.tv_nsec += NS_PER_TICK * ticksSinceLastSleep;
+    //     if (end.tv_nsec > 1000000000) {
+    //         ++end.tv_sec;
+    //         end.tv_nsec -= 1000000000;
+    //     }
         
-        for (;;) {
-            if (now.tv_sec > end.tv_sec || 
-                (now.tv_sec == end.tv_sec && now.tv_nsec >= end.tv_nsec)) {
-                break;
-            }
+    //     for (;;) {
+    //         if (now.tv_sec > end.tv_sec || 
+    //             (now.tv_sec == end.tv_sec && now.tv_nsec >= end.tv_nsec)) {
+    //             break;
+    //         }
             
-            clock_gettime(CLOCK_MONOTONIC, &now);
-        }
+    //         clock_gettime(CLOCK_MONOTONIC, &now);
+    //     }
         
-        ticksSinceLastSleep = 0;
-    }
+    //     ticksSinceLastSleep = 0;
+    // }
     
     // ticksSinceLastSleep += ticks;
     // if (ticksSinceLastSleep >= TICKS_PER_SLEEP) {
