@@ -35,4 +35,12 @@ Level 4, `-vvvv`
 
 * Memory Read/Write Operations
 * SDL Audio Callback
-`
+
+## References
+
+https://github.com/gbdev/awesome-gbdev
+
+https://gbdev.gg8.se/files/roms/bootroms/
+https://www.its.caltech.edu/~costis/sgb_hack/
+
+git clone https://github.com/retrio/gb-test-roms.git

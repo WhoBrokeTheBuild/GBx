@@ -1,4 +1,5 @@
 roms/*.gb
+roms/*.bin
 roms/gb-test-roms
 build/
 .vscode/
