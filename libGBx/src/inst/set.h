@@ -7,7 +7,7 @@
 #include "memory.h"
 
 #define _SET(x, b) \
-    (x) = ((x) | (1 << (b)))
+    (x) |= (1 << (b))
 
 static void _SET_b_A(int bit)
 {

@@ -1,6 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.15)
 
-PROJECT(thirdparty LANGUAGES C)
+PROJECT(thirdparty)
 
 INCLUDE(ExternalProject)
 

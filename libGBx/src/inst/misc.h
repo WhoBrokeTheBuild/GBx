@@ -33,6 +33,7 @@ static void _DI()
 static void _EI()
 {
     LogInst("EI");
+    // Next Instruction
     IME = true;
 }
 
@@ -83,7 +84,7 @@ static void _CCF()
     LogInst("CCF");
     R.FN = false;
     R.FH = false;
-    R.FC = ~R.C;
+    R.FC = !R.FC;
 }
 
 

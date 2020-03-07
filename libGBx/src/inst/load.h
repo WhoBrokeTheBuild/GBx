@@ -564,10 +564,10 @@ static void _LD_SP_uu()
 
 static void _LD_SP_HL()
 {
-    tick(4);
-    
     LogInst("LD SP,HL");
     R.SP = R.HL;
+    
+    tick(4);
 }
 
 static void _LD_puu_SP()

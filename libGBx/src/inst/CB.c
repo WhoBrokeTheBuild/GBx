@@ -5,6 +5,7 @@
 #include "rotate.h"
 #include "set.h"
 #include "shift.h"
+#include "swap.h"
 
 #include "cpu.h"
 
