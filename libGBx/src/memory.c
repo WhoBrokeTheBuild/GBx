@@ -432,7 +432,7 @@ void writeByte(uint16_t address, uint8_t data)
             {
                 uint16_t addr = data << 8;
                 for (unsigned i = 0; i < 0xA0; ++i) {
-                    writeByte(0xFE00 + i, readByte(addr + 1));
+                    writeByte(0xFE00 + i, readByte(addr + i));
                     tick(4);
                 }
             }
