@@ -20,6 +20,7 @@ int Tone2Timer = 0;
 int Tone2DutyIndex = 0;
 
 int WaveTimer = 0;
+
 int NoiseTimer = 0;
 
 uint8_t DutyCycles[4][8] = {
