@@ -663,14 +663,14 @@ static void _LDH_A_pu()
 static void _LDH_pC_A()
 {
     LogInst("LDH (C),A");
-    R.A = readByte(0xFF00 + R.C);
+    writeByte(0xFF00 + R.C, R.A);
     tick(4);
 }
 
 static void _LDH_A_pC()
 {
     LogInst("LDH A,(C)");
-    writeByte(0xFF00 + R.C, R.A);
+    R.A = readByte(0xFF00 + R.C);
     tick(4);
 }
 

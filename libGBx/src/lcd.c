@@ -319,7 +319,7 @@ void lcdTick(unsigned cycles)
                     struct timespec wait;
                     wait.tv_sec = 0;
                     wait.tv_nsec = 16750419 - delta.tv_nsec;
-                    clock_nanosleep(CLOCK_MONOTONIC, 0, &wait, NULL);
+                    // clock_nanosleep(CLOCK_MONOTONIC, 0, &wait, NULL);
                 }
                 else {
                     STAT.Mode = STAT_MODE_SEARCH_SPRITE;
