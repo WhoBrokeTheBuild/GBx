@@ -41,6 +41,7 @@ extern uint8_t * SRAM;
 extern uint8_t * ROM0;
 extern uint8_t * ROM;
 
+void resetCartridgeMBC();
 void writeCartridgeMBC(uint16_t address, uint8_t data);
 
 bool loadCartridge(const char * filename);

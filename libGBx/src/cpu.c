@@ -34,7 +34,7 @@ uint16_t LastInstructionAddress = 0x0000;
 
 typedef void(* inst_t)();
 
-inst_t instructions[0x100] = {
+inst_t instructions[] = {
     // CB
     [0xCB] = _CB,
     // misc

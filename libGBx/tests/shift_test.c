@@ -1,4 +1,5 @@
 #include "inst/shift.h"
+#include "inst/swap.h"
 #include "clock.h"
 #include "memory.h"
 #include "unit.h"

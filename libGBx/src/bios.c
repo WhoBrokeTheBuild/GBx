@@ -1,4 +1,4 @@
-#include "bootstrap.h"
+#include "bios.h"
 
 #include "apu.h"
 #include "cartridge.h"
@@ -8,28 +8,28 @@
 #include "log.h"
 #include "timer.h"
 
-bool BootstrapEnable = false;
+bool BIOSEnable = false;
 
-uint8_t Bootstrap[0x100];
+uint8_t BIOS[0x100];
 
-bool loadBootstrap(const char * filename)
+bool loadBIOS(const char * filename)
 {
-    LogVerbose(1, "Opening Bootstrap ROM: '%s'", filename);
+    LogVerbose(1, "Opening BIOS ROM: '%s'", filename);
 
     FILE * file = fopen(filename, "rb");
 
-    size_t bytesRead = fread(Bootstrap, 1, sizeof(Bootstrap), file);
+    size_t bytesRead = fread(BIOS, 1, sizeof(BIOS), file);
     fclose(file);
 
-    if (bytesRead < sizeof(Bootstrap)) {
-        LogFatal("Bootstrap ROM too small: '%s'", filename);
+    if (bytesRead < sizeof(BIOS)) {
+        LogFatal("BIOS ROM too small: '%s'", filename);
     }
 
-    BootstrapEnable = true;
+    BIOSEnable = true;
     return true;
 }
 
-void dmg_bootstrap()
+void resetDMG()
 {
     IME = true;
     R.AF = 0x01B0;
@@ -75,25 +75,27 @@ void dmg_bootstrap()
     IE.raw = 0x00;
 }
 
-void sgb_bootstrap()
+void resetSGB()
 {
 
 }
 
-void cgb_bootstrap()
+void resetCGB()
 {
     
 }
 
-void bootstrap()
+void reset()
 {
+    // resetCartridgeMBC();
+    
     if (SuperEnabled) {
-        sgb_bootstrap();
+        resetSGB();
     }
     else if (ColorEnabled) {
-        cgb_bootstrap();
+        resetCGB();
     }
     else {
-        dmg_bootstrap();
+        resetDMG();
     }
 }

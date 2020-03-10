@@ -1,7 +1,7 @@
 #include "memory.h"
 
 #include "apu.h"
-#include "bootstrap.h"
+#include "bios.h"
 #include "cartridge.h"
 #include "clock.h"
 #include "interrupt.h"
@@ -20,8 +20,8 @@ uint8_t readByte(uint16_t address)
     LogVerbose(4, "Read %02X", address);
 
     if (address <= 0x00FF) {
-        if (BootstrapEnable) {
-            return Bootstrap[address];
+        if (BIOSEnable) {
+            return BIOS[address];
         } else {
             // Jump Vectors
             return ROM0[address];
@@ -157,7 +157,7 @@ uint8_t readByte(uint16_t address)
             break;
 
         case 0xFF50:
-            return BootstrapEnable;
+            return BIOSEnable;
         };
     }
     else if (address <= 0xFFFE) {
@@ -469,8 +469,8 @@ void writeByte(uint16_t address, uint8_t data)
             break;
         
         case 0xFF50:
-            BootstrapEnable = (data == 0);
-            LogVerbose(2, "Bootstrap %s", (BootstrapEnable ? "Enabled" : "Disabled"));
+            BIOSEnable = (data == 0);
+            LogVerbose(2, "BIOS %s", (BIOSEnable ? "Enabled" : "Disabled"));
             break;
         };
     }

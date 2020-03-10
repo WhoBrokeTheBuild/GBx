@@ -12,7 +12,7 @@
 typedef void(* inst_t)();
 typedef void(* bit_inst_t)(int);
 
-inst_t CB_instructions[0x40] = {
+inst_t CB_instructions[] = {
     // rotate
     [0x00] = _RLC_B,
     [0x01] = _RLC_C,
@@ -81,7 +81,7 @@ inst_t CB_instructions[0x40] = {
     [0x3F] = _SRL_A,
 };
 
-bit_inst_t bit_instructions[24] = {
+bit_inst_t bit_instructions[] = {
     _BIT_b_B,
     _BIT_b_C,
     _BIT_b_D,

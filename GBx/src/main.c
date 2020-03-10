@@ -2,10 +2,12 @@
 #include "audio.h"
 #include "debug.h"
 
-#include <GBx/bootstrap.h>
+#include <GBx/bios.h>
 #include <GBx/cartridge.h>
 #include <GBx/cpu.h>
+#include <GBx/instruction.h>
 #include <GBx/log.h>
+#include <GBx/memory.h>
 
 #include <SDL.h>
 #include <cflags.h>
@@ -41,13 +43,11 @@ int main(int argc, char ** argv)
     cflags_t * flags = cflags_init();
 
     cflags_add_bool(flags, 'd', "debug", &DebugEnable, "Enable Debug Mode");
+    
     cflags_flag_t * verbose = cflags_add_bool(flags, 'v', "verbose", NULL, "Enables verbose output, repeat up to 4 times for more verbosity");
 
-    const char * bootstrapFilename = NULL;
-    cflags_add_string(flags, 'b', "bootstrap", &bootstrapFilename, "Load a Bootstrap ROM");
-
-    bool breakAtStart = false;
-    cflags_add_bool(flags, '\0', "break-start", &breakAtStart, "Breakpoint when application starts, implies Debug Mode");
+    const char * biosFilename = NULL;
+    cflags_add_string(flags, 'b', "bios", &biosFilename, "Load a BIOS ROM");
 
     cflags_parse(flags, argc, argv);
     VerboseLevel = verbose->count;
@@ -78,18 +78,24 @@ int main(int argc, char ** argv)
         return 1;
     }
 
-    if (bootstrapFilename) {
-        loadBootstrap(bootstrapFilename);
+    if (biosFilename) {
+        loadBIOS(biosFilename);
     }
     else {
-        bootstrap();
+        reset();
+    }
+    
+    char buffer[60];
+    uint16_t addr = 0x0000;
+    for (int i = 0; i < 100; ++i) {
+        addr = disassemble(buffer, 60, addr);
+        printf("%s\n", buffer);
     }
 
     videoInit();
     audioInit();
 
-    if (breakAtStart) {
-        DebugEnable = true;
+    if (DebugEnable) {
         setBreakpoint(R.PC);
     }
     
