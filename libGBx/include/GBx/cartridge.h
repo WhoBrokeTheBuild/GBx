@@ -47,7 +47,7 @@ void writeCartridgeMBC(uint16_t address, uint8_t data);
 bool loadCartridge(const char * filename);
 void freeCartridge();
 
-void printBank();
+void printCartridgeMBC();
 void printCartridge();
 
 #endif // CARTRIDGE_H

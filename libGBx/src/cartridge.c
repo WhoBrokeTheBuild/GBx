@@ -332,9 +332,9 @@ void freeCartridge()
     SRAM0 = NULL;
 }
 
-void printBank()
+void printCartridgeMBC()
 {
-    LogInfo("Bank: Lower=%02X Upper=%01X Full=%04X Mode=%s", 
+    LogInfo("MBC: Lower=%02X Upper=%01X Full=%04X Mode=%s", 
         Bank.Lower, Bank.Upper, Bank.Full, 
         (Bank.RAMMode ? "RAM" : "ROM"));
 }

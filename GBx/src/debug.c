@@ -1,19 +1,21 @@
 #include "debug.h"
 
+#include "breakpoint.h"
+
 #include <limits.h>
-#include <stdlib.h>
-
-#include "apu.h"
-#include "cartridge.h"
-#include "cpu.h"
-#include "interrupt.h"
-#include "lcd.h"
-#include "log.h"
-#include "memory.h"
-#include "timer.h"
-
 #include <signal.h>
 #include <stdarg.h>
+#include <stdlib.h>
+
+#include <GBx/apu.h>
+#include <GBx/bios.h>
+#include <GBx/cartridge.h>
+#include <GBx/cpu.h>
+#include <GBx/interrupt.h>
+#include <GBx/lcd.h>
+#include <GBx/log.h>
+#include <GBx/memory.h>
+#include <GBx/timer.h>
 
 #ifdef HAVE_READLINE
     #include <readline/readline.h>
@@ -24,14 +26,12 @@
 
 bool DebugEnable = false;
 
-uint16_t breakpointAddress = UINT16_MAX;
-
 void handleSignal(int sig)
 {
     LogInfo("Caught signal %d", sig);
 
     if (sig == SIGINT) {
-        setBreakpoint(R.PC);
+        setBreakpoint("PC", R.PC);
     }
     else {
         debugPrompt();
@@ -59,37 +59,27 @@ void debugTerm()
     signal(SIGSEGV, SIG_DFL);
 }
 
-void setBreakpoint(uint16_t address)
-{
-    breakpointAddress = address;
-}
-
-void clearBreakpoint()
-{
-    breakpointAddress = UINT16_MAX;
-}
-
-bool atBreakpoint()
-{
-    return (R.PC == breakpointAddress);
-}
-
 const char * help = 
+"All commands may be shortened, ambiguous commands will be\n"
+"processed in the order they are listed here.\n"
+"e.g. `i r` will run `info registers`\n"
+"but `r` will run `read` not `reset`\n"
+"\n"
 "  help         Print this information\n"
-"  quit         Exit the emulator\n"
-"  continue     Continue normal execution\n"
 "  info         Print information, see `help info`\n"
-"  break        Set a breakpoint, see `help breakpoint`\n"
-"  get          Get a flag or register\n"
-"  set          Set a flag or register\n"
+"  break        Set a breakpoint, see `help break`\n"
+"  delete       Delete a breakpoint, see `help delete`\n"
+"  continue     Continue normal execution\n"
 "  read         Read memory, see `help read`\n"
-"  write        Write memory, see `help write`\n";
+"  write        Write memory, see `help write`\n"
+"  quit         Exit the emulation\n"
+"  reset        Reset the emulation\n";
 
 const char * helpInfo = 
+"  all          Print all information\n"
 "  apu          Print tone, wave, noise, and volume registers\n"
 "  registers    Print all registers and their values\n"
 "  interrupts   Print IE and IF, and IME values\n"
-"  lcd          Print LCDC values and LCD info\n"
 "  lcd          Print LCDC values and LCD info\n"
 "  stat         Print STAT values\n"
 "  timer        Print TAC, TIMA, TMA and DIV info\n"
@@ -97,21 +87,48 @@ const char * helpInfo =
 "  cartridge    Print Cartridge info\n";
 
 const char * helpBreak = 
-"  break ADDRESS\n"
+"  break [CONDITION|ADDRESS]\n"
+"\n"
+"  Set a breakpoint at ADDRESS, or when CONDITION is met\n"
+"\n"
+"  CONDITION will be interpreted either as A=B\n"
+"  where B is a hex number, and A can be one of the following:\n"
+"    A, B, C, D, E, H, L, AF, BC, DE, HL, SP, PC, FZ, FN, FH, FC\n"
+"\n"
 "  ADDRESS will be interpreted as a 16-bit hex number\n"
+"\n"
+"  If no CONDITION or ADDRESS are specified, a breakpoint will be\n"
+"  set at the current PC\n"
+"\n";
+
+const char * helpDelete = 
+"  delete [ADDRESS]\n"
+"\n"
+"  Delete a breakpoint at ADDRESS, or all breakpoints\n"
+"\n"
+"  ADDRESS will be interpreted as a 16-bit hex number\n"
+"\n"
+"  If ADDRESS is not specified, all breakpoints will be deleted\n"
 "\n";
 
 const char * helpRead = 
 "  read SIZE ADDRESS\n"
 "\n"
-"  SIZE can be 8 or 16\n"
+"  Read SIZE bytes from ADDRESS\n"
+"\n"
+"  SIZE can be 1 or 2\n"
+"\n"
 "  ADDRESS will be interpreted as a 16-bit hex number\n";
 
 const char * helpWrite = 
 "  write SIZE ADDRESS VALUE\n"
 "\n"
-"  SIZE can be 8 or 16\n"
+"  Write SIZE bytes to ADDRESS from VALUE\n"
+"\n"
+"  SIZE can be 1 or 2\n"
+"\n"
 "  ADDRESS will be interpreted as a 16-bit hex number\n"
+"\n"
 "  VALUE will be interpreted as an 8-bit or 16-bit number, depending on SIZE\n";
 
 void infoPrompt(const char * input)
@@ -128,7 +145,23 @@ void infoPrompt(const char * input)
         return;
     }
 
-    if (strncmp(input, "apu", length) == 0) {
+    if (strncmp(input, "all", length) == 0) {
+        printR();
+        printTone1();
+        printTone2();
+        printWave();
+        printWaveRAM();
+        printVolumeControl();
+        printIE();
+        printIF();
+        printLCDInfo();
+        printLCDC();
+        printSTAT();
+        printTimer();
+        printCartridgeMBC();
+        printCartridge();
+    }
+    else if (strncmp(input, "apu", length) == 0) {
         printTone1();
         printTone2();
         printWave();
@@ -153,8 +186,8 @@ void infoPrompt(const char * input)
     else if (strncmp(input, "timer", length) == 0) {
         printTimer();
     }
-    else if (strncmp(input, "bank", length) == 0) {
-        printBank();
+    else if (strncmp(input, "mbc", length) == 0) {
+        printCartridgeMBC();
     }
     else if (strncmp(input, "cartridge", length) == 0) {
         printCartridge();
@@ -174,25 +207,57 @@ void breakPrompt(const char * input)
     size_t length = strlen(input);
     
     if (length == 0) {
-        printf("%s", helpInfo);
+        printf("%s", helpBreak);
         return;
     }
     
     char * equal = strchr(input, '=');
     if (equal) {
-        // *equal = '\0';
+        *equal = '\0';
 
-        // unsigned int rhs;
-        // sscanf(equal + 1, "%04X", &rhs);
+        unsigned int value;
+        sscanf(equal + 1, "%04X", &value);
 
-        // LogInfo("Breakpoint set when %s=%04Xh", input, rhs);
-        // addBreakpoint(cond, rhs);
+        setBreakpoint(input, value);
+        LogInfo("Breakpoint set when %s=%04Xh", input, value);
     }
     else {
         unsigned int pc;
         sscanf(input, "%04X", &pc);
-        setBreakpoint(pc);
+        setBreakpoint("PC", pc);
         LogInfo("Breakpoint set when PC=%04Xh", pc);
+    }
+}
+
+void deletePrompt(const char * input)
+{
+    if (!input) {
+        printf("%s", helpDelete);
+        return;
+    }
+
+    size_t length = strlen(input);
+    
+    if (length == 0) {
+        printf("%s", helpDelete);
+        return;
+    }
+    
+    char * equal = strchr(input, '=');
+    if (equal) {
+        *equal = '\0';
+
+        unsigned int value;
+        sscanf(equal + 1, "%04X", &value);
+
+        clearBreakpoint(input, value);
+        LogInfo("Breakpoint %s=%04Xh deleted", input, value);
+    }
+    else {
+        unsigned int pc;
+        sscanf(input, "%04X", &pc);
+        clearBreakpoint("PC", pc);
+        LogInfo("Breakpoint PC=%04Xh deleted", pc);
     }
 }
 
@@ -265,11 +330,20 @@ void helpPrompt(const char * input)
     if (strncmp(input, "info", length) == 0) {
         printf("%s", helpInfo);
     }
+    if (strncmp(input, "break", length) == 0) {
+        printf("%s", helpBreak);
+    }
+    if (strncmp(input, "delete", length) == 0) {
+        printf("%s", helpDelete);
+    }
     else if (strncmp(input, "read", length) == 0) {
         printf("%s", helpRead);
     }
     else if (strncmp(input, "write", length) == 0) {
         printf("%s", helpWrite);
+    }
+    else {
+        printf("Unknown command '%s'", input);
     }
 }
 
@@ -306,15 +380,8 @@ void debugPrompt()
         if (length == 0) {
             nextInstruction();
         }
-        else if (strncmp(input, "quit", length) == 0
-            || strncmp(input, "exit", length) == 0) {
-            // TODO: Exit gracefully
-            exit(0);
-            break;
-        }
-        else if (strncmp(input, "continue", length) == 0) {
-            VerboseLevel = oldVerboseLevel;
-            break;
+        else if (strncmp(input, "help", length) == 0) {
+            helpPrompt(args);
         }
         else if (strncmp(input, "info", length) == 0) {
             infoPrompt(args);
@@ -322,15 +389,12 @@ void debugPrompt()
         else if (strncmp(input, "break", length) == 0) {
             breakPrompt(args);
         }
-        else if (strncmp(input, "get", length) == 0) {
-            // TODO
+        else if (strncmp(input, "delete", length) == 0) {
+            deletePrompt(args);
         }
-        else if (strncmp(input, "set", length) == 0) {
-            // TODO
-        }
-        else if (strncmp(input, "reset", length) == 0) {
-            // TODO
-            // reset();
+        else if (strncmp(input, "continue", length) == 0) {
+            VerboseLevel = oldVerboseLevel;
+            break;
         }
         else if (strncmp(input, "read", length) == 0) {
             readPrompt(args);
@@ -338,8 +402,14 @@ void debugPrompt()
         else if (strncmp(input, "write", length) == 0) {
             writePrompt(args);
         }
-        else if (strncmp(input, "help", length) == 0) {
-            helpPrompt(args);
+        else if (strncmp(input, "quit", length) == 0
+            || strncmp(input, "exit", length) == 0) {
+            // TODO: Exit gracefully
+            exit(0);
+            break;
+        }
+        else if (strncmp(input, "reset", length) == 0) {
+            reset();
         }
 
         free(input);

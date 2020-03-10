@@ -1,6 +1,9 @@
 #include "instruction.h"
 
+#include "memory.h"
+
 #include <stdlib.h>
+#include <stdio.h>
 
 // $w = unsigned word
 // $u = unsigned byte

@@ -1,6 +1,7 @@
 #include "video.h"
 #include "audio.h"
 #include "debug.h"
+#include "breakpoint.h"
 
 #include <GBx/bios.h>
 #include <GBx/cartridge.h>
@@ -85,18 +86,11 @@ int main(int argc, char ** argv)
         reset();
     }
     
-    char buffer[60];
-    uint16_t addr = 0x0000;
-    for (int i = 0; i < 100; ++i) {
-        addr = disassemble(buffer, 60, addr);
-        printf("%s\n", buffer);
-    }
-
     videoInit();
     audioInit();
 
     if (DebugEnable) {
-        setBreakpoint(R.PC);
+        setBreakpoint("PC", R.PC);
     }
     
     pthread_t thread;

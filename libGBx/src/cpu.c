@@ -350,6 +350,11 @@ void nextInstruction(int cycles)
 
 void printR()
 {
-    LogInfo("AF=%04X BC=%04X DE=%04X HL=%04X SP=%04X PC=%04X FZ=%d FN=%d FH=%d FC=%d",
-        R.AF, R.BC, R.DE, R.HL, R.SP, R.PC, R.FZ, R.FN, R.FH, R.FC);
+    LogInfo("AF=%04X BC=%04X DE=%04X HL=%04X SP=%04X PC=%04X F=[%c%c%c%c]",
+        R.AF, R.BC, R.DE, R.HL, R.SP, R.PC, 
+        (R.FZ ? 'Z' : '-'), 
+        (R.FN ? 'N' : '-'), 
+        (R.FH ? 'H' : '-'), 
+        (R.FC ? 'C' : '-')
+    );
 }
