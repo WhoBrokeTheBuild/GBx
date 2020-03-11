@@ -9,6 +9,7 @@ typedef bool (*break_comp_func_t)(unsigned);
 
 typedef struct
 {
+    char *            name;
     break_comp_func_t comp;
     unsigned          value;
     
@@ -180,6 +181,7 @@ void setBreakpoint(const char * reg, unsigned value)
     
     for (int i = 0; i < MAX_BREAKPOINTS; ++i) {
         if (!breakpoints[i].comp) {
+            breakpoints[i].name = strdup(reg);
             breakpoints[i].comp = comp;
             breakpoints[i].value = value;
             return;
@@ -200,6 +202,8 @@ void clearBreakpoint(const char * reg, unsigned value)
     
     for (int i = 0; i < MAX_BREAKPOINTS; ++i) {
         if (breakpoints[i].comp == comp) {
+            free(breakpoints[i].name);
+            breakpoints[i].name = NULL;
             breakpoints[i].comp = NULL;
             return;
         }
@@ -210,7 +214,20 @@ void clearBreakpoint(const char * reg, unsigned value)
 void clearAllBreakpoints()
 {
     for (int i = 0; i < MAX_BREAKPOINTS; ++i) {
+        if (breakpoints[i].name) {
+            free(breakpoints[i].name);
+            breakpoints[i].name = NULL;
+        }
         breakpoints[i].comp = NULL;
+    }
+}
+
+void printBreakpoints()
+{
+    for (int i = 0; i < MAX_BREAKPOINTS; ++i) {
+        if (breakpoints[i].name) {
+            LogInfo("Breakpoint when %s=%04X", breakpoints[i].name, breakpoints[i].value);
+        }
     }
 }
 

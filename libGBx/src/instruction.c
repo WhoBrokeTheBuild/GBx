@@ -422,11 +422,11 @@ uint16_t disassemble(char * str, size_t len, uint16_t addr)
             ++pch;
             switch (*pch) {
             case 'w': // unsigned word
-                i += snprintf(str + i, len - i - 1, "0x%04X", readWord(addr));
+                i += snprintf(str + i, len - i - 1, "%04Xh", readWord(addr));
                 addr += 2;
                 break;
             case 'u': // unsigned byte
-                i += snprintf(str + i, len - i - 1, "0x%02X", readByte(addr));
+                i += snprintf(str + i, len - i - 1, "%02Xh", readByte(addr));
                 ++addr;
                 break;
             case 's': // signed byte

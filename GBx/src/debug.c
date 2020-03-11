@@ -11,6 +11,7 @@
 #include <GBx/bios.h>
 #include <GBx/cartridge.h>
 #include <GBx/cpu.h>
+#include <GBx/instruction.h>
 #include <GBx/interrupt.h>
 #include <GBx/lcd.h>
 #include <GBx/log.h>
@@ -72,6 +73,7 @@ const char * help =
 "  continue     Continue normal execution\n"
 "  read         Read memory, see `help read`\n"
 "  write        Write memory, see `help write`\n"
+"  disassemble  Disassemble instructions at address\n"
 "  quit         Exit the emulation\n"
 "  reset        Reset the emulation\n";
 
@@ -87,7 +89,7 @@ const char * helpInfo =
 "  cartridge    Print Cartridge info\n";
 
 const char * helpBreak = 
-"  break [CONDITION|ADDRESS]\n"
+"break [CONDITION|ADDRESS]\n"
 "\n"
 "  Set a breakpoint at ADDRESS, or when CONDITION is met\n"
 "\n"
@@ -97,22 +99,21 @@ const char * helpBreak =
 "\n"
 "  ADDRESS will be interpreted as a 16-bit hex number\n"
 "\n"
-"  If no CONDITION or ADDRESS are specified, a breakpoint will be\n"
-"  set at the current PC\n"
+"  If no CONDITION or ADDRESS are specified, all breakpoints\n"
+"  will be listed\n"
 "\n";
 
 const char * helpDelete = 
-"  delete [ADDRESS]\n"
+"delete [ADDRESS]\n"
 "\n"
 "  Delete a breakpoint at ADDRESS, or all breakpoints\n"
 "\n"
 "  ADDRESS will be interpreted as a 16-bit hex number\n"
-"\n"
 "  If ADDRESS is not specified, all breakpoints will be deleted\n"
 "\n";
 
 const char * helpRead = 
-"  read SIZE ADDRESS\n"
+"read SIZE ADDRESS\n"
 "\n"
 "  Read SIZE bytes from ADDRESS\n"
 "\n"
@@ -121,7 +122,7 @@ const char * helpRead =
 "  ADDRESS will be interpreted as a 16-bit hex number\n";
 
 const char * helpWrite = 
-"  write SIZE ADDRESS VALUE\n"
+"write SIZE ADDRESS VALUE\n"
 "\n"
 "  Write SIZE bytes to ADDRESS from VALUE\n"
 "\n"
@@ -130,6 +131,51 @@ const char * helpWrite =
 "  ADDRESS will be interpreted as a 16-bit hex number\n"
 "\n"
 "  VALUE will be interpreted as an 8-bit or 16-bit number, depending on SIZE\n";
+
+const char * helpDisassemble = 
+"disassemble [COUNT] [ADDRESS]\n"
+"\n"
+"  Dissassmble COUNT instructions at ADDRESS\n"
+"\n"
+"  COUNT will be interpreted as a decimal integer\n"
+"  If COUNT is not present, it will default to 1\n"
+"\n"
+"  ADDRESS will be interpreted as a 16-bit hex number\n"
+"  If ADDRESS is not present, it will default to PC\n";
+
+void helpPrompt(const char * input)
+{
+    if (!input) {
+        printf("%s", help);
+        return;
+    }
+
+    size_t length = strlen(input);
+    
+    if (length == 0) {
+        printf("%s", helpInfo);
+        return;
+    }
+
+    if (strncmp(input, "info", length) == 0) {
+        printf("%s", helpInfo);
+    }
+    else if (strncmp(input, "break", length) == 0) {
+        printf("%s", helpBreak);
+    }
+    else if (strncmp(input, "delete", length) == 0) {
+        printf("%s", helpDelete);
+    }
+    else if (strncmp(input, "read", length) == 0) {
+        printf("%s", helpRead);
+    }
+    else if (strncmp(input, "write", length) == 0) {
+        printf("%s", helpWrite);
+    }
+    else {
+        printf("Unknown command '%s'", input);
+    }
+}
 
 void infoPrompt(const char * input)
 {
@@ -200,14 +246,14 @@ void infoPrompt(const char * input)
 void breakPrompt(const char * input)
 {
     if (!input) {
-        printf("%s", helpBreak);
+        printBreakpoints();
         return;
     }
 
     size_t length = strlen(input);
     
     if (length == 0) {
-        printf("%s", helpBreak);
+        printBreakpoints();
         return;
     }
     
@@ -232,14 +278,16 @@ void breakPrompt(const char * input)
 void deletePrompt(const char * input)
 {
     if (!input) {
-        printf("%s", helpDelete);
+        clearAllBreakpoints();
+        LogInfo("All Breakpoints deleted");
         return;
     }
 
     size_t length = strlen(input);
     
     if (length == 0) {
-        printf("%s", helpDelete);
+        clearAllBreakpoints();
+        LogInfo("All Breakpoints deleted");
         return;
     }
     
@@ -313,38 +361,44 @@ void writePrompt(const char * input)
     }
 }
 
-void helpPrompt(const char * input)
+void disassemblePrompt(const char * input)
 {
-    if (!input) {
-        printf("%s", help);
-        return;
+    unsigned count;
+    uint16_t addr;
+
+    if (!input || strlen(input) == 0) {
+        count = 1;
+        addr = R.PC;
     }
 
-    size_t length = strlen(input);
-    
-    if (length == 0) {
-        printf("%s", helpInfo);
-        return;
-    }
+    char * space = strchr(input, ' ');
+    if (space) {
+        *space = '\0';
 
-    if (strncmp(input, "info", length) == 0) {
-        printf("%s", helpInfo);
-    }
-    if (strncmp(input, "break", length) == 0) {
-        printf("%s", helpBreak);
-    }
-    if (strncmp(input, "delete", length) == 0) {
-        printf("%s", helpDelete);
-    }
-    else if (strncmp(input, "read", length) == 0) {
-        printf("%s", helpRead);
-    }
-    else if (strncmp(input, "write", length) == 0) {
-        printf("%s", helpWrite);
+        sscanf(input, "%d", &count);
+        sscanf(space + 1, "%4hX", &addr);
     }
     else {
-        printf("Unknown command '%s'", input);
+        sscanf(input, "%d", &count);
+        addr = R.PC;
     }
+
+    LogInfo("Disassembling %u instructions at %04X", count, addr);
+
+    char buffer[60];
+
+    int tmpVerbose = VerboseLevel;
+    VerboseLevel = 0;
+
+    for (int i = 0; i < count; ++i) {
+        uint16_t tmp = addr;
+        addr = disassemble(buffer, sizeof(buffer), addr);
+        printf("%04X    %s\n", tmp, buffer);
+    }
+
+    VerboseLevel = tmpVerbose;
+
+    printf("\n");
 }
 
 void debugPrompt() 
@@ -401,6 +455,9 @@ void debugPrompt()
         }
         else if (strncmp(input, "write", length) == 0) {
             writePrompt(args);
+        }
+        else if (strncmp(input, "disassemble", length) == 0) {
+            disassemblePrompt(args);
         }
         else if (strncmp(input, "quit", length) == 0
             || strncmp(input, "exit", length) == 0) {

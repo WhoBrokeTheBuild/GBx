@@ -9,6 +9,8 @@ void clearBreakpoint(const char * reg, unsigned value);
 
 void clearAllBreakpoints();
 
+void printBreakpoints();
+
 bool atBreakpoint();
 
 #endif // BREAKPOINT_H
