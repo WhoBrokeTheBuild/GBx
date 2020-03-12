@@ -2,7 +2,6 @@
 #define LOG_H
 
 #include "cpu.h"
-#include "cpu.h"
 
 #include <signal.h>
 #include <stdio.h>
@@ -84,6 +83,6 @@ extern int VerboseLevel;
 #endif // WIN32
 
 #define LogInst(M, ...) \
-    if (VerboseLevel >= 3) { printf("[INST] %04X: " M "\n", LastInstructionAddress, ##__VA_ARGS__); }
+    if (VerboseLevel >= 3) { printf("[INST] " M "\n", ##__VA_ARGS__); }
 
 #endif // LOG_H

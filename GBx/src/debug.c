@@ -71,6 +71,7 @@ const char * help =
 "  break        Set a breakpoint, see `help break`\n"
 "  delete       Delete a breakpoint, see `help delete`\n"
 "  continue     Continue normal execution\n"
+"  next         Run the next N instructions\n"
 "  read         Read memory, see `help read`\n"
 "  write        Write memory, see `help write`\n"
 "  disassemble  Disassemble instructions at address\n"
@@ -112,12 +113,20 @@ const char * helpDelete =
 "  If ADDRESS is not specified, all breakpoints will be deleted\n"
 "\n";
 
+const char * helpNext = 
+"next [COUNT]\n"
+"\n"
+"  Run the next COUNT instructions\n"
+"\n"
+"  COUNT will be interpreted as an unsigned decimal integer\n"
+"  If COUNT is not present, it will default to 1\n";
+
 const char * helpRead = 
 "read SIZE ADDRESS\n"
 "\n"
 "  Read SIZE bytes from ADDRESS\n"
 "\n"
-"  SIZE can be 1 or 2\n"
+"  SIZE can be either 1 or 2\n"
 "\n"
 "  ADDRESS will be interpreted as a 16-bit hex number\n";
 
@@ -137,13 +146,13 @@ const char * helpDisassemble =
 "\n"
 "  Dissassmble COUNT instructions at ADDRESS\n"
 "\n"
-"  COUNT will be interpreted as a decimal integer\n"
+"  COUNT will be interpreted as an unsigned decimal integer\n"
 "  If COUNT is not present, it will default to 1\n"
 "\n"
 "  ADDRESS will be interpreted as a 16-bit hex number\n"
 "  If ADDRESS is not present, it will default to PC\n";
 
-void helpPrompt(const char * input)
+void cmdHelp(const char * input)
 {
     if (!input) {
         printf("%s", help);
@@ -166,6 +175,9 @@ void helpPrompt(const char * input)
     else if (strncmp(input, "delete", length) == 0) {
         printf("%s", helpDelete);
     }
+    else if (strncmp(input, "next", length) == 0) {
+        printf("%s", helpNext);
+    }
     else if (strncmp(input, "read", length) == 0) {
         printf("%s", helpRead);
     }
@@ -177,7 +189,7 @@ void helpPrompt(const char * input)
     }
 }
 
-void infoPrompt(const char * input)
+void cmdInfo(const char * input)
 {
     if (!input) {
         printf("%s", helpInfo);
@@ -243,7 +255,7 @@ void infoPrompt(const char * input)
     }
 }
 
-void breakPrompt(const char * input)
+void cmdBreak(const char * input)
 {
     if (!input) {
         printBreakpoints();
@@ -275,7 +287,7 @@ void breakPrompt(const char * input)
     }
 }
 
-void deletePrompt(const char * input)
+void cmdDelete(const char * input)
 {
     if (!input) {
         clearAllBreakpoints();
@@ -309,7 +321,22 @@ void deletePrompt(const char * input)
     }
 }
 
-void readPrompt(const char * input)
+void cmdNext(const char * input)
+{
+    if (!input || strlen(input) == 0) {
+        nextInstruction();
+        return;
+    }
+
+    unsigned count;
+    sscanf(input, "%u", &count);
+
+    for (int i = 0; i < count; ++i) {
+        nextInstruction();
+    }
+}
+
+void cmdRead(const char * input)
 {
     if (!input || strlen(input) == 0) {
         printf("%s", helpRead);
@@ -333,7 +360,7 @@ void readPrompt(const char * input)
     }
 }
 
-void writePrompt(const char * input)
+void cmdWrite(const char * input)
 {
     if (!input || strlen(input) == 0) {
         printf("%s", helpRead);
@@ -361,7 +388,7 @@ void writePrompt(const char * input)
     }
 }
 
-void disassemblePrompt(const char * input)
+void cmdDisassemble(const char * input)
 {
     unsigned count;
     uint16_t addr;
@@ -385,7 +412,7 @@ void disassemblePrompt(const char * input)
 
     LogInfo("Disassembling %u instructions at %04X", count, addr);
 
-    char buffer[60];
+    char buffer[80];
 
     int tmpVerbose = VerboseLevel;
     VerboseLevel = 0;
@@ -409,6 +436,8 @@ void debugPrompt()
 
     int oldVerboseLevel = VerboseLevel;
     VerboseLevel = 4;
+
+    printR();
 
     char prompt[2048];
     snprintf(prompt, sizeof(prompt), "[%04X]> ", R.PC);
@@ -435,29 +464,32 @@ void debugPrompt()
             nextInstruction();
         }
         else if (strncmp(input, "help", length) == 0) {
-            helpPrompt(args);
+            cmdHelp(args);
         }
         else if (strncmp(input, "info", length) == 0) {
-            infoPrompt(args);
+            cmdInfo(args);
         }
         else if (strncmp(input, "break", length) == 0) {
-            breakPrompt(args);
+            cmdBreak(args);
         }
         else if (strncmp(input, "delete", length) == 0) {
-            deletePrompt(args);
+            cmdDelete(args);
         }
         else if (strncmp(input, "continue", length) == 0) {
             VerboseLevel = oldVerboseLevel;
             break;
         }
+        else if (strncmp(input, "next", length) == 0) {
+            cmdNext(args);
+        }
         else if (strncmp(input, "read", length) == 0) {
-            readPrompt(args);
+            cmdRead(args);
         }
         else if (strncmp(input, "write", length) == 0) {
-            writePrompt(args);
+            cmdWrite(args);
         }
         else if (strncmp(input, "disassemble", length) == 0) {
-            disassemblePrompt(args);
+            cmdDisassemble(args);
         }
         else if (strncmp(input, "quit", length) == 0
             || strncmp(input, "exit", length) == 0) {
@@ -472,6 +504,7 @@ void debugPrompt()
         free(input);
         input = NULL;
 
+        printR();
         snprintf(prompt, sizeof(prompt), "[%04X]> ", R.PC);
     }
 

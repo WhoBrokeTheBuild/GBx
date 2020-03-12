@@ -9,20 +9,22 @@
 
 #include <time.h>
 
-LCDC_t LCDC;
+lcd_control_t LCDC;
 
-STAT_t STAT;
+lcd_status_t STAT;
 
-uint8_t SCY = 0x00;
-uint8_t SCX = 0x00;
-uint8_t LY  = 0x00;
-uint8_t LYC = 0x00;
-uint8_t WX  = 0x00;
-uint8_t WY  = 0x00;
+uint8_t SCY;
+uint8_t SCX;
 
-palette_t BGP  = { .raw = 0b11100100 };
-palette_t OBP0 = { .raw = 0b11100100 };
-palette_t OBP1 = { .raw = 0b11100100 };
+uint8_t LY;
+uint8_t LYC;
+
+uint8_t WX;
+uint8_t WY;
+
+palette_t BGP;
+palette_t OBP0;
+palette_t OBP1;
 
 uint8_t VRAM0[0x1FFF];
 uint8_t VRAM1[0x1FFF];
@@ -33,10 +35,10 @@ uint8_t OAM[0xA0];
 uint8_t Backbuffer[BACKBUFFER_WIDTH * BACKBUFFER_HEIGHT * BACKBUFFER_COMP];
 
 const char * LCD_MODE_STR[4] = {
-    "HBlank",
-    "VBlank",
-    "SearchSprite",
-    "DataTransfer",
+    "HBlank(0)",
+    "VBlank(1)",
+    "SearchSprite(2)",
+    "DataTransfer(3)",
 };
 
 uint16_t TILE_MAP_ADDR[2] = {
@@ -127,16 +129,16 @@ void drawTiles()
         uint8_t color = 0;
         switch (colorIndex) {
         case 0b00:
-            colorIndex = BGP.Color00;
+            colorIndex = BGP.Color0;
             break;
         case 0b01:
-            colorIndex = BGP.Color01;
+            colorIndex = BGP.Color1;
             break;
         case 0b10:
-            colorIndex = BGP.Color10;
+            colorIndex = BGP.Color2;
             break;
         case 0b11:
-            colorIndex = BGP.Color11;
+            colorIndex = BGP.Color3;
             break;
         }
 
@@ -204,16 +206,16 @@ void drawSprites()
                 uint8_t color = 0;
                 switch (colorIndex) {
                 case 0b00:
-                    colorIndex = pal->Color00;
+                    colorIndex = pal->Color0;
                     break;
                 case 0b01:
-                    colorIndex = pal->Color01;
+                    colorIndex = pal->Color1;
                     break;
                 case 0b10:
-                    colorIndex = pal->Color10;
+                    colorIndex = pal->Color2;
                     break;
                 case 0b11:
-                    colorIndex = pal->Color11;
+                    colorIndex = pal->Color3;
                     break;
                 }
 
@@ -261,6 +263,7 @@ void lcdTick(unsigned cycles)
                 lcdModeTotalTicks -= SEARCH_SPRITE_TICK_COUNT;
 
                 STAT.Mode = STAT_MODE_DATA_TRANSFER;
+                // printSTAT();
             }
         break;
         case STAT_MODE_DATA_TRANSFER:
@@ -276,6 +279,7 @@ void lcdTick(unsigned cycles)
                 }
 
                 STAT.Mode = STAT_MODE_HBLANK;
+                // printSTAT();
             }
         break;
         case STAT_MODE_HBLANK:
@@ -287,6 +291,7 @@ void lcdTick(unsigned cycles)
 
                 if (LY == SCREEN_HEIGHT) {
                     STAT.Mode = STAT_MODE_VBLANK;
+                    // printSTAT();
                     if (STAT.IntVBlank) {
                         IF.STAT = true;
                     }
@@ -323,6 +328,7 @@ void lcdTick(unsigned cycles)
                 }
                 else {
                     STAT.Mode = STAT_MODE_SEARCH_SPRITE;
+                    // printSTAT();
                     if (STAT.IntSearchSprite) {
                         IF.STAT = true;
                     }
@@ -338,6 +344,7 @@ void lcdTick(unsigned cycles)
 
                 if (LY == 0) {
                     STAT.Mode = STAT_MODE_SEARCH_SPRITE;
+                    // printSTAT();
                     if (STAT.IntSearchSprite) {
                         IF.STAT = true;
                     }
@@ -361,8 +368,8 @@ void printLCDC()
 
 void printSTAT() 
 {
-    LogInfo("Mode=%s IntCoinc=%d IntHBlank=%d IntVBlank=%d IntSearchSprite=%d Coincidence=%d",
-        LCD_MODE_STR[STAT.Mode], STAT.IntCoincidence, STAT.IntHBlank, STAT.IntVBlank, STAT.IntSearchSprite, STAT.Coincidence);
+    LogInfo("Mode=%s Coincidence=%d IntHBlank=%d IntVBlank=%d IntSearchSprite=%d IntCoincidence=%d",
+        LCD_MODE_STR[STAT.Mode], STAT.Coincidence, STAT.IntHBlank, STAT.IntVBlank, STAT.IntSearchSprite, STAT.IntCoincidence);
 }
 
 void printLCDInfo()
@@ -373,18 +380,18 @@ void printLCDInfo()
 
 void printBGP()
 {
-    LogInfo("BGP Color00=%d Color01=%d Color10=%d Color11=%d",
-        BGP.Color00, BGP.Color01, BGP.Color10, BGP.Color11);
+    LogInfo("BGP Color0=%d Color1=%d Color2=%d Color3=%d",
+        BGP.Color0, BGP.Color1, BGP.Color2, BGP.Color3);
 }
 
 void printOBP0()
 {
-    LogInfo("OBP0 Color00=%d Color01=%d Color10=%d Color11=%d",
-        OBP0.Color00, OBP0.Color01, OBP0.Color10, OBP0.Color11);
+    LogInfo("BGP Color0=%d Color1=%d Color2=%d Color3=%d",
+        OBP0.Color0, OBP0.Color1, OBP0.Color2, OBP0.Color3);
 }
 
 void printOBP1()
 {
-    LogInfo("OBP1 Color00=%d Color01=%d Color10=%d Color11=%d",
-        OBP1.Color00, OBP1.Color01, OBP1.Color10, OBP1.Color11);
+    LogInfo("BGP Color0=%d Color1=%d Color2=%d Color3=%d",
+        OBP1.Color0, OBP1.Color1, OBP1.Color2, OBP1.Color3);
 }

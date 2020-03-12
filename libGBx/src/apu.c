@@ -3,25 +3,32 @@
 #include "log.h"
 
 tone_t Tone1;
+
+int Tone1Timer;
+int Tone1DutyIndex;
+
 tone_t Tone2;
+
+int Tone2Timer;
+int Tone2DutyIndex;
 
 wave_t Wave;
 
-noise_t Noise;
-
-volume_control_t VolumeControl;
+int WaveTimer;
 
 uint8_t WaveRAM[0x10];
 
-int Tone1Timer = 0;
-int Tone1DutyIndex = 0;
+noise_t Noise;
 
-int Tone2Timer = 0;
-int Tone2DutyIndex = 0;
+int NoiseTimer;
 
-int WaveTimer = 0;
+volume_control_t VolumeControl;
 
-int NoiseTimer = 0;
+volume_control_t VolumeControl;
+
+sound_output_terminal_t SoundOutputTerminal;
+
+sound_control_t SoundControl;
 
 uint8_t DutyCycles[4][8] = {
     { 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },

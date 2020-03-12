@@ -4,6 +4,7 @@
 #include <GBx/log.h>
 
 #include <stdlib.h>
+#include <string.h>
 
 typedef bool (*break_comp_func_t)(unsigned);
 
@@ -236,6 +237,9 @@ bool atBreakpoint()
     for (int i = 0; i < MAX_BREAKPOINTS; ++i) {
         if (breakpoints[i].comp) {
             if (breakpoints[i].comp(breakpoints[i].value)) {
+                free(breakpoints[i].name);
+                breakpoints[i].name = NULL;
+                breakpoints[i].comp = NULL;
                 return true;
             }
         }

@@ -4,10 +4,11 @@
 #include "bios.h"
 #include "cartridge.h"
 #include "clock.h"
+#include "input.h"
 #include "interrupt.h"
-#include "io.h"
 #include "lcd.h"
 #include "log.h"
+#include "serial.h"
 #include "timer.h"
 
 uint8_t WRAM0[0x7FF8];
@@ -17,7 +18,7 @@ uint8_t HRAM[127];
 
 uint8_t readByte(uint16_t address)
 {
-    LogVerbose(4, "Read %02X", address);
+    LogVerbose(4, "Read Memory at %04X", address);
 
     if (address <= 0x00FF) {
         if (BIOSEnable) {
@@ -36,7 +37,13 @@ uint8_t readByte(uint16_t address)
         return ROM[address - 0x4000];
     }
     else if (address <= 0x9FFF) {
-        return VRAM0[address - 0x8000];
+        // if (STAT.Mode != STAT_MODE_DATA_TRANSFER) {
+            return VRAM0[address - 0x8000];
+        // }
+        // else {
+        //     // LogWarn("Attempting to read from VRAM while in mode %d", STAT.Mode);
+        //     return 0xFF;
+        // }
     }
     else if (address <= 0xBFFF) {
         // External Cartridge RAM
@@ -61,7 +68,13 @@ uint8_t readByte(uint16_t address)
     }
     else if (address <= 0xFE9F) {
         // Object Attribute Memory
-        return OAM[address - 0xFE00];
+        // if (STAT.Mode != STAT_MODE_DATA_TRANSFER && STAT.Mode != STAT_MODE_SEARCH_SPRITE) {
+            return OAM[address - 0xFE00];
+        // }
+        // else {
+        //     // LogWarn("Attempting to read from OAM while in mode %d", STAT.Mode);
+        //     return 0xFF;
+        // }
     }
     else if (address <= 0xFEFF) {
         // Unusable
@@ -74,11 +87,11 @@ uint8_t readByte(uint16_t address)
 
         switch (address) {
         case 0xFF00:
-            // return P1.raw;
+            return JOYP.raw;
         case 0xFF01:
-            // return SB;
+            return SB;
         case 0xFF02:
-            // return SC.raw;
+            return SC.raw;
         case 0xFF04:
             return DIV;
         case 0xFF05:
@@ -195,13 +208,18 @@ uint16_t nextWord()
 
 void writeByte(uint16_t address, uint8_t data)
 {
-    LogVerbose(4, "Write %02X to %02X", data, address);
+    LogVerbose(4, "Write %02X to Memory at %04X", data, address);
 
     if (address <= 0x7FFF) {
         writeCartridgeMBC(address, data);
     }
     else if (address <= 0x9FFF) {
-        VRAM[address - 0x8000] = data;
+        // if (STAT.Mode != STAT_MODE_DATA_TRANSFER) {
+            VRAM[address - 0x8000] = data;
+        // }
+        // else {
+        //     // LogWarn("Attempting to write to VRAM while in mode %d", STAT.Mode);
+        // }
     }
     else if (address <= 0xBFFF) {
         // Cartridge RAM
@@ -226,7 +244,12 @@ void writeByte(uint16_t address, uint8_t data)
     }
     else if (address <= 0xFE9F) {
         // Object Attribute Memory
-        OAM[address - 0xFE00] = data;
+        //if (STAT.Mode != STAT_MODE_DATA_TRANSFER && STAT.Mode != STAT_MODE_SEARCH_SPRITE) {
+           OAM[address - 0xFE00] = data;
+        //}
+        //else {
+        //    // LogWarn("Attempting to write to OAM while in mode %d", STAT.Mode);
+        //}
     }
     else if (address <= 0xFEFF) {
         // Unusable
@@ -239,13 +262,15 @@ void writeByte(uint16_t address, uint8_t data)
 
         switch (address) {
         case 0xFF00:
-            // P1.raw = data;
+            JOYP.raw = data & JOYP_WRITE_MASK;
+            // TODO:
+            // updateJOYP();
             break;
         case 0xFF01:
-            // SB = data;
+            SB = data;
             break;
         case 0xFF02:
-            // SC.raw = data;
+            SC.raw = data;
             break;
         case 0xFF04:
             DIV = 0;
@@ -275,31 +300,31 @@ void writeByte(uint16_t address, uint8_t data)
             }
             break;
         case 0xFF10:
-            Tone1.raw[0] = data;
+            Tone1.raw[0] = data & TONE_READ_MASK0;
             if (VerboseLevel >= 2) {
                 printTone1();
             }
             break;
         case 0xFF11:
-            Tone1.raw[1] = data;
+            Tone1.raw[1] = data & TONE_READ_MASK1;
             if (VerboseLevel >= 2) {
                 printTone1();
             }
             break;
         case 0xFF12:
-            Tone1.raw[2] = data;
+            Tone1.raw[2] = data & TONE_READ_MASK2;
             if (VerboseLevel >= 2) {
                 printTone1();
             }
             break;
         case 0xFF13:
-            Tone1.raw[3] = data;
+            Tone1.raw[3] = data & TONE_READ_MASK3;
             if (VerboseLevel >= 2) {
                 printTone1();
             }
             break;
         case 0xFF14:
-            Tone1.raw[4] = data;
+            Tone1.raw[4] = data & TONE_READ_MASK4;
             if (VerboseLevel >= 2) {
                 printTone1();
             }
@@ -308,49 +333,49 @@ void writeByte(uint16_t address, uint8_t data)
             LogWarn("Attempting to access Tone2's Sweep Controls");
             break;
         case 0xFF16:
-            Tone2.raw[1] = data;
+            Tone2.raw[1] = data & TONE_READ_MASK1;
             if (VerboseLevel >= 2) {
                 printTone2();
             }
             break;
         case 0xFF17:
-            Tone2.raw[2] = data;
+            Tone2.raw[2] = data & TONE_READ_MASK2;
             if (VerboseLevel >= 2) {
                 printTone2();
             }
             break;
         case 0xFF18:
-            Tone2.raw[3] = data;
+            Tone2.raw[3] = data & TONE_READ_MASK3;
             if (VerboseLevel >= 2) {
                 printTone2();
             }
             break;
         case 0xFF19:
-            Tone2.raw[4] = data;
+            Tone2.raw[4] = data & TONE_READ_MASK4;
             if (VerboseLevel >= 2) {
                 printTone2();
             }
             break;
         case 0xFF20:
-            Noise.raw[0] = data;
+            Noise.raw[0] = data & NOISE_READ_MASK0;
             if (VerboseLevel >= 2) {
                 printNoise();
             }
             break;
         case 0xFF21:
-            Noise.raw[1] = data;
+            Noise.raw[1] = data & NOISE_READ_MASK1;
             if (VerboseLevel >= 2) {
                 printNoise();
             }
             break;
         case 0xFF22:
-            Noise.raw[2] = data;
+            Noise.raw[2] = data & NOISE_READ_MASK2;
             if (VerboseLevel >= 2) {
                 printNoise();
             }
             break;
         case 0xFF23:
-            Noise.raw[3] = data;
+            Noise.raw[3] = data & NOISE_READ_MASK3;
             if (VerboseLevel >= 2) {
                 printNoise();
             }
@@ -362,37 +387,46 @@ void writeByte(uint16_t address, uint8_t data)
             }
             break;
         case 0xFF25:
-            // NR51 = data;
+            SoundOutputTerminal.raw = data;
+            if (VerboseLevel >= 2) {
+                // printSoundOutputTerminal();
+            }
             break;
         case 0xFF26:
-            // NR52 = data;
+            SoundControl.raw = data & SOUND_CONTROL_WRITE_MASK;
+            if (!SoundControl.SoundEnable) {
+                // TODO: Disable all sound
+            }
+            if (VerboseLevel >= 2) {
+                // printSoundControl();
+            }
             break;
         case 0xFF1A:
-            Wave.raw[0] = data;
+            Wave.raw[0] = data & WAVE_READ_MASK0;
             if (VerboseLevel >= 2) {
                 printWave();
             }
             break;
         case 0xFF1B:
-            Wave.raw[1] = data;
+            Wave.raw[1] = data & WAVE_READ_MASK1;
             if (VerboseLevel >= 2) {
                 printWave();
             }
             break;
         case 0xFF1C:
-            Wave.raw[2] = data;
+            Wave.raw[2] = data & WAVE_READ_MASK2;
             if (VerboseLevel >= 2) {
                 printWave();
             }
             break;
         case 0xFF1D:
-            Wave.raw[3] = data;
+            Wave.raw[3] = data & WAVE_READ_MASK3;
             if (VerboseLevel >= 2) {
                 printWave();
             }
             break;
         case 0xFF1E:
-            Wave.raw[4] = data;
+            Wave.raw[4] = data & WAVE_READ_MASK4;
             if (VerboseLevel >= 2) {
                 printWave();
             }
@@ -405,7 +439,7 @@ void writeByte(uint16_t address, uint8_t data)
             }
             break;
         case 0xFF41:
-            STAT.raw = data;
+            STAT.raw = data & STAT_WRITE_MASK;
             if (VerboseLevel >= 2) {
                 printSTAT();
             }
@@ -432,7 +466,7 @@ void writeByte(uint16_t address, uint8_t data)
             {
                 uint16_t addr = data << 8;
                 for (unsigned i = 0; i < 0xA0; ++i) {
-                    writeByte(0xFE00 + i, readByte(addr + i));
+                    OAM[i] = readByte(addr + i);
                     tick(4);
                 }
             }

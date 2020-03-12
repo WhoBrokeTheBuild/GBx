@@ -413,38 +413,39 @@ uint16_t disassemble(char * str, size_t len, uint16_t addr)
         pch = instructionDefinitions[op];
     }
     
-    size_t i;
-    for (i = 0; i < len - 1; ++i) {
-        if (*pch == '\0') {
-            break;
-        }
-        else if (*pch == '$') {
+    size_t i = 0;
+    while (i < len - 1) {
+        if (*pch == '$') {
             ++pch;
             switch (*pch) {
             case 'w': // unsigned word
-                i += snprintf(str + i, len - i - 1, "%04Xh", readWord(addr));
+                i += snprintf(str + i, len - i, "%04Xh", readWord(addr));
                 addr += 2;
                 break;
             case 'u': // unsigned byte
-                i += snprintf(str + i, len - i - 1, "%02Xh", readByte(addr));
+                i += snprintf(str + i, len - i, "%02Xh", readByte(addr));
                 ++addr;
                 break;
             case 's': // signed byte
-                i += snprintf(str + i, len - i - 1, "%d", (int8_t)readByte(addr));
+                i += snprintf(str + i, len - i, "%d", (int8_t)readByte(addr));
                 ++addr;
                 break;
             case 'b': // bit, for CB instructions
-                i += snprintf(str + i, len - i - 1, "%d", bit);
+                i += snprintf(str + i, len - i, "%d", bit);
                 ++addr;
                 break;
             }
+            ++pch;
         }
         else {
             str[i] = *pch;
+            if (*pch == '\0') {
+                break;
+            }
+            ++i;
             ++pch;
         }
     }
-    
-    str[i] = '\0';
+
     return addr;
 }

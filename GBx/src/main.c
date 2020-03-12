@@ -10,6 +10,8 @@
 #include <GBx/log.h>
 #include <GBx/memory.h>
 
+#include <GBx/lcd.h>
+
 #include <SDL.h>
 #include <cflags.h>
 
@@ -85,7 +87,7 @@ int main(int argc, char ** argv)
     else {
         reset();
     }
-    
+
     videoInit();
     audioInit();
 
