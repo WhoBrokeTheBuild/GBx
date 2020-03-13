@@ -6,24 +6,21 @@
 
 #include <SDL.h>
 
-#define DEFAULT_SCALE (4)
-
-unsigned windowWidth  = LCD_WIDTH  * DEFAULT_SCALE;
-unsigned windowHeight = LCD_HEIGHT * DEFAULT_SCALE;
-
 SDL_Window   * sdlWindow   = NULL;
 SDL_Renderer * sdlRenderer = NULL;
 SDL_Texture  * sdlTexture  = NULL;
 
-void VideoInit()
+void VideoInit(int scale)
 {
     char windowTitle[21];
     snprintf(windowTitle, sizeof(windowTitle), "GBx - %.*s", 15, CartridgeHeader.Title);
 
+    int width  = LCD_WIDTH * scale;
+    int height = LCD_HEIGHT * scale;
+
     sdlWindow = SDL_CreateWindow(windowTitle, 
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
-        windowWidth, windowHeight, 
-        SDL_WINDOW_RESIZABLE);
+        width, height, SDL_WINDOW_RESIZABLE);
     
     if (!sdlWindow) {
         LogFatal("Failed to create SDL2 Window, %s", SDL_GetError());
@@ -41,7 +38,7 @@ void VideoInit()
     SDL_SetRenderDrawColor(sdlRenderer, 0, 0, 0, 255);
     
     LogInfo("Window Size=(%dx%d) LCDBuffer=(%dx%d)", 
-        windowWidth, windowHeight, 
+        width, height, 
         LCD_BUFFER_WIDTH, LCD_BUFFER_HEIGHT);
 
     Render();
@@ -64,17 +61,6 @@ void PollEvents()
             exit(0);
             break;
         }
-        else if (evt.type == SDL_WINDOWEVENT) {
-            switch (evt.window.event) {
-            case SDL_WINDOWEVENT_RESIZED:
-            case SDL_WINDOWEVENT_SIZE_CHANGED:
-                windowWidth = evt.window.data1;
-                windowHeight = evt.window.data2;
-                break;
-            default:
-                break;
-            };
-        }
     }
 }
 
@@ -85,18 +71,21 @@ void Render()
     SDL_LockTexture(sdlTexture, NULL, (void **)&pixels, &pitch);
     memcpy(pixels, LCDBuffer, sizeof(LCDBuffer));
     SDL_UnlockTexture(sdlTexture);
+
+    int width, height;
+    SDL_GetWindowSize(sdlWindow, &width, &height);
     
     SDL_Rect src = { .x = 0, .y = 0, .w = 160, .h = 144 };
     SDL_Rect dst = { .x = 0, .y = 0, .w = 160, .h = 144 };
 
     float scale = 1.0;
-    if (windowWidth > windowHeight) {
-        scale = windowHeight / 144.0;
-        dst.x = (windowWidth - (scale * 160)) / 2;
+    if (width > height) {
+        scale = height / 144.0;
+        dst.x = (width - (scale * 160)) / 2;
     }
     else {
-        scale = windowWidth / 160.0;
-        dst.y = (windowHeight - (scale * 144)) / 2;
+        scale = width / 160.0;
+        dst.y = (height - (scale * 144)) / 2;
     }
 
     dst.w = 160 * scale;

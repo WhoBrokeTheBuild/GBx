@@ -92,13 +92,12 @@ UNIT_TEST(JP_C_uu_true)
     unit_assert_int_eq(12, TotalTicks);
 }
 
-UNIT_TEST(JP_pHL)
+UNIT_TEST(JP_HL)
 {
-    R.HL = RAM_OFFSET;
-    WriteWord(R.HL, 0x1234);
-    _JP_pHL();
+    R.HL = 0x1234;
+    _JP_HL();
     unit_assert_hex_eq(0x1234, R.PC);
-    unit_assert_int_eq(12, TotalTicks);
+    unit_assert_int_eq(4, TotalTicks);
 }
 
 UNIT_TEST_SUITE(JP)
@@ -115,7 +114,7 @@ UNIT_TEST_SUITE(JP)
 	UNIT_RUN_TEST(JP_C_uu_false);
 	UNIT_RUN_TEST(JP_C_uu_true);
 
-	UNIT_RUN_TEST(JP_pHL);
+	UNIT_RUN_TEST(JP_HL);
 }
 
 UNIT_TEST(JR_s_positive)

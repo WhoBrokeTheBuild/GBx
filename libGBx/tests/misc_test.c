@@ -20,10 +20,10 @@ UNIT_TEST(HALT)
 UNIT_TEST(STOP)
 {
     R.PC = 0x0000;
-    LCDC.LCDEnable = true;
+    LCDC.LCDEnabled = true;
     _STOP();
     unit_assert_hex_eq(R.PC, 0x0001);
-    unit_assert_false(LCDC.LCDEnable);
+    unit_assert_false(LCDC.LCDEnabled);
     unit_assert_int_eq(TotalTicks, 0);
 }
 

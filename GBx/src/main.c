@@ -46,7 +46,10 @@ int main(int argc, char ** argv)
     cflags_t * flags = cflags_init();
 
     cflags_add_bool(flags, 'd', "debug", &DebugEnabled, "Enable Debug Mode");
-    
+
+    int scale = 1;
+    cflags_add_int(flags, 's', "scale", &scale, "Window scale, default is 1");
+
     cflags_flag_t * verbose = cflags_add_bool(flags, 'v', "verbose", NULL, "Enables verbose output, repeat up to 4 times for more verbosity");
 
     const char * bootROMFilename = NULL;
@@ -87,7 +90,7 @@ int main(int argc, char ** argv)
 
     Reset();
 
-    VideoInit();
+    VideoInit(scale);
     AudioInit();
 
     if (DebugEnabled) {
