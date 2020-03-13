@@ -86,7 +86,7 @@ static void (*unit_teardown)() = NULL;
         }                                                           \
     } while (0)
 
-#define unit_assert_int_eq(expected, result)                        \
+#define unit_assert_int_eq(result, expected)                        \
     do {                                                            \
         ++unit_assert;                                              \
         int tmp_expected = (int)(expected);                         \
@@ -100,7 +100,7 @@ static void (*unit_teardown)() = NULL;
         }                                                           \
     } while (0)
 
-#define unit_assert_hex_eq(expected, result)                        \
+#define unit_assert_hex_eq(result, expected)                        \
     do {                                                            \
         ++unit_assert;                                              \
         int tmp_expected = (int)(expected);                         \
@@ -114,7 +114,7 @@ static void (*unit_teardown)() = NULL;
         }                                                           \
     } while (0)
 
-#define unit_assert_double_eq(expected, result)                     \
+#define unit_assert_double_eq(result, expected)                     \
     do {                                                            \
         ++unit_assert;                                              \
         double tmp_expected = (double)(expected);                   \
@@ -128,7 +128,7 @@ static void (*unit_teardown)() = NULL;
         }                                                           \
     } while (0)
 
-#define unit_assert_string_eq(expected, result)                     \
+#define unit_assert_string_eq(result, expected)                     \
     do {                                                            \
         ++unit_assert;                                              \
         const char * tmp_expected = (const char *)(expected);       \

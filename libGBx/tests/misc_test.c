@@ -2,6 +2,7 @@
 #include "clock.h"
 #include "memory.h"
 #include "unit.h"
+#include "cartridge.h"
 
 void setup() 
 {
@@ -38,9 +39,11 @@ UNIT_TEST(DI)
 UNIT_TEST(EI)
 {
     IME = false;
+    CPUEnabled = false;
+    // With the CPU disabled, when EI calls NextInstruction, it will just Tick(1)
     _EI();
     unit_assert_true(IME);
-    unit_assert_int_eq(TotalTicks, 0);
+    unit_assert_int_eq(TotalTicks, 1);
 }
 
 UNIT_TEST(DAA)
