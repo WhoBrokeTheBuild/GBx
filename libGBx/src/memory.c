@@ -120,31 +120,31 @@ byte ReadByte(word address)
         case 0xFF0F:
             return IF.raw;
         case 0xFF10:
-            return Tone1.raw[0];
+            return Tone1.raw[0] * TONE_READ_MASK0;
         case 0xFF11:
-            return Tone1.raw[1];
+            return Tone1.raw[1] * TONE_READ_MASK1;
         case 0xFF12:
-            return Tone1.raw[2];
+            return Tone1.raw[2] * TONE_READ_MASK2;
         case 0xFF13:
-            return Tone1.raw[3];
+            return Tone1.raw[3] * TONE_READ_MASK3;
         case 0xFF14:
-            return Tone1.raw[4];
+            return Tone1.raw[4] * TONE_READ_MASK4;
         case 0xFF16:
-            return Tone2.raw[1];
+            return Tone2.raw[1] * TONE_READ_MASK1;
         case 0xFF17:
-            return Tone2.raw[2];
+            return Tone2.raw[2] * TONE_READ_MASK2;
         case 0xFF18:
-            return Tone2.raw[3];
+            return Tone2.raw[3] * TONE_READ_MASK3;
         case 0xFF19:
-            return Tone2.raw[4];
+            return Tone2.raw[4] * TONE_READ_MASK4;
         case 0xFF20:
-            return Noise.raw[0];
+            return Noise.raw[0] * NOISE_READ_MASK0;
         case 0xFF21:
-            return Noise.raw[1];
+            return Noise.raw[1] * NOISE_READ_MASK1;
         case 0xFF22:
-            return Noise.raw[2];
+            return Noise.raw[2] * NOISE_READ_MASK2;
         case 0xFF23:
-            return Noise.raw[3];
+            return Noise.raw[3] * NOISE_READ_MASK3;
         case 0xFF24:
             return VolumeControl.raw;
         case 0xFF25:
@@ -152,15 +152,15 @@ byte ReadByte(word address)
         case 0xFF26:
             // return NR52;
         case 0xFF1A:
-            return Wave.raw[0];
+            return Wave.raw[0] * WAVE_READ_MASK0;
         case 0xFF1B:
-            return Wave.raw[1];
+            return Wave.raw[1] * WAVE_READ_MASK1;
         case 0xFF1C:
-            return Wave.raw[2];
+            return Wave.raw[2] * WAVE_READ_MASK2;
         case 0xFF1D:
-            return Wave.raw[3];
+            return Wave.raw[3] * WAVE_READ_MASK3;
         case 0xFF1E:
-            return Wave.raw[4];
+            return Wave.raw[4] * WAVE_READ_MASK4;
         case 0xFF40:
             return LCDC.raw;
         case 0xFF41:
@@ -282,7 +282,8 @@ void WriteByte(word address, byte data)
 
         switch (address) {
         case 0xFF00:
-            JOYP.raw = data & JOYP_WRITE_MASK;
+            JOYP.raw ^= JOYP_WRITE_MASK;
+            JOYP.raw |= data & JOYP_WRITE_MASK;
             // TODO:
             // updateJOYP();
             break;
@@ -320,31 +321,31 @@ void WriteByte(word address, byte data)
             }
             break;
         case 0xFF10:
-            Tone1.raw[0] = data & TONE_READ_MASK0;
+            Tone1.raw[0] = data;
             if (VerboseLevel >= 2) {
                 PrintTone1();
             }
             break;
         case 0xFF11:
-            Tone1.raw[1] = data & TONE_READ_MASK1;
+            Tone1.raw[1] = data;
             if (VerboseLevel >= 2) {
                 PrintTone1();
             }
             break;
         case 0xFF12:
-            Tone1.raw[2] = data & TONE_READ_MASK2;
+            Tone1.raw[2] = data;
             if (VerboseLevel >= 2) {
                 PrintTone1();
             }
             break;
         case 0xFF13:
-            Tone1.raw[3] = data & TONE_READ_MASK3;
+            Tone1.raw[3] = data;
             if (VerboseLevel >= 2) {
                 PrintTone1();
             }
             break;
         case 0xFF14:
-            Tone1.raw[4] = data & TONE_READ_MASK4;
+            Tone1.raw[4] = data;
             if (VerboseLevel >= 2) {
                 PrintTone1();
             }
@@ -353,49 +354,49 @@ void WriteByte(word address, byte data)
             LogWarn("Attempting to access Tone2's Sweep Controls");
             break;
         case 0xFF16:
-            Tone2.raw[1] = data & TONE_READ_MASK1;
+            Tone2.raw[1] = data;
             if (VerboseLevel >= 2) {
                 PrintTone2();
             }
             break;
         case 0xFF17:
-            Tone2.raw[2] = data & TONE_READ_MASK2;
+            Tone2.raw[2] = data;
             if (VerboseLevel >= 2) {
                 PrintTone2();
             }
             break;
         case 0xFF18:
-            Tone2.raw[3] = data & TONE_READ_MASK3;
+            Tone2.raw[3] = data;
             if (VerboseLevel >= 2) {
                 PrintTone2();
             }
             break;
         case 0xFF19:
-            Tone2.raw[4] = data & TONE_READ_MASK4;
+            Tone2.raw[4] = data;
             if (VerboseLevel >= 2) {
                 PrintTone2();
             }
             break;
         case 0xFF20:
-            Noise.raw[0] = data & NOISE_READ_MASK0;
+            Noise.raw[0] = data;
             if (VerboseLevel >= 2) {
                 PrintNoise();
             }
             break;
         case 0xFF21:
-            Noise.raw[1] = data & NOISE_READ_MASK1;
+            Noise.raw[1] = data;
             if (VerboseLevel >= 2) {
                 PrintNoise();
             }
             break;
         case 0xFF22:
-            Noise.raw[2] = data & NOISE_READ_MASK2;
+            Noise.raw[2] = data;
             if (VerboseLevel >= 2) {
                 PrintNoise();
             }
             break;
         case 0xFF23:
-            Noise.raw[3] = data & NOISE_READ_MASK3;
+            Noise.raw[3] = data;
             if (VerboseLevel >= 2) {
                 PrintNoise();
             }
@@ -413,7 +414,8 @@ void WriteByte(word address, byte data)
             }
             break;
         case 0xFF26:
-            SoundControl.raw = data & SOUND_CONTROL_WRITE_MASK;
+            SoundControl.raw ^= SOUND_CONTROL_WRITE_MASK;
+            SoundControl.raw |= data & SOUND_CONTROL_WRITE_MASK;
             if (!SoundControl.SoundEnabled) {
                 // TODO: Disable all sound
             }
@@ -422,31 +424,31 @@ void WriteByte(word address, byte data)
             }
             break;
         case 0xFF1A:
-            Wave.raw[0] = data & WAVE_READ_MASK0;
+            Wave.raw[0] = data;
             if (VerboseLevel >= 2) {
                 PrintWave();
             }
             break;
         case 0xFF1B:
-            Wave.raw[1] = data & WAVE_READ_MASK1;
+            Wave.raw[1] = data;
             if (VerboseLevel >= 2) {
                 PrintWave();
             }
             break;
         case 0xFF1C:
-            Wave.raw[2] = data & WAVE_READ_MASK2;
+            Wave.raw[2] = data;
             if (VerboseLevel >= 2) {
                 PrintWave();
             }
             break;
         case 0xFF1D:
-            Wave.raw[3] = data & WAVE_READ_MASK3;
+            Wave.raw[3] = data;
             if (VerboseLevel >= 2) {
                 PrintWave();
             }
             break;
         case 0xFF1E:
-            Wave.raw[4] = data & WAVE_READ_MASK4;
+            Wave.raw[4] = data;
             if (VerboseLevel >= 2) {
                 PrintWave();
             }
@@ -459,7 +461,8 @@ void WriteByte(word address, byte data)
             }
             break;
         case 0xFF41:
-            STAT.raw = data & STAT_WRITE_MASK;
+            STAT.raw ^= STAT_WRITE_MASK;
+            STAT.raw |= data & STAT_WRITE_MASK;
             if (VerboseLevel >= 2) {
                 PrintSTAT();
             }
@@ -484,10 +487,10 @@ void WriteByte(word address, byte data)
             break;
         case 0xFF46:
             {
+                // TODO: Background somehow?
                 word addr = data << 8;
                 for (unsigned i = 0; i < 0xA0; ++i) {
                     OAM[i] = ReadByte(addr + i);
-                    Tick(4);
                 }
             }
             break;

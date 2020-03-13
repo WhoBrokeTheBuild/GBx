@@ -59,7 +59,7 @@ const char * instructionDefinitions[] = {
     [0x28] = "JR Z, $s",
     [0x30] = "JR NC, $s",
     [0x38] = "JR C, $s",
-    [0xE9] = "JP (HL)",
+    [0xE9] = "JP HL",
     // stack
     [0xF5] = "PUSH AF",
     [0xC5] = "PUSH BC",

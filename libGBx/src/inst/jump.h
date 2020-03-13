@@ -133,14 +133,11 @@ static void _JR_C_s()
     }
 }
 
-static void _JP_pHL()
+static void _JP_HL()
 {
-    int16_t pHL = ReadWord(R.HL);
-    Tick(8);
+    LogInst("JP HL");
 
-    LogInst("JP (HL)");
-
-    R.PC = pHL;
+    R.PC = R.HL;
     Tick(4);
 }
 

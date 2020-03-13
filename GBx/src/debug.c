@@ -344,11 +344,11 @@ void cmdRead(const char * input)
     word addr;
     sscanf(input, "%d %hX", &size, &addr);
 
-    if (size == 8) {
+    if (size == 1) {
         byte value = ReadByte(addr);
         LogInfo("(%04X) = %02X", addr, value);
     }
-    else if (size == 16) {
+    else if (size == 2) {
         word value = ReadWord(addr);
         LogInfo("(%04X) = %04X", addr, value);
     }
@@ -394,17 +394,18 @@ void cmdDisassemble(const char * input)
         count = 1;
         addr = R.PC;
     }
-
-    char * space = strchr(input, ' ');
-    if (space) {
-        *space = '\0';
-
-        sscanf(input, "%d", &count);
-        sscanf(space + 1, "%4hX", &addr);
-    }
     else {
-        sscanf(input, "%d", &count);
-        addr = R.PC;
+        char * space = strchr(input, ' ');
+        if (space) {
+            *space = '\0';
+
+            sscanf(input, "%d", &count);
+            sscanf(space + 1, "%4hX", &addr);
+        }
+        else {
+            sscanf(input, "%d", &count);
+            addr = R.PC;
+        }
     }
 
     LogInfo("Disassembling %u instructions at %04X", count, addr);

@@ -83,7 +83,7 @@ inst_t instructions[] = {
     [0x28] = _JR_Z_s,
     [0x30] = _JR_NC_s,
     [0x38] = _JR_C_s,
-    [0xE9] = _JP_pHL,
+    [0xE9] = _JP_HL,
     // stack
     [0xF5] = _PUSH_AF,
     [0xC5] = _PUSH_BC,
@@ -330,15 +330,15 @@ void Execute(byte op)
     }
 }
 
-void NextInstruction(int cycles)
+void NextInstruction()
 {
-    CheckInterrupts();
-
     if (CPUEnabled) {
         Execute(Fetch());
     } else {
         Tick(1);
     }
+
+    CheckInterrupts();
 }
 
 void PrintR()

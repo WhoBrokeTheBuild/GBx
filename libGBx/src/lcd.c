@@ -74,54 +74,55 @@ void ResetLCD()
 }
 
 void DrawTiles()
-{
+{    
     const uint TILE_WIDTH     = 8;
     const uint TILE_HEIGHT    = 8;
     const uint TILES_PER_ROW  = 32;
     const uint TILE_DATA_SIZE = 16;
 
-    int wx7 = WX - 7;
+    byte WXM7 = WX - 7;
 
-    uint mapSelect = (LCDC.WindowDisplayEnabled ? LCDC.WindowTileMapSelect : LCDC.TileMapSelect);
+    bool usingWindow = (LCDC.WindowDisplayEnabled && WY <= LY);
+    uint mapSelect = (usingWindow ? LCDC.WindowTileMapSelect : LCDC.TileMapSelect);
     word mapBaseAddress = TILE_MAP_ADDR[mapSelect];
     word dataBaseAddress = TILE_DATA_ADDR[LCDC.TileDataSelect];
 
-    int srcY = LY;
-    int dstY = LY + SCY;
-    if (LCDC.WindowDisplayEnabled) {
-        dstY = LY - WY;
+    byte yPos = 0;
+    if (usingWindow) {
+        yPos = LY - WY;
+    }
+    else {
+        yPos = SCY + LY;
     }
 
-    word yOffset = (dstY / TILE_HEIGHT) * TILES_PER_ROW;
-    word lineOffset = (dstY % TILE_HEIGHT) * 2;
+    int tileRow = (byte)(yPos / TILE_HEIGHT) * TILES_PER_ROW;
 
-    for (uint srcX = 0; srcX < LCD_WIDTH; ++srcX) {
-
-        int dstX = srcX + SCX;
-        if (LCDC.WindowDisplayEnabled && srcX >= wx7) {
-            dstX = srcX - wx7;
+    for (int pixel = 0; pixel < LCD_WIDTH; ++pixel) {
+        byte xPos = pixel + SCX;
+        if (usingWindow && pixel >= WXM7) {
+            xPos = pixel - WXM7;
         }
 
-        word xOffset = dstX / TILE_WIDTH;
+        int tileCol = xPos / TILE_WIDTH;
 
-        int tileIndex = ReadByte(mapBaseAddress + yOffset + xOffset);
+        int tileIndex = ReadByte(mapBaseAddress + tileRow + tileCol);
         if (LCDC.TileDataSelect == 0) {
             tileIndex = (sbyte)tileIndex; // Convert to [-128, 127]
         }
 
         word dataOffset = dataBaseAddress + (tileIndex * TILE_DATA_SIZE);
 
-        byte data1 = ReadByte(dataOffset + lineOffset);
-        byte data2 = ReadByte(dataOffset + lineOffset + 1);
+        byte line = (yPos % 8) * 2;
+        byte data1 = ReadByte(dataOffset + line);
+        byte data2 = ReadByte(dataOffset + line + 1);
 
-        int bit = 0x80 >> (srcX % TILE_WIDTH);
+        int bit = 0x80 >> (xPos % TILE_WIDTH);
         bool high = (data2 & bit);
         bool low  = (data1 & bit);
         byte colorIndex = 
             (high ? 0b10 : 0b00) | 
             (low  ? 0b01 : 0b00);
         
-        byte color = 0;
         switch (colorIndex) {
         case 0b00:
             colorIndex = BGP.Color0;
@@ -137,6 +138,7 @@ void DrawTiles()
             break;
         }
 
+        byte color = 0;
         switch (colorIndex) {
         case 0b00:
             color = LCD_COLOR_WHITE;
@@ -152,8 +154,15 @@ void DrawTiles()
             break;
         }
 
-        uint off = (srcY * LCD_BUFFER_WIDTH * LCD_BUFFER_COMPONENTS) 
-            + (srcX * LCD_BUFFER_COMPONENTS);
+        // if (LY < 0 || LY > (LCD_HEIGHT - 1) || 
+        //     pixel > 0 || pixel < (LCD_WIDTH - 1)) {
+        //     LogWarn("Drawing out of bounds");
+        //     continue;
+        // }
+
+        uint off = (LY * LCD_BUFFER_WIDTH * LCD_BUFFER_COMPONENTS) + 
+            (pixel * LCD_BUFFER_COMPONENTS);
+        
         LCDBuffer[off + 0] = color;
         LCDBuffer[off + 1] = color;
         LCDBuffer[off + 2] = color;

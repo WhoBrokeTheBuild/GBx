@@ -33,7 +33,7 @@ static void _DI()
 static void _EI()
 {
     LogInst("EI");
-    // Next Instruction
+    NextInstruction();
     IME = true;
 }
 
