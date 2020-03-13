@@ -1,53 +1,61 @@
 #ifndef CARTRIDGE_H
 #define CARTRIDGE_H
 
-#include <stdbool.h>
-#include <stdint.h>
+#include "types.h"
 
-typedef union {
+typedef union
+{
     struct {
-        uint8_t Code[4];
-        uint8_t Magic[48];
-        uint8_t Title[15];
-        uint8_t ColorEnabled;
-        uint8_t SuperEnabled;
-        uint8_t CartridgeType;
-        uint8_t ROMType;
-        uint8_t RAMType;
-        uint8_t Region;
-        uint8_t License;
-        uint8_t ROMMask;
-        uint8_t ComplementCheck;
-        uint8_t Checksum[2];
+        byte Code[4];
+        byte Magic[48];
+        char Title[15];
+        byte ColorEnabled;
+        byte SuperEnabled;
+        byte CartridgeType;
+        byte ROMType;
+        byte RAMType;
+        byte Region;
+        byte License;
+        byte Version;
+        byte ComplementCheck;
+        byte Checksum[2];
     };
-    uint8_t raw[80];
-} cartridge_header_t;
+    byte raw[80];
 
-extern cartridge_header_t CartridgeHeader;
+} cartridge_header;
 
-extern bool ColorEnabled;
-extern bool SuperEnabled;
+extern cartridge_header CartridgeHeader;
 
 extern bool HasCartridgeBattery;
 extern bool HasCartridgeTimer;
-extern bool HasSRAM;
 extern bool HasCartridgeSRAM;
 
 extern bool SRAMEnabled;
+extern bool ColorEnabled;
+extern bool SuperEnabled;
 
-extern uint8_t * SRAM0;
-extern uint8_t * SRAM;
+#define SRAM_BANK_COUNT (8)
+#define SRAM_BANK_SIZE  (0x2000)
 
-extern uint8_t * ROM0;
-extern uint8_t * ROM;
+byte SRAM[SRAM_BANK_COUNT][SRAM_BANK_SIZE];
 
-void resetCartridgeMBC();
-void writeCartridgeMBC(uint16_t address, uint8_t data);
+extern uint SRAMBank;
 
-bool loadCartridge(const char * filename);
-void freeCartridge();
+#define ROM_BANK_COUNT (512)
+#define ROM_BANK_SIZE  (0x4000)
 
-void printCartridgeMBC();
-void printCartridge();
+extern byte ROM[ROM_BANK_COUNT][ROM_BANK_SIZE];
+
+extern uint ROMBank;
+
+void ResetCartridgeMBC();
+
+void WriteCartridgeMBC(word address, byte data);
+
+bool LoadCartridgeROM(const char * filename);
+void FeeCartridgeROM();
+
+void PrintCartridgeMBC();
+void PrintCartridge();
 
 #endif // CARTRIDGE_H

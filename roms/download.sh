@@ -24,7 +24,7 @@ get_rom() {
 # https://gbdev.gg8.se/files/roms/bootroms/
 wget https://gbdev.gg8.se/files/roms/bootroms/dmg0_rom.bin
 wget https://gbdev.gg8.se/files/roms/bootroms/sgb_boot.bin
-wget https://gbdev.gg8.se/files/roms/bootroms/cgb_bios.bin
+wget https://gbdev.gg8.se/files/roms/bootroms/cgb_bootstrap.bin
 
 git clone https://github.com/retrio/gb-test-roms.git
 

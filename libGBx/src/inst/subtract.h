@@ -58,16 +58,16 @@ static void _SUB_L()
 static void _SUB_pHL()
 {
     LogInst("SUB A,(HL)");
-    uint8_t n = readByte(R.HL);
-    tick(4);
+    byte n = ReadByte(R.HL);
+    Tick(4);
 
     _SUB(n);
 }
 
 static void _SUB_u()
 {
-    uint8_t u = nextByte();
-    tick(4);
+    byte u = NextByte();
+    Tick(4);
 
     LogInst("SUB A,%02Xh", u);
 
@@ -119,16 +119,16 @@ static void _SBC_L()
 static void _SBC_pHL()
 {
     LogInst("SBC A,(HL)");
-    uint8_t n = readByte(R.HL);
-    tick(4);
+    byte n = ReadByte(R.HL);
+    Tick(4);
 
     _SBC(n);
 }
 
 static void _SBC_u()
 {
-    uint8_t u = nextByte();
-    tick(4);
+    byte u = NextByte();
+    Tick(4);
 
     LogInst("SBC A,%02Xh", u);
 

@@ -1,8 +1,7 @@
 #ifndef SERIAL_H
 #define SERIAL_H
 
-#include <stdint.h>
-#include <stdbool.h>
+#include "types.h"
 
 typedef union
 {
@@ -12,7 +11,7 @@ typedef union
         unsigned :5;
         bool     TransferStart:1;
     };
-    uint8_t raw;
+    byte raw;
 
 } serial_control_t;
 
@@ -21,7 +20,7 @@ typedef union
 
 // FF01 - Serial Data
 
-extern uint8_t SB;
+extern byte SB;
 
 // FF02 - Serial Control
 

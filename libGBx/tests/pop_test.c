@@ -12,7 +12,7 @@ void setup()
 
 UNIT_TEST(POP_AF)
 {
-    pushWord(0x1234);
+    PushWord(0x1234);
     _POP_AF();
     unit_assert_hex_eq(0xFFFE, R.SP);
     unit_assert_hex_eq(0x1234, R.AF);
@@ -21,7 +21,7 @@ UNIT_TEST(POP_AF)
 
 UNIT_TEST(POP_BC)
 {
-    pushWord(0x1234);
+    PushWord(0x1234);
     _POP_BC();
     unit_assert_hex_eq(0xFFFE, R.SP);
     unit_assert_hex_eq(0x1234, R.BC);
@@ -30,7 +30,7 @@ UNIT_TEST(POP_BC)
 
 UNIT_TEST(POP_DE)
 {
-    pushWord(0x1234);
+    PushWord(0x1234);
     _POP_DE();
     unit_assert_hex_eq(0xFFFE, R.SP);
     unit_assert_hex_eq(0x1234, R.DE);
@@ -39,7 +39,7 @@ UNIT_TEST(POP_DE)
 
 UNIT_TEST(POP_HL)
 {
-    pushWord(0x1234);
+    PushWord(0x1234);
     _POP_HL();
     unit_assert_int_eq(0xFFFE, R.SP);
     unit_assert_int_eq(0x1234, R.HL);

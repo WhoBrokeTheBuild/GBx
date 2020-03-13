@@ -3,7 +3,7 @@
 #include "memory.h"
 #include "unit.h"
 
-const uint16_t RAM_OFFSET = 0xC100;
+const word RAM_OFFSET = 0xC100;
 
 void setup() 
 {
@@ -82,7 +82,7 @@ MAKE_SUB_TEST(L);
 UNIT_TEST(SUB_pHL_00_00)
 {
     R.A = 0x00;
-    writeByte(R.HL, 0x00);
+    WriteByte(R.HL, 0x00);
     _SUB_pHL();
     unit_assert_hex_eq(0x00, R.A);
     unit_assert_true(R.FZ);
@@ -94,7 +94,7 @@ UNIT_TEST(SUB_pHL_00_00)
 UNIT_TEST(SUB_pHL_00_FF)
 {
     R.A = 0x00;
-    writeByte(R.HL, 0xFF);
+    WriteByte(R.HL, 0xFF);
     _SUB_pHL();
     unit_assert_hex_eq(0x01, R.A);
     unit_assert_false(R.FZ);
@@ -106,7 +106,7 @@ UNIT_TEST(SUB_pHL_00_FF)
 UNIT_TEST(SUB_pHL_AA_BB)
 {
     R.A = 0xAA;
-    writeByte(R.HL, 0xBB);
+    WriteByte(R.HL, 0xBB);
     _SUB_pHL();
     unit_assert_hex_eq(0xEF, R.A);
     unit_assert_false(R.FZ);
@@ -118,7 +118,7 @@ UNIT_TEST(SUB_pHL_AA_BB)
 UNIT_TEST(SUB_pHL_BB_AA)
 {
     R.A = 0xBB;
-    writeByte(R.HL, 0xAA);
+    WriteByte(R.HL, 0xAA);
     _SUB_pHL();
     unit_assert_hex_eq(0x11, R.A);
     unit_assert_false(R.FZ);

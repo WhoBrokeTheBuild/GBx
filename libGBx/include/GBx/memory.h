@@ -1,22 +1,23 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
-#include <stdbool.h>
-#include <stdint.h>
+#include "types.h"
 
-uint8_t readByte(uint16_t address);
-uint16_t readWord(uint16_t address);
+void ResetMemory();
 
-uint8_t nextByte();
-uint16_t nextWord();
+byte ReadByte(word address);
+word ReadWord(word address);
 
-void writeByte(uint16_t address, uint8_t data);
-void writeWord(uint16_t address, uint16_t data);
+byte NextByte();
+word NextWord();
 
-void pushByte(uint8_t data);
-void pushWord(uint16_t data);
+void WriteByte(word address, byte data);
+void WriteWord(word address, word data);
 
-uint8_t popByte();
-uint16_t popWord();
+void PushByte(byte data);
+void PushWord(word data);
+
+byte PopByte();
+word PopWord();
 
 #endif // MEMORY_H

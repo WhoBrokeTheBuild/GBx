@@ -4,14 +4,11 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-extern bool DebugEnable;
+extern bool DebugEnabled;
 
-void debugInit();
-void debugTerm();
+void DebugInit();
+void DebugTerm();
 
-void logInstruction(const char * format, ...);
-void printInstructionLog();
-
-void debugPrompt();
+void DebugPrompt();
 
 #endif // DEBUG_H

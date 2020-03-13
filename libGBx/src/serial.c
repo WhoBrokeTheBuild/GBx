@@ -1,5 +1,5 @@
 #include "serial.h"
 
-uint8_t SB;
+byte SB;
 
 serial_control_t SC;

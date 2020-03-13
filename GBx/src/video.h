@@ -1,11 +1,11 @@
 #ifndef VIDEO_H
 #define VIDEO_H
 
-void videoInit();
-void videoTerm();
+void VideoInit();
+void VideoTerm();
 
-void pollEvents();
+void PollEvents();
 
-void render();
+void Render();
 
 #endif // VIDEO_H

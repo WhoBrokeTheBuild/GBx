@@ -18,62 +18,62 @@ static void _SWAP_A()
 {
     LogInst("SWAP A");
     _SWAP(R.A);
-    tick(4);
+    Tick(4);
 }
 
 static void _SWAP_B()
 {
     LogInst("SWAP B");
     _SWAP(R.B);
-    tick(4);
+    Tick(4);
 }
 
 static void _SWAP_C()
 {
     LogInst("SWAP C");
     _SWAP(R.C);
-    tick(4);
+    Tick(4);
 }
 
 static void _SWAP_D()
 {
     LogInst("SWAP D");
     _SWAP(R.D);
-    tick(4);
+    Tick(4);
 }
 
 static void _SWAP_E()
 {
     LogInst("SWAP E");
     _SWAP(R.E);
-    tick(4);
+    Tick(4);
 }
 
 static void _SWAP_H()
 {
     LogInst("SWAP H");
     _SWAP(R.H);
-    tick(4);
+    Tick(4);
 }
 
 static void _SWAP_L()
 {
     LogInst("SWAP L");
     _SWAP(R.L);
-    tick(4);
+    Tick(4);
 }
 
 static void _SWAP_pHL()
 {
     LogInst("SWAP (HL)");
-    uint8_t n = readByte(R.HL);
-    tick(4);
+    byte n = ReadByte(R.HL);
+    Tick(4);
 
     _SWAP(n);
-    tick(4);
+    Tick(4);
 
-    writeByte(R.HL, n);
-    tick(4);
+    WriteByte(R.HL, n);
+    Tick(4);
 }
 
 #undef _SWAP

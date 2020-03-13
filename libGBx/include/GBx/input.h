@@ -1,8 +1,7 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-#include <stdint.h>
-#include <stdbool.h>
+#include "types.h"
 
 typedef union
 {
@@ -23,7 +22,7 @@ typedef union
         bool     SelectButtons:1;
         unsigned :4;
     };
-    uint8_t raw;
+    byte raw;
 
 } joypad_state_t;
 

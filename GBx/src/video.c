@@ -8,19 +8,23 @@
 
 #define DEFAULT_SCALE (4)
 
-unsigned winWidth  = SCREEN_WIDTH  * DEFAULT_SCALE;
-unsigned winHeight = SCREEN_HEIGHT * DEFAULT_SCALE;
+unsigned windowWidth  = LCD_WIDTH  * DEFAULT_SCALE;
+unsigned windowHeight = LCD_HEIGHT * DEFAULT_SCALE;
 
 SDL_Window   * sdlWindow   = NULL;
 SDL_Renderer * sdlRenderer = NULL;
 SDL_Texture  * sdlTexture  = NULL;
 
-void videoInit()
+void VideoInit()
 {
     char windowTitle[21];
     snprintf(windowTitle, sizeof(windowTitle), "GBx - %.*s", 15, CartridgeHeader.Title);
 
-    sdlWindow = SDL_CreateWindow(windowTitle, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, winWidth, winHeight, SDL_WINDOW_RESIZABLE);
+    sdlWindow = SDL_CreateWindow(windowTitle, 
+        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
+        windowWidth, windowHeight, 
+        SDL_WINDOW_RESIZABLE);
+    
     if (!sdlWindow) {
         LogFatal("Failed to create SDL2 Window, %s", SDL_GetError());
     }
@@ -32,16 +36,18 @@ void videoInit()
     
     sdlTexture = SDL_CreateTexture(sdlRenderer, 
         SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_STREAMING, 
-        BACKBUFFER_WIDTH, BACKBUFFER_HEIGHT);
+        LCD_BUFFER_WIDTH, LCD_BUFFER_HEIGHT);
 
     SDL_SetRenderDrawColor(sdlRenderer, 0, 0, 0, 255);
     
-    LogInfo("Window Size=(%dx%d) Backbuffer=(%dx%d)", winWidth, winHeight, BACKBUFFER_WIDTH, BACKBUFFER_HEIGHT);
+    LogInfo("Window Size=(%dx%d) LCDBuffer=(%dx%d)", 
+        windowWidth, windowHeight, 
+        LCD_BUFFER_WIDTH, LCD_BUFFER_HEIGHT);
 
-    render();
+    Render();
 }
 
-void videoTerm()
+void VideoTerm()
 {
     SDL_DestroyTexture(sdlTexture);
 
@@ -49,7 +55,7 @@ void videoTerm()
     SDL_DestroyWindow(sdlWindow);
 }
 
-void pollEvents() 
+void PollEvents() 
 {
     SDL_Event evt;
     while (SDL_PollEvent(&evt)) {
@@ -62,8 +68,8 @@ void pollEvents()
             switch (evt.window.event) {
             case SDL_WINDOWEVENT_RESIZED:
             case SDL_WINDOWEVENT_SIZE_CHANGED:
-                winWidth = evt.window.data1;
-                winHeight = evt.window.data2;
+                windowWidth = evt.window.data1;
+                windowHeight = evt.window.data2;
                 break;
             default:
                 break;
@@ -72,25 +78,25 @@ void pollEvents()
     }
 }
 
-void render()
+void Render()
 {
     uint8_t * pixels = NULL;
     int pitch = 0;
     SDL_LockTexture(sdlTexture, NULL, (void **)&pixels, &pitch);
-    memcpy(pixels, Backbuffer, sizeof(Backbuffer));
+    memcpy(pixels, LCDBuffer, sizeof(LCDBuffer));
     SDL_UnlockTexture(sdlTexture);
     
     SDL_Rect src = { .x = 0, .y = 0, .w = 160, .h = 144 };
     SDL_Rect dst = { .x = 0, .y = 0, .w = 160, .h = 144 };
 
     float scale = 1.0;
-    if (winWidth > winHeight) {
-        scale = winHeight / 144.0;
-        dst.x = (winWidth - (scale * 160)) / 2;
+    if (windowWidth > windowHeight) {
+        scale = windowHeight / 144.0;
+        dst.x = (windowWidth - (scale * 160)) / 2;
     }
     else {
-        scale = winWidth / 160.0;
-        dst.y = (winHeight - (scale * 144)) / 2;
+        scale = windowWidth / 160.0;
+        dst.y = (windowHeight - (scale * 144)) / 2;
     }
 
     dst.w = 160 * scale;

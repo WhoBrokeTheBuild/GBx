@@ -110,11 +110,11 @@ bit_inst_t bit_instructions[] = {
 
 void _CB()
 {
-    uint8_t op = fetch();
+    byte op = Fetch();
     if (op < 0x40) {
         CB_instructions[op]();
     } else {
-        uint8_t tmp = op - 0x40;
+        byte tmp = op - 0x40;
         // 0-7
         int bit = (tmp % 8) + (tmp / 16);
         // 0-3

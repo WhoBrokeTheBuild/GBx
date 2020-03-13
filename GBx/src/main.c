@@ -3,7 +3,7 @@
 #include "debug.h"
 #include "breakpoint.h"
 
-#include <GBx/bios.h>
+#include <GBx/bootstrap.h>
 #include <GBx/cartridge.h>
 #include <GBx/cpu.h>
 #include <GBx/instruction.h>
@@ -24,20 +24,20 @@
 
 void * runThread(void * ptr)
 {
-    if (DebugEnable) {
-        debugInit();
+    if (DebugEnabled) {
+        DebugInit();
     }
 
     for (;;) {
-        if (atBreakpoint()) {
-            debugPrompt();
+        if (AtBreakpoint()) {
+            DebugPrompt();
         }
         
-        nextInstruction();
+        NextInstruction();
     }
 
-    if (DebugEnable) {
-        debugTerm();
+    if (DebugEnabled) {
+        DebugTerm();
     }
 }
 
@@ -45,12 +45,12 @@ int main(int argc, char ** argv)
 {
     cflags_t * flags = cflags_init();
 
-    cflags_add_bool(flags, 'd', "debug", &DebugEnable, "Enable Debug Mode");
+    cflags_add_bool(flags, 'd', "debug", &DebugEnabled, "Enable Debug Mode");
     
     cflags_flag_t * verbose = cflags_add_bool(flags, 'v', "verbose", NULL, "Enables verbose output, repeat up to 4 times for more verbosity");
 
-    const char * biosFilename = NULL;
-    cflags_add_string(flags, 'b', "bios", &biosFilename, "Load a BIOS ROM");
+    const char * bootROMFilename = NULL;
+    cflags_add_string(flags, 'b', "bootstrap", &bootROMFilename, "Load a Bootstrap ROM");
 
     cflags_parse(flags, argc, argv);
     VerboseLevel = verbose->count;
@@ -77,39 +77,36 @@ int main(int argc, char ** argv)
         LogVerbose(1, "Readline Version: %s", rl_library_version);
     #endif
 
-    if (!loadCartridge(flags->argv[0])) {
+    if (!LoadCartridgeROM(flags->argv[0])) {
         return 1;
     }
 
-    if (biosFilename) {
-        loadBIOS(biosFilename);
-    }
-    else {
-        reset();
+    if (bootROMFilename) {
+        LoadBootstrapROM(bootROMFilename);
     }
 
-    videoInit();
-    audioInit();
+    Reset();
 
-    if (DebugEnable) {
-        setBreakpoint("PC", R.PC);
+    VideoInit();
+    AudioInit();
+
+    if (DebugEnabled) {
+        SetBreakpoint("PC", R.PC);
     }
     
     pthread_t thread;
     pthread_create(&thread, NULL, runThread, NULL);
     
     for (;;) {
-        pollEvents();
+        PollEvents();
         
-        render();
+        Render();
     }
     
     pthread_join(thread, NULL);
 
-    videoTerm();
-    audioTerm();
-
-    freeCartridge();
+    VideoTerm();
+    AudioTerm();
 
     SDL_Quit();
 

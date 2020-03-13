@@ -1,22 +1,21 @@
 #ifndef INTERRUPT_H
 #define INTERRUPT_H
 
-#include <stdbool.h>
-#include <stdint.h>
+#include "types.h"
 
 typedef union
 {
     struct {
-        bool     VBlank:1;
-        bool     STAT:1;
-        bool     Timer:1;
-        bool     Serial:1;
-        bool     Joypad:1;
-        unsigned :3;
+        bool VBlank:1;
+        bool STAT:1;
+        bool Timer:1;
+        bool Serial:1;
+        bool Joypad:1;
+        uint :3;
     };
-    uint8_t raw;
+    byte raw;
 
-} interrupt_flags_t;
+} interrupt_flags;
 
 // Interrupt Master Enable
 
@@ -24,15 +23,17 @@ extern bool IME;
 
 // FF0F - Interrupt Flag
 
-extern interrupt_flags_t IF;
+extern interrupt_flags IF;
 
 // FFFF - Interrupt Enable
 
-extern interrupt_flags_t IE;
+extern interrupt_flags IE;
 
-void checkInterrupts();
+void ResetInterrupts();
 
-void printIF();
-void printIE();
+void CheckInterrupts();
+
+void PrintIF();
+void PrintIE();
 
 #endif // INTERRUPT_H

@@ -54,13 +54,13 @@ static void _SET_b_L(int bit)
 static void _SET_b_pHL(int bit)
 {
     LogInst("SET %d,(HL)", bit);
-    uint8_t n = readByte(R.HL);
-    tick(4);
+    byte n = ReadByte(R.HL);
+    Tick(4);
 
     _SET(n, bit);
 
-    writeByte(R.HL, n);
-    tick(4);
+    WriteByte(R.HL, n);
+    Tick(4);
 }
 
 #endif // SET_H

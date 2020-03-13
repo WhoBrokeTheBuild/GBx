@@ -1,29 +1,28 @@
 #ifndef APU_H
 #define APU_H
 
-#include <stdbool.h>
-#include <stdint.h>
+#include "types.h"
 
 typedef union
 {
     struct {
-        unsigned Shift:3;
-        bool     Negate:1;
-        unsigned SweepPeriod:3;
-        unsigned :1;
-        unsigned LengthLoad:6;
-        unsigned Duty:2;
-        unsigned Period:3;
-        bool     EnvelopeAddMode:1;
-        unsigned Volume:4;
-        unsigned Frequency:11;
-        unsigned :3;
-        bool     LengthEnable:1;
-        bool     Trigger:1;
+        uint Shift:3;
+        bool Negate:1;
+        uint SweepPeriod:3;
+        uint :1;
+        uint LengthLoad:6;
+        uint Duty:2;
+        uint Period:3;
+        bool EnvelopeAddMode:1;
+        uint Volume:4;
+        uint Frequency:11;
+        uint :3;
+        bool LengthEnabled:1;
+        bool Trigger:1;
     };
-    uint8_t raw[5];
+    byte raw[5];
 
-} tone_t;
+} tone_control;
 
 #define TONE_READ_MASK0 (0b11111111)
 #define TONE_READ_MASK1 (0b00000011)
@@ -34,20 +33,20 @@ typedef union
 typedef union
 {
     struct {
-        unsigned :7;
-        bool     DACPower:1;
-        unsigned LengthLoad;
-        unsigned :5;
-        unsigned VolumeCode:2;
-        unsigned :1;
-        unsigned Frequency:11;
-        unsigned :3;
-        bool     LengthEnable:1;
-        bool     Trigger:1;
+        uint :7;
+        bool DACPower:1;
+        uint LengthLoad;
+        uint :5;
+        uint VolumeCode:2;
+        uint :1;
+        uint Frequency:11;
+        uint :3;
+        bool LengthEnabled:1;
+        bool Trigger:1;
     };
-    uint8_t raw[5];
+    byte raw[5];
 
-} wave_t;
+} wave_control;
 
 #define WAVE_READ_MASK0 (0b00000001)
 #define WAVE_READ_MASK1 (0b11111111)
@@ -58,21 +57,21 @@ typedef union
 typedef union
 {
     struct {
-        unsigned LengthLoad:6;
-        unsigned :2;
-        unsigned Period:3;
-        bool     EnvelopeAddMode:1;
-        unsigned Volume:4;
-        unsigned DivisorCode:3;
-        bool     LFSRWidthMode:1;
-        unsigned ClockShift:4;
-        unsigned :6;
-        bool     LengthEnable:1;
-        bool     Trigger:1;
+        uint LengthLoad:6;
+        uint :2;
+        uint Period:3;
+        bool EnvelopeAddMode:1;
+        uint Volume:4;
+        uint DivisorCode:3;
+        bool LFSRWidthMode:1;
+        uint ClockShift:4;
+        uint :6;
+        bool LengthEnabled:1;
+        bool Trigger:1;
     };
-    uint8_t raw[4];
+    byte raw[4];
 
-} noise_t;
+} noise_control;
 
 #define NOISE_READ_MASK0 (0b1111111)
 #define NOISE_READ_MASK1 (0b1111111)
@@ -82,14 +81,14 @@ typedef union
 typedef union
 {
     struct {
-        unsigned RightVolume:3;
-        bool     RightVinEnable:1;
-        unsigned LeftVolume:3;
-        bool     LeftVinEnable:1;
+        uint RightVolume:3;
+        bool RightVinEnabled:1;
+        uint LeftVolume:3;
+        bool LeftVinEnabled:1;
     };
-    uint8_t raw;
+    byte raw;
 
-} volume_control_t;
+} volume_control;
 
 typedef union 
 {
@@ -103,9 +102,9 @@ typedef union
         bool WaveToSO2;
         bool NoiseToSO2;
     };
-    uint8_t raw;
+    byte raw;
 
-} sound_output_terminal_t;
+} sound_output_terminal;
 
 typedef union
 {
@@ -114,73 +113,74 @@ typedef union
         bool     Tone2Playing;
         bool     WavePlaying;
         bool     NoisePlaying;
-        unsigned :2;
-        bool     SoundEnable;
+        uint :2;
+        bool     SoundEnabled;
     };
-    uint8_t raw;
+    byte raw;
 
-} sound_control_t;
+} sound_control;
 
 #define SOUND_CONTROL_WRITE_MASK (0b0000001)
 
 // FF10-FF14
 
-extern tone_t Tone1;
+extern tone_control Tone1;
 
 extern int Tone1Timer;
 extern int Tone1DutyIndex;
 
 // FF16-FF19
 
-extern tone_t Tone2;
+extern tone_control Tone2;
 
 extern int Tone2Timer;
 extern int Tone2DutyIndex;
 
 // FF1A-FF1E
 
-extern wave_t Wave;
+extern wave_control Wave;
 
 extern int WaveTimer;
 
 // FF30-FF3F
 
-extern uint8_t WaveRAM[0x10];
+extern byte WaveRAM[0x10];
 
 // FF20-FF23
 
-extern noise_t Noise;
+extern noise_control Noise;
 
 extern int NoiseTimer;
 
 // FF24
 
-extern volume_control_t VolumeControl;
+extern volume_control VolumeControl;
 
 // FF25
 
-extern sound_output_terminal_t SoundOutputTerminal;
+extern sound_output_terminal SoundOutputTerminal;
 
 // FF26
 
-extern sound_control_t SoundControl;
+extern sound_control SoundControl;
 
-extern uint8_t DutyCycles[4][8];
+extern byte DutyCycles[4][8];
 
+void ResetAPU();
 
-void apuInit();
-void apuTerm();
+void APUInit();
+void APUTerm();
 
-void apuTick(unsigned cycles);
+void APUTick(uint cycles);
 
-void apuPause();
-void apuPlay();
+void APUPause();
+void APUPlay();
 
-void printTone1();
-void printTone2();
-void printWave();
-void printNoise();
-void printVolumeControl();
-void printWaveRAM();
+void PrintTone1();
+void PrintTone2();
+void PrintWave();
+void PrintNoise();
+void PrintVolumeControl();
+void PrintWaveRAM();
 
 #endif // APU_H

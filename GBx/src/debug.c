@@ -8,7 +8,7 @@
 #include <stdlib.h>
 
 #include <GBx/apu.h>
-#include <GBx/bios.h>
+#include <GBx/bootstrap.h>
 #include <GBx/cartridge.h>
 #include <GBx/cpu.h>
 #include <GBx/instruction.h>
@@ -25,22 +25,22 @@
     #define HISTORY_FILE ".gbx_history"
 #endif
 
-bool DebugEnable = false;
+bool DebugEnabled = false;
 
 void handleSignal(int sig)
 {
     LogInfo("Caught signal %d", sig);
 
     if (sig == SIGINT) {
-        setBreakpoint("PC", R.PC);
+        SetBreakpoint("PC", R.PC);
     }
     else {
-        debugPrompt();
+        DebugPrompt();
         exit(1);
     }
 }
 
-void debugInit()
+void DebugInit()
 {
     signal(SIGINT, handleSignal);
     signal(SIGSEGV, handleSignal);
@@ -50,7 +50,7 @@ void debugInit()
     #endif
 }
 
-void debugTerm()
+void DebugTerm()
 {   
     #ifdef HAVE_READLINE
         write_history(HISTORY_FILE);
@@ -80,11 +80,10 @@ const char * help =
 
 const char * helpInfo = 
 "  all          Print all information\n"
-"  apu          Print tone, wave, noise, and volume registers\n"
+"  apu          Print Tone1, Tone2, Wave, Noise, and APU Control registers\n"
 "  registers    Print all registers and their values\n"
 "  interrupts   Print IE and IF, and IME values\n"
-"  lcd          Print LCDC values and LCD info\n"
-"  stat         Print STAT values\n"
+"  lcd          Print LCDC, STAT registers and LCD coordinates\n"
 "  timer        Print TAC, TIMA, TMA and DIV info\n"
 "  bank         Print ROM/RAM Bank info\n"
 "  cartridge    Print Cartridge info\n";
@@ -204,51 +203,49 @@ void cmdInfo(const char * input)
     }
 
     if (strncmp(input, "all", length) == 0) {
-        printR();
-        printTone1();
-        printTone2();
-        printWave();
-        printWaveRAM();
-        printVolumeControl();
-        printIE();
-        printIF();
-        printLCDInfo();
-        printLCDC();
-        printSTAT();
-        printTimer();
-        printCartridgeMBC();
-        printCartridge();
+        PrintR();
+        PrintTone1();
+        PrintTone2();
+        PrintWave();
+        PrintWaveRAM();
+        PrintVolumeControl();
+        PrintIE();
+        PrintIF();
+        PrintLCDCoordinates();
+        PrintLCDC();
+        PrintSTAT();
+        PrintTimer();
+        PrintCartridgeMBC();
+        PrintCartridge();
     }
     else if (strncmp(input, "apu", length) == 0) {
-        printTone1();
-        printTone2();
-        printWave();
-        printWaveRAM();
-        printVolumeControl();
+        PrintTone1();
+        PrintTone2();
+        PrintWave();
+        PrintWaveRAM();
+        PrintVolumeControl();
     }
     else if (strncmp(input, "registers", length) == 0) {
-        printR();
+        PrintR();
     }
     else if (strncmp(input, "interrupts", length) == 0) {
-        printIE();
-        printIF();
+        PrintIE();
+        PrintIF();
         LogInfo("IME=%s", (IME ? "true" : "false"));
     }
     else if (strncmp(input, "lcd", length) == 0) {
-        printLCDInfo();
-        printLCDC();
-    }
-    else if (strncmp(input, "stat", length) == 0) {
-        printSTAT();
+        PrintLCDCoordinates();
+        PrintLCDC();
+        PrintSTAT();
     }
     else if (strncmp(input, "timer", length) == 0) {
-        printTimer();
+        PrintTimer();
     }
     else if (strncmp(input, "mbc", length) == 0) {
-        printCartridgeMBC();
+        PrintCartridgeMBC();
     }
     else if (strncmp(input, "cartridge", length) == 0) {
-        printCartridge();
+        PrintCartridge();
     }
     else {
         LogWarn("Unrecognized command 'info %s'", input);
@@ -258,14 +255,14 @@ void cmdInfo(const char * input)
 void cmdBreak(const char * input)
 {
     if (!input) {
-        printBreakpoints();
+        PrintBreakpoints();
         return;
     }
 
     size_t length = strlen(input);
     
     if (length == 0) {
-        printBreakpoints();
+        PrintBreakpoints();
         return;
     }
     
@@ -276,13 +273,13 @@ void cmdBreak(const char * input)
         unsigned int value;
         sscanf(equal + 1, "%04X", &value);
 
-        setBreakpoint(input, value);
+        SetBreakpoint(input, value);
         LogInfo("Breakpoint set when %s=%04Xh", input, value);
     }
     else {
         unsigned int pc;
         sscanf(input, "%04X", &pc);
-        setBreakpoint("PC", pc);
+        SetBreakpoint("PC", pc);
         LogInfo("Breakpoint set when PC=%04Xh", pc);
     }
 }
@@ -290,7 +287,7 @@ void cmdBreak(const char * input)
 void cmdDelete(const char * input)
 {
     if (!input) {
-        clearAllBreakpoints();
+        ClearAllBreakpoints();
         LogInfo("All Breakpoints deleted");
         return;
     }
@@ -298,7 +295,7 @@ void cmdDelete(const char * input)
     size_t length = strlen(input);
     
     if (length == 0) {
-        clearAllBreakpoints();
+        ClearAllBreakpoints();
         LogInfo("All Breakpoints deleted");
         return;
     }
@@ -310,13 +307,13 @@ void cmdDelete(const char * input)
         unsigned int value;
         sscanf(equal + 1, "%04X", &value);
 
-        clearBreakpoint(input, value);
+        ClearBreakpoint(input, value);
         LogInfo("Breakpoint %s=%04Xh deleted", input, value);
     }
     else {
         unsigned int pc;
         sscanf(input, "%04X", &pc);
-        clearBreakpoint("PC", pc);
+        ClearBreakpoint("PC", pc);
         LogInfo("Breakpoint PC=%04Xh deleted", pc);
     }
 }
@@ -324,7 +321,7 @@ void cmdDelete(const char * input)
 void cmdNext(const char * input)
 {
     if (!input || strlen(input) == 0) {
-        nextInstruction();
+        NextInstruction();
         return;
     }
 
@@ -332,7 +329,7 @@ void cmdNext(const char * input)
     sscanf(input, "%u", &count);
 
     for (int i = 0; i < count; ++i) {
-        nextInstruction();
+        NextInstruction();
     }
 }
 
@@ -344,15 +341,15 @@ void cmdRead(const char * input)
     }
 
     int size;
-    uint16_t addr;
+    word addr;
     sscanf(input, "%d %hX", &size, &addr);
 
     if (size == 8) {
-        uint8_t value = readByte(addr);
+        byte value = ReadByte(addr);
         LogInfo("(%04X) = %02X", addr, value);
     }
     else if (size == 16) {
-        uint16_t value = readWord(addr);
+        word value = ReadWord(addr);
         LogInfo("(%04X) = %04X", addr, value);
     }
     else {
@@ -368,20 +365,20 @@ void cmdWrite(const char * input)
     }
     
     int size;
-    uint16_t addr;
+    word addr;
     sscanf(input, "%d %hX", &size, &addr);
 
     if (size == 8) {
-        uint8_t value;
+        byte value;
         sscanf(input, "%*s %*s %hhX", &value);
         LogInfo("Writing %02X to %04X", value, addr);
-        writeByte(addr, value);
+        WriteByte(addr, value);
     }
     else if (size == 16) {
-        uint16_t value;
+        word value;
         sscanf(input, "%*s %*s %hX", &value);
         LogInfo("Writing %04X to %04X", value, addr);
-        writeWord(addr, value);
+        WriteWord(addr, value);
     }
     else {
         LogError("Unsupported size '%d'", size);
@@ -391,7 +388,7 @@ void cmdWrite(const char * input)
 void cmdDisassemble(const char * input)
 {
     unsigned count;
-    uint16_t addr;
+    word addr;
 
     if (!input || strlen(input) == 0) {
         count = 1;
@@ -418,8 +415,8 @@ void cmdDisassemble(const char * input)
     VerboseLevel = 0;
 
     for (int i = 0; i < count; ++i) {
-        uint16_t tmp = addr;
-        addr = disassemble(buffer, sizeof(buffer), addr);
+        word tmp = addr;
+        addr = Disassemble(buffer, sizeof(buffer), addr);
         printf("%04X    %s\n", tmp, buffer);
     }
 
@@ -428,7 +425,7 @@ void cmdDisassemble(const char * input)
     printf("\n");
 }
 
-void debugPrompt() 
+void DebugPrompt() 
 {
 #ifdef HAVE_READLINE
 
@@ -437,12 +434,12 @@ void debugPrompt()
     int oldVerboseLevel = VerboseLevel;
     VerboseLevel = 4;
 
-    printR();
+    PrintR();
 
     char prompt[2048];
     snprintf(prompt, sizeof(prompt), "[%04X]> ", R.PC);
 
-    uint16_t addr;
+    word addr;
     char * input = NULL;
     while ((input = readline(prompt)) != NULL) {
         size_t length = 0;
@@ -461,7 +458,7 @@ void debugPrompt()
         }
 
         if (length == 0) {
-            nextInstruction();
+            NextInstruction();
         }
         else if (strncmp(input, "help", length) == 0) {
             cmdHelp(args);
@@ -498,13 +495,13 @@ void debugPrompt()
             break;
         }
         else if (strncmp(input, "reset", length) == 0) {
-            reset();
+            Reset();
         }
 
         free(input);
         input = NULL;
 
-        printR();
+        PrintR();
         snprintf(prompt, sizeof(prompt), "[%04X]> ", R.PC);
     }
 
@@ -513,19 +510,4 @@ void debugPrompt()
     signal(SIGINT, handleSignal);
     
 #endif
-}
-
-void showinstructionLogWindow()
-{
-
-}
-
-void showStatusWindow()
-{
-
-}
-
-void showVideoRAMWindow()
-{
-
 }

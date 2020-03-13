@@ -55,16 +55,16 @@ static void _AND_L()
 static void _AND_pHL()
 {
     LogInst("AND HL");
-    uint8_t n = readByte(R.HL);
-    tick(4);
+    byte n = ReadByte(R.HL);
+    Tick(4);
 
     _AND(n);
 }
 
 static void _AND_u()
 {
-    uint8_t u = nextByte();
-    tick(4);
+    byte u = NextByte();
+    Tick(4);
 
     LogInst("AND %02Xh", u);
 

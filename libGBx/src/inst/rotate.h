@@ -75,13 +75,13 @@ static void _RLC_L()
 static void _RLC_pHL()
 {
     LogInst("RLC (HL)");
-    uint8_t n = readByte(R.HL);
-    tick(4);
+    byte n = ReadByte(R.HL);
+    Tick(4);
 
     _RLC(n);
 
-    writeByte(R.HL, n);
-    tick(4);
+    WriteByte(R.HL, n);
+    Tick(4);
 }
 
 static void _RLC_A()
@@ -135,13 +135,13 @@ static void _RRC_L()
 static void _RRC_pHL()
 {
     LogInst("RRC (HL)");
-    uint8_t n = readByte(R.HL);
-    tick(4);
+    byte n = ReadByte(R.HL);
+    Tick(4);
 
     _RRC(n);
 
-    writeByte(R.HL, n);
-    tick(4);
+    WriteByte(R.HL, n);
+    Tick(4);
 }
 
 static void _RRC_A()
@@ -195,13 +195,13 @@ static void _RL_L()
 static void _RL_pHL()
 {
     LogInst("RL (HL)");
-    uint8_t n = readByte(R.HL);
-    tick(4);
+    byte n = ReadByte(R.HL);
+    Tick(4);
 
     _RL(n);
 
-    writeByte(R.HL, n);
-    tick(4);
+    WriteByte(R.HL, n);
+    Tick(4);
 }
 
 static void _RL_A()
@@ -255,13 +255,13 @@ static void _RR_L()
 static void _RR_pHL()
 {
     LogInst("RR (HL)");
-    uint8_t n = readByte(R.HL);
-    tick(4);
+    byte n = ReadByte(R.HL);
+    Tick(4);
 
     _RR(n);
 
-    writeByte(R.HL, n);
-    tick(4);
+    WriteByte(R.HL, n);
+    Tick(4);
 }
 
 static void _RR_A()

@@ -11,6 +11,6 @@ extern uint64_t TotalTicks;
 
 extern unsigned ClockSpeed;
 
-void tick(unsigned ticks);
+void Tick(unsigned ticks);
 
 #endif // CLOCK_H

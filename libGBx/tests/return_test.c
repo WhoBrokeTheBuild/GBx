@@ -3,7 +3,7 @@
 #include "memory.h"
 #include "unit.h"
 
-const uint16_t RAM_OFFSET = 0xC100;
+const word RAM_OFFSET = 0xC100;
 
 void setup() 
 {
@@ -15,7 +15,7 @@ void setup()
 
 UNIT_TEST(RET)
 {
-    pushWord(0x1234);
+    PushWord(0x1234);
     _RET();
     unit_assert_hex_eq(0x1234, R.PC);
     unit_assert_int_eq(16, TotalTicks);
@@ -23,7 +23,7 @@ UNIT_TEST(RET)
 
 UNIT_TEST(RET_NZ_true)
 {
-    pushWord(0x1234);
+    PushWord(0x1234);
     R.FZ = true;
     _RET_NZ();
     unit_assert_hex_eq(0x0000, R.PC);
@@ -32,7 +32,7 @@ UNIT_TEST(RET_NZ_true)
 
 UNIT_TEST(RET_NZ_false)
 {
-    pushWord(0x1234);
+    PushWord(0x1234);
     R.FZ = false;
     _RET_NZ();
     unit_assert_hex_eq(0x1234, R.PC);
@@ -41,7 +41,7 @@ UNIT_TEST(RET_NZ_false)
 
 UNIT_TEST(RET_Z_false)
 {
-    pushWord(0x1234);
+    PushWord(0x1234);
     R.FZ = false;
     _RET_Z();
     unit_assert_hex_eq(0x0000, R.PC);
@@ -50,7 +50,7 @@ UNIT_TEST(RET_Z_false)
 
 UNIT_TEST(RET_Z_true)
 {
-    pushWord(0x1234);
+    PushWord(0x1234);
     R.FZ = true;
     _RET_Z();
     unit_assert_hex_eq(0x1234, R.PC);
@@ -59,7 +59,7 @@ UNIT_TEST(RET_Z_true)
 
 UNIT_TEST(RET_NC_true)
 {
-    pushWord(0x1234);
+    PushWord(0x1234);
     R.FC = true;
     _RET_NC();
     unit_assert_hex_eq(0x0000, R.PC);
@@ -68,7 +68,7 @@ UNIT_TEST(RET_NC_true)
 
 UNIT_TEST(RET_NC_false)
 {
-    pushWord(0x1234);
+    PushWord(0x1234);
     R.FC = false;
     _RET_NC();
     unit_assert_hex_eq(0x1234, R.PC);
@@ -77,7 +77,7 @@ UNIT_TEST(RET_NC_false)
 
 UNIT_TEST(RET_C_false)
 {
-    pushWord(0x1234);
+    PushWord(0x1234);
     R.FC = false;
     _RET_C();
     unit_assert_hex_eq(0x0000, R.PC);
@@ -86,7 +86,7 @@ UNIT_TEST(RET_C_false)
 
 UNIT_TEST(RET_C_true)
 {
-    pushWord(0x1234);
+    PushWord(0x1234);
     R.FC = true;
     _RET_C();
     unit_assert_hex_eq(0x1234, R.PC);
@@ -95,7 +95,7 @@ UNIT_TEST(RET_C_true)
 
 UNIT_TEST(RETI)
 {
-    pushWord(0x1234);
+    PushWord(0x1234);
     _RETI();
     unit_assert_hex_eq(0x1234, R.PC);
     unit_assert_int_eq(16, TotalTicks);

@@ -1,7 +1,7 @@
 #include "memory.h"
 
 #include "apu.h"
-#include "bios.h"
+#include "bootstrap.h"
 #include "cartridge.h"
 #include "clock.h"
 #include "input.h"
@@ -11,63 +11,80 @@
 #include "serial.h"
 #include "timer.h"
 
-uint8_t WRAM0[0x7FF8];
-uint8_t * WRAM = WRAM0 + 0x0FFF; // Default to Bank 1
+#include <string.h>
 
-uint8_t HRAM[127];
+#define WRAM_BANK_COUNT (8)
+#define WRAM_BANK_SIZE  (0x1000)
 
-uint8_t readByte(uint16_t address)
+byte WRAM[WRAM_BANK_COUNT][WRAM_BANK_SIZE];
+uint WRAMBank;
+
+byte HRAM[0x7F];
+
+void ResetMemory()
+{
+    WRAMBank = 1;
+
+    for (unsigned i = 0; i < WRAM_BANK_COUNT; ++i) {
+        memset(WRAM[i], 0, sizeof(WRAM[i]));
+    }
+
+    memset(HRAM, 0, sizeof(HRAM));
+}
+
+byte ReadByte(word address)
 {
     LogVerbose(4, "Read Memory at %04X", address);
 
+    // BIOS / Jump Vectors - 0000-00FF
     if (address <= 0x00FF) {
-        if (BIOSEnable) {
-            return BIOS[address];
+        if (BootstrapROMEnabled) {
+            return BootstrapROM[address];
         } else {
-            // Jump Vectors
-            return ROM0[address];
+            return ROM[0][address];
         }
     }
+    // Cartridge ROM Bank 0 - 0100-3FFF
     else if (address <= 0x3FFF) {
-        // Cartridge ROM Bank 0
-        return ROM0[address];
+        return ROM[0][address];
     }
+    // Switchable Cartridge ROM - 4000-7FFF
     else if (address <= 0x7FFF) {
-        // Switchable Cartridge ROM
-        return ROM[address - 0x4000];
+        return ROM[ROMBank][address - 0x4000];
     }
+    // Video RAM - 8000-9FFF
     else if (address <= 0x9FFF) {
         // if (STAT.Mode != STAT_MODE_DATA_TRANSFER) {
-            return VRAM0[address - 0x8000];
+            return VRAM[VRAMBank][address - 0x8000];
         // }
         // else {
         //     // LogWarn("Attempting to read from VRAM while in mode %d", STAT.Mode);
         //     return 0xFF;
         // }
     }
+    // External Cartridge RAM - A000-BFFF
     else if (address <= 0xBFFF) {
-        // External Cartridge RAM
         if (SRAMEnabled) {
-            return SRAM[address - 0xA000];
+            return SRAM[SRAMBank][address - 0xA000];
         }
         else {
             LogFatal("Cartridge RAM Not Enabled %04X", address);
         }
     }
+    // Work RAM Bank 0 - C000-CFFF
     else if (address <= 0xCFFF) {
-        // Work RAM Bank 0
-        return WRAM0[address - 0xC000];
+        return WRAM[0][address - 0xC000];
     }
+    // Switchable Work RAM - D000-DFFF
     else if (address <= 0xDFFF) {
-        // Switchable Work RAM
-        return WRAM[address - 0xD000];
+        return WRAM[WRAMBank][address - 0xD000];
     }
+    // Echo RAM - E000-FDFF
     else if (address <= 0xFDFF) {
-        // Echo RAM
-        return WRAM0[address - 0xE000];
+        return WRAM[0][address - 0xE000];
     }
+    // Object Attribute Memory - FE00-FE9F
     else if (address <= 0xFE9F) {
-        // Object Attribute Memory
         // if (STAT.Mode != STAT_MODE_DATA_TRANSFER && STAT.Mode != STAT_MODE_SEARCH_SPRITE) {
             return OAM[address - 0xFE00];
         // }
@@ -76,11 +93,11 @@ uint8_t readByte(uint16_t address)
         //     return 0xFF;
         // }
     }
+    // Unusable - FEA0-FEFF
     else if (address <= 0xFEFF) {
-        // Unusable
     }
+    // Hardware I/O Registers - FF00-FE7F
     else if (address <= 0xFF7F) {
-        // Hardware I/O Registers
         if (address >= 0xFF30 && address <= 0xFF3F) {
             return WaveRAM[address - 0xFF30];
         }
@@ -170,80 +187,83 @@ uint8_t readByte(uint16_t address)
             break;
 
         case 0xFF50:
-            return BIOSEnable;
+            return BootstrapROMEnabled;
         };
     }
+    // High RAM - FF80-FFFE
     else if (address <= 0xFFFE) {
         return HRAM[address - 0xFF80];
     }
+    // Interrupt Enable Flag - FFFF
     else if (address == 0xFFFF) {
-        // Interrupt Enable Flag
         return IE.raw;
     }
 
     return 0;
 }
 
-uint16_t readWord(uint16_t address) 
+word ReadWord(word address) 
 {
-    uint16_t word = readByte(address + 1);
+    word word = ReadByte(address + 1);
     word <<= 8;
-    word |= readByte(address);
+    word |= ReadByte(address);
     return word;
 }
 
-uint8_t nextByte()
+byte NextByte()
 {
-    uint8_t byte = readByte(R.PC);
+    byte byte = ReadByte(R.PC);
     ++R.PC;
     return byte;
 }
 
-uint16_t nextWord()
+word NextWord()
 {
-    uint16_t word = readWord(R.PC);
+    word word = ReadWord(R.PC);
     R.PC += 2;
     return word;
 }
 
-void writeByte(uint16_t address, uint8_t data)
+void WriteByte(word address, byte data)
 {
     LogVerbose(4, "Write %02X to Memory at %04X", data, address);
 
+    // Cartridge Memory Bank Controller - 0000-7FFF
     if (address <= 0x7FFF) {
-        writeCartridgeMBC(address, data);
+        WriteCartridgeMBC(address, data);
     }
+    // Video RAM - 8000-9FFF
     else if (address <= 0x9FFF) {
         // if (STAT.Mode != STAT_MODE_DATA_TRANSFER) {
-            VRAM[address - 0x8000] = data;
+            VRAM[VRAMBank][address - 0x8000] = data;
         // }
         // else {
         //     // LogWarn("Attempting to write to VRAM while in mode %d", STAT.Mode);
         // }
     }
+    // External Cartridge RAM - A000-BFFF
     else if (address <= 0xBFFF) {
-        // Cartridge RAM
         if (SRAMEnabled) {
-            SRAM[address - 0xA000] = data;
+            SRAM[SRAMBank][address - 0xA000] = data;
         }
         else {
             LogFatal("Cartridge RAM Not Enabled %04X", address);
         }
     }
+    // Work RAM Bank 0 - C000-CFFF
     else if (address <= 0xCFFF) {
-        // Work RAM Bank 0
-        WRAM0[address - 0xC000] = data;
+        WRAM[0][address - 0xC000] = data;
     }
+    // Switchable Work RAM - D000-DFFF
     else if (address <= 0xDFFF) {
-        // Switchable Work RAM Bank
-        WRAM[address - 0xD000] = data;
+        WRAM[WRAMBank][address - 0xD000] = data;
     }
+    // Echo RAM - E000-FDFF
     else if (address <= 0xFDFF) {
-        // Echo RAM
-        WRAM0[address - 0xE000] = data;
+        WRAM[0][address - 0xE000] = data;
     }
+    // Object Attribute Memory - FE00-FE9F
     else if (address <= 0xFE9F) {
-        // Object Attribute Memory
         //if (STAT.Mode != STAT_MODE_DATA_TRANSFER && STAT.Mode != STAT_MODE_SEARCH_SPRITE) {
            OAM[address - 0xFE00] = data;
         //}
@@ -251,11 +271,11 @@ void writeByte(uint16_t address, uint8_t data)
         //    // LogWarn("Attempting to write to OAM while in mode %d", STAT.Mode);
         //}
     }
+    // Unusable - FEA0-FEFF
     else if (address <= 0xFEFF) {
-        // Unusable
     }
+    // Hardware I/O Registers - FF00-FE7F
     else if (address <= 0xFF7F) {
-        // Hardware I/O Registers
         if (address >= 0xFF30 && address <= 0xFF3F) {
             WaveRAM[address - 0xFF30] = data;
         }
@@ -278,55 +298,55 @@ void writeByte(uint16_t address, uint8_t data)
         case 0xFF05:
             TIMA = data;
             if (VerboseLevel >= 2) {
-                printTimer();
+                PrintTimer();
             }
             break;
         case 0xFF06:
             TMA = data;
             if (VerboseLevel >= 2) {
-                printTimer();
+                PrintTimer();
             }
             break;
         case 0xFF07:
             TAC.raw = data;
             if (VerboseLevel >= 2) {
-                printTimer();
+                PrintTimer();
             }
             break;
         case 0xFF0F:
             IF.raw = data;
             if (VerboseLevel >= 2) {
-                printIF();
+                PrintIF();
             }
             break;
         case 0xFF10:
             Tone1.raw[0] = data & TONE_READ_MASK0;
             if (VerboseLevel >= 2) {
-                printTone1();
+                PrintTone1();
             }
             break;
         case 0xFF11:
             Tone1.raw[1] = data & TONE_READ_MASK1;
             if (VerboseLevel >= 2) {
-                printTone1();
+                PrintTone1();
             }
             break;
         case 0xFF12:
             Tone1.raw[2] = data & TONE_READ_MASK2;
             if (VerboseLevel >= 2) {
-                printTone1();
+                PrintTone1();
             }
             break;
         case 0xFF13:
             Tone1.raw[3] = data & TONE_READ_MASK3;
             if (VerboseLevel >= 2) {
-                printTone1();
+                PrintTone1();
             }
             break;
         case 0xFF14:
             Tone1.raw[4] = data & TONE_READ_MASK4;
             if (VerboseLevel >= 2) {
-                printTone1();
+                PrintTone1();
             }
             break;
         case 0xFF15:
@@ -335,219 +355,220 @@ void writeByte(uint16_t address, uint8_t data)
         case 0xFF16:
             Tone2.raw[1] = data & TONE_READ_MASK1;
             if (VerboseLevel >= 2) {
-                printTone2();
+                PrintTone2();
             }
             break;
         case 0xFF17:
             Tone2.raw[2] = data & TONE_READ_MASK2;
             if (VerboseLevel >= 2) {
-                printTone2();
+                PrintTone2();
             }
             break;
         case 0xFF18:
             Tone2.raw[3] = data & TONE_READ_MASK3;
             if (VerboseLevel >= 2) {
-                printTone2();
+                PrintTone2();
             }
             break;
         case 0xFF19:
             Tone2.raw[4] = data & TONE_READ_MASK4;
             if (VerboseLevel >= 2) {
-                printTone2();
+                PrintTone2();
             }
             break;
         case 0xFF20:
             Noise.raw[0] = data & NOISE_READ_MASK0;
             if (VerboseLevel >= 2) {
-                printNoise();
+                PrintNoise();
             }
             break;
         case 0xFF21:
             Noise.raw[1] = data & NOISE_READ_MASK1;
             if (VerboseLevel >= 2) {
-                printNoise();
+                PrintNoise();
             }
             break;
         case 0xFF22:
             Noise.raw[2] = data & NOISE_READ_MASK2;
             if (VerboseLevel >= 2) {
-                printNoise();
+                PrintNoise();
             }
             break;
         case 0xFF23:
             Noise.raw[3] = data & NOISE_READ_MASK3;
             if (VerboseLevel >= 2) {
-                printNoise();
+                PrintNoise();
             }
             break;
         case 0xFF24:
             VolumeControl.raw = data;
             if (VerboseLevel >= 2) {
-                printVolumeControl();
+                PrintVolumeControl();
             }
             break;
         case 0xFF25:
             SoundOutputTerminal.raw = data;
             if (VerboseLevel >= 2) {
-                // printSoundOutputTerminal();
+                // PrintSoundOutputTerminal();
             }
             break;
         case 0xFF26:
             SoundControl.raw = data & SOUND_CONTROL_WRITE_MASK;
-            if (!SoundControl.SoundEnable) {
+            if (!SoundControl.SoundEnabled) {
                 // TODO: Disable all sound
             }
             if (VerboseLevel >= 2) {
-                // printSoundControl();
+                // PrintSoundControl();
             }
             break;
         case 0xFF1A:
             Wave.raw[0] = data & WAVE_READ_MASK0;
             if (VerboseLevel >= 2) {
-                printWave();
+                PrintWave();
             }
             break;
         case 0xFF1B:
             Wave.raw[1] = data & WAVE_READ_MASK1;
             if (VerboseLevel >= 2) {
-                printWave();
+                PrintWave();
             }
             break;
         case 0xFF1C:
             Wave.raw[2] = data & WAVE_READ_MASK2;
             if (VerboseLevel >= 2) {
-                printWave();
+                PrintWave();
             }
             break;
         case 0xFF1D:
             Wave.raw[3] = data & WAVE_READ_MASK3;
             if (VerboseLevel >= 2) {
-                printWave();
+                PrintWave();
             }
             break;
         case 0xFF1E:
             Wave.raw[4] = data & WAVE_READ_MASK4;
             if (VerboseLevel >= 2) {
-                printWave();
+                PrintWave();
             }
             break;
         
         case 0xFF40:
             LCDC.raw = data;
             if (VerboseLevel >= 2) {
-                printLCDC();
+                PrintLCDC();
             }
             break;
         case 0xFF41:
             STAT.raw = data & STAT_WRITE_MASK;
             if (VerboseLevel >= 2) {
-                printSTAT();
+                PrintSTAT();
             }
             break;
         case 0xFF42:
             SCY = data;
             if (VerboseLevel >= 2) {
-                printLCDInfo();
+                PrintLCDCoordinates();
             }
             break;
         case 0xFF43:
             SCX = data;
             if (VerboseLevel >= 2) {
-                printLCDInfo();
+                PrintLCDCoordinates();
             }
             break;
         case 0xFF45:
             LYC = data;
             if (VerboseLevel >= 2) {
-                printLCDInfo();
+                PrintLCDCoordinates();
             }
             break;
         case 0xFF46:
             {
-                uint16_t addr = data << 8;
+                word addr = data << 8;
                 for (unsigned i = 0; i < 0xA0; ++i) {
-                    OAM[i] = readByte(addr + i);
-                    tick(4);
+                    OAM[i] = ReadByte(addr + i);
+                    Tick(4);
                 }
             }
             break;
         case 0xFF47:
             BGP.raw = data;
             if (VerboseLevel >= 2) {
-                printBGP();
+                PrintPalettes();
             }
             break;
         case 0xFF48:
             OBP0.raw = data;
             if (VerboseLevel >= 2) {
-                printOBP0();
+                PrintLCDCoordinates();
             }
             break;
         case 0xFF49:
             OBP1.raw = data;
             if (VerboseLevel >= 2) {
-                printOBP1();
+                PrintLCDCoordinates();
             }
             break;
         case 0xFF4A:
             WX = data;
             if (VerboseLevel >= 2) {
-                printLCDInfo();
+                PrintLCDCoordinates();
             }
             break;
         case 0xFF4B:
             WY = data;
             if (VerboseLevel >= 2) {
-                printLCDInfo();
+                PrintLCDCoordinates();
             }
             break;
         
         case 0xFF50:
-            BIOSEnable = (data == 0);
-            LogVerbose(2, "BIOS %s", (BIOSEnable ? "Enabled" : "Disabled"));
+            BootstrapROMEnabled = (data == 0);
+            LogVerbose(2, "Bootstrap ROM %s", (BootstrapROMEnabled ? "Enabled" : "Disabled"));
             break;
         };
     }
+    // High RAM - FF80-FFFE
     else if (address <= 0xFFFE) {
         HRAM[address - 0xFF80] = data;
     }
+    // Interrupt Enable Flag - FFFF
     else if (address == 0xFFFF) {
-        // Interrupt Enable Flag
         IE.raw = data;
         if (VerboseLevel >= 2) {
-            printIE();
+            PrintIE();
         }
     }
 }
 
-void writeWord(uint16_t address, uint16_t data) 
+void WriteWord(word address, word data) 
 {
-    writeByte(address + 1, (uint8_t)(data >> 8));
-    writeByte(address, (uint8_t)(data & 0xFF));
+    WriteByte(address + 1, (byte)(data >> 8));
+    WriteByte(address, (byte)(data & 0xFF));
 }
 
-void pushByte(uint8_t data)
+void PushByte(byte data)
 {
     --R.SP;
-    writeByte(R.SP, data);
+    WriteByte(R.SP, data);
 }
 
-void pushWord(uint16_t data)
+void PushWord(word data)
 {
     R.SP -= 2;
-    writeWord(R.SP, data);
+    WriteWord(R.SP, data);
 }
 
-uint8_t popByte()
+byte PopByte()
 {
-    uint8_t byte = readByte(R.SP);
+    byte data = ReadByte(R.SP);
     ++R.SP;
-    return byte;
+    return data;
 }
 
-uint16_t popWord()
+word PopWord()
 {
-    uint16_t word = readWord(R.SP);
+    word data = ReadWord(R.SP);
     R.SP += 2;
-    return word;
+    return data;
 }

@@ -3,7 +3,7 @@
 #include "memory.h"
 #include "unit.h"
 
-const uint16_t RAM_OFFSET = 0xC100;
+const word RAM_OFFSET = 0xC100;
 
 void setup() 
 {
@@ -41,9 +41,9 @@ MAKE_SET_REG_TEST_LIST(L);
 #define MAKE_SET_pHL_TEST(SET)                              \
     UNIT_TEST(SET_##SET##_pHL)                              \
     {                                                       \
-        writeByte(RAM_OFFSET, 0);                           \
+        WriteByte(RAM_OFFSET, 0);                           \
         _SET_b_pHL(SET);                                    \
-        unit_assert_hex_eq(1 << SET, readByte(RAM_OFFSET)); \
+        unit_assert_hex_eq(1 << SET, ReadByte(RAM_OFFSET)); \
         unit_assert_int_eq(TotalTicks, 8);                    \
     }
 

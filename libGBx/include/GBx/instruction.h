@@ -1,9 +1,8 @@
 #ifndef INSTRUCTION_H
 #define INSTRUCTION_H
 
-#include <stdint.h>
-#include <stddef.h>
+#include "types.h"
 
-uint16_t disassemble(char * str, size_t len, uint16_t addr);
+word Disassemble(char * str, uint len, word addr);
 
 #endif // INSTRUCTION_H

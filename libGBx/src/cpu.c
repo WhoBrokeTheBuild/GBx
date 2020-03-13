@@ -26,7 +26,7 @@
 #include "inst/subtract.h"
 #include "inst/xor.h"
 
-reg_t R;
+registers R;
 
 bool CPUEnabled = true;
 
@@ -309,18 +309,18 @@ inst_t instructions[] = {
     [0xFD] = NULL,
 };
 
-uint8_t fetch()
+byte Fetch()
 {
     if (CPUEnabled) {
-        uint8_t op = nextByte();
-        tick(4);
+        byte op = NextByte();
+        Tick(4);
         return op;
     }
 
     return 0x00;
 }
 
-void execute(uint8_t op)
+void Execute(byte op)
 {
     inst_t inst = instructions[op];
     if (inst) {
@@ -330,19 +330,18 @@ void execute(uint8_t op)
     }
 }
 
-void nextInstruction(int cycles)
+void NextInstruction(int cycles)
 {
-    checkInterrupts();
+    CheckInterrupts();
 
     if (CPUEnabled) {
-        uint8_t op = fetch();
-        execute(op);
+        Execute(Fetch());
     } else {
-        tick(1);
+        Tick(1);
     }
 }
 
-void printR()
+void PrintR()
 {
     LogInfo("AF=%04X BC=%04X DE=%04X HL=%04X SP=%04X PC=%04X F=[%c%c%c%c]",
         R.AF, R.BC, R.DE, R.HL, R.SP, R.PC, 

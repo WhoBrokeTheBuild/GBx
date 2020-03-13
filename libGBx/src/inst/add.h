@@ -6,6 +6,7 @@
 #include "cpu.h"
 #include "log.h"
 #include "memory.h"
+#include "types.h"
 
 #define _ADD(x) \
     R.A = add8(R.A, (x))
@@ -61,16 +62,16 @@ static void _ADD_L()
 static void _ADD_pHL()
 {
     LogInst("ADD A,(HL)");
-    uint8_t pHL = readByte(R.HL);
-    tick(4);
+    byte pHL = ReadByte(R.HL);
+    Tick(4);
 
     _ADD(pHL);
 }
 
 static void _ADD_u()
 {
-    uint8_t u = nextByte();
-    tick(4);
+    byte u = NextByte();
+    Tick(4);
 
     LogInst("ADD A,%02Xh", u);
 
@@ -122,16 +123,16 @@ static void _ADC_L()
 static void _ADC_pHL()
 {
     LogInst("ADC A,(HL)");
-    uint8_t pHL = readByte(R.HL);
-    tick(4);
+    byte pHL = ReadByte(R.HL);
+    Tick(4);
 
     _ADC(pHL);
 }
 
 static void _ADC_u()
 {
-    uint8_t u = nextByte();
-    tick(4);
+    byte u = NextByte();
+    Tick(4);
 
     LogInst("ADC A,%02Xh", u);
 
@@ -142,28 +143,28 @@ static void _ADD_HL_BC()
 {
     LogInst("ADD HL,BC");
     _ADDHL(R.BC);
-    tick(4);
+    Tick(4);
 }
 
 static void _ADD_HL_DE()
 {
     LogInst("ADD HL,DE");
     _ADDHL(R.DE);
-    tick(4);
+    Tick(4);
 }
 
 static void _ADD_HL_HL()
 {
     LogInst("ADD HL,HL");
     _ADDHL(R.HL);
-    tick(4);
+    Tick(4);
 }
 
 static void _ADD_HL_SP()
 {
     LogInst("ADD HL,SP");
     _ADDHL(R.SP);
-    tick(4);
+    Tick(4);
 }
 
 #undef _ADDHL
@@ -172,13 +173,13 @@ static void _ADD_HL_SP()
 
 static void _ADD_SP_s()
 {
-    int8_t s = nextByte();
-    tick(4);
+    sbyte s = NextByte();
+    Tick(4);
 
     LogInst("ADD SP,%d", s);
 
     R.SP = add16s(R.SP, s);
-    tick(4);
+    Tick(4);
 }
 
 #endif // ADD_H

@@ -3,7 +3,7 @@
 #include "memory.h"
 #include "unit.h"
 
-const uint16_t RAM_OFFSET = 0xC100;
+const word RAM_OFFSET = 0xC100;
 
 void setup() 
 {
@@ -56,17 +56,17 @@ MAKE_INC_TEST8(L);
 
 UNIT_TEST(INC_pHL_00)
 {
-    writeByte(R.HL, 0x00);
+    WriteByte(R.HL, 0x00);
     _INC_pHL();
-    unit_assert_hex_eq(0x01, readByte(R.HL));
+    unit_assert_hex_eq(0x01, ReadByte(R.HL));
     unit_assert_int_eq(12, TotalTicks);
 }
 
 UNIT_TEST(INC_pHL_FF)
 {
-    writeByte(R.HL, 0xFF);
+    WriteByte(R.HL, 0xFF);
     _INC_pHL();
-    unit_assert_hex_eq(0x00, readByte(R.HL));
+    unit_assert_hex_eq(0x00, ReadByte(R.HL));
     unit_assert_int_eq(12, TotalTicks);
 }
 

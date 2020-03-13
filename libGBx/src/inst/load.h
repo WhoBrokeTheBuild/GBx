@@ -52,8 +52,8 @@ static void _LD_A_L()
 static void _LD_A_pHL()
 {
     LogInst("LD A,(HL)");
-    uint8_t n = readByte(R.HL);
-    tick(4);
+    byte n = ReadByte(R.HL);
+    Tick(4);
 
     R.A = n;
 }
@@ -103,8 +103,8 @@ static void _LD_B_L()
 static void _LD_B_pHL()
 {
     LogInst("LD B,(HL)");
-    uint8_t n = readByte(R.HL);
-    tick(4);
+    byte n = ReadByte(R.HL);
+    Tick(4);
 
     R.B = n;
 }
@@ -154,8 +154,8 @@ static void _LD_C_L()
 static void _LD_C_pHL()
 {
     LogInst("LD C,(HL)");
-    uint8_t n = readByte(R.HL);
-    tick(4);
+    byte n = ReadByte(R.HL);
+    Tick(4);
 
     R.C = n;
 }
@@ -205,8 +205,8 @@ static void _LD_D_L()
 static void _LD_D_pHL()
 {
     LogInst("LD D,(HL)");
-    uint8_t n = readByte(R.HL);
-    tick(4);
+    byte n = ReadByte(R.HL);
+    Tick(4);
 
     R.D = n;
 }
@@ -256,8 +256,8 @@ static void _LD_E_L()
 static void _LD_E_pHL()
 {
     LogInst("LD E,(HL)");
-    uint8_t n = readByte(R.HL);
-    tick(4);
+    byte n = ReadByte(R.HL);
+    Tick(4);
 
     R.E = n;
 }
@@ -307,8 +307,8 @@ static void _LD_H_L()
 static void _LD_H_pHL()
 {
     LogInst("LD H,(HL)");
-    uint8_t n = readByte(R.HL);
-    tick(4);
+    byte n = ReadByte(R.HL);
+    Tick(4);
 
     R.H = n;
 }
@@ -358,8 +358,8 @@ static void _LD_L_L()
 static void _LD_L_pHL()
 {
     LogInst("LD L,(HL)");
-    uint8_t n = readByte(R.HL);
-    tick(4);
+    byte n = ReadByte(R.HL);
+    Tick(4);
 
     R.L = n;
 }
@@ -367,70 +367,70 @@ static void _LD_L_pHL()
 static void _LD_pHL_A()
 {
     LogInst("LD (HL),A");
-    writeByte(R.HL, R.A);
-    tick(8);
+    WriteByte(R.HL, R.A);
+    Tick(8);
 }
 
 static void _LD_pHL_B()
 {
     LogInst("LD (HL),B");
-    writeByte(R.HL, R.B);
-    tick(8);
+    WriteByte(R.HL, R.B);
+    Tick(8);
 }
 
 static void _LD_pHL_C()
 {
     LogInst("LD (HL),C");
-    writeByte(R.HL, R.C);
-    tick(8);
+    WriteByte(R.HL, R.C);
+    Tick(8);
 }
 
 static void _LD_pHL_D()
 {
     LogInst("LD (HL),D");
-    writeByte(R.HL, R.D);
-    tick(8);
+    WriteByte(R.HL, R.D);
+    Tick(8);
 }
 
 static void _LD_pHL_E()
 {
     LogInst("LD (HL),E");
-    writeByte(R.HL, R.E);
-    tick(8);
+    WriteByte(R.HL, R.E);
+    Tick(8);
 }
 
 static void _LD_pHL_H()
 {
     LogInst("LD (HL),H");
-    writeByte(R.HL, R.H);
-    tick(8);
+    WriteByte(R.HL, R.H);
+    Tick(8);
 }
 
 static void _LD_pHL_L()
 {
     LogInst("LD (HL),L");
-    writeByte(R.HL, R.L);
-    tick(8);
+    WriteByte(R.HL, R.L);
+    Tick(8);
 }
 
 static void _LD_pBC_A()
 {
     LogInst("LD (BC),A");
-    writeByte(R.BC, R.A);
-    tick(8);
+    WriteByte(R.BC, R.A);
+    Tick(8);
 }
 
 static void _LD_pDE_A()
 {
     LogInst("LD (DE),A");
-    writeByte(R.DE, R.A);
-    tick(8);
+    WriteByte(R.DE, R.A);
+    Tick(8);
 }
 
 static void _LD_A_u()
 {
-    uint8_t u = nextByte();
-    tick(4);
+    byte u = NextByte();
+    Tick(4);
 
     LogInst("LD A,%02Xh", u);
 
@@ -439,8 +439,8 @@ static void _LD_A_u()
 
 static void _LD_B_u()
 {
-    uint8_t u = nextByte();
-    tick(4);
+    byte u = NextByte();
+    Tick(4);
 
     LogInst("LD B,%02Xh", u);
 
@@ -449,8 +449,8 @@ static void _LD_B_u()
 
 static void _LD_C_u()
 {
-    uint8_t u = nextByte();
-    tick(4);
+    byte u = NextByte();
+    Tick(4);
 
     LogInst("LD C,%02Xh", u);
 
@@ -459,8 +459,8 @@ static void _LD_C_u()
 
 static void _LD_D_u()
 {
-    uint8_t u = nextByte();
-    tick(4);
+    byte u = NextByte();
+    Tick(4);
 
     LogInst("LD D,%02Xh", u);
 
@@ -469,8 +469,8 @@ static void _LD_D_u()
 
 static void _LD_E_u()
 {
-    uint8_t u = nextByte();
-    tick(4);
+    byte u = NextByte();
+    Tick(4);
 
     LogInst("LD E,%02Xh", u);
 
@@ -479,8 +479,8 @@ static void _LD_E_u()
 
 static void _LD_H_u()
 {
-    uint8_t u = nextByte();
-    tick(4);
+    byte u = NextByte();
+    Tick(4);
 
     LogInst("LD H,%02Xh", u);
 
@@ -489,8 +489,8 @@ static void _LD_H_u()
 
 static void _LD_L_u()
 {
-    uint8_t u = nextByte();
-    tick(4);
+    byte u = NextByte();
+    Tick(4);
 
     LogInst("LD L,%02Xh", u);
 
@@ -499,20 +499,20 @@ static void _LD_L_u()
 
 static void _LD_pHL_u()
 {
-    uint8_t u = nextByte();
-    tick(4);
+    byte u = NextByte();
+    Tick(4);
 
     LogInst("LD (HL),%02Xh", u);
 
-    writeByte(R.HL, u);
-    tick(4);
+    WriteByte(R.HL, u);
+    Tick(4);
 }
 
 static void _LD_A_pBC()
 {
     LogInst("LD A,(BC)");
-    uint8_t n = readByte(R.BC);
-    tick(4);
+    byte n = ReadByte(R.BC);
+    Tick(4);
 
     R.A = n;
 }
@@ -520,16 +520,16 @@ static void _LD_A_pBC()
 static void _LD_A_pDE()
 {
     LogInst("LD A,(DE)");
-    uint8_t n = readByte(R.DE);
-    tick(4);
+    byte n = ReadByte(R.DE);
+    Tick(4);
 
     R.A = n;
 }
 
 static void _LD_BC_uu()
 {
-    uint16_t uu = nextWord();
-    tick(8);
+    word uu = NextWord();
+    Tick(8);
 
     LogInst("LD BC,%04Xh", uu);
     R.BC = uu;
@@ -537,8 +537,8 @@ static void _LD_BC_uu()
 
 static void _LD_DE_uu()
 {
-    uint16_t uu = nextWord();
-    tick(8);
+    word uu = NextWord();
+    Tick(8);
 
     LogInst("LD DE,%04Xh", uu);
     R.DE = uu;
@@ -546,8 +546,8 @@ static void _LD_DE_uu()
 
 static void _LD_HL_uu()
 {
-    uint16_t uu = nextWord();
-    tick(8);
+    word uu = NextWord();
+    Tick(8);
 
     LogInst("LD HL,%04Xh", uu);
     R.HL = uu;
@@ -555,8 +555,8 @@ static void _LD_HL_uu()
 
 static void _LD_SP_uu()
 {
-    uint16_t uu = nextWord();
-    tick(8);
+    word uu = NextWord();
+    Tick(8);
 
     LogInst("LD SP,%04Xh", uu);
     R.SP = uu;
@@ -567,122 +567,122 @@ static void _LD_SP_HL()
     LogInst("LD SP,HL");
     R.SP = R.HL;
     
-    tick(4);
+    Tick(4);
 }
 
 static void _LD_puu_SP()
 {
-    uint16_t uu = nextWord();
-    tick(8);
+    word uu = NextWord();
+    Tick(8);
 
     LogInst("LD (%04Xh),SP", uu);
     
-    writeWord(uu, R.SP);
-    tick(8);
+    WriteWord(uu, R.SP);
+    Tick(8);
 }
 
 static void _LD_puu_A()
 {
-    uint16_t uu = nextWord();
-    tick(8);
+    word uu = NextWord();
+    Tick(8);
 
     LogInst("LD (%04Xh),A", uu);
 
-    writeByte(uu, R.A);
-    tick(4);
+    WriteByte(uu, R.A);
+    Tick(4);
 }
 
 static void _LD_A_puu()
 {
-    uint16_t uu = nextWord();
-    tick(4);
+    word uu = NextWord();
+    Tick(4);
 
     LogInst("LD A,(%04Xh)", uu);
 
-    uint8_t n = readByte(uu);
-    tick(4);
+    byte n = ReadByte(uu);
+    Tick(4);
 
     R.A = n;
-    tick(4);
+    Tick(4);
 }
 
 static void _LDI_pHL_A()
 {
     LogInst("LDI (HL),A");
-    writeByte(R.HL, R.A);
+    WriteByte(R.HL, R.A);
     ++R.HL;
-    tick(4);
+    Tick(4);
 }
 
 static void _LDD_pHL_A()
 {
     LogInst("LDD (HL),A");
-    writeByte(R.HL, R.A);
+    WriteByte(R.HL, R.A);
     --R.HL;
-    tick(4);
+    Tick(4);
 }
 
 static void _LDI_A_pHL()
 {
     LogInst("LDI A,(HL)");
-    R.A = readByte(R.HL);
+    R.A = ReadByte(R.HL);
     ++R.HL;
-    tick(4);
+    Tick(4);
 }
 
 static void _LDD_A_pHL()
 {
     LogInst("LDD A,(HL)");
-    R.A = readByte(R.HL);;
+    R.A = ReadByte(R.HL);;
     --R.HL;
-    tick(4);
+    Tick(4);
 }
 
 static void _LDH_pu_A()
 {
-    uint8_t u = nextByte();
-    tick(4);
+    byte u = NextByte();
+    Tick(4);
 
     LogInst("LDH (%02Xh),A", u);
 
-    writeByte(0xFF00 + u, R.A);
-    tick(4);
+    WriteByte(0xFF00 + u, R.A);
+    Tick(4);
 }
 
 static void _LDH_A_pu()
 {
-    uint8_t u = nextByte();
-    tick(4);
+    byte u = NextByte();
+    Tick(4);
 
     LogInst("LDH A,(%02Xh)", u);
 
-    R.A = readByte(0xFF00 + u);
-    tick(4);
+    R.A = ReadByte(0xFF00 + u);
+    Tick(4);
 }
 
 static void _LDH_pC_A()
 {
     LogInst("LDH (C),A");
-    writeByte(0xFF00 + R.C, R.A);
-    tick(4);
+    WriteByte(0xFF00 + R.C, R.A);
+    Tick(4);
 }
 
 static void _LDH_A_pC()
 {
     LogInst("LDH A,(C)");
-    R.A = readByte(0xFF00 + R.C);
-    tick(4);
+    R.A = ReadByte(0xFF00 + R.C);
+    Tick(4);
 }
 
 static void _LD_HL_SP_s()
 {
-    int8_t s = nextByte();
-    tick(4);
+    sbyte s = NextByte();
+    Tick(4);
 
     LogInst("LD HL,SP%+d", s);
 
     R.HL = add16s(R.SP, s);
-    tick(4);
+    Tick(4);
 }
 
 #endif // LOAD_H

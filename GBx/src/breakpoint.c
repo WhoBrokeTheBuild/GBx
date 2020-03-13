@@ -171,7 +171,7 @@ break_comp_func_t getBreakCompFunc(const char * reg)
     return NULL;
 }
 
-void setBreakpoint(const char * reg, unsigned value)
+void SetBreakpoint(const char * reg, unsigned value)
 {
     break_comp_func_t comp = getBreakCompFunc(reg);
     
@@ -192,7 +192,7 @@ void setBreakpoint(const char * reg, unsigned value)
     LogWarn("Maximum number of breakpoints reached: %d", MAX_BREAKPOINTS);
 }
 
-void clearBreakpoint(const char * reg, unsigned value)
+void ClearBreakpoint(const char * reg, unsigned value)
 {
     break_comp_func_t comp = getBreakCompFunc(reg);
     
@@ -212,7 +212,7 @@ void clearBreakpoint(const char * reg, unsigned value)
     
 }
 
-void clearAllBreakpoints()
+void ClearAllBreakpoints()
 {
     for (int i = 0; i < MAX_BREAKPOINTS; ++i) {
         if (breakpoints[i].name) {
@@ -223,16 +223,7 @@ void clearAllBreakpoints()
     }
 }
 
-void printBreakpoints()
-{
-    for (int i = 0; i < MAX_BREAKPOINTS; ++i) {
-        if (breakpoints[i].name) {
-            LogInfo("Breakpoint when %s=%04X", breakpoints[i].name, breakpoints[i].value);
-        }
-    }
-}
-
-bool atBreakpoint()
+bool AtBreakpoint()
 {
     for (int i = 0; i < MAX_BREAKPOINTS; ++i) {
         if (breakpoints[i].comp) {
@@ -246,4 +237,13 @@ bool atBreakpoint()
     }
     
     return false;
+}
+
+void PrintBreakpoints()
+{
+    for (int i = 0; i < MAX_BREAKPOINTS; ++i) {
+        if (breakpoints[i].name) {
+            LogInfo("Breakpoint when %s=%04X", breakpoints[i].name, breakpoints[i].value);
+        }
+    }
 }

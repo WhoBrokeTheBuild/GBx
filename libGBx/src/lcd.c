@@ -8,125 +8,120 @@
 #include "memory.h"
 
 #include <time.h>
+#include <string.h>
 
-lcd_control_t LCDC;
+byte LCDBuffer[LCD_BUFFER_SIZE];
 
-lcd_status_t STAT;
+lcd_control LCDC;
+lcd_status STAT;
 
-uint8_t SCY;
-uint8_t SCX;
+byte SCY;
+byte SCX;
+byte LY;
+byte LYC;
+byte WX;
+byte WY;
 
-uint8_t LY;
-uint8_t LYC;
+palette BGP;
+palette OBP0;
+palette OBP1;
 
-uint8_t WX;
-uint8_t WY;
+byte VRAM[2][0x2000];
+uint VRAMBank;
 
-palette_t BGP;
-palette_t OBP0;
-palette_t OBP1;
-
-uint8_t VRAM0[0x1FFF];
-uint8_t VRAM1[0x1FFF];
-uint8_t * VRAM = VRAM0;
-
-uint8_t OAM[0xA0];
-
-uint8_t Backbuffer[BACKBUFFER_WIDTH * BACKBUFFER_HEIGHT * BACKBUFFER_COMP];
+byte OAM[0xA0];
 
 const char * LCD_MODE_STR[4] = {
-    "HBlank(0)",
-    "VBlank(1)",
-    "SearchSprite(2)",
-    "DataTransfer(3)",
+    "HBlank",
+    "VBlank",
+    "SearchSprite",
+    "DataTransfer",
 };
 
-uint16_t TILE_MAP_ADDR[2] = {
+const word TILE_MAP_ADDR[2] = {
     0x9800, // 9800-9BFF
     0x9C00, // 9C00-9FFF
 };
 
-uint16_t TILE_DATA_ADDR[2] = {
+const word TILE_DATA_ADDR[2] = {
     0x9000, // 8800-97FF
     0x8000, // 8000-8FFF
 };
 
-#define HBLANK_TICK_COUNT        (204)
-#define VBLANK_TICK_COUNT        (456) // 1/10 of VBlank Period
-#define SEARCH_SPRITE_TICK_COUNT (80)
-#define DATA_TRANSFER_TICK_COUNT (172)
-
-unsigned lcdModeTotalTicks = 0;
-
-#define MAX_LY (154)
-
-#define TILE_WIDTH     (8)
-#define TILE_HEIGHT    (8)
-#define TILES_PER_ROW  (32)
-#define TILE_DATA_SIZE (16)
-
-#define COLOR_WHITE      (0xFF)
-#define COLOR_LIGHT_GRAY (0xCC)
-#define COLOR_DARK_GRAY  (0x77)
-#define COLOR_BLACK      (0x00)
-
-struct timespec diff(struct timespec start, struct timespec end)
+void ResetLCD()
 {
-	struct timespec temp;
-	if ((end.tv_nsec-start.tv_nsec)<0) {
-		temp.tv_sec = end.tv_sec-start.tv_sec-1;
-		temp.tv_nsec = 1000000000+end.tv_nsec-start.tv_nsec;
-	} else {
-		temp.tv_sec = end.tv_sec-start.tv_sec;
-		temp.tv_nsec = end.tv_nsec-start.tv_nsec;
-	}
-	return temp;
+    VRAMBank = 0;
+    
+    for (uint i = 0; i < VRAM_BANK_COUNT; ++i) {
+        memset(VRAM[i], 0, sizeof(VRAM[i]));
+    }
+
+    memset(OAM, 0, sizeof(OAM));
+
+    LCDC.raw = 0x91;
+    STAT.Mode = STAT_MODE_HBLANK;
+
+    SCY = 0x00;
+    SCX = 0x00;
+    LY = 0x00;
+    LYC = 0x00;
+    WY = 0x00;
+    WX = 0x00;
+
+    BGP.raw = 0b11100100;
+    OBP0.raw = 0b11100100;
+    OBP1.raw = 0b11100100;
 }
 
-void drawTiles()
+void DrawTiles()
 {
+    const uint TILE_WIDTH     = 8;
+    const uint TILE_HEIGHT    = 8;
+    const uint TILES_PER_ROW  = 32;
+    const uint TILE_DATA_SIZE = 16;
+
     int wx7 = WX - 7;
 
-    unsigned mapSelect = (LCDC.WindowDisplayEnable ? LCDC.WindowTileMapSelect : LCDC.TileMapSelect);
-    uint16_t mapBaseAddress = TILE_MAP_ADDR[mapSelect];
-    uint16_t dataBaseAddress = TILE_DATA_ADDR[LCDC.TileDataSelect];
+    uint mapSelect = (LCDC.WindowDisplayEnabled ? LCDC.WindowTileMapSelect : LCDC.TileMapSelect);
+    word mapBaseAddress = TILE_MAP_ADDR[mapSelect];
+    word dataBaseAddress = TILE_DATA_ADDR[LCDC.TileDataSelect];
 
     int srcY = LY;
     int dstY = LY + SCY;
-    if (LCDC.WindowDisplayEnable) {
+    if (LCDC.WindowDisplayEnabled) {
         dstY = LY - WY;
     }
 
-    uint16_t yOffset = (dstY / TILE_HEIGHT) * TILES_PER_ROW;
-    uint16_t lineOffset = (dstY % TILE_HEIGHT) * 2;
+    word yOffset = (dstY / TILE_HEIGHT) * TILES_PER_ROW;
+    word lineOffset = (dstY % TILE_HEIGHT) * 2;
 
-    for (unsigned srcX = 0; srcX < SCREEN_WIDTH; ++srcX) {
+    for (uint srcX = 0; srcX < LCD_WIDTH; ++srcX) {
 
         int dstX = srcX + SCX;
-        if (LCDC.WindowDisplayEnable && srcX >= wx7) {
+        if (LCDC.WindowDisplayEnabled && srcX >= wx7) {
             dstX = srcX - wx7;
         }
 
-        uint16_t xOffset = dstX / TILE_WIDTH;
+        word xOffset = dstX / TILE_WIDTH;
 
-        int tileIndex = readByte(mapBaseAddress + yOffset + xOffset);
+        int tileIndex = ReadByte(mapBaseAddress + yOffset + xOffset);
         if (LCDC.TileDataSelect == 0) {
-            tileIndex = (int8_t)tileIndex; // Convert to [-128, 127]
+            tileIndex = (sbyte)tileIndex; // Convert to [-128, 127]
         }
 
-        uint16_t dataOffset = dataBaseAddress + (tileIndex * TILE_DATA_SIZE);
+        word dataOffset = dataBaseAddress + (tileIndex * TILE_DATA_SIZE);
 
-        uint8_t data1 = readByte(dataOffset + lineOffset);
-        uint8_t data2 = readByte(dataOffset + lineOffset + 1);
+        byte data1 = ReadByte(dataOffset + lineOffset);
+        byte data2 = ReadByte(dataOffset + lineOffset + 1);
 
         int bit = 0x80 >> (srcX % TILE_WIDTH);
         bool high = (data2 & bit);
         bool low  = (data1 & bit);
-        uint8_t colorIndex = 
+        byte colorIndex = 
             (high ? 0b10 : 0b00) | 
             (low  ? 0b01 : 0b00);
         
-        uint8_t color = 0;
+        byte color = 0;
         switch (colorIndex) {
         case 0b00:
             colorIndex = BGP.Color0;
@@ -144,105 +139,123 @@ void drawTiles()
 
         switch (colorIndex) {
         case 0b00:
-            color = COLOR_WHITE;
+            color = LCD_COLOR_WHITE;
             break;
         case 0b01:
-            color = COLOR_LIGHT_GRAY;
+            color = LCD_COLOR_LIGHT_GRAY;
             break;
         case 0b10:
-            color = COLOR_DARK_GRAY;
+            color = LCD_COLOR_DARK_GRAY;
             break;
         case 0b11:
-            color = COLOR_BLACK;
+            color = LCD_COLOR_BLACK;
             break;
         }
 
-        unsigned off = (srcY * BACKBUFFER_WIDTH * 3) + (srcX * 3);
-        Backbuffer[off + 0] = color;
-        Backbuffer[off + 1] = color;
-        Backbuffer[off + 2] = color;
+        uint off = (srcY * LCD_BUFFER_WIDTH * LCD_BUFFER_COMPONENTS) 
+            + (srcX * LCD_BUFFER_COMPONENTS);
+        LCDBuffer[off + 0] = color;
+        LCDBuffer[off + 1] = color;
+        LCDBuffer[off + 2] = color;
     }
 }
 
-void drawSprites()
+void DrawSprites()
 {
-    sprite_t s;
-    for (int sprite = 0; sprite < 40; ++sprite) {
-        uint8_t index = sprite * 4;
-        s.Y = readWord(0xFE00 + index) - 16;
-        s.X = readWord(0xFE00 + index + 1) - 8;
-        s.Pattern = readWord(0xFE00 + index + 2);
-        s.Attributes = readWord(0xFE00 + index + 3);
+    sprite spr;
+
+    for (uint sprite = 0; sprite < 40; ++sprite) {
+        uint index = sprite * 4;
+        spr.Y = ReadWord(0xFE00 + index) - 16;
+        spr.X = ReadWord(0xFE00 + index + 1) - 8;
+        spr.Pattern = ReadWord(0xFE00 + index + 2);
+        spr.Attributes = ReadWord(0xFE00 + index + 3);
 
         int height = 8;
         if (LCDC.SpriteSize == 1) {
             height = 16;
         }
 
-        if (LY >= s.Y && LY < s.Y + height) {
-            int line = LY - s.Y;
-            if (s.YFlip) {
+        if (LY >= spr.Y && LY < spr.Y + height) {
+            int line = LY - spr.Y;
+            if (spr.YFlip) {
                 line -= height;
                 line *= -1;
             }
             line *= 2;
             
-            uint16_t tileAddress = 0x8000 + (s.Pattern * 16);
-            uint8_t data1 = readByte(tileAddress + line);
-            uint8_t data2 = readByte(tileAddress + line + 1);
+            word tileAddress = 0x8000 + (spr.Pattern * 16);
+            byte data1 = ReadByte(tileAddress + line);
+            byte data2 = ReadByte(tileAddress + line + 1);
 
             for (int pixel = 7; pixel >= 0; --pixel) {
-                int bit = pixel;
-                if (s.XFlip) {
-                    bit -= 7;
-                    bit *= -1;
+                int bit = (1 << pixel);
+                if (spr.XFlip) {
+                    bit = (0x80 >> pixel);
                 }
 
-                uint8_t colorIndex = ((data2 & (1 << bit)) ? 2 : 0) | 
-                                    ((data1 & (1 << bit)) ? 1 : 0);
-                
-                palette_t * pal = (s.Palette ? &OBP1 : &OBP0);
+                bool high = (data2 & bit);
+                bool low  = (data1 & bit);
+                byte colorIndex = 
+                    (high ? 0b10 : 0b00) | 
+                    (low  ? 0b01 : 0b00);
 
-                uint8_t color = 0;
+                palette * pal = (spr.Palette ? &OBP1 : &OBP0);
+
+                byte color = 0;
                 switch (colorIndex) {
                 case 0b00:
-                    colorIndex = pal->Color0;
+                    colorIndex = BGP.Color0;
                     break;
                 case 0b01:
-                    colorIndex = pal->Color1;
+                    colorIndex = BGP.Color1;
                     break;
                 case 0b10:
-                    colorIndex = pal->Color2;
+                    colorIndex = BGP.Color2;
                     break;
                 case 0b11:
-                    colorIndex = pal->Color3;
+                    colorIndex = BGP.Color3;
                     break;
                 }
 
                 switch (colorIndex) {
                 case 0b00:
-                    color = COLOR_WHITE;
+                    color = LCD_COLOR_WHITE;
                     break;
                 case 0b01:
-                    color = COLOR_LIGHT_GRAY;
+                    color = LCD_COLOR_LIGHT_GRAY;
                     break;
                 case 0b10:
-                    color = COLOR_DARK_GRAY;
+                    color = LCD_COLOR_DARK_GRAY;
                     break;
                 case 0b11:
-                    color = COLOR_BLACK;
+                    color = LCD_COLOR_BLACK;
                     break;
                 }
 
                 int x = -pixel + 7;
 
-                unsigned off = (LY * 256*3) + (x * 3);
-                Backbuffer[off + 0] = color;
-                Backbuffer[off + 1] = color;
-                Backbuffer[off + 2] = color;
+                uint off = (LY * LCD_BUFFER_WIDTH * LCD_BUFFER_COMPONENTS) 
+                    + (x * LCD_BUFFER_COMPONENTS);
+                LCDBuffer[off + 0] = color;
+                LCDBuffer[off + 1] = color;
+                LCDBuffer[off + 2] = color;
             }
         }
     }
+}
+
+struct timespec timediff(struct timespec start, struct timespec end)
+{
+	struct timespec temp;
+	if ((end.tv_nsec-start.tv_nsec)<0) {
+		temp.tv_sec = end.tv_sec-start.tv_sec-1;
+		temp.tv_nsec = 1000000000+end.tv_nsec-start.tv_nsec;
+	} else {
+		temp.tv_sec = end.tv_sec-start.tv_sec;
+		temp.tv_nsec = end.tv_nsec-start.tv_nsec;
+	}
+	return temp;
 }
 
 void updateCoincidence()
@@ -253,29 +266,30 @@ void updateCoincidence()
     }
 }
 
-void lcdTick(unsigned cycles)
+void LCDTick(uint cycles)
 {
-    lcdModeTotalTicks += cycles;
+    static uint modeTicks = 0;
+    modeTicks += cycles;
 
     switch (STAT.Mode) {
         case STAT_MODE_SEARCH_SPRITE:
-            if (lcdModeTotalTicks >= SEARCH_SPRITE_TICK_COUNT) {
-                lcdModeTotalTicks -= SEARCH_SPRITE_TICK_COUNT;
+            if (modeTicks >= SEARCH_SPRITE_TICK_COUNT) {
+                modeTicks -= SEARCH_SPRITE_TICK_COUNT;
 
                 STAT.Mode = STAT_MODE_DATA_TRANSFER;
                 // printSTAT();
             }
         break;
         case STAT_MODE_DATA_TRANSFER:
-            if (lcdModeTotalTicks >= DATA_TRANSFER_TICK_COUNT) {
-                lcdModeTotalTicks -= DATA_TRANSFER_TICK_COUNT;
+            if (modeTicks >= DATA_TRANSFER_TICK_COUNT) {
+                modeTicks -= DATA_TRANSFER_TICK_COUNT;
 
-                if (LCDC.TileDisplayEnable) {
-                    drawTiles();
+                if (LCDC.TileDisplayEnabled) {
+                    DrawTiles();
                 }
 
-                if (LCDC.SpriteDisplayEnable) {
-                    drawSprites();
+                if (LCDC.SpriteDisplayEnabled) {
+                    DrawSprites();
                 }
 
                 STAT.Mode = STAT_MODE_HBLANK;
@@ -283,13 +297,13 @@ void lcdTick(unsigned cycles)
             }
         break;
         case STAT_MODE_HBLANK:
-            if (lcdModeTotalTicks >= HBLANK_TICK_COUNT) {
-                lcdModeTotalTicks -= HBLANK_TICK_COUNT;
+            if (modeTicks >= HBLANK_TICK_COUNT) {
+                modeTicks -= HBLANK_TICK_COUNT;
 
                 ++LY;
                 updateCoincidence();
 
-                if (LY == SCREEN_HEIGHT) {
+                if (LY == LCD_HEIGHT) {
                     STAT.Mode = STAT_MODE_VBLANK;
                     // printSTAT();
                     if (STAT.IntVBlank) {
@@ -307,7 +321,7 @@ void lcdTick(unsigned cycles)
                         struct timespec now;
                     
                         clock_gettime(CLOCK_MONOTONIC, &now);
-                        struct timespec delta = diff(last, now);
+                        struct timespec delta = timediff(last, now);
                         last = now;
                         
                     //     float fps = 1.0 / (delta.tv_nsec / 1000000000.0);
@@ -336,10 +350,10 @@ void lcdTick(unsigned cycles)
             }
         break;
         case STAT_MODE_VBLANK:
-            if (lcdModeTotalTicks >= VBLANK_TICK_COUNT) {
-                lcdModeTotalTicks -= VBLANK_TICK_COUNT;
+            if (modeTicks >= VBLANK_TICK_COUNT) {
+                modeTicks -= VBLANK_TICK_COUNT;
                 
-                LY = (LY + 1) % MAX_LY;
+                LY = (LY + 1) % LCD_MAX_LY;
                 updateCoincidence();
 
                 if (LY == 0) {
@@ -354,44 +368,44 @@ void lcdTick(unsigned cycles)
     }
 }
 
-void printLCDC()
+void PrintLCDC()
 {
     LogInfo("BGWinDisp=%d OBJDisp=%d OBJSize=%s BGTileMap=%s TileData=%s WinDisp=%d WinTileMap=%s LCDEnab=%d",
-        LCDC.TileDisplayEnable, LCDC.SpriteDisplayEnable, 
+        LCDC.TileDisplayEnabled,
+        LCDC.SpriteDisplayEnabled,
         (LCDC.SpriteSize ? "8x16" : "8x8"),
         (LCDC.TileMapSelect ? "9C00h-9FFFh" : "9800h-9BFFh"),
         (LCDC.TileDataSelect ? "8000h-8FFFh" : "8800h-97FFh"),
-        LCDC.WindowDisplayEnable,
+        LCDC.WindowDisplayEnabled,
         (LCDC.WindowTileMapSelect ? "9800h-9BFFh" : "9C00h-9FFFh"),
-        LCDC.LCDEnable);
+        LCDC.LCDEnabled);
 }
 
-void printSTAT() 
+void PrintSTAT() 
 {
-    LogInfo("Mode=%s Coincidence=%d IntHBlank=%d IntVBlank=%d IntSearchSprite=%d IntCoincidence=%d",
-        LCD_MODE_STR[STAT.Mode], STAT.Coincidence, STAT.IntHBlank, STAT.IntVBlank, STAT.IntSearchSprite, STAT.IntCoincidence);
+    LogInfo("Mode=%d (%s) Coincidence=%d IntHBlank=%d IntVBlank=%d IntSearchSprite=%d IntCoincidence=%d",
+        STAT.Mode, LCD_MODE_STR[STAT.Mode], 
+        STAT.Coincidence, 
+        STAT.IntHBlank, 
+        STAT.IntVBlank, 
+        STAT.IntSearchSprite, 
+        STAT.IntCoincidence);
 }
 
-void printLCDInfo()
-{
-    LogInfo("SCY=%d SCX=%d LY=%d LYC=%d WX=%d WY=%d",
-        SCY, SCX, LY, LYC, WX, WY);
-}
-
-void printBGP()
+void PrintPalettes()
 {
     LogInfo("BGP Color0=%d Color1=%d Color2=%d Color3=%d",
         BGP.Color0, BGP.Color1, BGP.Color2, BGP.Color3);
-}
 
-void printOBP0()
-{
     LogInfo("BGP Color0=%d Color1=%d Color2=%d Color3=%d",
         OBP0.Color0, OBP0.Color1, OBP0.Color2, OBP0.Color3);
-}
 
-void printOBP1()
-{
     LogInfo("BGP Color0=%d Color1=%d Color2=%d Color3=%d",
         OBP1.Color0, OBP1.Color1, OBP1.Color2, OBP1.Color3);
+}
+
+void PrintLCDCoordinates()
+{
+    LogInfo("SCY=%d SCX=%d LY=%d LYC=%d WX=%d WY=%d",
+        SCY, SCX, LY, LYC, WX, WY);
 }

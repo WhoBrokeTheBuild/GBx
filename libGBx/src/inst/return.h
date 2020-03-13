@@ -11,25 +11,25 @@ static void _RET()
 {
     LogInst("RET");
 
-    uint16_t nn = popWord();
-    tick(8);
+    word nn = PopWord();
+    Tick(8);
 
     R.PC = nn;
-    tick(8);
+    Tick(8);
 }
 
 static void _RET_NZ()
 {
     LogInst("RET NZ");
 
-    uint16_t nn = popWord();
-    tick(8);
+    word nn = PopWord();
+    Tick(8);
 
     if (!R.FZ) {
-        tick(4);
+        Tick(4);
 
         R.PC = nn;
-        tick(8);
+        Tick(8);
     }
 }
 
@@ -37,14 +37,14 @@ static void _RET_Z()
 {
     LogInst("RET Z");
 
-    uint16_t nn = popWord();
-    tick(8);
+    word nn = PopWord();
+    Tick(8);
 
     if (R.FZ) {
-        tick(4);
+        Tick(4);
 
         R.PC = nn;
-        tick(8);
+        Tick(8);
     }
 }
 
@@ -52,14 +52,14 @@ static void _RET_NC()
 {
     LogInst("RET NC");
 
-    uint16_t nn = popWord();
-    tick(8);
+    word nn = PopWord();
+    Tick(8);
 
     if (!R.FC) {
-        tick(4);
+        Tick(4);
 
         R.PC = nn;
-        tick(8);
+        Tick(8);
     }
 }
 
@@ -67,14 +67,14 @@ static void _RET_C()
 {
     LogInst("RET C");
 
-    uint16_t nn = popWord();
-    tick(8);
+    word nn = PopWord();
+    Tick(8);
 
     if (R.FC) {
-        tick(4);
+        Tick(4);
 
         R.PC = nn;
-        tick(8);
+        Tick(8);
     }
 }
 
@@ -82,11 +82,11 @@ static void _RETI()
 {
     LogInst("RETI");
     
-    uint16_t nn = popWord();
-    tick(8);
+    word nn = PopWord();
+    Tick(8);
 
     R.PC = nn;
-    tick(8);
+    Tick(8);
 
     IME = true;
 }

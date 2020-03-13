@@ -20,7 +20,7 @@ void sdlAudioCallback(void * userdata, uint8_t * stream, int length)
 
     sample *= 2;
 
-    if (VolumeControl.LeftVinEnable) {
+    if (VolumeControl.LeftVinEnabled) {
         for (int i = 0; i < dataLength; i += 2) {
             data[i] = sample; 
         }
@@ -31,7 +31,7 @@ void sdlAudioCallback(void * userdata, uint8_t * stream, int length)
         }
     }
 
-    if (VolumeControl.RightVinEnable) {
+    if (VolumeControl.RightVinEnabled) {
         for (int i = 1; i < dataLength; i += 2) {
             data[i] = sample;
         }
@@ -43,7 +43,7 @@ void sdlAudioCallback(void * userdata, uint8_t * stream, int length)
     }
 }
 
-void audioInit()
+void AudioInit()
 {
     SDL_AudioSpec request;
     memset(&request, 0, sizeof(request));
@@ -65,7 +65,7 @@ void audioInit()
     SDL_PauseAudioDevice(sdlAudioDev, false);
 }
 
-void audioTerm()
+void AudioTerm()
 {
     SDL_CloseAudioDevice(sdlAudioDev);
 }

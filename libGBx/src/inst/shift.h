@@ -72,13 +72,13 @@ static void _SLA_L()
 static void _SLA_pHL()
 {
     LogInst("SLA (HL)");
-    uint8_t n = readByte(R.HL);
-    tick(4);
+    byte n = ReadByte(R.HL);
+    Tick(4);
 
     _SLA(n);
 
-    writeByte(R.HL, n);
-    tick(4);
+    WriteByte(R.HL, n);
+    Tick(4);
 }
 
 static void _SRA_A()
@@ -126,13 +126,13 @@ static void _SRA_L()
 static void _SRA_pHL()
 {
     LogInst("_SRA (HL)");
-    uint8_t n = readByte(R.HL);
-    tick(4);
+    byte n = ReadByte(R.HL);
+    Tick(4);
 
     _SRA(n);
 
-    writeByte(R.HL, n);
-    tick(4);
+    WriteByte(R.HL, n);
+    Tick(4);
 }
 
 static void _SRL_A()
@@ -180,13 +180,13 @@ static void _SRL_L()
 static void _SRL_pHL()
 {
     LogInst("_SRL (HL)");
-    uint8_t n = readByte(R.HL);
-    tick(4);
+    byte n = ReadByte(R.HL);
+    Tick(4);
 
     _SRL(n);
 
-    writeByte(R.HL, n);
-    tick(4);
+    WriteByte(R.HL, n);
+    Tick(4);
 }
 
 #undef _SRL

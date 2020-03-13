@@ -4,7 +4,7 @@
 #include "memory.h"
 #include "unit.h"
 
-const uint16_t RAM_OFFSET = 0xC100;
+const word RAM_OFFSET = 0xC100;
 
 void setup() 
 {
@@ -68,46 +68,46 @@ MAKE_SLA_TEST(L);
 
 UNIT_TEST(SLA_pHL_00)
 {
-    writeByte(R.HL, 0x00);
+    WriteByte(R.HL, 0x00);
     _SLA_pHL();
     unit_assert_true(R.FZ);
     unit_assert_false(R.FN);
     unit_assert_false(R.FH);
     unit_assert_false(R.FC);
-    unit_assert_hex_eq(0x00, readByte(R.HL));
+    unit_assert_hex_eq(0x00, ReadByte(R.HL));
 }
 
 UNIT_TEST(SLA_pHL_01)
 {
-    writeByte(R.HL, 0x01);
+    WriteByte(R.HL, 0x01);
     _SLA_pHL();
     unit_assert_false(R.FZ);
     unit_assert_false(R.FN);
     unit_assert_false(R.FH);
     unit_assert_false(R.FC);
-    unit_assert_hex_eq(0x02, readByte(R.HL));
+    unit_assert_hex_eq(0x02, ReadByte(R.HL));
 }
 
 UNIT_TEST(SLA_pHL_80)
 {
-    writeByte(R.HL, 0x80);
+    WriteByte(R.HL, 0x80);
     _SLA_pHL();
     unit_assert_true(R.FZ);
     unit_assert_false(R.FN);
     unit_assert_false(R.FH);
     unit_assert_true(R.FC);
-    unit_assert_hex_eq(0x00, readByte(R.HL));
+    unit_assert_hex_eq(0x00, ReadByte(R.HL));
 }
 
 UNIT_TEST(SLA_pHL_FF)
 {
-    writeByte(R.HL, 0xFF);
+    WriteByte(R.HL, 0xFF);
     _SLA_pHL();
     unit_assert_false(R.FZ);
     unit_assert_false(R.FN);
     unit_assert_false(R.FH);
     unit_assert_true(R.FC);
-    unit_assert_hex_eq(0xFE, readByte(R.HL));
+    unit_assert_hex_eq(0xFE, ReadByte(R.HL));
 }
 
 UNIT_TEST_SUITE(SLA)
@@ -199,35 +199,35 @@ MAKE_SRA_TEST(L);
 
 UNIT_TEST(SRA_pHL_00)
 {
-    writeByte(R.HL, 0x00);
+    WriteByte(R.HL, 0x00);
     _SRA_pHL();
     unit_assert_true(R.FZ);
     unit_assert_false(R.FN);
     unit_assert_false(R.FH);
     unit_assert_false(R.FC);
-    unit_assert_hex_eq(0x00, readByte(R.HL));
+    unit_assert_hex_eq(0x00, ReadByte(R.HL));
 }
 
 UNIT_TEST(SRA_pHL_01)
 {
-    writeByte(R.HL, 0x01);
+    WriteByte(R.HL, 0x01);
     _SRA_pHL();
     unit_assert_true(R.FZ);
     unit_assert_false(R.FN);
     unit_assert_false(R.FH);
     unit_assert_true(R.FC);
-    unit_assert_hex_eq(0x00, readByte(R.HL));
+    unit_assert_hex_eq(0x00, ReadByte(R.HL));
 }
 
 UNIT_TEST(SRA_pHL_FF)
 {
-    writeByte(R.HL, 0xFF);
+    WriteByte(R.HL, 0xFF);
     _SRA_pHL();
     unit_assert_false(R.FZ);
     unit_assert_false(R.FN);
     unit_assert_false(R.FH);
     unit_assert_true(R.FC);
-    unit_assert_hex_eq(0xFF, readByte(R.HL));
+    unit_assert_hex_eq(0xFF, ReadByte(R.HL));
 }
 
 UNIT_TEST_SUITE(SRA)
@@ -322,46 +322,46 @@ MAKE_SRL_TEST(L);
 
 UNIT_TEST(SRL_pHL_00)
 {
-    writeByte(R.HL, 0x00);
+    WriteByte(R.HL, 0x00);
     _SRL_pHL();
     unit_assert_true(R.FZ);
     unit_assert_false(R.FN);
     unit_assert_false(R.FH);
     unit_assert_false(R.FC);
-    unit_assert_hex_eq(0x00, readByte(R.HL));
+    unit_assert_hex_eq(0x00, ReadByte(R.HL));
 }
 
 UNIT_TEST(SRL_pHL_01)
 {
-    writeByte(R.HL, 0x01);
+    WriteByte(R.HL, 0x01);
     _SRL_pHL();
     unit_assert_true(R.FZ);
     unit_assert_false(R.FN);
     unit_assert_false(R.FH);
     unit_assert_true(R.FC);
-    unit_assert_hex_eq(0x00, readByte(R.HL));
+    unit_assert_hex_eq(0x00, ReadByte(R.HL));
 }
 
 UNIT_TEST(SRL_pHL_AA)
 {
-    writeByte(R.HL, 0xAA);
+    WriteByte(R.HL, 0xAA);
     _SRL_pHL();
     unit_assert_false(R.FZ);
     unit_assert_false(R.FN);
     unit_assert_false(R.FH);
     unit_assert_false(R.FC);
-    unit_assert_hex_eq(0x55, readByte(R.HL));
+    unit_assert_hex_eq(0x55, ReadByte(R.HL));
 }
 
 UNIT_TEST(SRL_pHL_FF)
 {
-    writeByte(R.HL, 0xFF);
+    WriteByte(R.HL, 0xFF);
     _SRL_pHL();
     unit_assert_false(R.FZ);
     unit_assert_false(R.FN);
     unit_assert_false(R.FH);
     unit_assert_true(R.FC);
-    unit_assert_hex_eq(0x7F, readByte(R.HL));
+    unit_assert_hex_eq(0x7F, ReadByte(R.HL));
 }
 
 UNIT_TEST_SUITE(SRL)
@@ -443,24 +443,24 @@ MAKE_SWAP_TEST(L);
 
 UNIT_TEST(SWAP_pHL_00)
 {
-    writeByte(R.HL, 0x00);
+    WriteByte(R.HL, 0x00);
     _SWAP_pHL();
     unit_assert_true(R.FZ);
     unit_assert_false(R.FN);
     unit_assert_false(R.FH);
     unit_assert_false(R.FC);
-    unit_assert_hex_eq(0x00, readByte(R.HL));
+    unit_assert_hex_eq(0x00, ReadByte(R.HL));
 }
                                                 
 UNIT_TEST(SWAP_pHL_0A)
 {
-    writeByte(R.HL, 0x0A);
+    WriteByte(R.HL, 0x0A);
     _SWAP_pHL();
     unit_assert_false(R.FZ);
     unit_assert_false(R.FN);
     unit_assert_false(R.FH);
     unit_assert_false(R.FC);
-    unit_assert_hex_eq(0xA0, readByte(R.HL));
+    unit_assert_hex_eq(0xA0, ReadByte(R.HL));
 }
 
 UNIT_TEST_SUITE(SWAP)

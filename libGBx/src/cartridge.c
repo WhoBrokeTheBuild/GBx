@@ -2,6 +2,7 @@
 
 #include "clock.h"
 #include "log.h"
+#include "types.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,7 +10,8 @@
 
 #define HEADER_OFFSET 0x0100
 
-typedef enum {
+typedef enum
+{
     MBC_NONE,
     MBC_MBC1,
     MBC_MBC2,
@@ -19,50 +21,66 @@ typedef enum {
     MBC_MBC7,
     MBC_MMM01,
 
-} mbc_type_t;
+} mbc_type;
 
-cartridge_header_t CartridgeHeader;
+cartridge_header CartridgeHeader;
 
 bool ColorEnabled = false;
 bool SuperEnabled = false;
 
 bool HasCartridgeBattery = false;
 bool HasCartridgeTimer   = false;
-bool HasSRAM             = false;
 bool HasCartridgeSRAM    = false;
 
-mbc_type_t MBCType = MBC_NONE;
+mbc_type MBCType = MBC_NONE;
 
-typedef struct {
+typedef struct
+{
     struct {
         union {
             struct {
-                uint8_t Lower:5;
-                uint8_t Upper:2;
+                byte Lower:5;
+                byte Upper:2;
             };
-            uint8_t Full:7;
+            byte Full:7;
         };
         bool RAMMode:1;
     };
-    uint8_t data;
-} bank_t;
+    byte raw;
 
-bank_t Bank;
+} mbc_bank;
 
-bool SRAMEnabled = false;
+mbc_bank MBCBank;
 
-uint8_t * SRAM0 = NULL;
-uint8_t * SRAM = NULL;
+bool SRAMEnabled;
 
-uint8_t * ROM0 = NULL;
-uint8_t * ROM = NULL;
+byte SRAM[SRAM_BANK_COUNT][SRAM_BANK_SIZE];
 
-void writeCartridgeMBC(uint16_t address, uint8_t data)
+uint SRAMBank;
+
+byte ROM[ROM_BANK_COUNT][ROM_BANK_SIZE];
+
+uint ROMBank;
+
+void ResetCartridgeMBC()
+{
+    MBCBank.raw = 0x00;
+
+    SRAMEnabled = false;
+    SRAMBank = 0;
+
+    for (uint i = 0; i < SRAM_BANK_COUNT; ++i) {
+        memset(SRAM[i], 0, sizeof(SRAM[i]));
+    }
+
+    ROMBank = 1;
+}
+
+void WriteCartridgeMBC(word address, byte data)
 {
     if (MBCType == MBC_MBC1) {
         if (address <= 0x1FFF) {
             // RAM Enable
-            LogInfo("%04X %02X", address, data);
             SRAMEnabled = ((data & 0x0F) == 0x0A);
             LogInfo("SRAM Enabled:%s", SRAMEnabled ? "true" : "false");
         }
@@ -72,22 +90,22 @@ void writeCartridgeMBC(uint16_t address, uint8_t data)
                 data = 1;
             }
             
-            Bank.Lower = data;
-            ROM = ROM0 + (0x4000 * Bank.Full);
+            MBCBank.Lower = data;
+            ROMBank = MBCBank.Full;
         }
         else if (address <= 0x5FFF) {
             // RAM Bank Number or ROM Upper Bank Number
-            Bank.Upper = data;
-            if (Bank.RAMMode) {
-                SRAM = SRAM0 + (0x2000 * Bank.Upper);
+            MBCBank.Upper = data;
+            if (MBCBank.RAMMode) {
+                SRAMBank = MBCBank.Upper;
             }
             else {
-                ROM = ROM0 + (0x4000 * Bank.Full);
+                ROMBank = MBCBank.Full;
             }
         }
         else {
             // ROM/RAM Mode Select
-            Bank.RAMMode = (data == 1);
+            MBCBank.RAMMode = (data == 1);
         }
     }
     else if (MBCType == MBC_MBC2) {
@@ -104,15 +122,16 @@ void writeCartridgeMBC(uint16_t address, uint8_t data)
                 data = 1;
             }
             
-            Bank.Full = data;
-            ROM = ROM0 + (0x4000 * Bank.Full);
+            MBCBank.Full = data;
+            ROMBank = MBCBank.Full;
         }
         else if (address <= 0x5FFF) {
+            
         }
     }
 }
 
-bool loadCartridge(const char * filename)
+bool LoadCartridgeROM(const char * filename)
 {
     LogVerbose(1, "Opening ROM: '%s'", filename);
 
@@ -124,10 +143,7 @@ bool loadCartridge(const char * filename)
 
     LogVerbose(1, "ROM Size %zu", size);
 
-    ROM0 = (uint8_t *)malloc(size);
-    ROM = ROM0 + 0x4000; // Default to Bank 1
-
-    size_t bytesRead = fread(ROM0, 1, size, file);
+    size_t bytesRead = fread(ROM, 1, size, file);
     fclose(file);
 
     LogVerbose(1, "Read %zu bytes", bytesRead);
@@ -137,9 +153,9 @@ bool loadCartridge(const char * filename)
         return false;
     }
 
-    memcpy(CartridgeHeader.raw, ROM0 + HEADER_OFFSET, sizeof(CartridgeHeader));
+    memcpy(CartridgeHeader.raw, &ROM[0][HEADER_OFFSET], sizeof(CartridgeHeader));
 
-    LogVerbose(1, "ROM Title: %.*s", 15, CartridgeHeader.Title);
+    LogVerbose(1, "ROM Title: %.*s", (int)sizeof(CartridgeHeader.Title), CartridgeHeader.Title);
 
     ColorEnabled = (CartridgeHeader.ColorEnabled == 0x80);
     SuperEnabled = (CartridgeHeader.SuperEnabled != 0x00);
@@ -147,8 +163,6 @@ bool loadCartridge(const char * filename)
     if (SuperEnabled) {
         ClockSpeed = SGB_CLOCK_SPEED;
     }
-
-    // CartridgeHeader.ROMType
 
     switch (CartridgeHeader.CartridgeType) {
     case 0x00:
@@ -161,12 +175,12 @@ bool loadCartridge(const char * filename)
     case 0x02:
         // MBC1+RAM
         MBCType = MBC_MBC1;
-        HasSRAM = true;
+        HasCartridgeSRAM = true;
         break;
     case 0x03:
         // MBC1+RAM+Battery
         MBCType = MBC_MBC1;
-        HasSRAM = true;
+        HasCartridgeSRAM = true;
         HasCartridgeBattery = true;
         break;
     case 0x05:
@@ -180,11 +194,11 @@ bool loadCartridge(const char * filename)
         break;
     case 0x08:
         // RAM
-        HasSRAM = true;
+        HasCartridgeSRAM = true;
         break;
     case 0x09:
         // RAM+Battery
-        HasSRAM = true;
+        HasCartridgeSRAM = true;
         HasCartridgeBattery = true;
         break;
     case 0x0B:
@@ -212,7 +226,7 @@ bool loadCartridge(const char * filename)
         // MBC3+Timer+RAM+Battery
         MBCType = MBC_MBC3;
         HasCartridgeTimer = true;
-        HasSRAM = true;
+        HasCartridgeSRAM = true;
         HasCartridgeBattery = true;
         break;
     case 0x11:
@@ -222,12 +236,12 @@ bool loadCartridge(const char * filename)
     case 0x12:
         // MBC3+RAM
         MBCType = MBC_MBC3;
-        HasSRAM = true;
+        HasCartridgeSRAM = true;
         break;
     case 0x13:
         // MBC3+RAM+Battery
         MBCType = MBC_MBC3;
-        HasSRAM = true;
+        HasCartridgeSRAM = true;
         HasCartridgeBattery = true;
         break;
     case 0x19:
@@ -237,12 +251,12 @@ bool loadCartridge(const char * filename)
     case 0x1A:
         // MBC5+RAM
         MBCType = MBC_MBC5;
-        HasSRAM = true;
+        HasCartridgeSRAM = true;
         break;
     case 0x1B:
         // MBC5+RAM+Battery
         MBCType = MBC_MBC5;
-        HasSRAM = true;
+        HasCartridgeSRAM = true;
         HasCartridgeBattery = true;
         break;
     case 0x1C:
@@ -267,7 +281,7 @@ bool loadCartridge(const char * filename)
     case 0x22:
         // MBC7+Sensor+Rumble+RAM+Battery
         MBCType = MBC_MBC7;
-        HasSRAM = true;
+        HasCartridgeSRAM = true;
         HasCartridgeBattery = true;
         break;
     case 0xFC:
@@ -287,59 +301,33 @@ bool loadCartridge(const char * filename)
     }
 
     switch (CartridgeHeader.RAMType) {
-    case 0x01:
-        // 2KB
-        SRAM0 = (uint8_t *)malloc(2048);
+    case 0x01: // 2KB
+    case 0x02: // 8KB
+    case 0x03: // 32KB (4 mbc_banks of 8KB)
+    case 0x04: // 128KB (16 mbc_banks of 8KB)
+    case 0x05: // 64KB (8 mbc_banks of 8KB)
         SRAMEnabled = true;
-        break;
-    case 0x02:
-        // 8KB
-        SRAM0 = (uint8_t *)malloc(8120);
-        SRAMEnabled = true;
-        break;
-    case 0x03:
-        // 32KB (4 banks of 8KB)
-        SRAM0 = (uint8_t *)malloc(32768);
-        SRAMEnabled = true;
-        break;
-    case 0x04:
-        // 128KB (16 banks of 8KB
-        SRAM0 = (uint8_t *)malloc(131072);
-        SRAMEnabled = true;
-        break;
-    case 0x05:
-        // 64KB (8 banks of 8KB
-        SRAM0 = (uint8_t *)malloc(65536);
-        SRAMEnabled = true;
-        break;
     default:
         break;
     }
 
     if (VerboseLevel >= 1) {
-        printCartridge();
+        PrintCartridge();
     }
+
+    ResetCartridgeMBC();
 
     return true;
 }
 
-void freeCartridge() 
-{
-    free(ROM0);
-    ROM0 = NULL;
-
-    free(SRAM0);
-    SRAM0 = NULL;
-}
-
-void printCartridgeMBC()
+void PrintCartridgeMBC()
 {
     LogInfo("MBC: Lower=%02X Upper=%01X Full=%04X Mode=%s", 
-        Bank.Lower, Bank.Upper, Bank.Full, 
-        (Bank.RAMMode ? "RAM" : "ROM"));
+        MBCBank.Lower, MBCBank.Upper, MBCBank.Full, 
+        (MBCBank.RAMMode ? "RAM" : "ROM"));
 }
 
-void printCartridge()
+void PrintCartridge()
 {
     switch (CartridgeHeader.CartridgeType) {
     case 0x00:
@@ -433,40 +421,40 @@ void printCartridge()
 
     switch (CartridgeHeader.ROMType) {
     case 0x00:
-        LogInfo("ROM: 32KB (no banks)");
+        LogInfo("ROM: 32KB (no mbc_banks)");
         break;
     case 0x01:
-        LogInfo("ROM: 64KB (4 banks)");
+        LogInfo("ROM: 64KB (4 mbc_banks)");
         break;
     case 0x02:
-        LogInfo("ROM: 128KB (8 banks)");
+        LogInfo("ROM: 128KB (8 mbc_banks)");
         break;
     case 0x03:
-        LogInfo("ROM: 256KB (16 banks)");
+        LogInfo("ROM: 256KB (16 mbc_banks)");
         break;
     case 0x04:
-        LogInfo("ROM: 512KB (32 banks)");
+        LogInfo("ROM: 512KB (32 mbc_banks)");
         break;
     case 0x05:
-        LogInfo("ROM: 1MB (64 banks)");
+        LogInfo("ROM: 1MB (64 mbc_banks)");
         break;
     case 0x06:
-        LogInfo("ROM: 2MB (128 banks)");
+        LogInfo("ROM: 2MB (128 mbc_banks)");
         break;
     case 0x07:
-        LogInfo("ROM: 4MB (256 banks)");
+        LogInfo("ROM: 4MB (256 mbc_banks)");
         break;
     case 0x08:
-        LogInfo("ROM: 8MB (512 banks)");
+        LogInfo("ROM: 8MB (512 mbc_banks)");
         break;
     case 0x52:
-        LogInfo("ROM: 1.1MB (72 banks)");
+        LogInfo("ROM: 1.1MB (72 mbc_banks)");
         break;
     case 0x53:
-        LogInfo("ROM: 1.2MB (80 banks)");
+        LogInfo("ROM: 1.2MB (80 mbc_banks)");
         break;
     case 0x54:
-        LogInfo("ROM: 1.5MB (96 banks)");
+        LogInfo("ROM: 1.5MB (96 mbc_banks)");
         break;
     default:
         LogInfo("ROM: Type %02X unknown", CartridgeHeader.ROMType);
@@ -484,13 +472,13 @@ void printCartridge()
         LogInfo("RAM: 8KB");
         break;
     case 0x03:
-        LogInfo("RAM: 32KB (4 banks of 8KB)");
+        LogInfo("RAM: 32KB (4 mbc_banks of 8KB)");
         break;
     case 0x04:
-        LogInfo("RAM: 128KB (16 banks of 8KB");
+        LogInfo("RAM: 128KB (16 mbc_banks of 8KB");
         break;
     case 0x05:
-        LogInfo("RAM: 64KB (8 banks of 8KB");
+        LogInfo("RAM: 64KB (8 mbc_banks of 8KB");
         break;
     default:
         LogInfo("RAM: Type %02X unknown", CartridgeHeader.RAMType);

@@ -383,23 +383,23 @@ const char * bit_instructionDefinitions[] = {
     "SET $b, A",
 };
 
-uint16_t disassemble(char * str, size_t len, uint16_t addr)
+word Disassemble(char * str, uint len, word addr)
 {
     int bit = 0;
     const char * pch;
     
-    uint8_t op = readByte(addr);
+    byte op = ReadByte(addr);
     ++addr;
     
     if (op == 0xCB) {
-        op = readByte(addr);
+        op = ReadByte(addr);
         ++addr;
         
         if (op < 0x40) {
             pch = CB_instructionDefinitions[op];
         }
         else {
-            uint8_t tmp = op - 0x40;
+            byte tmp = op - 0x40;
             // 0-7
             bit = (tmp % 8) + (tmp / 16);
             // 0-3
@@ -413,21 +413,21 @@ uint16_t disassemble(char * str, size_t len, uint16_t addr)
         pch = instructionDefinitions[op];
     }
     
-    size_t i = 0;
+    uint i = 0;
     while (i < len - 1) {
         if (*pch == '$') {
             ++pch;
             switch (*pch) {
             case 'w': // unsigned word
-                i += snprintf(str + i, len - i, "%04Xh", readWord(addr));
+                i += snprintf(str + i, len - i, "%04Xh", ReadWord(addr));
                 addr += 2;
                 break;
             case 'u': // unsigned byte
-                i += snprintf(str + i, len - i, "%02Xh", readByte(addr));
+                i += snprintf(str + i, len - i, "%02Xh", ReadByte(addr));
                 ++addr;
                 break;
             case 's': // signed byte
-                i += snprintf(str + i, len - i, "%d", (int8_t)readByte(addr));
+                i += snprintf(str + i, len - i, "%d", (sbyte)ReadByte(addr));
                 ++addr;
                 break;
             case 'b': // bit, for CB instructions

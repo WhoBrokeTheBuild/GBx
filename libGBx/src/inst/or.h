@@ -54,16 +54,16 @@ static void _OR_L()
 static void _OR_pHL()
 {
     LogInst("OR HL");
-    uint8_t n = readByte(R.HL);
-    tick(4);
+    byte n = ReadByte(R.HL);
+    Tick(4);
 
     _OR(n);
 }
 
 static void _OR_u()
 {
-    uint8_t u = nextByte();
-    tick(4);
+    byte u = NextByte();
+    Tick(4);
 
     LogInst("OR %02Xh", u);
 

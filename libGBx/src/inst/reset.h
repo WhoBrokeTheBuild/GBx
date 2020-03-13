@@ -54,13 +54,13 @@ static void _RES_b_L(int bit)
 static void _RES_b_pHL(int bit)
 {
     LogInst("RES %d,(HL)", bit);
-    uint8_t n = readByte(R.HL);
-    tick(4);
+    byte n = ReadByte(R.HL);
+    Tick(4);
 
     _RES(n, bit);
 
-    writeByte(R.HL, n);
-    tick(4);
+    WriteByte(R.HL, n);
+    Tick(4);
 }
 
 #endif // RESET_H

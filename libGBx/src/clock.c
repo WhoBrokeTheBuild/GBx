@@ -29,11 +29,11 @@ unsigned ClockSpeed = GB_CLOCK_SPEED;
 // 	return temp;
 // }
 
-void tick(unsigned ticks)
+void Tick(unsigned ticks)
 {
-    timerTick(ticks);
-    lcdTick(ticks);
-    apuTick(ticks);
+    TimerTick(ticks);
+    LCDTick(ticks);
+    APUTick(ticks);
     TotalTicks += ticks;
     
     // ticksSinceLastSleep += ticks;

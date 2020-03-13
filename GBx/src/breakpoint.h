@@ -3,14 +3,14 @@
 
 #include <stdbool.h>
 
-void setBreakpoint(const char * reg, unsigned value);
+void SetBreakpoint(const char * reg, unsigned value);
 
-void clearBreakpoint(const char * reg, unsigned value);
+void ClearBreakpoint(const char * reg, unsigned value);
 
-void clearAllBreakpoints();
+void ClearAllBreakpoints();
 
-void printBreakpoints();
+bool AtBreakpoint();
 
-bool atBreakpoint();
+void PrintBreakpoints();
 
 #endif // BREAKPOINT_H

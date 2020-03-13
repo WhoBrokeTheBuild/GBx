@@ -9,29 +9,29 @@
 static void _POP_AF()
 {
     LogInst("POP AF");
-    R.AF = popWord();
-    tick(12);
+    R.AF = PopWord();
+    Tick(12);
 }
 
 static void _POP_BC()
 {
     LogInst("POP BC");
-    R.BC = popWord();
-    tick(12);
+    R.BC = PopWord();
+    Tick(12);
 }
 
 static void _POP_DE()
 {
     LogInst("POP DE");
-    R.DE = popWord();
-    tick(12);
+    R.DE = PopWord();
+    Tick(12);
 }
 
 static void _POP_HL()
 {
     LogInst("POP HL");
-    R.HL = popWord();
-    tick(12);
+    R.HL = PopWord();
+    Tick(12);
 }
 
 #endif // POP_H

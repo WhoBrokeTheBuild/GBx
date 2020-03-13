@@ -55,16 +55,16 @@ static void _CP_L()
 static void _CP_pHL()
 {
     LogInst("CP (HL)");
-    uint8_t pHL = readByte(R.HL);
-    tick(4);
+    byte pHL = ReadByte(R.HL);
+    Tick(4);
 
     _CP(pHL);
 }
 
 static void _CP_u()
 {
-    uint8_t u = nextByte();
-    tick(4);
+    byte u = NextByte();
+    Tick(4);
 
     LogInst("CP %02Xh", u);
 

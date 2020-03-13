@@ -54,16 +54,16 @@ static void _XOR_L()
 static void _XOR_pHL()
 {
     LogInst("XOR HL");
-    uint8_t n = readByte(R.HL);
-    tick(4);
+    byte n = ReadByte(R.HL);
+    Tick(4);
 
     _XOR(n);
 }
 
 static void _XOR_u()
 {
-    uint8_t u = nextByte();
-    tick(4);
+    byte u = NextByte();
+    Tick(4);
 
     LogInst("XOR %02Xh", u);
 

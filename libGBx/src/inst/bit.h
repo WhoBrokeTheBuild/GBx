@@ -56,8 +56,8 @@ static void _BIT_b_L(int bit)
 static void _BIT_b_pHL(int bit)
 {
     LogInst("BIT %d,(HL)", bit);
-    uint8_t n = readByte(R.HL);
-    tick(4);
+    byte n = ReadByte(R.HL);
+    Tick(4);
 
     _BIT(n, bit);
 }

@@ -1,156 +1,172 @@
 #ifndef LCD_H
 #define LCD_H
 
-#include <stdbool.h>
-#include <stdint.h>
+#include "types.h"
+
+#define LCD_WIDTH  (160)
+#define LCD_HEIGHT (144)
+#define LCD_MAX_LY (LCD_HEIGHT + 10)
+
+#define LCD_COLOR_WHITE      (0xFF)
+#define LCD_COLOR_LIGHT_GRAY (0xCC)
+#define LCD_COLOR_DARK_GRAY  (0x77)
+#define LCD_COLOR_BLACK      (0x00)
+
+#define LCD_BUFFER_WIDTH      (256)
+#define LCD_BUFFER_HEIGHT     (256)
+#define LCD_BUFFER_COMPONENTS (3) // RGB
+
+#define LCD_BUFFER_SIZE \
+    (LCD_BUFFER_WIDTH * LCD_BUFFER_HEIGHT * LCD_BUFFER_COMPONENTS)
+
+#define HBLANK_TICK_COUNT        (204)
+#define SEARCH_SPRITE_TICK_COUNT (80)
+#define DATA_TRANSFER_TICK_COUNT (172)
+
+// 1/10th of VBlank period, or one line worth of ticks
+#define VBLANK_TICK_COUNT \
+    (HBLANK_TICK_COUNT + SEARCH_SPRITE_TICK_COUNT + DATA_TRANSFER_TICK_COUNT)
+
+extern byte LCDBuffer[LCD_BUFFER_SIZE];
 
 typedef union
 {
     struct {
-        bool     TileDisplayEnable:1;
-        bool     SpriteDisplayEnable:1;
-        unsigned SpriteSize:1;
-        unsigned TileMapSelect:1;
-        unsigned TileDataSelect:1;
-        bool     WindowDisplayEnable:1;
-        unsigned WindowTileMapSelect:1;
-        bool     LCDEnable:1;
+        bool TileDisplayEnabled:1;
+        bool SpriteDisplayEnabled:1;
+        uint SpriteSize:1;
+        uint TileMapSelect:1;
+        uint TileDataSelect:1;
+        bool WindowDisplayEnabled:1;
+        uint WindowTileMapSelect:1;
+        bool LCDEnabled:1;
     };
-    uint8_t raw;
+    byte raw;
 
-} lcd_control_t;
+} lcd_control;
 
 typedef union
 {
     struct {
-        unsigned Mode:2;
-        bool     Coincidence:1;
-        bool     IntHBlank:1;
-        bool     IntVBlank:1;
-        bool     IntSearchSprite:1;
-        bool     IntCoincidence:1;
-        unsigned :1;
+        uint Mode:2;
+        bool Coincidence:1;
+        bool IntHBlank:1;
+        bool IntVBlank:1;
+        bool IntSearchSprite:1;
+        bool IntCoincidence:1;
+        uint :1;
     };
-    uint8_t raw;
+    byte raw;
 
-} lcd_status_t;
-
-#define STAT_WRITE_MASK (0b01111000)
-
-#define STAT_MODE_HBLANK         (0b00)
-#define STAT_MODE_VBLANK         (0b01)
-#define STAT_MODE_SEARCH_SPRITE  (0b10)
-#define STAT_MODE_DATA_TRANSFER  (0b11)
+} lcd_status;
 
 typedef union
 {
     struct {
-        unsigned Color0:2;
-        unsigned Color1:2;
-        unsigned Color2:2;
-        unsigned Color3:2;
+        uint Color0:2;
+        uint Color1:2;
+        uint Color2:2;
+        uint Color3:2;
     };
-    uint8_t raw;
+    byte raw;
 
-} palette_t;
+} palette;
 
 typedef union
 {
     struct {
-        uint8_t Y;
-        uint8_t X;
-        uint8_t Pattern;
+        byte Y;
+        byte X;
+        byte Pattern;
         union {
             struct {
-                bool     Priority:1;
-                bool     YFlip:1;
-                bool     XFlip:1;
-                bool     Palette:1;
-                unsigned :4;
+                bool Priority:1;
+                bool YFlip:1;
+                bool XFlip:1;
+                bool Palette:1;
+                uint :4;
             };
-            uint8_t Attributes;
+            byte Attributes;
         };
     };
-    uint32_t raw;
+    dword raw;
 
-} sprite_t;
+} sprite;
 
 // FF40 - LCD Control
 
-extern lcd_control_t LCDC;
+extern lcd_control LCDC;
 
 // FF41 - LCD Status
 
-extern lcd_status_t STAT;
+extern lcd_status STAT;
+
+#define STAT_WRITE_MASK (0b01111000)
+
+#define STAT_MODE_HBLANK         (0)
+#define STAT_MODE_VBLANK         (1)
+#define STAT_MODE_SEARCH_SPRITE  (2)
+#define STAT_MODE_DATA_TRANSFER  (3)
 
 // FF42 - Scroll Y
 
-extern uint8_t SCY;
+extern byte SCY;
 
 // FF43 - Scroll X
 
-extern uint8_t SCX;
+extern byte SCX;
 
 // FF44 - LCD Y Coordinate
 
-extern uint8_t LY;
+extern byte LY;
 
 // FF45 - LY Compare
 
-extern uint8_t LYC;
+extern byte LYC;
 
 // FF4A - Window Y Position
 
-extern uint8_t WX;
+extern byte WX;
 
 // FF4B - Window X Position
 
-extern uint8_t WY;
+extern byte WY;
 
 // FF47 - BG Palette Data
 
-extern palette_t BGP;
+extern palette BGP;
 
 // FF48 - Object Palette 0 Data
 
-extern palette_t OBP0;
+extern palette OBP0;
 
 // FF49 - Object Palette 1 Data
 
-extern palette_t OBP1;
-
-// VRAM Bank 0
-
-extern uint8_t VRAM0[0x1FFF];
-
-// VRAM Bank 1
-
-extern uint8_t VRAM1[0x1FFF];
+extern palette OBP1;
 
 // VRAM Switchable Bank - 8000-9FFF
 
-extern uint8_t * VRAM;
+#define VRAM_BANK_COUNT (2)
+#define VRAM_BANK_SIZE  (0x2000)
+
+extern byte VRAM[VRAM_BANK_COUNT][VRAM_BANK_SIZE];
+
+extern uint VRAMBank;
 
 // Object Attribute Memory - FE00-FE9F
 
-extern uint8_t OAM[0xA0];
+extern byte OAM[0xA0];
 
-#define BACKBUFFER_WIDTH  (256)
-#define BACKBUFFER_HEIGHT (256)
-#define BACKBUFFER_COMP   (3)
+void ResetLCD();
 
-#define SCREEN_WIDTH  (160)
-#define SCREEN_HEIGHT (144)
+void DrawTiles();
+void DrawSprites();
 
-extern uint8_t Backbuffer[BACKBUFFER_WIDTH * BACKBUFFER_HEIGHT * BACKBUFFER_COMP];
+void LCDTick(uint cycles);
 
-void lcdTick(unsigned cycles);
-
-void printLCDC();
-void printSTAT();
-void printLCDInfo();
-void printBGP();
-void printOBP0();
-void printOBP1();
+void PrintLCDC();
+void PrintSTAT();
+void PrintPalettes();
+void PrintLCDCoordinates();
 
 #endif // LCD_H

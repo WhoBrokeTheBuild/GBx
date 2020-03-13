@@ -1,20 +1,20 @@
 #ifndef ALU_H
 #define ALU_H
 
-#include <stdint.h>
+#include "types.h"
 
-uint16_t add16(uint16_t a, uint16_t b);
+word add16(word a, word b);
 
-uint16_t add16s(uint16_t a, int8_t b);
+word add16s(word a, sbyte b);
 
-uint8_t add8(uint8_t a, uint8_t b);
+byte add8(byte a, byte b);
 
-uint8_t sub8(uint8_t a, uint8_t b);
+byte sub8(byte a, byte b);
 
-uint8_t and8(uint8_t a, uint8_t b);
+byte and8(byte a, byte b);
 
-uint8_t or8(uint8_t a, uint8_t b);
+byte or8(byte a, byte b);
 
-uint8_t xor8(uint8_t a, uint8_t b);
+byte xor8(byte a, byte b);
 
 #endif // ALU_H
