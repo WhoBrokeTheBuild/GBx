@@ -38,16 +38,6 @@ const char * LCD_MODE_STR[4] = {
     "DataTransfer",
 };
 
-const word TILE_MAP_ADDR[2] = {
-    0x9800, // 9800-9BFF
-    0x9C00, // 9C00-9FFF
-};
-
-const word TILE_DATA_ADDR[2] = {
-    0x9000, // 8800-97FF
-    0x8000, // 8000-8FFF
-};
-
 void ResetLCD()
 {
     VRAMBank = 0;
@@ -73,17 +63,55 @@ void ResetLCD()
     OBP1.raw = 0b11100100;
 }
 
-void DrawTiles()
-{    
-    const uint TILE_WIDTH     = 8;
-    const uint TILE_HEIGHT    = 8;
-    const uint TILES_PER_ROW  = 32;
-    const uint TILE_DATA_SIZE = 16;
+byte GetColor(palette * pal, int bit, byte d1, byte d2)
+{
+    bit = 0x80 >> bit;
+    bool high = (d2 & bit);
+    bool low  = (d1 & bit);
+    byte colorIndex = 
+        (high ? 0b10 : 0b00) | 
+        (low  ? 0b01 : 0b00);
+    
+    switch (colorIndex) {
+    case 0b00:
+        colorIndex = pal->Color0;
+        break;
+    case 0b01:
+        colorIndex = pal->Color1;
+        break;
+    case 0b10:
+        colorIndex = pal->Color2;
+        break;
+    case 0b11:
+        colorIndex = pal->Color3;
+        break;
+    }
 
+    byte color = 0;
+    switch (colorIndex) {
+    case 0b00:
+        color = LCD_COLOR_WHITE;
+        break;
+    case 0b01:
+        color = LCD_COLOR_LIGHT_GRAY;
+        break;
+    case 0b10:
+        color = LCD_COLOR_DARK_GRAY;
+        break;
+    case 0b11:
+        color = LCD_COLOR_BLACK;
+        break;
+    }
+
+    return color;
+}
+
+void DrawTiles()
+{
     byte WXM7 = WX - 7;
 
     bool usingWindow = (LCDC.WindowDisplayEnabled && WY <= LY);
-    uint mapSelect = (usingWindow ? LCDC.WindowTileMapSelect : LCDC.TileMapSelect);
+    uint mapSelect = (usingWindow ? LCDC.WindowTileMapSelect : LCDC.BGTileMapSelect);
     word mapBaseAddress = TILE_MAP_ADDR[mapSelect];
     word dataBaseAddress = TILE_DATA_ADDR[LCDC.TileDataSelect];
 
@@ -112,47 +140,12 @@ void DrawTiles()
 
         word dataOffset = dataBaseAddress + (tileIndex * TILE_DATA_SIZE);
 
-        byte line = (yPos % 8) * 2;
+        byte line = (yPos % TILE_HEIGHT) * 2;
         byte data1 = ReadByte(dataOffset + line);
         byte data2 = ReadByte(dataOffset + line + 1);
 
-        int bit = 0x80 >> (xPos % TILE_WIDTH);
-        bool high = (data2 & bit);
-        bool low  = (data1 & bit);
-        byte colorIndex = 
-            (high ? 0b10 : 0b00) | 
-            (low  ? 0b01 : 0b00);
-        
-        switch (colorIndex) {
-        case 0b00:
-            colorIndex = BGP.Color0;
-            break;
-        case 0b01:
-            colorIndex = BGP.Color1;
-            break;
-        case 0b10:
-            colorIndex = BGP.Color2;
-            break;
-        case 0b11:
-            colorIndex = BGP.Color3;
-            break;
-        }
-
-        byte color = 0;
-        switch (colorIndex) {
-        case 0b00:
-            color = LCD_COLOR_WHITE;
-            break;
-        case 0b01:
-            color = LCD_COLOR_LIGHT_GRAY;
-            break;
-        case 0b10:
-            color = LCD_COLOR_DARK_GRAY;
-            break;
-        case 0b11:
-            color = LCD_COLOR_BLACK;
-            break;
-        }
+        int bit = (xPos % TILE_WIDTH);
+        byte color = GetColor(&BGP, bit, data1, data2);
 
         // if (LY < 0 || LY > (LCD_HEIGHT - 1) || 
         //     pixel > 0 || pixel < (LCD_WIDTH - 1)) {
@@ -203,44 +196,8 @@ void DrawSprites()
                     bit = (0x80 >> pixel);
                 }
 
-                bool high = (data2 & bit);
-                bool low  = (data1 & bit);
-                byte colorIndex = 
-                    (high ? 0b10 : 0b00) | 
-                    (low  ? 0b01 : 0b00);
-
                 palette * pal = (spr.Palette ? &OBP1 : &OBP0);
-
-                byte color = 0;
-                switch (colorIndex) {
-                case 0b00:
-                    colorIndex = BGP.Color0;
-                    break;
-                case 0b01:
-                    colorIndex = BGP.Color1;
-                    break;
-                case 0b10:
-                    colorIndex = BGP.Color2;
-                    break;
-                case 0b11:
-                    colorIndex = BGP.Color3;
-                    break;
-                }
-
-                switch (colorIndex) {
-                case 0b00:
-                    color = LCD_COLOR_WHITE;
-                    break;
-                case 0b01:
-                    color = LCD_COLOR_LIGHT_GRAY;
-                    break;
-                case 0b10:
-                    color = LCD_COLOR_DARK_GRAY;
-                    break;
-                case 0b11:
-                    color = LCD_COLOR_BLACK;
-                    break;
-                }
+                byte color = GetColor(pal, bit, data1, data2);
 
                 int x = -pixel + 7;
 
@@ -347,7 +304,7 @@ void LCDTick(uint cycles)
                     struct timespec wait;
                     wait.tv_sec = 0;
                     wait.tv_nsec = 16750419 - delta.tv_nsec;
-                    // clock_nanosleep(CLOCK_MONOTONIC, 0, &wait, NULL);
+                    clock_nanosleep(CLOCK_MONOTONIC, 0, &wait, NULL);
                 }
                 else {
                     STAT.Mode = STAT_MODE_SEARCH_SPRITE;
@@ -382,11 +339,11 @@ void PrintLCDC()
     LogInfo("BGWinDisp=%d OBJDisp=%d OBJSize=%s BGTileMap=%s TileData=%s WinDisp=%d WinTileMap=%s LCDEnab=%d",
         LCDC.TileDisplayEnabled,
         LCDC.SpriteDisplayEnabled,
-        (LCDC.SpriteSize ? "8x16" : "8x8"),
-        (LCDC.TileMapSelect ? "9C00h-9FFFh" : "9800h-9BFFh"),
-        (LCDC.TileDataSelect ? "8000h-8FFFh" : "8800h-97FFh"),
+        (LCDC.SpriteSize == 0 ? "8x8" : "8x16"),
+        (LCDC.TileMapSelect == 0 ? "9800h-9BFFh" : "9C00h-9FFFh"),
+        (LCDC.TileDataSelect == 0 ? "8800h-97FFh" : "8000h-8FFFh"),
         LCDC.WindowDisplayEnabled,
-        (LCDC.WindowTileMapSelect ? "9800h-9BFFh" : "9C00h-9FFFh"),
+        (LCDC.WindowTileMapSelect == 0 ? "9800h-9BFFh" : "9C00h-9FFFh"),
         LCDC.LCDEnabled);
 }
 

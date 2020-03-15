@@ -27,7 +27,22 @@
 #define VBLANK_TICK_COUNT \
     (HBLANK_TICK_COUNT + SEARCH_SPRITE_TICK_COUNT + DATA_TRANSFER_TICK_COUNT)
 
+#define TILE_WIDTH     (8)
+#define TILE_HEIGHT    (8)
+#define TILES_PER_ROW  (32)
+#define TILE_DATA_SIZE (16)
+
 extern byte LCDBuffer[LCD_BUFFER_SIZE];
+
+static const word TILE_MAP_ADDR[2] = {
+    0x9800, // 9800-9BFF
+    0x9C00, // 9C00-9FFF
+};
+
+static const word TILE_DATA_ADDR[2] = {
+    0x9000, // 8800-97FF
+    0x8000, // 8000-8FFF
+};
 
 typedef union
 {
@@ -35,7 +50,7 @@ typedef union
         bool TileDisplayEnabled:1;
         bool SpriteDisplayEnabled:1;
         uint SpriteSize:1;
-        uint TileMapSelect:1;
+        uint BGTileMapSelect:1;
         uint TileDataSelect:1;
         bool WindowDisplayEnabled:1;
         uint WindowTileMapSelect:1;
@@ -158,6 +173,8 @@ extern uint VRAMBank;
 extern byte OAM[0xA0];
 
 void ResetLCD();
+
+byte GetColor(palette * pal, int bit, byte d1, byte d2);
 
 void DrawTiles();
 void DrawSprites();

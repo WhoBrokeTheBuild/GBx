@@ -8,4 +8,9 @@ void PollEvents();
 
 void Render();
 
+void DebugWindowInit();
+void DebugWindowTerm();
+
+void DebugWindowRender();
+
 #endif // VIDEO_H

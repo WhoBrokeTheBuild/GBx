@@ -34,7 +34,7 @@ void ResetMemory()
 
 byte ReadByte(word address)
 {
-    LogVerbose(4, "Read Memory at %04X", address);
+    // LogVerbose(4, "Read Memory at %04X", address);
 
     // BIOS / Jump Vectors - 0000-00FF
     if (address <= 0x00FF) {
@@ -181,10 +181,8 @@ byte ReadByte(word address)
             return OBP1.raw;
         case 0xFF4A:
             return WX;
-            break;
         case 0xFF4B:
             return WY;
-            break;
 
         case 0xFF50:
             return BootstrapROMEnabled;
@@ -226,7 +224,7 @@ word NextWord()
 
 void WriteByte(word address, byte data)
 {
-    LogVerbose(4, "Write %02X to Memory at %04X", data, address);
+    // LogVerbose(4, "Write %02X to Memory at %04X", data, address);
 
     // Cartridge Memory Bank Controller - 0000-7FFF
     if (address <= 0x7FFF) {
@@ -295,6 +293,7 @@ void WriteByte(word address, byte data)
             break;
         case 0xFF04:
             DIV = 0;
+            LogVerbose(2, "Resetting DIV");
             break;
         case 0xFF05:
             TIMA = data;
@@ -469,21 +468,15 @@ void WriteByte(word address, byte data)
             break;
         case 0xFF42:
             SCY = data;
-            if (VerboseLevel >= 2) {
-                PrintLCDCoordinates();
-            }
+            LogVerbose(2, "Setting SCY=%02X", data);
             break;
         case 0xFF43:
             SCX = data;
-            if (VerboseLevel >= 2) {
-                PrintLCDCoordinates();
-            }
+            LogVerbose(2, "Setting SCX=%02X", data);
             break;
         case 0xFF45:
             LYC = data;
-            if (VerboseLevel >= 2) {
-                PrintLCDCoordinates();
-            }
+            LogVerbose(2, "Setting LYC=%02X", data);
             break;
         case 0xFF46:
             {
@@ -514,15 +507,11 @@ void WriteByte(word address, byte data)
             break;
         case 0xFF4A:
             WX = data;
-            if (VerboseLevel >= 2) {
-                PrintLCDCoordinates();
-            }
+            LogVerbose(2, "Setting WX=%02X", data);
             break;
         case 0xFF4B:
             WY = data;
-            if (VerboseLevel >= 2) {
-                PrintLCDCoordinates();
-            }
+            LogVerbose(2, "Setting WY=%02X", data);
             break;
         
         case 0xFF50:

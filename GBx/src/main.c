@@ -95,6 +95,8 @@ int main(int argc, char ** argv)
 
     if (DebugEnabled) {
         SetBreakpoint("PC", R.PC);
+
+        DebugWindowInit();
     }
     
     pthread_t thread;
@@ -104,9 +106,14 @@ int main(int argc, char ** argv)
         PollEvents();
         
         Render();
+        DebugWindowRender();
     }
     
     pthread_join(thread, NULL);
+
+    if (DebugEnabled) {
+        DebugWindowTerm();
+    }
 
     VideoTerm();
     AudioTerm();
