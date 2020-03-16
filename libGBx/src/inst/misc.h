@@ -21,7 +21,7 @@ static void _STOP()
 {
     LogInst("STOP");
     ++R.PC;
-    LCDC.LCDEnabled = false;
+    LCDC.Enabled = false;
 }
 
 static void _DI()

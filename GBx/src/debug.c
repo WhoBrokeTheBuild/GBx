@@ -160,9 +160,6 @@ void DebugPrompt()
 
 #define FONT_FILENAME "font.bmp"
 
-#define FONT_CHARACTER_WIDTH  (8)
-#define FONT_CHARACTER_HEIGHT (8)
-
 const char * FONT_CHARACTER_MAP = 
 "ABCDEFGH"
 "IJKLMNOP"
@@ -298,8 +295,8 @@ SDL_Rect GetStringBounds(int x, int y, const char * string)
     return (SDL_Rect){
         .x = x,
         .y = y,
-        .w = strlen(string) * FONT_CHARACTER_WIDTH,
-        .h = FONT_CHARACTER_HEIGHT
+        .w = strlen(string) * DEBUG_CHARACTER_WIDTH,
+        .h = DEBUG_CHARACTER_HEIGHT
     };
 }
 
@@ -311,18 +308,28 @@ SDL_Rect GetButtonBounds(const button * b)
     return rect;
 }
 
+void CheckButtonClick(const button * b, SDL_Point * mouse)
+{
+    SDL_Rect rect = GetButtonBounds(b);
+    if (SDL_PointInRect(mouse, &rect)) {
+        if (b->click) {
+            b->click();
+        }
+    }
+}
+
 void RenderDebugString(int x, int y, const char * string)
 {
     size_t length = strlen(string);
 
-    SDL_Rect src = { .x = 0, .y = 0, .w = FONT_CHARACTER_WIDTH, .h = FONT_CHARACTER_HEIGHT };
-    SDL_Rect dst = { .x = x, .y = y, .w = FONT_CHARACTER_WIDTH, .h = FONT_CHARACTER_HEIGHT };
+    SDL_Rect src = { .x = 0, .y = 0, .w = DEBUG_CHARACTER_WIDTH, .h = DEBUG_CHARACTER_HEIGHT };
+    SDL_Rect dst = { .x = x, .y = y, .w = DEBUG_CHARACTER_WIDTH, .h = DEBUG_CHARACTER_HEIGHT };
 
     char * questionMark = strchr(FONT_CHARACTER_MAP, '?');
 
     for (size_t i = 0; i < length; ++i) {
         if (string[i] == ' ') {
-            dst.x += FONT_CHARACTER_WIDTH;
+            dst.x += DEBUG_CHARACTER_WIDTH;
             continue;
         }
 
@@ -334,11 +341,11 @@ void RenderDebugString(int x, int y, const char * string)
 
         size_t offset = index - FONT_CHARACTER_MAP;
 
-        src.x = (offset % 8) * FONT_CHARACTER_WIDTH;
-        src.y = (offset / 8) * FONT_CHARACTER_WIDTH;
+        src.x = (offset % 8) * DEBUG_CHARACTER_WIDTH;
+        src.y = (offset / 8) * DEBUG_CHARACTER_WIDTH;
         SDL_RenderCopy(sdlDebugRenderer, sdlFontTexture, &src, &dst);
 
-        dst.x += FONT_CHARACTER_WIDTH;
+        dst.x += DEBUG_CHARACTER_WIDTH;
     }
 }
 
@@ -419,6 +426,22 @@ void DebugWindowHandleEvent(SDL_Event * evt)
         if (window == sdlDebugWindow) {
             if (evt->key.keysym.sym == SDLK_1) {
                 SDL_HideWindow(sdlDebugWindow);
+            }
+        }
+    }
+    else if (evt->type == SDL_MOUSEBUTTONUP) {
+        SDL_Window * window = SDL_GetWindowFromID(evt->key.windowID);
+        if (window == sdlDebugWindow) {
+            if (evt->button.button == SDL_BUTTON_LEFT) {
+
+                SDL_Point mouse = { evt->button.x, evt->button.y };
+                CheckButtonClick(&BTN_REFRESH, &mouse);
+
+                for (int i = 0; i < sizeof(DEBUG_TABS) / sizeof(tab); ++i) {
+                    const tab * tab = &DEBUG_TABS[i];
+                    CheckButtonClick(&tab->button, &mouse);
+                }
+
             }
         }
     }

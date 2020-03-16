@@ -45,6 +45,9 @@ typedef struct
 #define DEBUG_WINDOW_CONTENT_HEIGHT \
     (DEBUG_WINDOW_HEIGHT - 40 - (DEBUG_WINDOW_PADDING * 2))
 
+#define DEBUG_CHARACTER_WIDTH  (8)
+#define DEBUG_CHARACTER_HEIGHT (8)
+
 #define DEBUG_LINE_HEIGHT (12)
 
 #define COLOR_DEFAULT  (0xDD)
@@ -58,6 +61,8 @@ void ToggleDebugWindow();
 
 SDL_Rect GetStringBounds(int x, int y, const char * string);
 SDL_Rect GetButtonBounds(const button * b);
+
+void CheckButtonClick(const button * b, SDL_Point * mouse);
 
 void RenderDebugString(int x, int y, const char * string);
 void RenderDebugButton(const button * b, SDL_Point * mouse);

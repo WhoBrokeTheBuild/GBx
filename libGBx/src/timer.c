@@ -13,7 +13,7 @@ timer_control TAC;
 int timerCounter = 0;
 int divCounter = 0;
 
-int getTimerSpeed()
+int GetTimerSpeed()
 {
     switch (TAC.Type) {
     case 0b00:
@@ -46,11 +46,11 @@ void TimerTick(unsigned cycles)
         ++DIV;
     }
 
-    if (!TAC.Enable) {
+    if (!TAC.Enabled) {
         return;
     }
 
-    int speed = getTimerSpeed();
+    int speed = GetTimerSpeed();
 
     timerCounter += cycles;
     if (timerCounter > speed) {
@@ -70,5 +70,5 @@ void TimerTick(unsigned cycles)
 void PrintTimer()
 {
     LogInfo("Enable=%s Type=%d (%d Hz) TIMA=%d TMA=%d DIV=%d",
-        (TAC.Enable ? "True" : "False"), TAC.Type, getTimerSpeed(), TIMA, TMA, DIV);
+        (TAC.Enabled ? "True" : "False"), TAC.Type, GetTimerSpeed(), TIMA, TMA, DIV);
 }

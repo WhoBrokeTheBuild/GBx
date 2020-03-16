@@ -55,6 +55,10 @@ void WriteCartridgeMBC(word address, byte data);
 bool LoadCartridgeROM(const char * filename);
 void FeeCartridgeROM();
 
+const char * GetCartridgeTypeString();
+const char * GetROMTypeString();
+const char * GetRAMTypeString();
+
 void PrintCartridgeMBC();
 void PrintCartridge();
 

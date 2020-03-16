@@ -415,7 +415,7 @@ void WriteByte(word address, byte data)
         case 0xFF26:
             SoundControl.raw ^= SOUND_CONTROL_WRITE_MASK;
             SoundControl.raw |= data & SOUND_CONTROL_WRITE_MASK;
-            if (!SoundControl.SoundEnabled) {
+            if (!SoundControl.Enabled) {
                 // TODO: Disable all sound
             }
             if (VerboseLevel >= 2) {

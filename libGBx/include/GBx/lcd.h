@@ -54,7 +54,7 @@ typedef union
         uint TileDataSelect:1;
         bool WindowDisplayEnabled:1;
         uint WindowTileMapSelect:1;
-        bool LCDEnabled:1;
+        bool Enabled:1;
     };
     byte raw;
 

@@ -344,7 +344,7 @@ void PrintLCDC()
         (LCDC.TileDataSelect == 0 ? "8800h-97FFh" : "8000h-8FFFh"),
         LCDC.WindowDisplayEnabled,
         (LCDC.WindowTileMapSelect == 0 ? "9800h-9BFFh" : "9C00h-9FFFh"),
-        LCDC.LCDEnabled);
+        LCDC.Enabled);
 }
 
 void PrintSTAT() 

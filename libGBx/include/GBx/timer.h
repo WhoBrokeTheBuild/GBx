@@ -12,7 +12,7 @@ typedef union
 {
     struct {
         unsigned Type:2;
-        bool     Enable:1;
+        bool     Enabled:1;
         unsigned :5;
     };
     byte raw;
@@ -34,6 +34,8 @@ extern byte TMA;
 // FF07 - Timer Control
 
 extern timer_control TAC;
+
+int GetTimerSpeed();
 
 void ResetTimer();
 

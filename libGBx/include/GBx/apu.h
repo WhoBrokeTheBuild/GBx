@@ -114,7 +114,7 @@ typedef union
         bool     WavePlaying;
         bool     NoisePlaying;
         uint :2;
-        bool     SoundEnabled;
+        bool     Enabled;
     };
     byte raw;
 
