@@ -97,6 +97,7 @@ int main(int argc, char ** argv)
         SetBreakpoint("PC", R.PC);
 
         DebugWindowInit();
+        ToggleDebugWindow();
     }
     
     pthread_t thread;

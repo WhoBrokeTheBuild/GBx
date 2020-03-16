@@ -4,7 +4,6 @@
 #include <GBx/cartridge.h>
 #include <GBx/lcd.h>
 #include <GBx/log.h>
-#include <GBx/memory.h>
 
 SDL_Window   * sdlWindow   = NULL;
 SDL_Renderer * sdlRenderer = NULL;

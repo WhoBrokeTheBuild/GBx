@@ -21,6 +21,11 @@ TARGET_LINK_LIBRARIES(
         cflags::cflags
 )
 
+SET_TARGET_PROPERTIES(
+    GBx PROPERTIES
+        C_STANDARD 11
+)
+
 IF(MSVC)
     SET_TARGET_PROPERTIES(
         GBx
@@ -37,3 +42,15 @@ IF(TARGET SDL2::SDL2main)
             SDL2::SDL2main
     )
 ENDIF()
+
+SET(
+    _ASSETS
+    font.bmp
+)
+
+FOREACH(asset ${_ASSETS})
+    ADD_CUSTOM_COMMAND(
+        TARGET GBx
+        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/${asset}" $<TARGET_FILE_DIR:GBx>
+    )
+ENDFOREACH()
