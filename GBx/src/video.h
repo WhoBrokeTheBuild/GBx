@@ -1,16 +1,14 @@
 #ifndef VIDEO_H
 #define VIDEO_H
 
+#include <SDL.h>
+
 void VideoInit();
 void VideoTerm();
 
 void PollEvents();
 
+void HandleEvent(SDL_Event * evt);
 void Render();
-
-void DebugWindowInit();
-void DebugWindowTerm();
-
-void DebugWindowRender();
 
 #endif // VIDEO_H

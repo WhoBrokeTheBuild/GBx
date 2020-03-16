@@ -25,7 +25,7 @@
 void * runThread(void * ptr)
 {
     if (DebugEnabled) {
-        DebugInit();
+        DebugPromptInit();
     }
 
     for (;;) {
@@ -37,7 +37,7 @@ void * runThread(void * ptr)
     }
 
     if (DebugEnabled) {
-        DebugTerm();
+        DebugPromptTerm();
     }
 }
 
