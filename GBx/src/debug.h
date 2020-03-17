@@ -23,13 +23,27 @@ typedef struct
 
 typedef struct 
 {
-    button button;
-    void (*render)();
+    int x;
+    int y;
+    const char * text;
+    void (*refresh)();
+    void (*render)(SDL_Point *);
+    void (*windowClick)(SDL_Point *);
 
 } tab;
 
-#define DEBUG_WINDOW_WIDTH  (600)
-#define DEBUG_WINDOW_HEIGHT (600)
+typedef struct 
+{
+    int x;
+    int y;
+    const char * text;
+    bool checked;
+    void (*changed)();
+    
+} checkbox;
+
+#define DEBUG_WINDOW_WIDTH  (768)
+#define DEBUG_WINDOW_HEIGHT (768)
 
 #define DEBUG_WINDOW_PADDING (8)
 
@@ -57,18 +71,29 @@ typedef struct
 void DebugWindowInit();
 void DebugWindowTerm();
 
+SDL_Renderer * GetDebugWindowRenderer();
+
 void ToggleDebugWindow();
 
 SDL_Rect GetStringBounds(int x, int y, const char * string);
-SDL_Rect GetButtonBounds(const button * b);
+SDL_Rect GetButtonBounds(button * b);
+SDL_Rect GetTabBounds(tab * t);
+SDL_Rect GetCheckboxBounds(checkbox * c);
 
-void CheckButtonClick(const button * b, SDL_Point * mouse);
+void ToggleCheckbox(checkbox * c);
+
+bool CheckButtonClick(button * b, SDL_Point * mouse);
+bool CheckTabClick(tab * t, SDL_Point * mouse);
+bool CheckCheckboxClick(checkbox * c, SDL_Point * mouse);
 
 void RenderDebugString(int x, int y, const char * string);
-void RenderDebugButton(const button * b, SDL_Point * mouse);
-void RenderDebugTab(const tab * t, SDL_Point * mouse, bool active);
+void RenderDebugButton(button * b, SDL_Point * mouse);
+void RenderDebugTab(tab * t, SDL_Point * mouse, bool active);
+void RenderDebugCheckbox(checkbox * c, SDL_Point * mouse);
 
+void DebugWindowHandleClick(SDL_Point * mouse);
 void DebugWindowHandleEvent(SDL_Event * evt);
+
 void DebugWindowRender();
 
 #endif // DEBUG_H

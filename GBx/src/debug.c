@@ -153,8 +153,8 @@ void DebugPrompt()
 }
 
 #include "win/status.h"
-// #include "win/tileData.h"
-// #include "win/tileMap.h"
+#include "win/tileData.h"
+#include "win/tileMap.h"
 // #include "win/spriteData.h"
 // #include "win/audio.h"
 
@@ -172,65 +172,44 @@ const char * FONT_CHARACTER_MAP =
 
 bool debugWindowShown = false;
 
+bool debugAutoRefresh = true;
+
 SDL_Window   * sdlDebugWindow   = NULL;
 SDL_Renderer * sdlDebugRenderer = NULL;
-SDL_Texture  * sdlFontTexture = NULL;
+SDL_Texture  * sdlFontTexture   = NULL;
 
 #define BUTTON_PADDING (4)
 
-enum {
-    DEBUG_TAB_STATUS,
-    DEBUG_TAB_TILE_DATA,
-    DEBUG_TAB_TILE_MAP,
-    DEBUG_TAB_SPRITE,
-    DEBUG_TAB_AUDIO,
+int debugTabIndex = 0;
+
+tab debugTabs[] = {
+    { 16,  16, "STATUS",    NULL,               StatusTabRender,   NULL },
+    { 80,  16, "TILE DATA", TileDataTabRefresh, TileDataTabRender, TileDataTabClick },
+    { 168, 16, "TILE MAP",  TileMapTabRefresh,  TileMapTabRender,  TileMapTabClick },
+    { 248, 16, "SPRITE",    NULL,               NULL,              NULL },
+    { 312, 16, "AUDIO",     NULL,               NULL,              NULL },
 };
-
-int debugTabIndex = DEBUG_TAB_STATUS;
-
-void onStatusTabClick()
-{
-    debugTabIndex = DEBUG_TAB_STATUS;
-}
-
-void onTileDataTabClick()
-{
-    debugTabIndex = DEBUG_TAB_TILE_DATA;
-}
-
-void onTileMapTabClick()
-{
-    debugTabIndex = DEBUG_TAB_TILE_MAP;
-}
-
-void onSpriteTabClick()
-{
-    debugTabIndex = DEBUG_TAB_SPRITE;
-}
-
-void onAudioTabClick()
-{
-    debugTabIndex = DEBUG_TAB_AUDIO;
-}
 
 void onRefreshClick()
 {
-
+    if (debugTabs[debugTabIndex].refresh) {
+        debugTabs[debugTabIndex].refresh();
+    }
 }
 
-const tab DEBUG_TABS[] = {
-    { { 16,  16, "STATUS",    onStatusTabClick,   }, StatusTabRender },
-    { { 80,  16, "TILE DATA", onTileDataTabClick, }, NULL },
-    { { 168, 16, "TILE MAP",  onTileMapTabClick,  }, NULL },
-    { { 248, 16, "SPRITE",    onSpriteTabClick,   }, NULL },
-    { { 312, 16, "AUDIO",     onAudioTabClick,    }, NULL },
-};
-
-const button BTN_REFRESH = { 
-    .x = DEBUG_WINDOW_WIDTH - 72,
+button btnRefresh = { 
+    .x = DEBUG_WINDOW_WIDTH - 200,
     .y = 8,
     .text = "REFRESH",
     .click = onRefreshClick,
+};
+
+checkbox chkAutoRefresh = {
+    .x = DEBUG_WINDOW_WIDTH - 128,
+    .y = 8,
+    .text = "AUTO REFRESH",
+    .checked = true,
+    .changed = NULL,
 };
 
 void DebugWindowInit()
@@ -250,10 +229,6 @@ void DebugWindowInit()
     if (!sdlDebugRenderer) {
         LogFatal("Failed to create SDL2 Renderer, %s", SDL_GetError());
     }
-    
-    // sdlDebugTexture = SDL_CreateTexture(sdlDebugRenderer,
-    //     SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_STREAMING,
-    //     DEBUG_BUFFER_WIDTH, DEBUG_BUFFER_HEIGHT);
 
     char fontPath[4096];
     GetExecutablePath(fontPath, sizeof(fontPath) - sizeof(FONT_FILENAME));
@@ -267,6 +242,9 @@ void DebugWindowInit()
     sdlFontTexture = SDL_CreateTextureFromSurface(sdlDebugRenderer, fontSurface);
     SDL_FreeSurface(fontSurface);
 
+    InitTileDataTab();
+    InitTileMapTab();
+
     DebugWindowRender();
 }
 
@@ -274,9 +252,17 @@ void DebugWindowTerm()
 {
     debugWindowShown = false;
 
+    TermTileMapTab();
+    TermTileDataTab();
+
     SDL_DestroyTexture(sdlFontTexture);
     SDL_DestroyRenderer(sdlDebugRenderer);
     SDL_DestroyWindow(sdlDebugWindow);
+}
+
+SDL_Renderer * GetDebugWindowRenderer()
+{
+    return sdlDebugRenderer;
 }
 
 void ToggleDebugWindow()
@@ -300,7 +286,7 @@ SDL_Rect GetStringBounds(int x, int y, const char * string)
     };
 }
 
-SDL_Rect GetButtonBounds(const button * b)
+SDL_Rect GetButtonBounds(button * b)
 {
     SDL_Rect rect = GetStringBounds(b->x, b->y, b->text);
     rect.w += (BUTTON_PADDING * 2);
@@ -308,14 +294,38 @@ SDL_Rect GetButtonBounds(const button * b)
     return rect;
 }
 
-void CheckButtonClick(const button * b, SDL_Point * mouse)
+SDL_Rect GetTabBounds(tab * t)
+{
+    SDL_Rect rect = GetStringBounds(t->x, t->y, t->text);
+    rect.w += (BUTTON_PADDING * 2);
+    rect.h += (BUTTON_PADDING * 2);
+    return rect;
+}
+
+SDL_Rect GetCheckboxBounds(checkbox * c)
+{
+    SDL_Rect rect = GetStringBounds(c->x, c->y, c->text);
+    rect.w += (BUTTON_PADDING * 2) + (DEBUG_CHARACTER_WIDTH * 2);
+    rect.h += (BUTTON_PADDING * 2);
+    return rect;
+}
+
+bool CheckButtonClick(button * b, SDL_Point * mouse)
 {
     SDL_Rect rect = GetButtonBounds(b);
-    if (SDL_PointInRect(mouse, &rect)) {
-        if (b->click) {
-            b->click();
-        }
-    }
+    return SDL_PointInRect(mouse, &rect);
+}
+
+bool CheckTabClick(tab * t, SDL_Point * mouse)
+{
+    SDL_Rect rect = GetTabBounds(t);
+    return SDL_PointInRect(mouse, &rect);
+}
+
+bool CheckCheckboxClick(checkbox * c, SDL_Point * mouse)
+{
+    SDL_Rect rect = GetCheckboxBounds(c);
+    return SDL_PointInRect(mouse, &rect);
 }
 
 void RenderDebugString(int x, int y, const char * string)
@@ -349,7 +359,7 @@ void RenderDebugString(int x, int y, const char * string)
     }
 }
 
-void RenderDebugButton(const button * b, SDL_Point * mouse)
+void RenderDebugButton(button * b, SDL_Point * mouse)
 {
     SDL_Rect dst = GetButtonBounds(b);
 
@@ -375,9 +385,9 @@ void RenderDebugButton(const button * b, SDL_Point * mouse)
     RenderDebugString(textX, textY, b->text);
 }
 
-void RenderDebugTab(const tab * t, SDL_Point * mouse, bool active)
+void RenderDebugTab(tab * t, SDL_Point * mouse, bool active)
 {
-    SDL_Rect dst = GetButtonBounds(&t->button);
+    SDL_Rect dst = GetTabBounds(t);
     dst.h += (BUTTON_PADDING * 2);
 
     if (active) {
@@ -386,8 +396,7 @@ void RenderDebugTab(const tab * t, SDL_Point * mouse, bool active)
         SDL_SetRenderDrawColor(sdlDebugRenderer,
             COLOR_DEFAULT, COLOR_DEFAULT, COLOR_DEFAULT, 0xFF);
     }
-    else 
-    if (SDL_PointInRect(mouse, &dst)) {
+    else if (SDL_PointInRect(mouse, &dst)) {
         SDL_SetRenderDrawColor(sdlDebugRenderer, 
             COLOR_DEFAULT, COLOR_DEFAULT, COLOR_DEFAULT, 0xFF);
     }
@@ -406,7 +415,51 @@ void RenderDebugTab(const tab * t, SDL_Point * mouse, bool active)
     int textX = dst.x + BUTTON_PADDING;
     int textY = dst.y + BUTTON_PADDING;
 
-    RenderDebugString(textX, textY, t->button.text);
+    RenderDebugString(textX, textY, t->text);
+}
+
+void RenderDebugCheckbox(checkbox * c, SDL_Point * mouse)
+{
+    SDL_Rect dst = GetCheckboxBounds(c);
+
+    if (SDL_PointInRect(mouse, &dst)) {
+        SDL_SetRenderDrawColor(sdlDebugRenderer, 
+            COLOR_DEFAULT, COLOR_DEFAULT, COLOR_DEFAULT, 0xFF);
+    }
+    else {
+        SDL_SetRenderDrawColor(sdlDebugRenderer, 
+            COLOR_INACTIVE, COLOR_INACTIVE, COLOR_INACTIVE, 0xFF);
+    }
+
+    SDL_RenderFillRect(sdlDebugRenderer, &dst);
+
+    SDL_SetRenderDrawColor(sdlDebugRenderer, 
+        COLOR_BORDER, COLOR_BORDER, COLOR_BORDER, 0xFF);
+
+    SDL_RenderDrawRect(sdlDebugRenderer, &dst);
+    
+    SDL_Rect checkbox = { 
+        .x = dst.x + BUTTON_PADDING, 
+        .y = dst.y + BUTTON_PADDING,
+        .w = DEBUG_CHARACTER_WIDTH, 
+        .h = DEBUG_CHARACTER_HEIGHT
+    };
+
+    SDL_RenderDrawRect(sdlDebugRenderer, &checkbox);
+
+    if (c->checked) {
+        ++checkbox.x;
+        ++checkbox.y;
+        checkbox.w -= 2;
+        checkbox.h -= 2;
+
+        SDL_RenderFillRect(sdlDebugRenderer, &checkbox);
+    }
+    
+    int textX = dst.x + BUTTON_PADDING + (DEBUG_CHARACTER_WIDTH * 2);
+    int textY = dst.y + BUTTON_PADDING;
+
+    RenderDebugString(textX, textY, c->text);
 }
 
 void DebugWindowHandleEvent(SDL_Event * evt)
@@ -433,263 +486,60 @@ void DebugWindowHandleEvent(SDL_Event * evt)
         SDL_Window * window = SDL_GetWindowFromID(evt->key.windowID);
         if (window == sdlDebugWindow) {
             if (evt->button.button == SDL_BUTTON_LEFT) {
-
                 SDL_Point mouse = { evt->button.x, evt->button.y };
-                CheckButtonClick(&BTN_REFRESH, &mouse);
-
-                for (int i = 0; i < sizeof(DEBUG_TABS) / sizeof(tab); ++i) {
-                    const tab * tab = &DEBUG_TABS[i];
-                    CheckButtonClick(&tab->button, &mouse);
-                }
-
+                DebugWindowHandleClick(&mouse);
             }
         }
     }
 }
 
+void DebugWindowHandleClick(SDL_Point * mouse)
+{
+    if (CheckButtonClick(&btnRefresh, mouse)) {
+        if (btnRefresh.click) {
+            btnRefresh.click();
+        }
+    }
+
+    if (CheckCheckboxClick(&chkAutoRefresh, mouse)) {
+        chkAutoRefresh.checked ^= true;
+        if (chkAutoRefresh.changed) {
+            chkAutoRefresh.changed();
+        }
+    }
+
+    for (int i = 0; i < sizeof(debugTabs) / sizeof(tab); ++i) {
+        tab * tab = &debugTabs[i];
+        if (CheckTabClick(tab, mouse)) {
+            debugTabIndex = i;
+            break;
+        }
+    }
+
+    if (debugTabs[debugTabIndex].windowClick) {
+        debugTabs[debugTabIndex].windowClick(mouse);
+    }
+}
+
 void DebugWindowRender()
 {
+    if (chkAutoRefresh.checked) {
+        if (debugTabs[debugTabIndex].refresh) {
+            debugTabs[debugTabIndex].refresh();
+        }
+    }
+
     SDL_Point mouse;
     SDL_GetMouseState(&mouse.x, &mouse.y);
-
-    // uint8_t * pixels = NULL;
-    // int pitch = 0;
-    // SDL_LockTexture(sdlDebugTexture, NULL, (void **)&pixels, &pitch);
-
-    // memset(pixels, 0x20, 
-    //     DEBUG_BUFFER_WIDTH * DEBUG_BUFFER_HEIGHT * LCD_BUFFER_COMPONENTS);
-
-    // {
-    //     const int TILE_DRAW_PER_ROW = 16;
-    //     const int TILE_DRAW_X = 8;
-    //     const int TILE_DRAW_Y = 8;
-    //     const int TILE_COUNT = 256;
-
-    //     for (int i = 0; i < TILE_COUNT; ++i) {
-    //         int x = TILE_DRAW_X + ((i % TILE_DRAW_PER_ROW) * (TILE_WIDTH + 1));
-    //         int y = TILE_DRAW_Y + ((i / TILE_DRAW_PER_ROW) * (TILE_HEIGHT + 1));
-    //         for (int tileRow = 0; tileRow < TILE_HEIGHT; ++tileRow) {
-    //             word dataOffset = TILE_DATA_ADDR[1] + (i * TILE_DATA_SIZE) + (tileRow * 2);
-
-    //             byte data1 = ReadByte(dataOffset);
-    //             byte data2 = ReadByte(dataOffset + 1);
-
-    //             for (int tileCol = 0; tileCol < TILE_WIDTH; ++tileCol) {
-    //                 byte color = GetColor(&BGP, tileCol, data1, data2);
-
-    //                 uint off = ((y + tileRow) * pitch) 
-    //                     + ((x + tileCol) * LCD_BUFFER_COMPONENTS);
-
-    //                 pixels[off + 0] = color;
-    //                 pixels[off + 1] = color;
-    //                 pixels[off + 2] = color;
-    //             }
-    //         }
-    //     }
-    // }
-
-    // {
-    //     const int TILE_DRAW_PER_ROW = 16;
-    //     const int TILE_DRAW_X = 9;
-    //     const int TILE_DRAW_Y = 161;
-    //     const int TILE_COUNT = 256;
-
-    //     for (int i = 0; i < TILE_COUNT; ++i) {
-    //         int x = TILE_DRAW_X + ((i % TILE_DRAW_PER_ROW) * (TILE_WIDTH + 1));
-    //         int y = TILE_DRAW_Y + ((i / TILE_DRAW_PER_ROW) * (TILE_HEIGHT + 1));
-    //         for (int tileRow = 0; tileRow < TILE_HEIGHT; ++tileRow) {
-    //             word dataOffset = TILE_DATA_ADDR[0] + ((i - 128) * TILE_DATA_SIZE) + (tileRow * 2);
-
-    //             byte data1 = ReadByte(dataOffset);
-    //             byte data2 = ReadByte(dataOffset + 1);
-
-    //             for (int tileCol = 0; tileCol < TILE_WIDTH; ++tileCol) {
-    //                 byte color = GetColor(&BGP, tileCol, data1, data2);
-
-    //                 uint off = ((y + tileRow) * pitch) 
-    //                     + ((x + tileCol) * LCD_BUFFER_COMPONENTS);
-
-    //                 pixels[off + 0] = color;
-    //                 pixels[off + 1] = color;
-    //                 pixels[off + 2] = color;
-    //             }
-    //         }
-    //     }
-    // }
-
-    // {
-    //     const int TILE_DRAW_ROWS = 32;
-    //     const int TILE_DRAW_COLS = 32;
-    //     const int TILE_DRAW_X = 161;
-    //     const int TILE_DRAW_Y = 9;
-
-    //     for (int row = 0; row < TILE_DRAW_ROWS; ++row) {
-    //         int y = TILE_DRAW_Y + (row * (TILE_HEIGHT + 1));
-    //         for (int col = 0; col < TILE_DRAW_COLS; ++col) {
-    //             int x = TILE_DRAW_X + (col * (TILE_WIDTH + 1));
-
-    //             int tileIndex = ReadByte(TILE_MAP_ADDR[0] 
-    //                 + (row * TILES_PER_ROW) + col);
-
-    //             if (LCDC.TileDataSelect == 0) {
-    //                 tileIndex = (sbyte)tileIndex; // Convert to [-128, 127]
-    //             }
-
-    //             for (int tileRow = 0; tileRow < TILE_HEIGHT; ++tileRow) {
-    //                 word dataOffset = TILE_DATA_ADDR[LCDC.TileDataSelect] 
-    //                     + (tileIndex * TILE_DATA_SIZE) + (tileRow * 2);
-
-    //                 byte data1 = ReadByte(dataOffset);
-    //                 byte data2 = ReadByte(dataOffset + 1);
-
-    //                 for (int tileCol = 0; tileCol < TILE_WIDTH; ++tileCol) {
-    //                     byte color = GetColor(&BGP, tileCol, data1, data2);
-
-    //                     uint off = ((y + tileRow) * pitch) 
-    //                         + ((x + tileCol) * LCD_BUFFER_COMPONENTS);
-
-    //                     pixels[off + 0] = color;
-    //                     pixels[off + 1] = color;
-    //                     pixels[off + 2] = color;
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-
-    // {
-    //     const int TILE_DRAW_ROWS = 32;
-    //     const int TILE_DRAW_COLS = 32;
-    //     const int TILE_DRAW_X = 457;
-    //     const int TILE_DRAW_Y = 9;
-
-    //     for (int row = 0; row < TILE_DRAW_ROWS; ++row) {
-    //         int y = TILE_DRAW_Y + (row * (TILE_HEIGHT + 1));
-    //         for (int col = 0; col < TILE_DRAW_COLS; ++col) {
-    //             int x = TILE_DRAW_X + (col * (TILE_WIDTH + 1));
-
-    //             int tileIndex = ReadByte(TILE_MAP_ADDR[1] 
-    //                 + (row * TILES_PER_ROW) + col);
-
-    //             if (LCDC.TileDataSelect == 0) {
-    //                 tileIndex = (sbyte)tileIndex; // Convert to [-128, 127]
-    //             }
-
-    //             for (int tileRow = 0; tileRow < TILE_HEIGHT; ++tileRow) {
-    //                 word dataOffset = TILE_DATA_ADDR[LCDC.TileDataSelect] 
-    //                     + (tileIndex * TILE_DATA_SIZE) + (tileRow * 2);
-
-    //                 byte data1 = ReadByte(dataOffset);
-    //                 byte data2 = ReadByte(dataOffset + 1);
-
-    //                 for (int tileCol = 0; tileCol < TILE_WIDTH; ++tileCol) {
-    //                     byte color = GetColor(&BGP, tileCol, data1, data2);
-
-    //                     uint off = ((y + tileRow) * pitch) 
-    //                         + ((x + tileCol) * LCD_BUFFER_COMPONENTS);
-
-    //                     pixels[off + 0] = color;
-    //                     pixels[off + 1] = color;
-    //                     pixels[off + 2] = color;
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-
-    // {
-    //     const int SCROLL_DRAW_X = 160;
-    //     const int SCROLL_DRAW_Y = 8;
-    //     const int WIN_DRAW_X = 456;
-    //     const int WIN_DRAW_Y = 8;
-
-    //     const int DRAW_WIDTH  = LCD_WIDTH + (LCD_WIDTH / 8);
-    //     const int DRAW_HEIGHT = LCD_HEIGHT + (LCD_HEIGHT / 8);
-
-    //     int off;
-    //     int scx = SCX + (SCX / 8);
-    //     int scy = SCY + (SCY / 8);
-    //     int wxm7 = WX - 7;
-    //     int wx = wxm7 + (wxm7 / 8);
-    //     int wy = WY + (WY / 8);
-
-    //     for (int i = 0; i < DRAW_WIDTH + 1; ++i) {
-
-    //         off = ((SCROLL_DRAW_Y + scy) * pitch) 
-    //             + ((SCROLL_DRAW_X + scx + i) * LCD_BUFFER_COMPONENTS);
-
-    //         pixels[off + 0] = 0xFF;
-    //         pixels[off + 2] = 0x00;
-    //         pixels[off + 1] = 0x00;
-
-    //         off = ((SCROLL_DRAW_Y + scy + DRAW_HEIGHT) * pitch) 
-    //             + ((SCROLL_DRAW_X + scx + i) * LCD_BUFFER_COMPONENTS);
-
-    //         pixels[off + 0] = 0xFF;
-    //         pixels[off + 2] = 0x00;
-    //         pixels[off + 1] = 0x00;
-
-    //         off = ((WIN_DRAW_Y + wy) * pitch) 
-    //             + ((WIN_DRAW_X + wx + i) * LCD_BUFFER_COMPONENTS);
-
-    //         pixels[off + 0] = 0x00;
-    //         pixels[off + 2] = 0xFF;
-    //         pixels[off + 1] = 0x00;
-
-    //         off = ((WIN_DRAW_Y + wy + DRAW_HEIGHT) * pitch) 
-    //             + ((WIN_DRAW_X + wx + i) * LCD_BUFFER_COMPONENTS);
-
-    //         pixels[off + 0] = 0x00;
-    //         pixels[off + 2] = 0xFF;
-    //         pixels[off + 1] = 0x00;
-    //     }
-
-    //     for (int i = 0; i < DRAW_HEIGHT + 1; ++i) {
-
-    //         off = ((SCROLL_DRAW_Y + scy + i) * pitch) 
-    //             + ((SCROLL_DRAW_X + scx) * LCD_BUFFER_COMPONENTS);
-
-    //         pixels[off + 0] = 0xFF;
-    //         pixels[off + 2] = 0x00;
-    //         pixels[off + 1] = 0x00;
-
-    //         off = ((SCROLL_DRAW_Y + scy + i) * pitch) 
-    //             + ((SCROLL_DRAW_X + scx + DRAW_WIDTH) * LCD_BUFFER_COMPONENTS);
-
-    //         pixels[off + 0] = 0xFF;
-    //         pixels[off + 2] = 0x00;
-    //         pixels[off + 1] = 0x00;
-
-    //         off = ((WIN_DRAW_Y + wy + i) * pitch) 
-    //             + ((WIN_DRAW_X + wx) * LCD_BUFFER_COMPONENTS);
-
-    //         pixels[off + 0] = 0x00;
-    //         pixels[off + 2] = 0xFF;
-    //         pixels[off + 1] = 0x00;
-
-    //         off = ((WIN_DRAW_Y + wy + i) * pitch) 
-    //             + ((WIN_DRAW_X + wx + DRAW_WIDTH) * LCD_BUFFER_COMPONENTS);
-
-    //         pixels[off + 0] = 0x00;
-    //         pixels[off + 2] = 0xFF;
-    //         pixels[off + 1] = 0x00;
-    //     }
-    // }
-
-    // SDL_UnlockTexture(sdlDebugTexture);
-
-    // SDL_Rect src = { .x = 0, .y = 0, .w = DEBUG_BUFFER_WIDTH, .h = DEBUG_BUFFER_HEIGHT };
-    // SDL_Rect dst = { .x = 0, .y = 0, .w = DEBUG_WINDOW_WIDTH, .h = DEBUG_WINDOW_HEIGHT };
 
     SDL_SetRenderDrawColor(sdlDebugRenderer, 0x33, 0x33, 0x33, 0xFF);
     SDL_RenderClear(sdlDebugRenderer);
 
-    // SDL_RenderCopy(sdlDebugRenderer, sdlDebugTexture, &src, &dst);
+    RenderDebugButton(&btnRefresh, &mouse);
+    RenderDebugCheckbox(&chkAutoRefresh, &mouse);
 
-    RenderDebugButton(&BTN_REFRESH, &mouse);
-
-    for (int i = 0; i < sizeof(DEBUG_TABS) / sizeof(tab); ++i) {
-        const tab * tab = &DEBUG_TABS[i];
+    for (int i = 0; i < sizeof(debugTabs) / sizeof(tab); ++i) {
+        tab * tab = &debugTabs[i];
         RenderDebugTab(tab, &mouse, (debugTabIndex == i));
     }
 
@@ -710,8 +560,8 @@ void DebugWindowRender()
 
     SDL_RenderDrawRect(sdlDebugRenderer, &dst);
 
-    if (DEBUG_TABS[debugTabIndex].render) {
-        DEBUG_TABS[debugTabIndex].render();
+    if (debugTabs[debugTabIndex].render) {
+        debugTabs[debugTabIndex].render(&mouse);
     }
 
     SDL_RenderPresent(sdlDebugRenderer);
