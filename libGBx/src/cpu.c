@@ -30,6 +30,8 @@ registers R;
 
 bool CPUEnabled = true;
 
+word LastInstructionAddress;
+
 typedef void(* inst_t)();
 
 inst_t instructions[] = {
@@ -312,6 +314,8 @@ inst_t instructions[] = {
 byte Fetch()
 {
     if (CPUEnabled) {
+        LastInstructionAddress = R.PC;
+
         byte op = NextByte();
         Tick(4);
         return op;
@@ -326,7 +330,7 @@ void Execute(byte op)
     if (inst) {
         inst();
     } else {
-        LogFatal("unknown instruction at %04X, %02X", R.PC, op);
+        LogWarn("unknown instruction at %04X, %02X", R.PC, op);
     }
 }
 

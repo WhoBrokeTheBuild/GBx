@@ -33,15 +33,14 @@ SET(SDL2_BINARY_DIR ${CMAKE_BINARY_DIR}/SDL2_bin)
 FIND_PACKAGE(SDL2 2.0.6 CONFIG QUIET)
 
 IF(NOT SDL2_FOUND)
-    IF(MSVC) 
-        SET(SDL2_PATCH_COMMAND ${GIT_EXECUTABLE} apply --ignore-space-change --ignore-whitespace -v ${CMAKE_SOURCE_DIR}/SDL2-vcruntime.patch || ver > nul)
-    ENDIF()
+    # IF(MSVC) 
+    #     SET(SDL2_PATCH_COMMAND ${GIT_EXECUTABLE} apply --ignore-space-change --ignore-whitespace -v ${CMAKE_SOURCE_DIR}/SDL2-vcruntime.patch || ver > nul)
+    # ENDIF()
 
     ExternalProject_Add(
         thirdparty_SDL2
-        GIT_REPOSITORY      "https://github.com/spurious/SDL-mirror.git"
-        GIT_TAG             "master"
-        GIT_SHALLOW         TRUE
+        HG_REPOSITORY       "http://hg.libsdl.org/SDL"
+        HG_TAG              "default"
         SOURCE_DIR          ${SDL2_SOURCE_DIR}
         BINARY_DIR          ${SDL2_BINARY_DIR}
         CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${SDL2_ROOT}

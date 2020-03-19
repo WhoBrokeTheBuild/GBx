@@ -2,6 +2,7 @@
 #define LOG_H
 
 #include "cpu.h"
+#include "instruction.h"
 
 #include <signal.h>
 #include <stdio.h>
@@ -50,12 +51,12 @@ extern int VerboseLevel;
             raise(SIGINT);                                          \
         } while (0)
 
-    #define LogVerbose(LVL, M, ...)                             \
-        if (VerboseLevel >= LVL) {                              \
-            HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);  \
-            SetConsoleTextAttribute(hConsole, COLOR_CYAN);      \
-            printf("[VERB] " M "\n", ##__VA_ARGS__);            \
-            SetConsoleTextAttribute(hConsole, COLOR_DEFAULT);   \
+    #define LogVerbose(LVL, M, ...)                                 \
+        if (VerboseLevel >= LVL) {                                  \
+            HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);      \
+            SetConsoleTextAttribute(hConsole, COLOR_CYAN);          \
+            printf("[VERB] " M "\n", ##__VA_ARGS__);                \
+            SetConsoleTextAttribute(hConsole, COLOR_DEFAULT);       \
         }
 
 #else // !WIN32
@@ -82,7 +83,16 @@ extern int VerboseLevel;
 
 #endif // WIN32
 
-#define LogInst(M, ...) \
-    if (VerboseLevel >= 3) { printf("[INST] " M "\n", ##__VA_ARGS__); }
+static char LOG_INST_BUFFER[1024];
+
+#define LogInst(M, ...)                                             \
+    do {                                                            \
+        snprintf(LOG_INST_BUFFER, sizeof(LOG_INST_BUFFER),          \
+            "[%04X] " M, LastInstructionAddress, ##__VA_ARGS__);    \
+        AddInstructionToLog(LOG_INST_BUFFER);                       \
+        if (VerboseLevel >= 3) {                                    \
+            printf("[INST] %s\n", LOG_INST_BUFFER);                 \
+        }                                                           \
+    } while (0)
 
 #endif // LOG_H

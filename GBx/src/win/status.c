@@ -5,6 +5,8 @@
 #include <GBx/cpu.h>
 #include <GBx/cartridge.h>
 #include <GBx/clock.h>
+#include <GBx/instruction.h>
+#include <GBx/interrupt.h>
 #include <GBx/lcd.h>
 #include <GBx/timer.h>
 
@@ -87,6 +89,53 @@ void StatusTabRender()
     RenderDebugString(x, y, buffer);
     y += DEBUG_LINE_HEIGHT;
 
+    RenderDebugString(x, y, "INTERRUPTS:");
+    y += DEBUG_LINE_HEIGHT;
+
+    snprintf(buffer, sizeof(buffer), "VBLANK: %s", 
+        (IE.VBlank ? "ENABLED" : "DISABLED"));
+    RenderDebugString(x, y, buffer);
+    y += DEBUG_LINE_HEIGHT;
+
+    snprintf(buffer, sizeof(buffer), "STAT: %s", 
+        (IE.STAT ? "ENABLED" : "DISABLED"));
+    RenderDebugString(x, y, buffer);
+    y += DEBUG_LINE_HEIGHT;
+
+    snprintf(buffer, sizeof(buffer), "TIMER: %s", 
+        (IE.Timer ? "ENABLED" : "DISABLED"));
+    RenderDebugString(x, y, buffer);
+    y += DEBUG_LINE_HEIGHT;
+
+    snprintf(buffer, sizeof(buffer), "SERIAL: %s", 
+        (IE.Serial ? "ENABLED" : "DISABLED"));
+    RenderDebugString(x, y, buffer);
+    y += DEBUG_LINE_HEIGHT;
+
+    snprintf(buffer, sizeof(buffer), "JOYPAD: %s", 
+        (IE.Joypad ? "ENABLED" : "DISABLED"));
+    RenderDebugString(x, y, buffer);
+    y += DEBUG_LINE_HEIGHT;
+
+    y += DEBUG_LINE_HEIGHT;
+
+    SDL_Rect instBox = {
+        .x = x,
+        .y = y,
+        .w = (20 * DEBUG_CHARACTER_WIDTH),
+        .h = (INSTRUCTION_LOG_LENGTH * DEBUG_LINE_HEIGHT) 
+            + (DEBUG_CHARACTER_HEIGHT * 2),
+    };
+
+    x += DEBUG_CHARACTER_WIDTH;
+
+    SDL_RenderDrawRect(GetDebugWindowRenderer(), &instBox);
+
+    y += (DEBUG_LINE_HEIGHT * INSTRUCTION_LOG_LENGTH);
+    for (int i = 0; i < GetInstructionLogSize(); ++i) {
+        RenderDebugString(x, y, GetInstructionLogEntry(i));
+        y -= DEBUG_LINE_HEIGHT;
+    }
 
     x = DEBUG_WINDOW_CONTENT_X + (DEBUG_CHARACTER_WIDTH * 20);
     y = DEBUG_WINDOW_CONTENT_Y + DEBUG_LINE_HEIGHT;
@@ -104,23 +153,16 @@ void StatusTabRender()
     RenderDebugString(x, y, buffer);
     y += DEBUG_LINE_HEIGHT;
 
-    const char * cartridgeType = GetCartridgeTypeString();
-    snprintf(buffer, sizeof(buffer), "CARTRIDGE: %s", cartridgeType);
+    snprintf(buffer, sizeof(buffer), "CARTRIDGE: %s", GetCartridgeTypeString());
     RenderDebugString(x, y, buffer);
     y += DEBUG_LINE_HEIGHT;
 
-    const char * romType = GetROMTypeString();
-    snprintf(buffer, sizeof(buffer), "ROM: %s", romType);
+    snprintf(buffer, sizeof(buffer), "ROM: %s", GetROMTypeString());
     RenderDebugString(x, y, buffer);
     y += DEBUG_LINE_HEIGHT;
 
-    const char * ramType = GetRAMTypeString();
-    snprintf(buffer, sizeof(buffer), "RAM: %s", ramType);
+    snprintf(buffer, sizeof(buffer), "RAM: %s", GetRAMTypeString());
     RenderDebugString(x, y, buffer);
     y += DEBUG_LINE_HEIGHT;
-
-    // snprintf(buffer, sizeof(buffer), "RAM: %s", );
-    // RenderDebugString(x, y, buffer);
-    // y += DEBUG_LINE_HEIGHT;
 
 }
