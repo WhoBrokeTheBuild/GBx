@@ -99,6 +99,8 @@ static void _DEC_SP()
     LogInst("DEC SP");
     --R.SP;
     Tick(8);
+
+    StackBaseAddress = R.SP;
 }
 
 #endif // DEC_H

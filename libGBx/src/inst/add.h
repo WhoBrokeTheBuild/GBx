@@ -73,7 +73,7 @@ static void _ADD_u()
     byte u = NextByte();
     Tick(4);
 
-    LogInst("ADD A,%02Xh", u);
+    LogInst("ADD A,$%02X", u);
 
     _ADD(u);
 }
@@ -134,7 +134,7 @@ static void _ADC_u()
     byte u = NextByte();
     Tick(4);
 
-    LogInst("ADC A,%02Xh", u);
+    LogInst("ADC A,$%02X", u);
 
     _ADC(u);
 }
@@ -180,6 +180,8 @@ static void _ADD_SP_s()
 
     R.SP = add16s(R.SP, s);
     Tick(4);
+
+    StackBaseAddress = R.SP;
 }
 
 #endif // ADD_H

@@ -8,161 +8,132 @@
 #include <GBx/instruction.h>
 #include <GBx/interrupt.h>
 #include <GBx/lcd.h>
+#include <GBx/memory.h>
 #include <GBx/timer.h>
 
 void StatusTabRender()
 {
-    char buffer[1024];
+    int startX, startY;
+    DebugGetCursor(&startX, &startY);
 
-    int x = DEBUG_WINDOW_CONTENT_X;
-    int y = DEBUG_WINDOW_CONTENT_Y + DEBUG_LINE_HEIGHT;
-
-    snprintf(buffer, sizeof(buffer), "CPU: %s", 
+    DebugPrintln("STATUS");
+    DebugPrintln("CPU: %s", 
         (CPUEnabled ? "ENABLED" : "DISABLED"));
-    RenderDebugString(x, y, buffer);
-    y += DEBUG_LINE_HEIGHT;
 
-    snprintf(buffer, sizeof(buffer), "LCD: %s", 
+    DebugPrintln("LCD: %s", 
         (LCDC.Enabled ? "ENABLED" : "DISABLED"));
-    RenderDebugString(x, y, buffer);
-    y += DEBUG_LINE_HEIGHT;
 
-    snprintf(buffer, sizeof(buffer), "APU: %s", 
-        (SoundControl.Enabled ? "ENABLED" : "DISABLED"));
-    RenderDebugString(x, y, buffer);
-    y += DEBUG_LINE_HEIGHT;
+    DebugPrintln("APU: %s", 
+        (APUC.Enabled ? "ENABLED" : "DISABLED"));
 
-    snprintf(buffer, sizeof(buffer), "TAC: %s", 
+    DebugPrintln("TAC: %s", 
         (TAC.Enabled ? "ENABLED" : "DISABLED"));
-    RenderDebugString(x, y, buffer);
-    y += DEBUG_LINE_HEIGHT;
+    
+    DebugNewline();
 
-    y += DEBUG_LINE_HEIGHT;
-
-    snprintf(buffer, sizeof(buffer), "A: %02X  F: %02X", R.A, R.F);
-    RenderDebugString(x, y, buffer);
-    y += DEBUG_LINE_HEIGHT;
-
-    snprintf(buffer, sizeof(buffer), "B: %02X  C: %02X", R.B, R.C);
-    RenderDebugString(x, y, buffer);
-    y += DEBUG_LINE_HEIGHT;
-
-    snprintf(buffer, sizeof(buffer), "D: %02X  E: %02X", R.D, R.E);
-    RenderDebugString(x, y, buffer);
-    y += DEBUG_LINE_HEIGHT;
-
-    snprintf(buffer, sizeof(buffer), "H: %02X  L: %02X", R.H, R.L);
-    RenderDebugString(x, y, buffer);
-    y += DEBUG_LINE_HEIGHT;
-
-    snprintf(buffer, sizeof(buffer), "PC: %04X", R.PC);
-    RenderDebugString(x, y, buffer);
-    y += DEBUG_LINE_HEIGHT;
-
-    snprintf(buffer, sizeof(buffer), "SP: %04X", R.SP);
-    RenderDebugString(x, y, buffer);
-    y += DEBUG_LINE_HEIGHT;
-
-    snprintf(buffer, sizeof(buffer), "FLAGS: [%c%c%c%c]",
+    DebugPrintln("REGISTERS");
+    DebugPrintln("A: $%02X  F: $%02X", R.A, R.F);
+    DebugPrintln("B: $%02X  C: $%02X", R.B, R.C);
+    DebugPrintln("D: $%02X  E: $%02X", R.D, R.E);
+    DebugPrintln("H: $%02X  L: $%02X", R.H, R.L);
+    DebugPrintln("PC: $%04X", R.PC);
+    DebugPrintln("SP: $%04X", R.SP);
+    DebugPrintln("FLAGS: [%c%c%c%c]",
         (R.FZ ? 'Z' : '-'), 
         (R.FN ? 'N' : '-'), 
         (R.FH ? 'H' : '-'), 
         (R.FC ? 'C' : '-'));
-    RenderDebugString(x, y, buffer);
-    y += DEBUG_LINE_HEIGHT;
 
-    y += DEBUG_LINE_HEIGHT;
+    DebugNewline();
 
-    snprintf(buffer, sizeof(buffer), "DIV: %02X", DIV);
-    RenderDebugString(x, y, buffer);
-    y += DEBUG_LINE_HEIGHT;
+    DebugPrintln("DIV:  $%02X", DIV);
+    DebugPrintln("TMA:  $%02X", TMA);
+    DebugPrintln("TIMA: $%02X", TIMA);
+    DebugPrintln("TIMER: %d HZ", GetTimerSpeed());
 
-    snprintf(buffer, sizeof(buffer), "TMA: %02X", TMA);
-    RenderDebugString(x, y, buffer);
-    y += DEBUG_LINE_HEIGHT;
+    DebugNewline();
 
-    snprintf(buffer, sizeof(buffer), "TIMA: %02X", TIMA);
-    RenderDebugString(x, y, buffer);
-    y += DEBUG_LINE_HEIGHT;
+    DebugPrintln("INTERRUPTS");
 
-    snprintf(buffer, sizeof(buffer), "TIMER: %d HZ", GetTimerSpeed());
-    RenderDebugString(x, y, buffer);
-    y += DEBUG_LINE_HEIGHT;
-
-    RenderDebugString(x, y, "INTERRUPTS:");
-    y += DEBUG_LINE_HEIGHT;
-
-    snprintf(buffer, sizeof(buffer), "VBLANK: %s", 
+    DebugPrintln("VBLANK: %s", 
         (IE.VBlank ? "ENABLED" : "DISABLED"));
-    RenderDebugString(x, y, buffer);
-    y += DEBUG_LINE_HEIGHT;
 
-    snprintf(buffer, sizeof(buffer), "STAT: %s", 
+    DebugPrintln("STAT:   %s", 
         (IE.STAT ? "ENABLED" : "DISABLED"));
-    RenderDebugString(x, y, buffer);
-    y += DEBUG_LINE_HEIGHT;
 
-    snprintf(buffer, sizeof(buffer), "TIMER: %s", 
+    DebugPrintln("TIMER:  %s", 
         (IE.Timer ? "ENABLED" : "DISABLED"));
-    RenderDebugString(x, y, buffer);
-    y += DEBUG_LINE_HEIGHT;
 
-    snprintf(buffer, sizeof(buffer), "SERIAL: %s", 
+    DebugPrintln("SERIAL: %s", 
         (IE.Serial ? "ENABLED" : "DISABLED"));
-    RenderDebugString(x, y, buffer);
-    y += DEBUG_LINE_HEIGHT;
 
-    snprintf(buffer, sizeof(buffer), "JOYPAD: %s", 
+    DebugPrintln("JOYPAD: %s", 
         (IE.Joypad ? "ENABLED" : "DISABLED"));
-    RenderDebugString(x, y, buffer);
-    y += DEBUG_LINE_HEIGHT;
 
-    y += DEBUG_LINE_HEIGHT;
+    DebugNewline();
 
-    SDL_Rect instBox = {
-        .x = x,
-        .y = y,
-        .w = (20 * DEBUG_CHARACTER_WIDTH),
-        .h = (INSTRUCTION_LOG_LENGTH * DEBUG_LINE_HEIGHT) 
-            + (DEBUG_CHARACTER_HEIGHT * 2),
-    };
+    DebugSetCursor(startX + (DEBUG_CHAR_WIDTH * 20), startY);
 
-    x += DEBUG_CHARACTER_WIDTH;
+    DebugPrintln("DEVICE: %s", 
+        (ColorEnabled ? "CGB" : (SuperEnabled ? "SGB" : "DMG")));
 
-    SDL_RenderDrawRect(GetDebugWindowRenderer(), &instBox);
+    DebugPrintln("CLOCK: %d HZ", ClockSpeed);
+    DebugPrintln("TITLE: %.*s", 15, CartridgeHeader.Title);
+    DebugPrintln("CARTRIDGE: %s", GetCartridgeTypeString());
+    DebugPrintln("ROM: %s", GetROMTypeString());
+    DebugPrintln("RAM: %s", GetRAMTypeString());
 
-    y += (DEBUG_LINE_HEIGHT * INSTRUCTION_LOG_LENGTH);
-    for (int i = 0; i < GetInstructionLogSize(); ++i) {
-        RenderDebugString(x, y, GetInstructionLogEntry(i));
-        y -= DEBUG_LINE_HEIGHT;
+    DebugNewline();
+
+    DebugPrintln("LCD MODE: %s", GetLCDModeString(STAT.Mode));
+    DebugPrintln("LY:  $%02X (%d)", LY, LY);
+    DebugPrintln("LYC: $%02X (%d)", LYC, LYC);
+    DebugPrintln("SCX: $%02X (%d)", SCX, SCX);
+    DebugPrintln("SCY: $%02X (%d)", SCY, SCY);
+    DebugPrintln("WX:  $%02X (%d)", WX, WX);
+    DebugPrintln("WY:  $%02X (%d)", WY, WY);
+
+    const int STACK_PREVIEW_LENGTH = 16;
+    const int STACK_PREVIEW_ENTRY_SIZE = 26;
+
+    int stackLogWidth = (DEBUG_CHAR_WIDTH * STACK_PREVIEW_ENTRY_SIZE);
+    int stackLogHeight = (DEBUG_LINE_HEIGHT * STACK_PREVIEW_LENGTH);
+
+    DebugSetCursor(startX + (DEBUG_CHAR_WIDTH * 60), startY);
+
+    DebugPrintln("STACK [%04X]", StackBaseAddress);
+
+    DebugPanel(stackLogWidth + (DEBUG_PANEL_PADDING * 2),
+               stackLogHeight + (DEBUG_PANEL_PADDING * 2));
+
+    char stackLogEntry[32];
+
+    word addr = R.SP;
+    for (int i = 0; i < STACK_PREVIEW_LENGTH; ++i) {
+        if (addr == StackBaseAddress) {
+            break;
+        }
+
+        word ptr = ReadWord(addr);
+
+        Disassemble(stackLogEntry, sizeof(stackLogEntry), ptr);
+        DebugPrintln("[%04X] $%04X: %s", addr, ptr, stackLogEntry);
+
+        addr += 2;
     }
 
-    x = DEBUG_WINDOW_CONTENT_X + (DEBUG_CHARACTER_WIDTH * 20);
-    y = DEBUG_WINDOW_CONTENT_Y + DEBUG_LINE_HEIGHT;
+    DebugSetCursor(startX + (DEBUG_CHAR_WIDTH * 60), 
+        startY + stackLogHeight + (DEBUG_LINE_HEIGHT * 6));
 
-    snprintf(buffer, sizeof(buffer), "DEVICE: %s", 
-        (ColorEnabled ? "CGB" : (SuperEnabled ? "SGB" : "DMG")));
-    RenderDebugString(x, y, buffer);
-    y += DEBUG_LINE_HEIGHT;
+    DebugPrintln("INSTRUCTION LOG");
 
-    snprintf(buffer, sizeof(buffer), "CLOCK: %d HZ", ClockSpeed);
-    RenderDebugString(x, y, buffer);
-    y += DEBUG_LINE_HEIGHT;
+    int instLogWidth = (DEBUG_CHAR_WIDTH * STACK_PREVIEW_ENTRY_SIZE);
+    int instLogHeight = (DEBUG_LINE_HEIGHT * INSTRUCTION_LOG_LENGTH);
 
-    snprintf(buffer, sizeof(buffer), "TITLE: %.*s", 15, CartridgeHeader.Title);
-    RenderDebugString(x, y, buffer);
-    y += DEBUG_LINE_HEIGHT;
+    DebugPanel(instLogWidth + (DEBUG_PANEL_PADDING * 2),
+               instLogHeight + (DEBUG_PANEL_PADDING * 2));
 
-    snprintf(buffer, sizeof(buffer), "CARTRIDGE: %s", GetCartridgeTypeString());
-    RenderDebugString(x, y, buffer);
-    y += DEBUG_LINE_HEIGHT;
-
-    snprintf(buffer, sizeof(buffer), "ROM: %s", GetROMTypeString());
-    RenderDebugString(x, y, buffer);
-    y += DEBUG_LINE_HEIGHT;
-
-    snprintf(buffer, sizeof(buffer), "RAM: %s", GetRAMTypeString());
-    RenderDebugString(x, y, buffer);
-    y += DEBUG_LINE_HEIGHT;
-
+    for (int i = 0; i < GetInstructionLogSize(); ++i) {
+        DebugPrintln(GetInstructionLogEntry(i));
+    }
 }

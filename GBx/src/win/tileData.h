@@ -6,10 +6,7 @@
 void InitTileDataTab();
 void TermTileDataTab();
 
-void TileDataTabClick(SDL_Point * mouse);
-
 void TileDataTabRefresh();
-
-void TileDataTabRender(SDL_Point * mouse);
+void TileDataTabRender();
 
 #endif // TILE_DATA_H

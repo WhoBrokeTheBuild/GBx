@@ -32,6 +32,8 @@ bool CPUEnabled = true;
 
 word LastInstructionAddress;
 
+word StackBaseAddress;
+
 typedef void(* inst_t)();
 
 inst_t instructions[] = {

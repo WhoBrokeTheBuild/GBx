@@ -55,6 +55,8 @@ int main(int argc, char ** argv)
     const char * bootROMFilename = NULL;
     cflags_add_string(flags, 'b', "bootstrap", &bootROMFilename, "Load a Bootstrap ROM");
 
+    cflags_add_bool(flags, '\0', "orig-colors", &LCDOriginalColors, "Use original green-tinted LCD colors");
+
     cflags_parse(flags, argc, argv);
     VerboseLevel = verbose->count;
 
@@ -97,7 +99,6 @@ int main(int argc, char ** argv)
         SetBreakpoint("PC", R.PC);
 
         DebugWindowInit();
-        ToggleDebugWindow();
     }
     
     pthread_t thread;

@@ -28,7 +28,7 @@ volume_control VolumeControl;
 
 sound_output_terminal SoundOutputTerminal;
 
-sound_control SoundControl;
+sound_control APUC;
 
 byte DutyCycles[4][8] = {
     { 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },
@@ -80,7 +80,7 @@ void ResetAPU()
     SoundOutputTerminal.raw = 0xF3;
 
     // NR52
-    SoundControl.raw = 0xF1;
+    APUC.raw = 0xF1;
 }
 
 void APUTick(unsigned cycles)

@@ -11,7 +11,7 @@ static void _CALL_uu()
     word uu = NextWord();
     Tick(8);
 
-    LogInst("CALL %04Xh", uu);
+    LogInst("CALL $%04X", uu);
 
     PushWord(R.PC);
     Tick(8);
@@ -25,7 +25,7 @@ static void _CALL_NZ_uu()
     word uu = NextWord();
     Tick(8);
 
-    LogInst("CALL NZ,%04Xh", uu);
+    LogInst("CALL NZ,$%04X", uu);
 
     if (!R.FZ) {
         PushWord(R.PC);
@@ -41,7 +41,7 @@ static void _CALL_Z_uu()
     word uu = NextWord();
     Tick(8);
 
-    LogInst("CALL Z,%04Xh", uu);
+    LogInst("CALL Z,$%04X", uu);
 
     if (R.FZ) {
         PushWord(R.PC);
@@ -57,7 +57,7 @@ static void _CALL_NC_uu()
     word uu = NextWord();
     Tick(8);
 
-    LogInst("CALL NC,%04Xh", uu);
+    LogInst("CALL NC,$%04X", uu);
 
     if (!R.FC) {
         PushWord(R.PC);
@@ -73,7 +73,7 @@ static void _CALL_C_uu()
     word uu = NextWord();
     Tick(8);
 
-    LogInst("CALL C,%04Xh", uu);
+    LogInst("CALL C,$%04X", uu);
 
     if (R.FC) {
         PushWord(R.PC);

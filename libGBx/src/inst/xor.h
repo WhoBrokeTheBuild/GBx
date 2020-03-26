@@ -65,7 +65,7 @@ static void _XOR_u()
     byte u = NextByte();
     Tick(4);
 
-    LogInst("XOR %02Xh", u);
+    LogInst("XOR $%02X", u);
 
     _XOR(u);
 }

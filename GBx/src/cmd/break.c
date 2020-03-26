@@ -28,12 +28,12 @@ void cmdBreak(const char * input)
         sscanf(equal + 1, "%04X", &value);
 
         SetBreakpoint(input, value);
-        LogInfo("Breakpoint set when %s=%04Xh", input, value);
+        LogInfo("Breakpoint set when %s=$%04X", input, value);
     }
     else {
         unsigned int pc;
         sscanf(input, "%04X", &pc);
         SetBreakpoint("PC", pc);
-        LogInfo("Breakpoint set when PC=%04Xh", pc);
+        LogInfo("Breakpoint set when PC=$%04X", pc);
     }
 }

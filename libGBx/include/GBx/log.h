@@ -88,7 +88,7 @@ static char LOG_INST_BUFFER[1024];
 #define LogInst(M, ...)                                             \
     do {                                                            \
         snprintf(LOG_INST_BUFFER, sizeof(LOG_INST_BUFFER),          \
-            "[%04X] " M, LastInstructionAddress, ##__VA_ARGS__);    \
+            "$%04X: " M, LastInstructionAddress, ##__VA_ARGS__);    \
         AddInstructionToLog(LOG_INST_BUFFER);                       \
         if (VerboseLevel >= 3) {                                    \
             printf("[INST] %s\n", LOG_INST_BUFFER);                 \

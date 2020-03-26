@@ -4,6 +4,7 @@
 #include "cartridge.h"
 #include "clock.h"
 #include "cpu.h"
+#include "input.h"
 #include "interrupt.h"
 #include "memory.h"
 #include "lcd.h"
@@ -49,10 +50,12 @@ void Reset()
     R.HL = 0x014D;
     R.PC = (HasBootstrapROM ? 0x0000 : 0x0100);
     R.SP = 0xFFFE;
+    StackBaseAddress = R.SP;
     
     ResetAPU();
     ResetLCD();
     ResetTimer();
+    ResetInput();
     ResetMemory();
     ResetInterrupts();
     ResetCartridgeMBC();

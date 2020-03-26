@@ -178,38 +178,12 @@ SDL_Window   * sdlDebugWindow   = NULL;
 SDL_Renderer * sdlDebugRenderer = NULL;
 SDL_Texture  * sdlFontTexture   = NULL;
 
-#define BUTTON_PADDING (4)
-
-int debugTabIndex = 0;
-
-tab debugTabs[] = {
-    { 16,  16, "STATUS",    NULL,               StatusTabRender,   NULL },
-    { 80,  16, "TILE DATA", TileDataTabRefresh, TileDataTabRender, TileDataTabClick },
-    { 168, 16, "TILE MAP",  TileMapTabRefresh,  TileMapTabRender,  TileMapTabClick },
-    { 248, 16, "SPRITE",    NULL,               NULL,              NULL },
-    { 312, 16, "AUDIO",     NULL,               NULL,              NULL },
-};
-
-void onRefreshClick()
-{
-    if (debugTabs[debugTabIndex].refresh) {
-        debugTabs[debugTabIndex].refresh();
-    }
-}
-
-button btnRefresh = { 
-    .x = DEBUG_WINDOW_WIDTH - 200,
-    .y = 8,
-    .text = "REFRESH",
-    .click = onRefreshClick,
-};
-
-checkbox chkAutoRefresh = {
-    .x = DEBUG_WINDOW_WIDTH - 128,
-    .y = 8,
-    .text = "AUTO REFRESH",
-    .checked = true,
-    .changed = NULL,
+enum {
+    DBG_TAB_STATUS,
+    DBG_TAB_TILE_DATA,
+    DBG_TAB_TILE_MAP,
+    DBG_TAB_SPRITE,
+    DBG_TAB_AUDIO,
 };
 
 void DebugWindowInit()
@@ -276,192 +250,6 @@ void ToggleDebugWindow()
     }
 }
 
-SDL_Rect GetStringBounds(int x, int y, const char * string)
-{
-    return (SDL_Rect){
-        .x = x,
-        .y = y,
-        .w = strlen(string) * DEBUG_CHARACTER_WIDTH,
-        .h = DEBUG_CHARACTER_HEIGHT
-    };
-}
-
-SDL_Rect GetButtonBounds(button * b)
-{
-    SDL_Rect rect = GetStringBounds(b->x, b->y, b->text);
-    rect.w += (BUTTON_PADDING * 2);
-    rect.h += (BUTTON_PADDING * 2);
-    return rect;
-}
-
-SDL_Rect GetTabBounds(tab * t)
-{
-    SDL_Rect rect = GetStringBounds(t->x, t->y, t->text);
-    rect.w += (BUTTON_PADDING * 2);
-    rect.h += (BUTTON_PADDING * 2);
-    return rect;
-}
-
-SDL_Rect GetCheckboxBounds(checkbox * c)
-{
-    SDL_Rect rect = GetStringBounds(c->x, c->y, c->text);
-    rect.w += (BUTTON_PADDING * 2) + (DEBUG_CHARACTER_WIDTH * 2);
-    rect.h += (BUTTON_PADDING * 2);
-    return rect;
-}
-
-bool CheckButtonClick(button * b, SDL_Point * mouse)
-{
-    SDL_Rect rect = GetButtonBounds(b);
-    return SDL_PointInRect(mouse, &rect);
-}
-
-bool CheckTabClick(tab * t, SDL_Point * mouse)
-{
-    SDL_Rect rect = GetTabBounds(t);
-    return SDL_PointInRect(mouse, &rect);
-}
-
-bool CheckCheckboxClick(checkbox * c, SDL_Point * mouse)
-{
-    SDL_Rect rect = GetCheckboxBounds(c);
-    return SDL_PointInRect(mouse, &rect);
-}
-
-void RenderDebugString(int x, int y, const char * string)
-{
-    size_t length = strlen(string);
-
-    SDL_Rect src = { .x = 0, .y = 0, .w = DEBUG_CHARACTER_WIDTH, .h = DEBUG_CHARACTER_HEIGHT };
-    SDL_Rect dst = { .x = x, .y = y, .w = DEBUG_CHARACTER_WIDTH, .h = DEBUG_CHARACTER_HEIGHT };
-
-    char * questionMark = strchr(FONT_CHARACTER_MAP, '?');
-
-    for (size_t i = 0; i < length; ++i) {
-        if (string[i] == ' ') {
-            dst.x += DEBUG_CHARACTER_WIDTH;
-            continue;
-        }
-
-        char * index = strchr(FONT_CHARACTER_MAP, toupper(string[i]));
-
-        if (index == NULL) {
-            index = questionMark;
-        }
-
-        size_t offset = index - FONT_CHARACTER_MAP;
-
-        src.x = (offset % 8) * DEBUG_CHARACTER_WIDTH;
-        src.y = (offset / 8) * DEBUG_CHARACTER_WIDTH;
-        SDL_RenderCopy(sdlDebugRenderer, sdlFontTexture, &src, &dst);
-
-        dst.x += DEBUG_CHARACTER_WIDTH;
-    }
-}
-
-void RenderDebugButton(button * b, SDL_Point * mouse)
-{
-    SDL_Rect dst = GetButtonBounds(b);
-
-    if (SDL_PointInRect(mouse, &dst)) {
-        SDL_SetRenderDrawColor(sdlDebugRenderer, 
-            COLOR_DEFAULT, COLOR_DEFAULT, COLOR_DEFAULT, 0xFF);
-    }
-    else {
-        SDL_SetRenderDrawColor(sdlDebugRenderer, 
-            COLOR_INACTIVE, COLOR_INACTIVE, COLOR_INACTIVE, 0xFF);
-    }
-
-    SDL_RenderFillRect(sdlDebugRenderer, &dst);
-
-    SDL_SetRenderDrawColor(sdlDebugRenderer, 
-        COLOR_BORDER, COLOR_BORDER, COLOR_BORDER, 0xFF);
-
-    SDL_RenderDrawRect(sdlDebugRenderer, &dst);
-
-    int textX = dst.x + BUTTON_PADDING;
-    int textY = dst.y + BUTTON_PADDING;
-
-    RenderDebugString(textX, textY, b->text);
-}
-
-void RenderDebugTab(tab * t, SDL_Point * mouse, bool active)
-{
-    SDL_Rect dst = GetTabBounds(t);
-    dst.h += (BUTTON_PADDING * 2);
-
-    if (active) {
-        dst.y -= BUTTON_PADDING;
-
-        SDL_SetRenderDrawColor(sdlDebugRenderer,
-            COLOR_DEFAULT, COLOR_DEFAULT, COLOR_DEFAULT, 0xFF);
-    }
-    else if (SDL_PointInRect(mouse, &dst)) {
-        SDL_SetRenderDrawColor(sdlDebugRenderer, 
-            COLOR_DEFAULT, COLOR_DEFAULT, COLOR_DEFAULT, 0xFF);
-    }
-    else {
-        SDL_SetRenderDrawColor(sdlDebugRenderer, 
-            COLOR_INACTIVE, COLOR_INACTIVE, COLOR_INACTIVE, 0xFF);
-    }
-
-    SDL_RenderFillRect(sdlDebugRenderer, &dst);
-
-    SDL_SetRenderDrawColor(sdlDebugRenderer, 
-        COLOR_BORDER, COLOR_BORDER, COLOR_BORDER, 0xFF);
-
-    SDL_RenderDrawRect(sdlDebugRenderer, &dst);
-    
-    int textX = dst.x + BUTTON_PADDING;
-    int textY = dst.y + BUTTON_PADDING;
-
-    RenderDebugString(textX, textY, t->text);
-}
-
-void RenderDebugCheckbox(checkbox * c, SDL_Point * mouse)
-{
-    SDL_Rect dst = GetCheckboxBounds(c);
-
-    if (SDL_PointInRect(mouse, &dst)) {
-        SDL_SetRenderDrawColor(sdlDebugRenderer, 
-            COLOR_DEFAULT, COLOR_DEFAULT, COLOR_DEFAULT, 0xFF);
-    }
-    else {
-        SDL_SetRenderDrawColor(sdlDebugRenderer, 
-            COLOR_INACTIVE, COLOR_INACTIVE, COLOR_INACTIVE, 0xFF);
-    }
-
-    SDL_RenderFillRect(sdlDebugRenderer, &dst);
-
-    SDL_SetRenderDrawColor(sdlDebugRenderer, 
-        COLOR_BORDER, COLOR_BORDER, COLOR_BORDER, 0xFF);
-
-    SDL_RenderDrawRect(sdlDebugRenderer, &dst);
-    
-    SDL_Rect checkbox = { 
-        .x = dst.x + BUTTON_PADDING, 
-        .y = dst.y + BUTTON_PADDING,
-        .w = DEBUG_CHARACTER_WIDTH, 
-        .h = DEBUG_CHARACTER_HEIGHT
-    };
-
-    SDL_RenderDrawRect(sdlDebugRenderer, &checkbox);
-
-    if (c->checked) {
-        ++checkbox.x;
-        ++checkbox.y;
-        checkbox.w -= 2;
-        checkbox.h -= 2;
-
-        SDL_RenderFillRect(sdlDebugRenderer, &checkbox);
-    }
-    
-    int textX = dst.x + BUTTON_PADDING + (DEBUG_CHARACTER_WIDTH * 2);
-    int textY = dst.y + BUTTON_PADDING;
-
-    RenderDebugString(textX, textY, c->text);
-}
-
 void DebugWindowHandleEvent(SDL_Event * evt)
 {
     if (evt->type == SDL_WINDOWEVENT) {
@@ -482,87 +270,462 @@ void DebugWindowHandleEvent(SDL_Event * evt)
             }
         }
     }
-    else if (evt->type == SDL_MOUSEBUTTONUP) {
-        SDL_Window * window = SDL_GetWindowFromID(evt->key.windowID);
-        if (window == sdlDebugWindow) {
-            if (evt->button.button == SDL_BUTTON_LEFT) {
-                SDL_Point mouse = { evt->button.x, evt->button.y };
-                DebugWindowHandleClick(&mouse);
-            }
-        }
-    }
 }
 
-void DebugWindowHandleClick(SDL_Point * mouse)
+SDL_Point dbgCursor = { .x = 0, .y = 0 };
+SDL_Point dbgMouse  = { .x = -1, .y = -1 };
+
+int dbgDirection = DEBUG_DIR_RIGHT;
+bool dbgClick = false;
+bool dbgMouseDown = false;
+bool dbgAutoRefresh = true;
+int dbgTabIndex = 0;
+
+#define SET_COLOR_BACKGROUND() \
+    do { \
+        SDL_SetRenderDrawColor(sdlDebugRenderer, 0x33, 0x33, 0x33, 0xFF); \
+    } while (0)
+
+#define SET_COLOR_DEFAULT() \
+    do { \
+        SDL_SetRenderDrawColor(sdlDebugRenderer, 0xEE, 0xEE, 0xEE, 0xFF); \
+    } while (0)
+
+#define SET_COLOR_INACTIVE() \
+    do { \
+        SDL_SetRenderDrawColor(sdlDebugRenderer, 0xAA, 0xAA, 0xAA, 0xFF); \
+    } while (0)
+
+#define SET_COLOR_BORDER() \
+    do { \
+        SDL_SetRenderDrawColor(sdlDebugRenderer, 0x00, 0x00, 0x00, 0xFF); \
+    } while (0)
+
+void DebugWindowUpdate()
 {
-    if (CheckButtonClick(&btnRefresh, mouse)) {
-        if (btnRefresh.click) {
-            btnRefresh.click();
-        }
-    }
-
-    if (CheckCheckboxClick(&chkAutoRefresh, mouse)) {
-        chkAutoRefresh.checked ^= true;
-        if (chkAutoRefresh.changed) {
-            chkAutoRefresh.changed();
-        }
-    }
-
-    for (int i = 0; i < sizeof(debugTabs) / sizeof(tab); ++i) {
-        tab * tab = &debugTabs[i];
-        if (CheckTabClick(tab, mouse)) {
-            debugTabIndex = i;
-            break;
-        }
-    }
-
-    if (debugTabs[debugTabIndex].windowClick) {
-        debugTabs[debugTabIndex].windowClick(mouse);
-    }
+    int state = SDL_GetMouseState(&dbgMouse.x, &dbgMouse.y);
+    bool pressed = (state & SDL_BUTTON(SDL_BUTTON_LEFT));
+    dbgClick = (pressed && !dbgMouseDown);
+    dbgMouseDown = pressed;
 }
 
 void DebugWindowRender()
 {
-    if (chkAutoRefresh.checked) {
-        if (debugTabs[debugTabIndex].refresh) {
-            debugTabs[debugTabIndex].refresh();
-        }
+    if (dbgAutoRefresh) {
+        DebugWindowRefresh();
     }
 
-    SDL_Point mouse;
-    SDL_GetMouseState(&mouse.x, &mouse.y);
+    DebugWindowUpdate();
 
-    SDL_SetRenderDrawColor(sdlDebugRenderer, 0x33, 0x33, 0x33, 0xFF);
+    SET_COLOR_BACKGROUND();
+
     SDL_RenderClear(sdlDebugRenderer);
 
-    RenderDebugButton(&btnRefresh, &mouse);
-    RenderDebugCheckbox(&chkAutoRefresh, &mouse);
+    DebugSetCursor(DEBUG_WINDOW_WIDTH - DEBUG_MARGIN, DEBUG_MARGIN);
+    DebugSetDirection(DEBUG_DIR_LEFT);
 
-    for (int i = 0; i < sizeof(debugTabs) / sizeof(tab); ++i) {
-        tab * tab = &debugTabs[i];
-        RenderDebugTab(tab, &mouse, (debugTabIndex == i));
+    DebugCheckbox("AUTO", &dbgAutoRefresh);
+
+    if (DebugButton("REFRESH")) {
+        DebugWindowRefresh();
     }
 
-    SDL_Rect dst = { 
-        .x = DEBUG_WINDOW_CONTENT_X - DEBUG_WINDOW_PADDING, 
-        .y = DEBUG_WINDOW_CONTENT_Y - DEBUG_WINDOW_PADDING, 
-        .w = DEBUG_WINDOW_CONTENT_WIDTH + (DEBUG_WINDOW_PADDING * 2), 
-        .h = DEBUG_WINDOW_CONTENT_HEIGHT + (DEBUG_WINDOW_PADDING * 2),
-    };
+    DebugSetCursor(DEBUG_MARGIN, DEBUG_MARGIN);
+    DebugSetDirection(DEBUG_DIR_RIGHT);
 
-    SDL_SetRenderDrawColor(sdlDebugRenderer, 
-        COLOR_DEFAULT, COLOR_DEFAULT, COLOR_DEFAULT, 0xFF);
+    DebugTab("STATUS",    DBG_TAB_STATUS,    &dbgTabIndex);
+    DebugTab("TILE DATA", DBG_TAB_TILE_DATA, &dbgTabIndex);
+    DebugTab("TILE MAP",  DBG_TAB_TILE_MAP,  &dbgTabIndex);
+    DebugTab("SPRITE",    DBG_TAB_SPRITE,    &dbgTabIndex);
+    DebugTab("AUDIO",     DBG_TAB_AUDIO,     &dbgTabIndex);
 
-    SDL_RenderFillRect(sdlDebugRenderer, &dst);
+    DebugSetCursor(DEBUG_CONTENT_X, DEBUG_CONTENT_Y);
+    DebugPanel(DEBUG_CONTENT_WIDTH, DEBUG_CONTENT_HEIGHT);
 
-    SDL_SetRenderDrawColor(sdlDebugRenderer, 
-        COLOR_BORDER, COLOR_BORDER, COLOR_BORDER, 0xFF);
-
-    SDL_RenderDrawRect(sdlDebugRenderer, &dst);
-
-    if (debugTabs[debugTabIndex].render) {
-        debugTabs[debugTabIndex].render(&mouse);
+    switch (dbgTabIndex) {
+    case DBG_TAB_STATUS:
+        StatusTabRender();
+        break;
+    case DBG_TAB_TILE_DATA:
+        TileDataTabRender();
+        break;
+    case DBG_TAB_TILE_MAP:
+        TileMapTabRender();
+        break;
+    default:
+        break;
     }
 
     SDL_RenderPresent(sdlDebugRenderer);
+}
+
+void DebugWindowRefresh()
+{
+    switch (dbgTabIndex) {
+    case DBG_TAB_TILE_DATA:
+        TileDataTabRefresh();
+        break;
+    case DBG_TAB_TILE_MAP:
+        TileMapTabRefresh();
+        break;
+    default:
+        break;
+    }
+}
+
+void moveCursor(SDL_Rect * r)
+{
+    switch (dbgDirection) {
+    case DEBUG_DIR_UP:
+        dbgCursor.y -= DEBUG_MARGIN;
+        break;
+    case DEBUG_DIR_DOWN:
+        dbgCursor.y += r->h + DEBUG_MARGIN;
+        break;
+    case DEBUG_DIR_LEFT:
+        dbgCursor.x -= DEBUG_MARGIN;
+        break;
+    case DEBUG_DIR_RIGHT:
+        dbgCursor.x += r->w + DEBUG_MARGIN;
+        break;
+    default:
+        break;
+    };
+}
+
+void adjustRect(SDL_Rect * r)
+{
+    switch (dbgDirection) {
+    case DEBUG_DIR_UP:
+        r->y -= r->h;
+        break;
+    case DEBUG_DIR_LEFT:
+        r->x -= r->w;
+        break;
+    default:
+        break;
+    }
+}
+
+void DebugSetDirection(int dir)
+{
+    dbgDirection = dir;
+}
+
+void DebugSetCursor(int x, int y)
+{
+    dbgCursor.x = x;
+    dbgCursor.y = y;
+}
+
+void DebugGetCursor(int * x, int * y)
+{
+    *x = dbgCursor.x;
+    *y = dbgCursor.y;
+}
+
+void DebugMoveCursor(int dx, int dy)
+{
+    dbgCursor.x += dx;
+    dbgCursor.y += dy;
+}
+
+void DebugNewline()
+{
+    dbgCursor.y += DEBUG_LINE_HEIGHT;
+}
+
+void DebugPrint(const char * format, ...)
+{
+    static char buffer[1024];
+
+    va_list args;
+    va_start(args, format);
+    vsnprintf(buffer, sizeof(buffer), format, args);
+    va_end(args);
+
+    size_t length = strlen(buffer);
+
+    SDL_Rect src = { 
+        .x = 0,
+        .y = 0,
+        .w = DEBUG_CHAR_WIDTH,
+        .h = DEBUG_CHAR_HEIGHT,
+    };
+
+    SDL_Rect dst = { 
+        .x = dbgCursor.x,
+        .y = dbgCursor.y,
+        .w = DEBUG_CHAR_WIDTH,
+        .h = DEBUG_CHAR_HEIGHT,
+    };
+
+    char * questionMark = strchr(FONT_CHARACTER_MAP, '?');
+
+    for (size_t i = 0; i < length; ++i) {
+        if (buffer[i] == ' ') {
+            dst.x += DEBUG_CHAR_WIDTH;
+            continue;
+        }
+
+        char * index = strchr(FONT_CHARACTER_MAP, toupper(buffer[i]));
+
+        if (index == NULL) {
+            index = questionMark;
+        }
+
+        size_t offset = index - FONT_CHARACTER_MAP;
+
+        src.x = (offset % 8) * DEBUG_CHAR_WIDTH;
+        src.y = (offset / 8) * DEBUG_CHAR_WIDTH;
+        SDL_RenderCopy(sdlDebugRenderer, sdlFontTexture, &src, &dst);
+
+        dst.x += DEBUG_CHAR_WIDTH;
+    }
+}
+
+void DebugPanel(int w, int h)
+{
+    SDL_Rect r = {
+        .x = dbgCursor.x,
+        .y = dbgCursor.y,
+        .w = w,
+        .h = h,
+    };
+
+    adjustRect(&r);
+
+    SET_COLOR_DEFAULT();
+    SDL_RenderFillRect(sdlDebugRenderer, &r);
+
+    SET_COLOR_BORDER();
+    SDL_RenderDrawRect(sdlDebugRenderer, &r);
+
+    switch (dbgDirection) {
+    case DEBUG_DIR_RIGHT:
+    case DEBUG_DIR_DOWN:
+        dbgCursor.x += DEBUG_PANEL_PADDING;
+        dbgCursor.y += DEBUG_PANEL_PADDING;
+        break;
+    case DEBUG_DIR_LEFT:
+        dbgCursor.x += r.w - DEBUG_PANEL_PADDING;
+        dbgCursor.y += DEBUG_PANEL_PADDING;
+        break;
+    case DEBUG_DIR_UP:
+        dbgCursor.x += DEBUG_PANEL_PADDING;
+        dbgCursor.y += r.y - DEBUG_PANEL_PADDING;
+        break;
+    default:
+        break;
+    }
+}
+
+bool DebugButton(const char * text)
+{
+    SDL_Rect r = {
+        .x = dbgCursor.x,
+        .y = dbgCursor.y,
+        .w = (DEBUG_CHAR_WIDTH * strlen(text))
+            + (DEBUG_BUTTON_PADDING * 2),
+        .h = DEBUG_CHAR_HEIGHT + (DEBUG_BUTTON_PADDING * 2),
+    };
+
+    adjustRect(&r);
+
+    bool hover = SDL_PointInRect(&dbgMouse, &r);
+
+    if (hover) {
+        SET_COLOR_DEFAULT();
+    }
+    else {
+        SET_COLOR_INACTIVE();
+    }
+
+    SDL_RenderFillRect(sdlDebugRenderer, &r);
+
+    SET_COLOR_BORDER();
+    SDL_RenderDrawRect(sdlDebugRenderer, &r);
+
+    dbgCursor.x = r.x + DEBUG_BUTTON_PADDING;
+    dbgCursor.y = r.y + DEBUG_BUTTON_PADDING;
+
+    DebugPrint("%s", text);
+
+    dbgCursor.x = r.x;
+    dbgCursor.y = r.y;
+
+    moveCursor(&r);
+
+    return (hover && dbgClick);
+}
+
+bool DebugCheckbox(const char * text, bool * active)
+{
+    SDL_Rect r = {
+        .x = dbgCursor.x,
+        .y = dbgCursor.y,
+        .w = (DEBUG_CHAR_WIDTH * strlen(text))
+            + (DEBUG_BUTTON_PADDING * 2)
+            + (DEBUG_CHAR_WIDTH * 2),
+        .h = DEBUG_CHAR_HEIGHT + (DEBUG_BUTTON_PADDING * 2),
+    };
+
+    adjustRect(&r);
+
+    bool hover = SDL_PointInRect(&dbgMouse, &r);
+
+    if (hover) {
+        SET_COLOR_DEFAULT();
+    }
+    else {
+        SET_COLOR_INACTIVE();
+    }
+
+    SDL_RenderFillRect(sdlDebugRenderer, &r);
+
+    SET_COLOR_BORDER();
+    SDL_RenderDrawRect(sdlDebugRenderer, &r);
+
+    SDL_Rect mark = { 
+        .x = r.x + DEBUG_BUTTON_PADDING, 
+        .y = r.y + DEBUG_BUTTON_PADDING,
+        .w = DEBUG_CHAR_WIDTH, 
+        .h = DEBUG_CHAR_WIDTH
+    };
+
+    SDL_RenderDrawRect(sdlDebugRenderer, &mark);
+
+    if (*active) {
+        ++mark.x;
+        ++mark.y;
+        mark.w -= 2;
+        mark.h -= 2;
+
+        SDL_RenderFillRect(sdlDebugRenderer, &mark);
+    }
+
+    dbgCursor.x = r.x + DEBUG_BUTTON_PADDING + (DEBUG_CHAR_WIDTH * 2);
+    dbgCursor.y = r.y + DEBUG_BUTTON_PADDING;
+
+    DebugPrint("%s", text);
+
+    dbgCursor.x = r.x;
+    dbgCursor.y = r.y;
+
+    moveCursor(&r);
+
+    if (hover && dbgClick) {
+        *active ^= true;
+    }
+
+    return *active;
+}
+
+bool DebugRadio(const char * text, int index, int * currentIndex)
+{
+    SDL_Rect r = {
+        .x = dbgCursor.x,
+        .y = dbgCursor.y,
+        .w = (DEBUG_CHAR_WIDTH * strlen(text))
+            + (DEBUG_BUTTON_PADDING * 2)
+            + (DEBUG_CHAR_WIDTH * 2),
+        .h = DEBUG_CHAR_HEIGHT 
+            + (DEBUG_BUTTON_PADDING * 2),
+    };
+
+    adjustRect(&r);
+
+    bool hover = SDL_PointInRect(&dbgMouse, &r);
+    bool active = (index == *currentIndex);
+
+    if (hover) {
+        SET_COLOR_DEFAULT();
+    }
+    else {
+        SET_COLOR_INACTIVE();
+    }
+
+    SDL_RenderFillRect(sdlDebugRenderer, &r);
+    
+    SET_COLOR_BORDER();
+    SDL_RenderDrawRect(sdlDebugRenderer, &r);
+
+    SDL_Rect mark = { 
+        .x = r.x + DEBUG_BUTTON_PADDING, 
+        .y = r.y + DEBUG_BUTTON_PADDING,
+        .w = DEBUG_CHAR_WIDTH, 
+        .h = DEBUG_CHAR_WIDTH
+    };
+
+    SDL_RenderDrawRect(sdlDebugRenderer, &mark);
+
+    if (active) {
+        ++mark.x;
+        ++mark.y;
+        mark.w -= 2;
+        mark.h -= 2;
+
+        SDL_RenderFillRect(sdlDebugRenderer, &mark);
+    }
+
+    dbgCursor.x = r.x + DEBUG_BUTTON_PADDING + (DEBUG_CHAR_WIDTH * 2);
+    dbgCursor.y = r.y + DEBUG_BUTTON_PADDING;
+
+    DebugPrint("%s", text);
+
+    dbgCursor.x = r.x;
+    dbgCursor.y = r.y;
+
+    moveCursor(&r);
+
+    if (hover && dbgClick) {
+        *currentIndex = index;
+    }
+
+    return active;
+}
+
+bool DebugTab(const char * text, int index, int * currentIndex)
+{
+    SDL_Rect r = {
+        .x = dbgCursor.x,
+        .y = dbgCursor.y,
+        .w = (DEBUG_CHAR_WIDTH * strlen(text))
+            + (DEBUG_BUTTON_PADDING * 2),
+        .h = DEBUG_CHAR_HEIGHT 
+            + (DEBUG_BUTTON_PADDING * 2),
+    };
+
+    adjustRect(&r);
+
+    bool hover = SDL_PointInRect(&dbgMouse, &r);
+    bool active = (index == *currentIndex);
+
+    if (active || hover) {
+        SET_COLOR_DEFAULT();
+    }
+    else {
+        SET_COLOR_INACTIVE();
+    }
+
+    SDL_RenderFillRect(sdlDebugRenderer, &r);
+
+    SET_COLOR_BORDER();
+    SDL_RenderDrawRect(sdlDebugRenderer, &r);
+
+    dbgCursor.x = r.x + DEBUG_BUTTON_PADDING;
+    dbgCursor.y = r.y + DEBUG_BUTTON_PADDING;
+
+    DebugPrint("%s", text);
+
+    dbgCursor.x = r.x;
+    dbgCursor.y = r.y;
+
+    moveCursor(&r);
+
+    if (hover && dbgClick) {
+        *currentIndex = index;
+    }
+
+    return active;
 }

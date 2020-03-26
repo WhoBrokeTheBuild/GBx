@@ -7,10 +7,7 @@
 #define LCD_HEIGHT (144)
 #define LCD_MAX_LY (LCD_HEIGHT + 10)
 
-#define LCD_COLOR_WHITE      (0xFF)
-#define LCD_COLOR_LIGHT_GRAY (0xCC)
-#define LCD_COLOR_DARK_GRAY  (0x77)
-#define LCD_COLOR_BLACK      (0x00)
+extern bool LCDOriginalColors;
 
 #define LCD_BUFFER_WIDTH      (256)
 #define LCD_BUFFER_HEIGHT     (256)
@@ -174,7 +171,9 @@ extern byte OAM[0xA0];
 
 void ResetLCD();
 
-byte GetColor(palette * pal, int bit, byte d1, byte d2);
+byte * GetColor(palette * pal, int bit, byte d1, byte d2);
+
+const char * GetLCDModeString(uint mode);
 
 void DrawTiles();
 void DrawSprites();

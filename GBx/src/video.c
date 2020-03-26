@@ -37,12 +37,11 @@ void VideoInit(int scale)
         LCD_BUFFER_WIDTH, LCD_BUFFER_HEIGHT);
 
     SDL_SetRenderDrawColor(sdlRenderer, 0, 0, 0, 255);
+    SDL_RenderClear(sdlRenderer);
     
     LogInfo("Window Size=(%dx%d) LCDBuffer=(%dx%d)", 
         width, height, 
         LCD_BUFFER_WIDTH, LCD_BUFFER_HEIGHT);
-
-    Render();
 }
 
 void VideoTerm()
@@ -91,6 +90,9 @@ void HandleEvent(SDL_Event * evt)
                 if (DebugEnabled) {
                     ToggleDebugWindow();
                 }
+            }
+            if (evt->key.keysym.sym == SDLK_0) {
+                LCDOriginalColors ^= true;
             }
         }
     }

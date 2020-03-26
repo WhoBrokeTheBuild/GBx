@@ -66,7 +66,7 @@ static void _AND_u()
     byte u = NextByte();
     Tick(4);
 
-    LogInst("AND %02Xh", u);
+    LogInst("AND $%02X", u);
 
     _AND(u);
 }

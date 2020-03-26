@@ -183,9 +183,6 @@ byte ReadByte(word address)
             return WX;
         case 0xFF4B:
             return WY;
-
-        case 0xFF50:
-            return BootstrapROMEnabled;
         };
     }
     // High RAM - FF80-FFFE
@@ -413,13 +410,13 @@ void WriteByte(word address, byte data)
             }
             break;
         case 0xFF26:
-            SoundControl.raw ^= SOUND_CONTROL_WRITE_MASK;
-            SoundControl.raw |= data & SOUND_CONTROL_WRITE_MASK;
-            if (!SoundControl.Enabled) {
+            APUC.raw ^= SOUND_CONTROL_WRITE_MASK;
+            APUC.raw |= data & SOUND_CONTROL_WRITE_MASK;
+            if (!APUC.Enabled) {
                 // TODO: Disable all sound
             }
             if (VerboseLevel >= 2) {
-                // PrintSoundControl();
+                // PrintAPUC();
             }
             break;
         case 0xFF1A:
@@ -515,8 +512,8 @@ void WriteByte(word address, byte data)
             break;
         
         case 0xFF50:
-            BootstrapROMEnabled = (data == 0);
-            LogVerbose(2, "Bootstrap ROM %s", (BootstrapROMEnabled ? "Enabled" : "Disabled"));
+            BootstrapROMEnabled = false;
+            LogVerbose(2, "Bootstrap ROM Disabled");
             break;
         };
     }

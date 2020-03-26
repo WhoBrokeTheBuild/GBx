@@ -12,158 +12,26 @@ SDL_Texture * sdlTileMapTexture = NULL;
 #define TILE_MAP_TEXTURE_HEIGHT (289)
 #define TILE_MAP_TEXTURE_COMP   (3)
 
-checkbox chkTileMapAddrAuto = {
-    .x = DEBUG_WINDOW_CONTENT_X + DEBUG_CHARACTER_WIDTH,
-    .y = DEBUG_WINDOW_CONTENT_Y + (DEBUG_CHARACTER_HEIGHT * 2),
-    .text = "AUTO",
-};
-
-checkbox chkTileMapAddrWinAuto = {
-    .x = DEBUG_WINDOW_CONTENT_X + DEBUG_CHARACTER_WIDTH,
-    .y = DEBUG_WINDOW_CONTENT_Y + (DEBUG_CHARACTER_HEIGHT * 5),
-    .text = "WIN AUTO",
-};
-
-checkbox chkTileMapAddrBGAuto = {
-    .x = DEBUG_WINDOW_CONTENT_X + DEBUG_CHARACTER_WIDTH,
-    .y = DEBUG_WINDOW_CONTENT_Y + (DEBUG_CHARACTER_HEIGHT * 8),
-    .text = "BG AUTO",
-};
-
-checkbox chkTileMapAddr9800 = {
-    .x = DEBUG_WINDOW_CONTENT_X + DEBUG_CHARACTER_WIDTH,
-    .y = DEBUG_WINDOW_CONTENT_Y + (DEBUG_CHARACTER_HEIGHT * 11),
-    .text = "9800",
-};
-
-checkbox chkTileMapAddr9C00 = {
-    .x = DEBUG_WINDOW_CONTENT_X + DEBUG_CHARACTER_WIDTH,
-    .y = DEBUG_WINDOW_CONTENT_Y + (DEBUG_CHARACTER_HEIGHT * 14),
-    .text = "9C00",
-};
-
 enum {
-    TILE_MAP_ADDR_SEL_AUTO,
-    TILE_MAP_ADDR_SEL_WIN_AUTO,
-    TILE_MAP_ADDR_SEL_BG_AUTO,
-    TILE_MAP_ADDR_SEL_9800,
-    TILE_MAP_ADDR_SEL_9C00,
+    TILE_MAP_ADDR_AUTO,
+    TILE_MAP_ADDR_WIN,
+    TILE_MAP_ADDR_BG,
+    TILE_MAP_ADDR_9800,
+    TILE_MAP_ADDR_9C00,
 };
 
-int tileMapAddrSelect;
-
-void setTileMapAddrAuto()
-{
-    tileMapAddrSelect = TILE_MAP_ADDR_SEL_AUTO;
-    chkTileMapAddrWinAuto.checked = false;
-    chkTileMapAddrBGAuto.checked = false;
-    chkTileMapAddr9800.checked = false;
-    chkTileMapAddr9C00.checked = false;
-
-    TileMapTabRefresh();
-}
-
-void setTileMapAddrWinAuto()
-{
-    tileMapAddrSelect = TILE_MAP_ADDR_SEL_WIN_AUTO;
-    chkTileMapAddrAuto.checked = false;
-    chkTileMapAddrBGAuto.checked = false;
-    chkTileMapAddr9800.checked = false;
-    chkTileMapAddr9C00.checked = false;
-
-    TileMapTabRefresh();
-}
-
-void setTileMapAddrBGAuto()
-{
-    tileMapAddrSelect = TILE_MAP_ADDR_SEL_BG_AUTO;
-    chkTileMapAddrAuto.checked = false;
-    chkTileMapAddrWinAuto.checked = false;
-    chkTileMapAddr9800.checked = false;
-    chkTileMapAddr9C00.checked = false;
-
-    TileMapTabRefresh();
-}
-
-void setTileMapAddr9800()
-{
-    tileMapAddrSelect = TILE_MAP_ADDR_SEL_9800;
-    chkTileMapAddrAuto.checked = false;
-    chkTileMapAddrWinAuto.checked = false;
-    chkTileMapAddrBGAuto.checked = false;
-    chkTileMapAddr9C00.checked = false;
-
-    TileMapTabRefresh();
-}
-
-void setTileMapAddr9C00()
-{
-    tileMapAddrSelect = TILE_MAP_ADDR_SEL_9C00;
-    chkTileMapAddrAuto.checked = false;
-    chkTileMapAddrWinAuto.checked = false;
-    chkTileMapAddrBGAuto.checked = false;
-    chkTileMapAddr9800.checked = false;
-
-    TileMapTabRefresh();
-}
+int tileMapAddrSelect = TILE_MAP_ADDR_AUTO;
 
 void InitTileMapTab()
 {
     sdlTileMapTexture = SDL_CreateTexture(GetDebugWindowRenderer(),
         SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_STREAMING,
         TILE_MAP_TEXTURE_WIDTH, TILE_MAP_TEXTURE_HEIGHT);
-
-    chkTileMapAddrAuto.changed = &setTileMapAddrAuto;
-    chkTileMapAddrWinAuto.changed = &setTileMapAddrWinAuto;
-    chkTileMapAddrBGAuto.changed = &setTileMapAddrBGAuto;
-    chkTileMapAddr9800.changed = &setTileMapAddr9800;
-    chkTileMapAddr9C00.changed = &setTileMapAddr9C00;
-
-    chkTileMapAddrAuto.checked = true;
-    setTileMapAddrAuto();
 }
 
 void TermTileMapTab()
 {
     SDL_DestroyTexture(sdlTileMapTexture);
-}
-
-void TileMapTabClick(SDL_Point * mouse)
-{
-    if (CheckCheckboxClick(&chkTileMapAddrAuto, mouse)) {
-        chkTileMapAddrAuto.checked ^= true;
-        if (chkTileMapAddrAuto.changed) {
-            chkTileMapAddrAuto.changed();
-        }
-    }
-
-    if (CheckCheckboxClick(&chkTileMapAddrWinAuto, mouse)) {
-        chkTileMapAddrWinAuto.checked ^= true;
-        if (chkTileMapAddrWinAuto.changed) {
-            chkTileMapAddrWinAuto.changed();
-        }
-    }
-
-    if (CheckCheckboxClick(&chkTileMapAddrBGAuto, mouse)) {
-        chkTileMapAddrBGAuto.checked ^= true;
-        if (chkTileMapAddrBGAuto.changed) {
-            chkTileMapAddrBGAuto.changed();
-        }
-    }
-
-    if (CheckCheckboxClick(&chkTileMapAddr9800, mouse)) {
-        chkTileMapAddr9800.checked ^= true;
-        if (chkTileMapAddr9800.changed) {
-            chkTileMapAddr9800.changed();
-        }
-    }
-
-    if (CheckCheckboxClick(&chkTileMapAddr9C00, mouse)) {
-        chkTileMapAddr9C00.checked ^= true;
-        if (chkTileMapAddr9C00.changed) {
-            chkTileMapAddr9C00.changed();
-        }
-    }
 }
 
 void TileMapTabRefresh()
@@ -178,16 +46,16 @@ void TileMapTabRefresh()
             LCDC.BGTileMapSelect)
     ];
 
-    if (tileMapAddrSelect == TILE_MAP_ADDR_SEL_WIN_AUTO) {
+    if (tileMapAddrSelect == TILE_MAP_ADDR_WIN) {
         dataAddr = TILE_MAP_ADDR[LCDC.WindowTileMapSelect];
     }
-    else if (tileMapAddrSelect == TILE_MAP_ADDR_SEL_BG_AUTO) {
+    else if (tileMapAddrSelect == TILE_MAP_ADDR_BG) {
         dataAddr = TILE_MAP_ADDR[LCDC.BGTileMapSelect];
     }
-    else if (tileMapAddrSelect == TILE_MAP_ADDR_SEL_9800) {
+    else if (tileMapAddrSelect == TILE_MAP_ADDR_9800) {
         dataAddr = TILE_MAP_ADDR[0];
     }
-    else if (tileMapAddrSelect == TILE_MAP_ADDR_SEL_9C00) {
+    else if (tileMapAddrSelect == TILE_MAP_ADDR_9C00) {
         dataAddr = TILE_MAP_ADDR[1];
     }
 
@@ -213,14 +81,14 @@ void TileMapTabRefresh()
                 byte data2 = ReadByte(dataOffset + 1);
 
                 for (int tileCol = 0; tileCol < TILE_WIDTH; ++tileCol) {
-                    byte color = GetColor(&BGP, tileCol, data1, data2);
+                    byte * color = GetColor(&BGP, tileCol, data1, data2);
 
                     uint off = ((y + tileRow) * pitch) 
                         + ((x + tileCol) * LCD_BUFFER_COMPONENTS);
 
-                    pixels[off + 0] = color;
-                    pixels[off + 1] = color;
-                    pixels[off + 2] = color;
+                    pixels[off + 0] = color[0];
+                    pixels[off + 1] = color[1];
+                    pixels[off + 2] = color[2];
                 }
             }
         }
@@ -231,27 +99,37 @@ void TileMapTabRefresh()
 
 void TileMapTabRender(SDL_Point * mouse)
 {
-    int x = DEBUG_WINDOW_CONTENT_X;
-    int y = DEBUG_WINDOW_CONTENT_Y;
+    int startX, startY;
+    DebugGetCursor(&startX, &startY);
 
-    RenderDebugString(x, y, "Tile Map:");
+    DebugPrintln("TILE MAP:");
+    DebugNewline();
 
-    RenderDebugCheckbox(&chkTileMapAddrAuto, mouse);
-    RenderDebugCheckbox(&chkTileMapAddrWinAuto, mouse);
-    RenderDebugCheckbox(&chkTileMapAddrBGAuto, mouse);
-    RenderDebugCheckbox(&chkTileMapAddr9800, mouse);
-    RenderDebugCheckbox(&chkTileMapAddr9C00, mouse);
+    DebugSetDirection(DEBUG_DIR_DOWN);
 
-    x = DEBUG_WINDOW_CONTENT_X + (DEBUG_CHARACTER_WIDTH * 18);
-    y = DEBUG_WINDOW_CONTENT_Y;
+    DebugRadio("AUTO", TILE_MAP_ADDR_AUTO, &tileMapAddrSelect);
+    DebugRadio("WIN", TILE_MAP_ADDR_WIN, &tileMapAddrSelect);
+    DebugRadio("BG", TILE_MAP_ADDR_BG, &tileMapAddrSelect);
+    DebugRadio("9800", TILE_MAP_ADDR_9800, &tileMapAddrSelect);
+    DebugRadio("9C00", TILE_MAP_ADDR_9C00, &tileMapAddrSelect);
 
-    SDL_Rect src = { .x = 0, .y = 0, .w = TILE_MAP_TEXTURE_WIDTH, .h = TILE_MAP_TEXTURE_WIDTH };
-    SDL_Rect dst = { .x = x, .y = y, .w = (TILE_MAP_TEXTURE_HEIGHT * 2), .h = (TILE_MAP_TEXTURE_HEIGHT * 2) };
+    DebugSetDirection(DEBUG_DIR_RIGHT);
+
+    SDL_Rect src = {
+        .x = 0,
+        .y = 0,
+        .w = TILE_MAP_TEXTURE_WIDTH,
+        .h = TILE_MAP_TEXTURE_WIDTH,
+    };
+    
+    SDL_Rect dst = {
+        .x = startX + (DEBUG_CHAR_WIDTH * 18),
+        .y = startY,
+        .w = (TILE_MAP_TEXTURE_HEIGHT * 2),
+        .h = (TILE_MAP_TEXTURE_HEIGHT * 2),
+    };
 
     SDL_RenderCopy(GetDebugWindowRenderer(), sdlTileMapTexture, &src, &dst);
-
-    x = DEBUG_WINDOW_CONTENT_X + (DEBUG_CHARACTER_WIDTH * 18);
-    y = DEBUG_WINDOW_CONTENT_Y;
 
     int scx = (SCX / 8.0) * 9.0;
     int scy = (SCY / 8.0) * 9.0;
@@ -260,15 +138,13 @@ void TileMapTabRender(SDL_Point * mouse)
     int height = ((LCD_HEIGHT / 8.0) * 9.0) + 1;
 
     SDL_Rect scroll = {
-        .x = x + (scx * 2),
-        .y = y + (scy * 2),
+        .x = dst.x + (scx * 2),
+        .y = dst.y + (scy * 2),
         .w = width * 2, 
         .h = height * 2,
     };
 
-    SDL_SetRenderDrawColor(GetDebugWindowRenderer(),
-        0xFF, 0x00, 0x00, 0xFF);
-
+    SDL_SetRenderDrawColor(GetDebugWindowRenderer(), 0xFF, 0x00, 0x00, 0xFF);
     SDL_RenderDrawRect(GetDebugWindowRenderer(), &scroll);
 
     ++scroll.x;
@@ -278,27 +154,27 @@ void TileMapTabRender(SDL_Point * mouse)
 
     SDL_RenderDrawRect(GetDebugWindowRenderer(), &scroll);
 
-    scroll.x = DEBUG_WINDOW_CONTENT_X + DEBUG_CHARACTER_WIDTH;
-    scroll.y = DEBUG_WINDOW_CONTENT_Y + (DEBUG_CHARACTER_HEIGHT * 20);
-    scroll.w = (DEBUG_CHARACTER_HEIGHT * 7);
-    scroll.h = (DEBUG_CHARACTER_HEIGHT * 2);
+    scroll.x = startX;
+    scroll.y = startY + (DEBUG_CHAR_HEIGHT * 20);
+    scroll.w = (DEBUG_CHAR_HEIGHT * 7);
+    scroll.h = (DEBUG_CHAR_HEIGHT * 2);
 
     SDL_RenderDrawRect(GetDebugWindowRenderer(), &scroll);
-    RenderDebugString(scroll.x + (DEBUG_CHARACTER_WIDTH / 2), scroll.y + (DEBUG_CHARACTER_HEIGHT / 2), "SCROLL");
+
+    DebugSetCursor(scroll.x + (DEBUG_CHAR_WIDTH / 2), scroll.y + (DEBUG_CHAR_HEIGHT / 2));
+    DebugPrint("SCROLL");
 
     int wx = (((WX - 7) / 8.0) * 9.0) - 1;
     int wy = ((WY / 8.0) * 9.0) - 1;
 
     SDL_Rect window = {
-        .x = x + (wx * 2),
-        .y = y + (wy * 2),
+        .x = dst.x + (wx * 2),
+        .y = dst.y + (wy * 2),
         .w = width * 2, 
         .h = height * 2,
     };
 
-    SDL_SetRenderDrawColor(GetDebugWindowRenderer(),
-        0x00, 0x00, 0xFF, 0xFF);
-
+    SDL_SetRenderDrawColor(GetDebugWindowRenderer(), 0x00, 0x00, 0xFF, 0xFF);
     SDL_RenderDrawRect(GetDebugWindowRenderer(), &window);
     
     ++window.x;
@@ -308,11 +184,13 @@ void TileMapTabRender(SDL_Point * mouse)
 
     SDL_RenderDrawRect(GetDebugWindowRenderer(), &window);
 
-    window.x = DEBUG_WINDOW_CONTENT_X + DEBUG_CHARACTER_WIDTH;
-    window.y = DEBUG_WINDOW_CONTENT_Y + (DEBUG_CHARACTER_HEIGHT * 24);
-    window.w = (DEBUG_CHARACTER_HEIGHT * 7);
-    window.h = (DEBUG_CHARACTER_HEIGHT * 2);
+    window.x = startX;
+    window.y = startY + (DEBUG_CHAR_HEIGHT * 24);
+    window.w = (DEBUG_CHAR_HEIGHT * 7);
+    window.h = (DEBUG_CHAR_HEIGHT * 2);
 
     SDL_RenderDrawRect(GetDebugWindowRenderer(), &window);
-    RenderDebugString(window.x + (DEBUG_CHARACTER_WIDTH / 2), window.y + (DEBUG_CHARACTER_HEIGHT / 2), "WINDOW");
+
+    DebugSetCursor(window.x + (DEBUG_CHAR_WIDTH / 2), window.y + (DEBUG_CHAR_HEIGHT / 2));
+    DebugPrint("WINDOW");
 }

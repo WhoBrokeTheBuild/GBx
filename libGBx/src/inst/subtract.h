@@ -69,7 +69,7 @@ static void _SUB_u()
     byte u = NextByte();
     Tick(4);
 
-    LogInst("SUB A,%02Xh", u);
+    LogInst("SUB A,$%02X", u);
 
     _SUB(u);
 }
@@ -130,7 +130,7 @@ static void _SBC_u()
     byte u = NextByte();
     Tick(4);
 
-    LogInst("SBC A,%02Xh", u);
+    LogInst("SBC A,$%02X", u);
 
     _SBC(u);
 }

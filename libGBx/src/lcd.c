@@ -10,6 +10,8 @@
 #include <time.h>
 #include <string.h>
 
+bool LCDOriginalColors = false;
+
 byte LCDBuffer[LCD_BUFFER_SIZE];
 
 lcd_control LCDC;
@@ -30,6 +32,20 @@ byte VRAM[2][0x2000];
 uint VRAMBank;
 
 byte OAM[0xA0];
+
+const byte LCD_COLORS_ORIG[][3] = {
+    { 0x9B, 0xBC, 0x0F },
+    { 0x8B, 0xAC, 0x0F },
+    { 0x30, 0x62, 0x30 },
+    { 0x0F, 0x38, 0x0F },
+};
+
+const byte LCD_COLORS_CLEAN[][3] = {
+    { 0xFF, 0xFF, 0xFF },
+    { 0xCC, 0xCC, 0xCC },
+    { 0x77, 0x77, 0x77 },
+    { 0x00, 0x00, 0x00 },
+};
 
 const char * LCD_MODE_STR[4] = {
     "HBlank",
@@ -63,7 +79,7 @@ void ResetLCD()
     OBP1.raw = 0b11100100;
 }
 
-byte GetColor(palette * pal, int bit, byte d1, byte d2)
+byte * GetColor(palette * pal, int bit, byte d1, byte d2)
 {
     bit = 0x80 >> bit;
     bool high = (d2 & bit);
@@ -87,23 +103,29 @@ byte GetColor(palette * pal, int bit, byte d1, byte d2)
         break;
     }
 
-    byte color = 0;
-    switch (colorIndex) {
-    case 0b00:
-        color = LCD_COLOR_WHITE;
-        break;
-    case 0b01:
-        color = LCD_COLOR_LIGHT_GRAY;
-        break;
-    case 0b10:
-        color = LCD_COLOR_DARK_GRAY;
-        break;
-    case 0b11:
-        color = LCD_COLOR_BLACK;
+    return (
+        LCDOriginalColors
+        ? LCD_COLORS_ORIG[colorIndex]
+        : LCD_COLORS_CLEAN[colorIndex]
+    );
+}
+
+const char * GetLCDModeString(uint mode)
+{
+    switch (mode) {
+    case STAT_MODE_HBLANK:
+        return "HBlank";
+    case STAT_MODE_VBLANK:
+        return "VBlank";
+    case STAT_MODE_SEARCH_SPRITE:
+        return "Search Sprite";
+    case STAT_MODE_DATA_TRANSFER:
+        return "Data Transfer";
+    default:
         break;
     }
 
-    return color;
+    return "";
 }
 
 void DrawTiles()
@@ -145,7 +167,7 @@ void DrawTiles()
         byte data2 = ReadByte(dataOffset + line + 1);
 
         int bit = (xPos % TILE_WIDTH);
-        byte color = GetColor(&BGP, bit, data1, data2);
+        byte * color = GetColor(&BGP, bit, data1, data2);
 
         // if (LY < 0 || LY > (LCD_HEIGHT - 1) || 
         //     pixel > 0 || pixel < (LCD_WIDTH - 1)) {
@@ -156,9 +178,9 @@ void DrawTiles()
         uint off = (LY * LCD_BUFFER_WIDTH * LCD_BUFFER_COMPONENTS) + 
             (pixel * LCD_BUFFER_COMPONENTS);
         
-        LCDBuffer[off + 0] = color;
-        LCDBuffer[off + 1] = color;
-        LCDBuffer[off + 2] = color;
+        LCDBuffer[off + 0] = color[0];
+        LCDBuffer[off + 1] = color[1];
+        LCDBuffer[off + 2] = color[2];
     }
 }
 
@@ -197,15 +219,15 @@ void DrawSprites()
                 }
 
                 palette * pal = (spr.Palette ? &OBP1 : &OBP0);
-                byte color = GetColor(pal, bit, data1, data2);
+                byte * color = GetColor(pal, bit, data1, data2);
 
                 int x = -pixel + 7;
 
                 uint off = (LY * LCD_BUFFER_WIDTH * LCD_BUFFER_COMPONENTS) 
                     + (x * LCD_BUFFER_COMPONENTS);
-                LCDBuffer[off + 0] = color;
-                LCDBuffer[off + 1] = color;
-                LCDBuffer[off + 2] = color;
+                LCDBuffer[off + 0] = color[0];
+                LCDBuffer[off + 1] = color[1];
+                LCDBuffer[off + 2] = color[2];
             }
         }
     }
@@ -243,7 +265,6 @@ void LCDTick(uint cycles)
                 modeTicks -= SEARCH_SPRITE_TICK_COUNT;
 
                 STAT.Mode = STAT_MODE_DATA_TRANSFER;
-                // printSTAT();
             }
         break;
         case STAT_MODE_DATA_TRANSFER:
@@ -259,7 +280,6 @@ void LCDTick(uint cycles)
                 }
 
                 STAT.Mode = STAT_MODE_HBLANK;
-                // printSTAT();
             }
         break;
         case STAT_MODE_HBLANK:
@@ -269,9 +289,10 @@ void LCDTick(uint cycles)
                 ++LY;
                 updateCoincidence();
 
-                if (LY == LCD_HEIGHT) {
+                if (LY == LCD_HEIGHT + 1) {
                     STAT.Mode = STAT_MODE_VBLANK;
-                    // printSTAT();
+
+                    IF.VBlank = true;
                     if (STAT.IntVBlank) {
                         IF.STAT = true;
                     }
@@ -308,7 +329,6 @@ void LCDTick(uint cycles)
                 }
                 else {
                     STAT.Mode = STAT_MODE_SEARCH_SPRITE;
-                    // printSTAT();
                     if (STAT.IntSearchSprite) {
                         IF.STAT = true;
                     }
@@ -324,7 +344,6 @@ void LCDTick(uint cycles)
 
                 if (LY == 0) {
                     STAT.Mode = STAT_MODE_SEARCH_SPRITE;
-                    // printSTAT();
                     if (STAT.IntSearchSprite) {
                         IF.STAT = true;
                     }

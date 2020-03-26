@@ -65,7 +65,7 @@ static void _OR_u()
     byte u = NextByte();
     Tick(4);
 
-    LogInst("OR %02Xh", u);
+    LogInst("OR $%02X", u);
 
     _OR(u);
 }

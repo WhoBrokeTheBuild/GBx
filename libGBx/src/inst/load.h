@@ -432,7 +432,7 @@ static void _LD_A_u()
     byte u = NextByte();
     Tick(4);
 
-    LogInst("LD A,%02Xh", u);
+    LogInst("LD A,$%02X", u);
 
     R.A = u;
 }
@@ -442,7 +442,7 @@ static void _LD_B_u()
     byte u = NextByte();
     Tick(4);
 
-    LogInst("LD B,%02Xh", u);
+    LogInst("LD B,$%02X", u);
 
     R.B = u;
 }
@@ -452,7 +452,7 @@ static void _LD_C_u()
     byte u = NextByte();
     Tick(4);
 
-    LogInst("LD C,%02Xh", u);
+    LogInst("LD C,$%02X", u);
 
     R.C = u;
 }
@@ -462,7 +462,7 @@ static void _LD_D_u()
     byte u = NextByte();
     Tick(4);
 
-    LogInst("LD D,%02Xh", u);
+    LogInst("LD D,$%02X", u);
 
     R.D = u;
 }
@@ -472,7 +472,7 @@ static void _LD_E_u()
     byte u = NextByte();
     Tick(4);
 
-    LogInst("LD E,%02Xh", u);
+    LogInst("LD E,$%02X", u);
 
     R.E = u;
 }
@@ -482,7 +482,7 @@ static void _LD_H_u()
     byte u = NextByte();
     Tick(4);
 
-    LogInst("LD H,%02Xh", u);
+    LogInst("LD H,$%02X", u);
 
     R.H = u;
 }
@@ -492,7 +492,7 @@ static void _LD_L_u()
     byte u = NextByte();
     Tick(4);
 
-    LogInst("LD L,%02Xh", u);
+    LogInst("LD L,$%02X", u);
 
     R.L = u;
 }
@@ -502,7 +502,7 @@ static void _LD_pHL_u()
     byte u = NextByte();
     Tick(4);
 
-    LogInst("LD (HL),%02Xh", u);
+    LogInst("LD (HL),$%02X", u);
 
     WriteByte(R.HL, u);
     Tick(4);
@@ -531,7 +531,7 @@ static void _LD_BC_uu()
     word uu = NextWord();
     Tick(8);
 
-    LogInst("LD BC,%04Xh", uu);
+    LogInst("LD BC,$%04X", uu);
     R.BC = uu;
 }
 
@@ -540,7 +540,7 @@ static void _LD_DE_uu()
     word uu = NextWord();
     Tick(8);
 
-    LogInst("LD DE,%04Xh", uu);
+    LogInst("LD DE,$%04X", uu);
     R.DE = uu;
 }
 
@@ -549,7 +549,7 @@ static void _LD_HL_uu()
     word uu = NextWord();
     Tick(8);
 
-    LogInst("LD HL,%04Xh", uu);
+    LogInst("LD HL,$%04X", uu);
     R.HL = uu;
 }
 
@@ -558,8 +558,10 @@ static void _LD_SP_uu()
     word uu = NextWord();
     Tick(8);
 
-    LogInst("LD SP,%04Xh", uu);
+    LogInst("LD SP,$%04X", uu);
     R.SP = uu;
+
+    StackBaseAddress = R.SP;
 }
 
 static void _LD_SP_HL()
@@ -568,6 +570,8 @@ static void _LD_SP_HL()
     R.SP = R.HL;
     
     Tick(4);
+
+    StackBaseAddress = R.SP;
 }
 
 static void _LD_puu_SP()
@@ -575,7 +579,7 @@ static void _LD_puu_SP()
     word uu = NextWord();
     Tick(8);
 
-    LogInst("LD (%04Xh),SP", uu);
+    LogInst("LD ($%04X),SP", uu);
     
     WriteWord(uu, R.SP);
     Tick(8);
@@ -586,7 +590,7 @@ static void _LD_puu_A()
     word uu = NextWord();
     Tick(8);
 
-    LogInst("LD (%04Xh),A", uu);
+    LogInst("LD ($%04X),A", uu);
 
     WriteByte(uu, R.A);
     Tick(4);
@@ -597,7 +601,7 @@ static void _LD_A_puu()
     word uu = NextWord();
     Tick(4);
 
-    LogInst("LD A,(%04Xh)", uu);
+    LogInst("LD A,($%04X)", uu);
 
     byte n = ReadByte(uu);
     Tick(4);
@@ -643,7 +647,7 @@ static void _LDH_pu_A()
     byte u = NextByte();
     Tick(4);
 
-    LogInst("LDH (%02Xh),A", u);
+    LogInst("LDH ($%02X),A", u);
 
     WriteByte(0xFF00 + u, R.A);
     Tick(4);
@@ -654,7 +658,7 @@ static void _LDH_A_pu()
     byte u = NextByte();
     Tick(4);
 
-    LogInst("LDH A,(%02Xh)", u);
+    LogInst("LDH A,($%02X)", u);
 
     R.A = ReadByte(0xFF00 + u);
     Tick(4);

@@ -9,11 +9,11 @@ typedef struct
         struct {
             union {
                 struct {
-                    unsigned :4;
-                    bool     FC:1; // Carry Flag
-                    bool     FH:1; // Half Carry Flag
-                    bool     FN:1; // Subtract Flag
-                    bool     FZ:1; // Zero Flag
+                    uint :4;
+                    bool FC:1; // Carry Flag
+                    bool FH:1; // Half Carry Flag
+                    bool FN:1; // Subtract Flag
+                    bool FZ:1; // Zero Flag
                 };
                 byte F;
             };
@@ -52,6 +52,8 @@ extern registers R;
 extern bool CPUEnabled;
 
 extern word LastInstructionAddress;
+
+extern word StackBaseAddress;
 
 byte Fetch();
 

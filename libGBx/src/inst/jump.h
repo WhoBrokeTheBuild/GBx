@@ -12,7 +12,7 @@ static void _JP_uu()
     word uu = NextWord();
     Tick(8);
 
-    LogInst("JP %04Xh", uu);
+    LogInst("JP $%04X", uu);
 
     R.PC = uu;
     Tick(4);
@@ -23,7 +23,7 @@ static void _JP_NZ_uu()
     word uu = NextWord();
     Tick(8);
 
-    LogInst("JP NZ,%04Xh", uu);
+    LogInst("JP NZ,$%04X", uu);
 
     if (!R.FZ) {
         R.PC = uu;
@@ -36,7 +36,7 @@ static void _JP_Z_uu()
     word uu = NextWord();
     Tick(8);
 
-    LogInst("JP Z,%04Xh", uu);
+    LogInst("JP Z,$%04X", uu);
 
     if (R.FZ) {
         R.PC = uu;
@@ -49,7 +49,7 @@ static void _JP_NC_uu()
     word uu = NextWord();
     Tick(8);
 
-    LogInst("JP NC,%04Xh", uu);
+    LogInst("JP NC,$%04X", uu);
 
     if (!R.FC) {
         R.PC = uu;
@@ -62,7 +62,7 @@ static void _JP_C_uu()
     word uu = NextWord();
     Tick(8);
 
-    LogInst("JP C,%04Xh", uu);
+    LogInst("JP C,$%04X", uu);
 
     if (R.FC) {
         R.PC = uu;

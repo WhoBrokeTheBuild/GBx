@@ -66,7 +66,7 @@ static void _CP_u()
     byte u = NextByte();
     Tick(4);
 
-    LogInst("CP %02Xh", u);
+    LogInst("CP $%02X", u);
 
     _CP(u);
 }

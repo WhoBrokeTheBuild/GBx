@@ -162,7 +162,7 @@ extern sound_output_terminal SoundOutputTerminal;
 
 // FF26
 
-extern sound_control SoundControl;
+extern sound_control APUC;
 
 extern byte DutyCycles[4][8];
 

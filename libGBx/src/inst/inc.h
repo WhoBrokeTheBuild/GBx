@@ -99,6 +99,8 @@ static void _INC_SP()
     LogInst("INC SP");
     ++R.SP;
     Tick(8);
+
+    StackBaseAddress = R.SP;
 }
 
 #endif // INC_H

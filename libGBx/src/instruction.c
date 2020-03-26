@@ -273,17 +273,17 @@ const char * instructionDefinitions[] = {
     [0xAF] = "XOR A",
     [0xEE] = "XOR $u",
     // null
-    [0xD3] = "Not Implemented",
-    [0xDB] = "Not Implemented",
-    [0xDD] = "Not Implemented",
-    [0xE3] = "Not Implemented",
-    [0xE4] = "Not Implemented",
-    [0xEB] = "Not Implemented",
-    [0xEC] = "Not Implemented",
-    [0xED] = "Not Implemented",
-    [0xF4] = "Not Implemented",
-    [0xFC] = "Not Implemented",
-    [0xFD] = "Not Implemented",
+    [0xD3] = "Not Imp.",
+    [0xDB] = "Not Imp.",
+    [0xDD] = "Not Imp.",
+    [0xE3] = "Not Imp.",
+    [0xE4] = "Not Imp.",
+    [0xEB] = "Not Imp.",
+    [0xEC] = "Not Imp.",
+    [0xED] = "Not Imp.",
+    [0xF4] = "Not Imp.",
+    [0xFC] = "Not Imp.",
+    [0xFD] = "Not Imp.",
 };
 
 const char * CB_instructionDefinitions[] = {
@@ -420,11 +420,11 @@ word Disassemble(char * str, uint len, word addr)
             ++pch;
             switch (*pch) {
             case 'w': // unsigned word
-                i += snprintf(str + i, len - i, "%04Xh", ReadWord(addr));
+                i += snprintf(str + i, len - i, "$%04X", ReadWord(addr));
                 addr += 2;
                 break;
             case 'u': // unsigned byte
-                i += snprintf(str + i, len - i, "%02Xh", ReadByte(addr));
+                i += snprintf(str + i, len - i, "$%02X", ReadByte(addr));
                 ++addr;
                 break;
             case 's': // signed byte

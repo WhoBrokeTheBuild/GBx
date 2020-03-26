@@ -30,4 +30,6 @@ extern joypad_state_t JOYP;
 
 #define JOYP_WRITE_MASK (0b00001100)
 
+void ResetInput();
+
 #endif // INPUT_H
