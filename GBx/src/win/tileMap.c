@@ -1,5 +1,6 @@
 #include "tileMap.h"
 #include "../debug.h"
+#include "../ui.h"
 
 #include <GBx/lcd.h>
 #include <GBx/memory.h>
@@ -100,20 +101,20 @@ void TileMapTabRefresh()
 void TileMapTabRender(SDL_Point * mouse)
 {
     int startX, startY;
-    DebugGetCursor(&startX, &startY);
+    UIGetCursor(&startX, &startY);
 
-    DebugPrintln("TILE MAP:");
-    DebugNewline();
+    UIPrintln("TILE MAP:");
+    UINewline();
 
-    DebugSetDirection(DEBUG_DIR_DOWN);
+    UISetDirection(UI_DIR_DOWN);
 
-    DebugRadio("AUTO", TILE_MAP_ADDR_AUTO, &tileMapAddrSelect);
-    DebugRadio("WIN", TILE_MAP_ADDR_WIN, &tileMapAddrSelect);
-    DebugRadio("BG", TILE_MAP_ADDR_BG, &tileMapAddrSelect);
-    DebugRadio("9800", TILE_MAP_ADDR_9800, &tileMapAddrSelect);
-    DebugRadio("9C00", TILE_MAP_ADDR_9C00, &tileMapAddrSelect);
+    UIRadio("AUTO", TILE_MAP_ADDR_AUTO, &tileMapAddrSelect);
+    UIRadio("WIN", TILE_MAP_ADDR_WIN, &tileMapAddrSelect);
+    UIRadio("BG", TILE_MAP_ADDR_BG, &tileMapAddrSelect);
+    UIRadio("9800", TILE_MAP_ADDR_9800, &tileMapAddrSelect);
+    UIRadio("9C00", TILE_MAP_ADDR_9C00, &tileMapAddrSelect);
 
-    DebugSetDirection(DEBUG_DIR_RIGHT);
+    UISetDirection(UI_DIR_RIGHT);
 
     SDL_Rect src = {
         .x = 0,
@@ -123,7 +124,7 @@ void TileMapTabRender(SDL_Point * mouse)
     };
     
     SDL_Rect dst = {
-        .x = startX + (DEBUG_CHAR_WIDTH * 18),
+        .x = startX + (UI_CHAR_WIDTH * 18),
         .y = startY,
         .w = (TILE_MAP_TEXTURE_HEIGHT * 2),
         .h = (TILE_MAP_TEXTURE_HEIGHT * 2),
@@ -155,14 +156,14 @@ void TileMapTabRender(SDL_Point * mouse)
     SDL_RenderDrawRect(GetDebugWindowRenderer(), &scroll);
 
     scroll.x = startX;
-    scroll.y = startY + (DEBUG_CHAR_HEIGHT * 20);
-    scroll.w = (DEBUG_CHAR_HEIGHT * 7);
-    scroll.h = (DEBUG_CHAR_HEIGHT * 2);
+    scroll.y = startY + (UI_CHAR_HEIGHT * 20);
+    scroll.w = (UI_CHAR_HEIGHT * 7);
+    scroll.h = (UI_CHAR_HEIGHT * 2);
 
     SDL_RenderDrawRect(GetDebugWindowRenderer(), &scroll);
 
-    DebugSetCursor(scroll.x + (DEBUG_CHAR_WIDTH / 2), scroll.y + (DEBUG_CHAR_HEIGHT / 2));
-    DebugPrint("SCROLL");
+    UISetCursor(scroll.x + (UI_CHAR_WIDTH / 2), scroll.y + (UI_CHAR_HEIGHT / 2));
+    UIPrint("SCROLL");
 
     int wx = (((WX - 7) / 8.0) * 9.0) - 1;
     int wy = ((WY / 8.0) * 9.0) - 1;
@@ -185,12 +186,12 @@ void TileMapTabRender(SDL_Point * mouse)
     SDL_RenderDrawRect(GetDebugWindowRenderer(), &window);
 
     window.x = startX;
-    window.y = startY + (DEBUG_CHAR_HEIGHT * 24);
-    window.w = (DEBUG_CHAR_HEIGHT * 7);
-    window.h = (DEBUG_CHAR_HEIGHT * 2);
+    window.y = startY + (UI_CHAR_HEIGHT * 24);
+    window.w = (UI_CHAR_HEIGHT * 7);
+    window.h = (UI_CHAR_HEIGHT * 2);
 
     SDL_RenderDrawRect(GetDebugWindowRenderer(), &window);
 
-    DebugSetCursor(window.x + (DEBUG_CHAR_WIDTH / 2), window.y + (DEBUG_CHAR_HEIGHT / 2));
-    DebugPrint("WINDOW");
+    UISetCursor(window.x + (UI_CHAR_WIDTH / 2), window.y + (UI_CHAR_HEIGHT / 2));
+    UIPrint("WINDOW");
 }

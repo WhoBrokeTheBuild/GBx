@@ -1,6 +1,7 @@
 #include "debug.h"
 #include "breakpoint.h"
 #include "util.h"
+#include "ui.h"
 
 #include "cmd/break.h"
 #include "cmd/delete.h"
@@ -158,25 +159,11 @@ void DebugPrompt()
 // #include "win/spriteData.h"
 // #include "win/audio.h"
 
-#define FONT_FILENAME "font.bmp"
-
-const char * FONT_CHARACTER_MAP = 
-"ABCDEFGH"
-"IJKLMNOP"
-"QRSTUVWX"
-"YZ+-/%*="
-"01234567"
-"89:;!?\"'"
-"(){}[]<>"
-"#$^~_&,.";
-
 bool debugWindowShown = false;
-
 bool debugAutoRefresh = true;
 
 SDL_Window   * sdlDebugWindow   = NULL;
 SDL_Renderer * sdlDebugRenderer = NULL;
-SDL_Texture  * sdlFontTexture   = NULL;
 
 enum {
     DBG_TAB_STATUS,
@@ -204,17 +191,7 @@ void DebugWindowInit()
         LogFatal("Failed to create SDL2 Renderer, %s", SDL_GetError());
     }
 
-    char fontPath[4096];
-    GetExecutablePath(fontPath, sizeof(fontPath) - sizeof(FONT_FILENAME));
-    strcat(fontPath + strlen(fontPath), FONT_FILENAME);
-
-    SDL_Surface * fontSurface = SDL_LoadBMP(fontPath);
-    if (!fontSurface) {
-        LogError("Failed to load '%s'", fontPath);
-    }
-
-    sdlFontTexture = SDL_CreateTextureFromSurface(sdlDebugRenderer, fontSurface);
-    SDL_FreeSurface(fontSurface);
+    UIInit();
 
     InitTileDataTab();
     InitTileMapTab();
@@ -226,10 +203,11 @@ void DebugWindowTerm()
 {
     debugWindowShown = false;
 
+    UITerm();
+
     TermTileMapTab();
     TermTileDataTab();
 
-    SDL_DestroyTexture(sdlFontTexture);
     SDL_DestroyRenderer(sdlDebugRenderer);
     SDL_DestroyWindow(sdlDebugWindow);
 }
@@ -272,42 +250,8 @@ void DebugWindowHandleEvent(SDL_Event * evt)
     }
 }
 
-SDL_Point dbgCursor = { .x = 0, .y = 0 };
-SDL_Point dbgMouse  = { .x = -1, .y = -1 };
-
-int dbgDirection = DEBUG_DIR_RIGHT;
-bool dbgClick = false;
-bool dbgMouseDown = false;
 bool dbgAutoRefresh = true;
 int dbgTabIndex = 0;
-
-#define SET_COLOR_BACKGROUND() \
-    do { \
-        SDL_SetRenderDrawColor(sdlDebugRenderer, 0x33, 0x33, 0x33, 0xFF); \
-    } while (0)
-
-#define SET_COLOR_DEFAULT() \
-    do { \
-        SDL_SetRenderDrawColor(sdlDebugRenderer, 0xEE, 0xEE, 0xEE, 0xFF); \
-    } while (0)
-
-#define SET_COLOR_INACTIVE() \
-    do { \
-        SDL_SetRenderDrawColor(sdlDebugRenderer, 0xAA, 0xAA, 0xAA, 0xFF); \
-    } while (0)
-
-#define SET_COLOR_BORDER() \
-    do { \
-        SDL_SetRenderDrawColor(sdlDebugRenderer, 0x00, 0x00, 0x00, 0xFF); \
-    } while (0)
-
-void DebugWindowUpdate()
-{
-    int state = SDL_GetMouseState(&dbgMouse.x, &dbgMouse.y);
-    bool pressed = (state & SDL_BUTTON(SDL_BUTTON_LEFT));
-    dbgClick = (pressed && !dbgMouseDown);
-    dbgMouseDown = pressed;
-}
 
 void DebugWindowRender()
 {
@@ -315,32 +259,32 @@ void DebugWindowRender()
         DebugWindowRefresh();
     }
 
-    DebugWindowUpdate();
+    UIUpdate();
 
     SET_COLOR_BACKGROUND();
 
     SDL_RenderClear(sdlDebugRenderer);
 
-    DebugSetCursor(DEBUG_WINDOW_WIDTH - DEBUG_MARGIN, DEBUG_MARGIN);
-    DebugSetDirection(DEBUG_DIR_LEFT);
+    UISetCursor(DEBUG_WINDOW_WIDTH - UI_MARGIN, UI_MARGIN);
+    UISetDirection(UI_DIR_LEFT);
 
-    DebugCheckbox("AUTO", &dbgAutoRefresh);
+    UICheckbox("AUTO", &dbgAutoRefresh);
 
-    if (DebugButton("REFRESH")) {
+    if (UIButton("REFRESH")) {
         DebugWindowRefresh();
     }
 
-    DebugSetCursor(DEBUG_MARGIN, DEBUG_MARGIN);
-    DebugSetDirection(DEBUG_DIR_RIGHT);
+    UISetCursor(UI_MARGIN, UI_MARGIN);
+    UISetDirection(UI_DIR_RIGHT);
 
-    DebugTab("STATUS",    DBG_TAB_STATUS,    &dbgTabIndex);
-    DebugTab("TILE DATA", DBG_TAB_TILE_DATA, &dbgTabIndex);
-    DebugTab("TILE MAP",  DBG_TAB_TILE_MAP,  &dbgTabIndex);
-    DebugTab("SPRITE",    DBG_TAB_SPRITE,    &dbgTabIndex);
-    DebugTab("AUDIO",     DBG_TAB_AUDIO,     &dbgTabIndex);
+    UITab("STATUS",    DBG_TAB_STATUS,    &dbgTabIndex);
+    UITab("TILE DATA", DBG_TAB_TILE_DATA, &dbgTabIndex);
+    UITab("TILE MAP",  DBG_TAB_TILE_MAP,  &dbgTabIndex);
+    UITab("SPRITE",    DBG_TAB_SPRITE,    &dbgTabIndex);
+    UITab("AUDIO",     DBG_TAB_AUDIO,     &dbgTabIndex);
 
-    DebugSetCursor(DEBUG_CONTENT_X, DEBUG_CONTENT_Y);
-    DebugPanel(DEBUG_CONTENT_WIDTH, DEBUG_CONTENT_HEIGHT);
+    UISetCursor(DEBUG_CONTENT_X, DEBUG_CONTENT_Y);
+    UIPanel(DEBUG_CONTENT_WIDTH, DEBUG_CONTENT_HEIGHT);
 
     switch (dbgTabIndex) {
     case DBG_TAB_STATUS:
@@ -371,361 +315,4 @@ void DebugWindowRefresh()
     default:
         break;
     }
-}
-
-void moveCursor(SDL_Rect * r)
-{
-    switch (dbgDirection) {
-    case DEBUG_DIR_UP:
-        dbgCursor.y -= DEBUG_MARGIN;
-        break;
-    case DEBUG_DIR_DOWN:
-        dbgCursor.y += r->h + DEBUG_MARGIN;
-        break;
-    case DEBUG_DIR_LEFT:
-        dbgCursor.x -= DEBUG_MARGIN;
-        break;
-    case DEBUG_DIR_RIGHT:
-        dbgCursor.x += r->w + DEBUG_MARGIN;
-        break;
-    default:
-        break;
-    };
-}
-
-void adjustRect(SDL_Rect * r)
-{
-    switch (dbgDirection) {
-    case DEBUG_DIR_UP:
-        r->y -= r->h;
-        break;
-    case DEBUG_DIR_LEFT:
-        r->x -= r->w;
-        break;
-    default:
-        break;
-    }
-}
-
-void DebugSetDirection(int dir)
-{
-    dbgDirection = dir;
-}
-
-void DebugSetCursor(int x, int y)
-{
-    dbgCursor.x = x;
-    dbgCursor.y = y;
-}
-
-void DebugGetCursor(int * x, int * y)
-{
-    *x = dbgCursor.x;
-    *y = dbgCursor.y;
-}
-
-void DebugMoveCursor(int dx, int dy)
-{
-    dbgCursor.x += dx;
-    dbgCursor.y += dy;
-}
-
-void DebugNewline()
-{
-    dbgCursor.y += DEBUG_LINE_HEIGHT;
-}
-
-void DebugPrint(const char * format, ...)
-{
-    static char buffer[1024];
-
-    va_list args;
-    va_start(args, format);
-    vsnprintf(buffer, sizeof(buffer), format, args);
-    va_end(args);
-
-    size_t length = strlen(buffer);
-
-    SDL_Rect src = { 
-        .x = 0,
-        .y = 0,
-        .w = DEBUG_CHAR_WIDTH,
-        .h = DEBUG_CHAR_HEIGHT,
-    };
-
-    SDL_Rect dst = { 
-        .x = dbgCursor.x,
-        .y = dbgCursor.y,
-        .w = DEBUG_CHAR_WIDTH,
-        .h = DEBUG_CHAR_HEIGHT,
-    };
-
-    char * questionMark = strchr(FONT_CHARACTER_MAP, '?');
-
-    for (size_t i = 0; i < length; ++i) {
-        if (buffer[i] == ' ') {
-            dst.x += DEBUG_CHAR_WIDTH;
-            continue;
-        }
-
-        char * index = strchr(FONT_CHARACTER_MAP, toupper(buffer[i]));
-
-        if (index == NULL) {
-            index = questionMark;
-        }
-
-        size_t offset = index - FONT_CHARACTER_MAP;
-
-        src.x = (offset % 8) * DEBUG_CHAR_WIDTH;
-        src.y = (offset / 8) * DEBUG_CHAR_WIDTH;
-        SDL_RenderCopy(sdlDebugRenderer, sdlFontTexture, &src, &dst);
-
-        dst.x += DEBUG_CHAR_WIDTH;
-    }
-}
-
-void DebugPanel(int w, int h)
-{
-    SDL_Rect r = {
-        .x = dbgCursor.x,
-        .y = dbgCursor.y,
-        .w = w,
-        .h = h,
-    };
-
-    adjustRect(&r);
-
-    SET_COLOR_DEFAULT();
-    SDL_RenderFillRect(sdlDebugRenderer, &r);
-
-    SET_COLOR_BORDER();
-    SDL_RenderDrawRect(sdlDebugRenderer, &r);
-
-    switch (dbgDirection) {
-    case DEBUG_DIR_RIGHT:
-    case DEBUG_DIR_DOWN:
-        dbgCursor.x += DEBUG_PANEL_PADDING;
-        dbgCursor.y += DEBUG_PANEL_PADDING;
-        break;
-    case DEBUG_DIR_LEFT:
-        dbgCursor.x += r.w - DEBUG_PANEL_PADDING;
-        dbgCursor.y += DEBUG_PANEL_PADDING;
-        break;
-    case DEBUG_DIR_UP:
-        dbgCursor.x += DEBUG_PANEL_PADDING;
-        dbgCursor.y += r.y - DEBUG_PANEL_PADDING;
-        break;
-    default:
-        break;
-    }
-}
-
-bool DebugButton(const char * text)
-{
-    SDL_Rect r = {
-        .x = dbgCursor.x,
-        .y = dbgCursor.y,
-        .w = (DEBUG_CHAR_WIDTH * strlen(text))
-            + (DEBUG_BUTTON_PADDING * 2),
-        .h = DEBUG_CHAR_HEIGHT + (DEBUG_BUTTON_PADDING * 2),
-    };
-
-    adjustRect(&r);
-
-    bool hover = SDL_PointInRect(&dbgMouse, &r);
-
-    if (hover) {
-        SET_COLOR_DEFAULT();
-    }
-    else {
-        SET_COLOR_INACTIVE();
-    }
-
-    SDL_RenderFillRect(sdlDebugRenderer, &r);
-
-    SET_COLOR_BORDER();
-    SDL_RenderDrawRect(sdlDebugRenderer, &r);
-
-    dbgCursor.x = r.x + DEBUG_BUTTON_PADDING;
-    dbgCursor.y = r.y + DEBUG_BUTTON_PADDING;
-
-    DebugPrint("%s", text);
-
-    dbgCursor.x = r.x;
-    dbgCursor.y = r.y;
-
-    moveCursor(&r);
-
-    return (hover && dbgClick);
-}
-
-bool DebugCheckbox(const char * text, bool * active)
-{
-    SDL_Rect r = {
-        .x = dbgCursor.x,
-        .y = dbgCursor.y,
-        .w = (DEBUG_CHAR_WIDTH * strlen(text))
-            + (DEBUG_BUTTON_PADDING * 2)
-            + (DEBUG_CHAR_WIDTH * 2),
-        .h = DEBUG_CHAR_HEIGHT + (DEBUG_BUTTON_PADDING * 2),
-    };
-
-    adjustRect(&r);
-
-    bool hover = SDL_PointInRect(&dbgMouse, &r);
-
-    if (hover) {
-        SET_COLOR_DEFAULT();
-    }
-    else {
-        SET_COLOR_INACTIVE();
-    }
-
-    SDL_RenderFillRect(sdlDebugRenderer, &r);
-
-    SET_COLOR_BORDER();
-    SDL_RenderDrawRect(sdlDebugRenderer, &r);
-
-    SDL_Rect mark = { 
-        .x = r.x + DEBUG_BUTTON_PADDING, 
-        .y = r.y + DEBUG_BUTTON_PADDING,
-        .w = DEBUG_CHAR_WIDTH, 
-        .h = DEBUG_CHAR_WIDTH
-    };
-
-    SDL_RenderDrawRect(sdlDebugRenderer, &mark);
-
-    if (*active) {
-        ++mark.x;
-        ++mark.y;
-        mark.w -= 2;
-        mark.h -= 2;
-
-        SDL_RenderFillRect(sdlDebugRenderer, &mark);
-    }
-
-    dbgCursor.x = r.x + DEBUG_BUTTON_PADDING + (DEBUG_CHAR_WIDTH * 2);
-    dbgCursor.y = r.y + DEBUG_BUTTON_PADDING;
-
-    DebugPrint("%s", text);
-
-    dbgCursor.x = r.x;
-    dbgCursor.y = r.y;
-
-    moveCursor(&r);
-
-    if (hover && dbgClick) {
-        *active ^= true;
-    }
-
-    return *active;
-}
-
-bool DebugRadio(const char * text, int index, int * currentIndex)
-{
-    SDL_Rect r = {
-        .x = dbgCursor.x,
-        .y = dbgCursor.y,
-        .w = (DEBUG_CHAR_WIDTH * strlen(text))
-            + (DEBUG_BUTTON_PADDING * 2)
-            + (DEBUG_CHAR_WIDTH * 2),
-        .h = DEBUG_CHAR_HEIGHT 
-            + (DEBUG_BUTTON_PADDING * 2),
-    };
-
-    adjustRect(&r);
-
-    bool hover = SDL_PointInRect(&dbgMouse, &r);
-    bool active = (index == *currentIndex);
-
-    if (hover) {
-        SET_COLOR_DEFAULT();
-    }
-    else {
-        SET_COLOR_INACTIVE();
-    }
-
-    SDL_RenderFillRect(sdlDebugRenderer, &r);
-    
-    SET_COLOR_BORDER();
-    SDL_RenderDrawRect(sdlDebugRenderer, &r);
-
-    SDL_Rect mark = { 
-        .x = r.x + DEBUG_BUTTON_PADDING, 
-        .y = r.y + DEBUG_BUTTON_PADDING,
-        .w = DEBUG_CHAR_WIDTH, 
-        .h = DEBUG_CHAR_WIDTH
-    };
-
-    SDL_RenderDrawRect(sdlDebugRenderer, &mark);
-
-    if (active) {
-        ++mark.x;
-        ++mark.y;
-        mark.w -= 2;
-        mark.h -= 2;
-
-        SDL_RenderFillRect(sdlDebugRenderer, &mark);
-    }
-
-    dbgCursor.x = r.x + DEBUG_BUTTON_PADDING + (DEBUG_CHAR_WIDTH * 2);
-    dbgCursor.y = r.y + DEBUG_BUTTON_PADDING;
-
-    DebugPrint("%s", text);
-
-    dbgCursor.x = r.x;
-    dbgCursor.y = r.y;
-
-    moveCursor(&r);
-
-    if (hover && dbgClick) {
-        *currentIndex = index;
-    }
-
-    return active;
-}
-
-bool DebugTab(const char * text, int index, int * currentIndex)
-{
-    SDL_Rect r = {
-        .x = dbgCursor.x,
-        .y = dbgCursor.y,
-        .w = (DEBUG_CHAR_WIDTH * strlen(text))
-            + (DEBUG_BUTTON_PADDING * 2),
-        .h = DEBUG_CHAR_HEIGHT 
-            + (DEBUG_BUTTON_PADDING * 2),
-    };
-
-    adjustRect(&r);
-
-    bool hover = SDL_PointInRect(&dbgMouse, &r);
-    bool active = (index == *currentIndex);
-
-    if (active || hover) {
-        SET_COLOR_DEFAULT();
-    }
-    else {
-        SET_COLOR_INACTIVE();
-    }
-
-    SDL_RenderFillRect(sdlDebugRenderer, &r);
-
-    SET_COLOR_BORDER();
-    SDL_RenderDrawRect(sdlDebugRenderer, &r);
-
-    dbgCursor.x = r.x + DEBUG_BUTTON_PADDING;
-    dbgCursor.y = r.y + DEBUG_BUTTON_PADDING;
-
-    DebugPrint("%s", text);
-
-    dbgCursor.x = r.x;
-    dbgCursor.y = r.y;
-
-    moveCursor(&r);
-
-    if (hover && dbgClick) {
-        *currentIndex = index;
-    }
-
-    return active;
 }

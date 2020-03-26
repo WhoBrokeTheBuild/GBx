@@ -1,5 +1,6 @@
 #include "tileData.h"
 #include "../debug.h"
+#include "../ui.h"
 
 #include <GBx/lcd.h>
 #include <GBx/memory.h>
@@ -87,18 +88,18 @@ void TileDataTabRefresh()
 void TileDataTabRender(SDL_Point * mouse)
 {
     int startX, startY;
-    DebugGetCursor(&startX, &startY);
+    UIGetCursor(&startX, &startY);
 
-    DebugPrintln("TILE DATA:");
-    DebugNewline();
+    UIPrintln("TILE DATA:");
+    UINewline();
 
-    DebugSetDirection(DEBUG_DIR_DOWN);
+    UISetDirection(UI_DIR_DOWN);
 
-    DebugRadio("AUTO", TILE_DATA_ADDR_AUTO, &tileDataAddrSelect);
-    DebugRadio("8000", TILE_DATA_ADDR_8000, &tileDataAddrSelect);
-    DebugRadio("8800", TILE_DATA_ADDR_8800, &tileDataAddrSelect);
+    UIRadio("AUTO", TILE_DATA_ADDR_AUTO, &tileDataAddrSelect);
+    UIRadio("8000", TILE_DATA_ADDR_8000, &tileDataAddrSelect);
+    UIRadio("8800", TILE_DATA_ADDR_8800, &tileDataAddrSelect);
 
-    DebugSetDirection(DEBUG_DIR_RIGHT);
+    UISetDirection(UI_DIR_RIGHT);
 
     SDL_Rect src = {
         .x = 0,
@@ -108,7 +109,7 @@ void TileDataTabRender(SDL_Point * mouse)
     };
 
     SDL_Rect dst = {
-        .x = startX + (DEBUG_CHAR_WIDTH * 18),
+        .x = startX + (UI_CHAR_WIDTH * 18),
         .y = startY,
         .w = (TILE_DATA_TEXTURE_WIDTH * 2),
         .h = (TILE_DATA_TEXTURE_HEIGHT * 2),

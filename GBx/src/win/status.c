@@ -1,5 +1,6 @@
 #include "status.h"
 #include "../debug.h"
+#include "../ui.h"
 
 #include <GBx/apu.h>
 #include <GBx/cpu.h>
@@ -14,97 +15,97 @@
 void StatusTabRender()
 {
     int startX, startY;
-    DebugGetCursor(&startX, &startY);
+    UIGetCursor(&startX, &startY);
 
-    DebugPrintln("STATUS");
-    DebugPrintln("CPU: %s", 
+    UIPrintln("STATUS");
+    UIPrintln("CPU: %s", 
         (CPUEnabled ? "ENABLED" : "DISABLED"));
 
-    DebugPrintln("LCD: %s", 
+    UIPrintln("LCD: %s", 
         (LCDC.Enabled ? "ENABLED" : "DISABLED"));
 
-    DebugPrintln("APU: %s", 
+    UIPrintln("APU: %s", 
         (APUC.Enabled ? "ENABLED" : "DISABLED"));
 
-    DebugPrintln("TAC: %s", 
+    UIPrintln("TAC: %s", 
         (TAC.Enabled ? "ENABLED" : "DISABLED"));
     
-    DebugNewline();
+    UINewline();
 
-    DebugPrintln("REGISTERS");
-    DebugPrintln("A: $%02X  F: $%02X", R.A, R.F);
-    DebugPrintln("B: $%02X  C: $%02X", R.B, R.C);
-    DebugPrintln("D: $%02X  E: $%02X", R.D, R.E);
-    DebugPrintln("H: $%02X  L: $%02X", R.H, R.L);
-    DebugPrintln("PC: $%04X", R.PC);
-    DebugPrintln("SP: $%04X", R.SP);
-    DebugPrintln("FLAGS: [%c%c%c%c]",
+    UIPrintln("REGISTERS");
+    UIPrintln("A: $%02X  F: $%02X", R.A, R.F);
+    UIPrintln("B: $%02X  C: $%02X", R.B, R.C);
+    UIPrintln("D: $%02X  E: $%02X", R.D, R.E);
+    UIPrintln("H: $%02X  L: $%02X", R.H, R.L);
+    UIPrintln("PC: $%04X", R.PC);
+    UIPrintln("SP: $%04X", R.SP);
+    UIPrintln("FLAGS: [%c%c%c%c]",
         (R.FZ ? 'Z' : '-'), 
         (R.FN ? 'N' : '-'), 
         (R.FH ? 'H' : '-'), 
         (R.FC ? 'C' : '-'));
 
-    DebugNewline();
+    UINewline();
 
-    DebugPrintln("DIV:  $%02X", DIV);
-    DebugPrintln("TMA:  $%02X", TMA);
-    DebugPrintln("TIMA: $%02X", TIMA);
-    DebugPrintln("TIMER: %d HZ", GetTimerSpeed());
+    UIPrintln("DIV:  $%02X", DIV);
+    UIPrintln("TMA:  $%02X", TMA);
+    UIPrintln("TIMA: $%02X", TIMA);
+    UIPrintln("TIMER: %d HZ", GetTimerSpeed());
 
-    DebugNewline();
+    UINewline();
 
-    DebugPrintln("INTERRUPTS");
+    UIPrintln("INTERRUPTS");
 
-    DebugPrintln("VBLANK: %s", 
+    UIPrintln("VBLANK: %s", 
         (IE.VBlank ? "ENABLED" : "DISABLED"));
 
-    DebugPrintln("STAT:   %s", 
+    UIPrintln("STAT:   %s", 
         (IE.STAT ? "ENABLED" : "DISABLED"));
 
-    DebugPrintln("TIMER:  %s", 
+    UIPrintln("TIMER:  %s", 
         (IE.Timer ? "ENABLED" : "DISABLED"));
 
-    DebugPrintln("SERIAL: %s", 
+    UIPrintln("SERIAL: %s", 
         (IE.Serial ? "ENABLED" : "DISABLED"));
 
-    DebugPrintln("JOYPAD: %s", 
+    UIPrintln("JOYPAD: %s", 
         (IE.Joypad ? "ENABLED" : "DISABLED"));
 
-    DebugNewline();
+    UINewline();
 
-    DebugSetCursor(startX + (DEBUG_CHAR_WIDTH * 20), startY);
+    UISetCursor(startX + (UI_CHAR_WIDTH * 20), startY);
 
-    DebugPrintln("DEVICE: %s", 
+    UIPrintln("DEVICE: %s", 
         (ColorEnabled ? "CGB" : (SuperEnabled ? "SGB" : "DMG")));
 
-    DebugPrintln("CLOCK: %d HZ", ClockSpeed);
-    DebugPrintln("TITLE: %.*s", 15, CartridgeHeader.Title);
-    DebugPrintln("CARTRIDGE: %s", GetCartridgeTypeString());
-    DebugPrintln("ROM: %s", GetROMTypeString());
-    DebugPrintln("RAM: %s", GetRAMTypeString());
+    UIPrintln("CLOCK: %d HZ", ClockSpeed);
+    UIPrintln("TITLE: %.*s", 15, CartridgeHeader.Title);
+    UIPrintln("CARTRIDGE: %s", GetCartridgeTypeString());
+    UIPrintln("ROM: %s", GetROMTypeString());
+    UIPrintln("RAM: %s", GetRAMTypeString());
 
-    DebugNewline();
+    UINewline();
 
-    DebugPrintln("LCD MODE: %s", GetLCDModeString(STAT.Mode));
-    DebugPrintln("LY:  $%02X (%d)", LY, LY);
-    DebugPrintln("LYC: $%02X (%d)", LYC, LYC);
-    DebugPrintln("SCX: $%02X (%d)", SCX, SCX);
-    DebugPrintln("SCY: $%02X (%d)", SCY, SCY);
-    DebugPrintln("WX:  $%02X (%d)", WX, WX);
-    DebugPrintln("WY:  $%02X (%d)", WY, WY);
+    UIPrintln("LCD MODE: %s", GetLCDModeString(STAT.Mode));
+    UIPrintln("LY:  $%02X (%d)", LY, LY);
+    UIPrintln("LYC: $%02X (%d)", LYC, LYC);
+    UIPrintln("SCX: $%02X (%d)", SCX, SCX);
+    UIPrintln("SCY: $%02X (%d)", SCY, SCY);
+    UIPrintln("WX:  $%02X (%d)", WX, WX);
+    UIPrintln("WY:  $%02X (%d)", WY, WY);
 
     const int STACK_PREVIEW_LENGTH = 16;
     const int STACK_PREVIEW_ENTRY_SIZE = 26;
 
-    int stackLogWidth = (DEBUG_CHAR_WIDTH * STACK_PREVIEW_ENTRY_SIZE);
-    int stackLogHeight = (DEBUG_LINE_HEIGHT * STACK_PREVIEW_LENGTH);
+    int stackLogWidth = (UI_CHAR_WIDTH * STACK_PREVIEW_ENTRY_SIZE);
+    int stackLogHeight = (UI_LINE_HEIGHT * STACK_PREVIEW_LENGTH);
 
-    DebugSetCursor(startX + (DEBUG_CHAR_WIDTH * 60), startY);
+    UISetCursor(startX + (UI_CHAR_WIDTH * 60), startY);
 
-    DebugPrintln("STACK [%04X]", StackBaseAddress);
+    UIPrintln("STACK [%04X]", StackBaseAddress);
 
-    DebugPanel(stackLogWidth + (DEBUG_PANEL_PADDING * 2),
-               stackLogHeight + (DEBUG_PANEL_PADDING * 2));
+    UIPanel(stackLogWidth + (UI_PANEL_PADDING * 2),
+               stackLogHeight + (UI_PANEL_PADDING * 2));
 
     char stackLogEntry[32];
 
@@ -117,23 +118,23 @@ void StatusTabRender()
         word ptr = ReadWord(addr);
 
         Disassemble(stackLogEntry, sizeof(stackLogEntry), ptr);
-        DebugPrintln("[%04X] $%04X: %s", addr, ptr, stackLogEntry);
+        UIPrintln("[%04X] $%04X: %s", addr, ptr, stackLogEntry);
 
         addr += 2;
     }
 
-    DebugSetCursor(startX + (DEBUG_CHAR_WIDTH * 60), 
-        startY + stackLogHeight + (DEBUG_LINE_HEIGHT * 6));
+    UISetCursor(startX + (UI_CHAR_WIDTH * 60), 
+        startY + stackLogHeight + (UI_LINE_HEIGHT * 6));
 
-    DebugPrintln("INSTRUCTION LOG");
+    UIPrintln("INSTRUCTION LOG");
 
-    int instLogWidth = (DEBUG_CHAR_WIDTH * STACK_PREVIEW_ENTRY_SIZE);
-    int instLogHeight = (DEBUG_LINE_HEIGHT * INSTRUCTION_LOG_LENGTH);
+    int instLogWidth = (UI_CHAR_WIDTH * STACK_PREVIEW_ENTRY_SIZE);
+    int instLogHeight = (UI_LINE_HEIGHT * INSTRUCTION_LOG_LENGTH);
 
-    DebugPanel(instLogWidth + (DEBUG_PANEL_PADDING * 2),
-               instLogHeight + (DEBUG_PANEL_PADDING * 2));
+    UIPanel(instLogWidth + (UI_PANEL_PADDING * 2),
+               instLogHeight + (UI_PANEL_PADDING * 2));
 
     for (int i = 0; i < GetInstructionLogSize(); ++i) {
-        DebugPrintln(GetInstructionLogEntry(i));
+        UIPrintln(GetInstructionLogEntry(i));
     }
 }
