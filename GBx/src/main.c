@@ -15,8 +15,15 @@
 #include <SDL.h>
 #include <cflags.h>
 
-// TODO Win32 support
-#include <pthread.h>
+#if defined(WIN32)
+
+    #include <Windows.h>
+
+#else 
+
+    #include <pthread.h>
+
+#endif // defined(WIN32)
 
 #ifdef HAVE_READLINE
     #include <readline/readline.h>
@@ -100,9 +107,19 @@ int main(int argc, char ** argv)
 
         DebugWindowInit();
     }
-    
+
+#if defined(WIN32)
+
+    DWORD threadID;
+    HANDLE thread;
+    thread = CreateThread(NULL, 0, runThread, NULL, 0, &threadID);
+
+#else
+
     pthread_t thread;
     pthread_create(&thread, NULL, runThread, NULL);
+
+#endif // defined(WIN32)
     
     for (;;) {
         PollEvents();
@@ -110,8 +127,17 @@ int main(int argc, char ** argv)
         Render();
         DebugWindowRender();
     }
-    
+   
+#if defined(WIN32)
+
+    WaitForSingleObject(thread, INFINITE);
+    CloseHandle(thread);
+
+#else
+
     pthread_join(thread, NULL);
+
+#endif // defined(WIN32)
 
     if (DebugEnabled) {
         DebugWindowTerm();
