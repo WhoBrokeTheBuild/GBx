@@ -236,8 +236,8 @@ void DrawSprites()
 struct timespec timediff(struct timespec start, struct timespec end)
 {
 	struct timespec temp;
-	if ((end.tv_nsec-start.tv_nsec)<0) {
-		temp.tv_sec = end.tv_sec-start.tv_sec-1;
+	if ((end.tv_nsec-start.tv_nsec) < 0) {
+		temp.tv_sec = end.tv_sec-start.tv_sec - 1;
 		temp.tv_nsec = 1000000000+end.tv_nsec-start.tv_nsec;
 	} else {
 		temp.tv_sec = end.tv_sec-start.tv_sec;
@@ -289,7 +289,7 @@ void LCDTick(uint cycles)
                 ++LY;
                 updateCoincidence();
 
-                if (LY == LCD_HEIGHT + 1) {
+                if (LY == LCD_HEIGHT) {
                     STAT.Mode = STAT_MODE_VBLANK;
 
                     IF.VBlank = true;
@@ -297,7 +297,7 @@ void LCDTick(uint cycles)
                         IF.STAT = true;
                     }
 
-                    static struct timespec last;
+                    // static struct timespec last;
                     // static double fpsTotal = 0.0;
                     // static long fpsCount = 0;
                     
@@ -305,11 +305,11 @@ void LCDTick(uint cycles)
                     //     clock_gettime(CLOCK_MONOTONIC, &last);
                     // }
                     // else {
-                        struct timespec now;
+                        // struct timespec now;
                     
-                        clock_gettime(CLOCK_MONOTONIC, &now);
-                        struct timespec delta = timediff(last, now);
-                        last = now;
+                        // clock_gettime(CLOCK_MONOTONIC, &now);
+                        // struct timespec delta = timediff(last, now);
+                        // last = now;
                         
                     //     float fps = 1.0 / (delta.tv_nsec / 1000000000.0);
                     //     // LogInfo("VBL %ld %f", delta.tv_nsec, fps);
@@ -322,10 +322,10 @@ void LCDTick(uint cycles)
                     //     }
                     // }
                     
-                    struct timespec wait;
-                    wait.tv_sec = 0;
-                    wait.tv_nsec = 16750419 - delta.tv_nsec;
-                    clock_nanosleep(CLOCK_MONOTONIC, 0, &wait, NULL);
+                    // struct timespec wait;
+                    // wait.tv_sec = 0;
+                    // wait.tv_nsec = 16750419 - delta.tv_nsec;
+                    // clock_nanosleep(CLOCK_MONOTONIC, 0, &wait, NULL);
                 }
                 else {
                     STAT.Mode = STAT_MODE_SEARCH_SPRITE;

@@ -41,6 +41,7 @@ void cmdInfo(const char * input)
         PrintTimer();
         PrintCartridgeMBC();
         PrintCartridge();
+        PrintInput();
     }
     else if (strncmp(input, "apu", length) == 0) {
         PrintTone1();
@@ -70,6 +71,9 @@ void cmdInfo(const char * input)
     }
     else if (strncmp(input, "cartridge", length) == 0) {
         PrintCartridge();
+    }
+    else if (strncmp(input, "input", length) == 0) {
+        PrintInput();
     }
     else {
         LogWarn("Unrecognized command 'info %s'", input);

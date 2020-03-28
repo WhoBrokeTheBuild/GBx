@@ -22,11 +22,12 @@ static void _RET_NZ()
 {
     LogInst("RET NZ");
 
-    word nn = PopWord();
     Tick(8);
 
     if (!R.FZ) {
         Tick(4);
+
+        word nn = PopWord();
 
         R.PC = nn;
         Tick(8);
@@ -37,11 +38,12 @@ static void _RET_Z()
 {
     LogInst("RET Z");
 
-    word nn = PopWord();
     Tick(8);
 
     if (R.FZ) {
         Tick(4);
+
+        word nn = PopWord();
 
         R.PC = nn;
         Tick(8);
@@ -52,11 +54,12 @@ static void _RET_NC()
 {
     LogInst("RET NC");
 
-    word nn = PopWord();
     Tick(8);
 
     if (!R.FC) {
         Tick(4);
+
+        word nn = PopWord();
 
         R.PC = nn;
         Tick(8);
@@ -67,11 +70,12 @@ static void _RET_C()
 {
     LogInst("RET C");
 
-    word nn = PopWord();
     Tick(8);
 
     if (R.FC) {
         Tick(4);
+
+        word nn = PopWord();
 
         R.PC = nn;
         Tick(8);

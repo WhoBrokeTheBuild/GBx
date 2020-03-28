@@ -5,6 +5,8 @@
 
 void SetBreakpoint(const char * reg, unsigned value);
 
+void SetBreakpointStackChanged();
+
 void ClearBreakpoint(const char * reg, unsigned value);
 
 void ClearAllBreakpoints();

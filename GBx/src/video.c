@@ -2,6 +2,7 @@
 #include "debug.h"
 
 #include <GBx/cartridge.h>
+#include <GBx/input.h>
 #include <GBx/lcd.h>
 #include <GBx/log.h>
 
@@ -86,13 +87,71 @@ void HandleEvent(SDL_Event * evt)
     else if (evt->type == SDL_KEYUP) {
         SDL_Window * window = SDL_GetWindowFromID(evt->key.windowID);
         if (window == sdlWindow) {
-            if (evt->key.keysym.sym == SDLK_1) {
+            switch (evt->key.keysym.sym) {
+            case SDLK_1:
                 if (DebugEnabled) {
                     ToggleDebugWindow();
                 }
-            }
-            if (evt->key.keysym.sym == SDLK_0) {
+                break;
+            case SDLK_0:
                 LCDOriginalColors ^= true;
+                break;
+
+            case SDLK_RIGHT:
+                RightPressed = false;
+                break;
+            case SDLK_LEFT:
+                LeftPressed = false;
+                break;
+            case SDLK_UP:
+                UpPressed = false;
+                break;
+            case SDLK_DOWN:
+                DownPressed = false;
+                break;
+            case SDLK_a:
+                APressed = false;
+                break;
+            case SDLK_s:
+                BPressed = false;
+                break;
+            case SDLK_d:
+                SelectPressed = false;
+                break;
+            case SDLK_f:
+                StartPressed = false;
+                break;
+            }
+        }
+    }
+    else if (evt->type == SDL_KEYDOWN) {
+        SDL_Window * window = SDL_GetWindowFromID(evt->key.windowID);
+        if (window == sdlWindow) {
+            switch (evt->key.keysym.sym) {
+            case SDLK_RIGHT:
+                RightPressed = true;
+                break;
+            case SDLK_LEFT:
+                LeftPressed = true;
+                break;
+            case SDLK_UP:
+                UpPressed = true;
+                break;
+            case SDLK_DOWN:
+                DownPressed = true;
+                break;
+            case SDLK_a:
+                APressed = true;
+                break;
+            case SDLK_s:
+                BPressed = true;
+                break;
+            case SDLK_d:
+                SelectPressed = true;
+                break;
+            case SDLK_f:
+                StartPressed = true;
+                break;
             }
         }
     }

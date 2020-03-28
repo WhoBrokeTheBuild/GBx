@@ -1,5 +1,7 @@
-roms/*.gb
-roms/*.bin
+*.gb
+*.bin
+*.zip
 roms/gb-test-roms
+roms/mooneye
 build/
 .vscode/

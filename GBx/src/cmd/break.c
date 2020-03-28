@@ -30,6 +30,10 @@ void cmdBreak(const char * input)
         SetBreakpoint(input, value);
         LogInfo("Breakpoint set when %s=$%04X", input, value);
     }
+    if (strcmp(input, "SPCHNG") == 0) {
+        SetBreakpointStackChanged();
+        LogInfo("Breakpoint set when Stack Changed");
+    }
     else {
         unsigned int pc;
         sscanf(input, "%04X", &pc);

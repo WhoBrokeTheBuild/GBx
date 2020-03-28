@@ -29,7 +29,8 @@ const char * CMD_HELP_INFO =
 "  lcd          Print LCDC, STAT registers and LCD coordinates\n"
 "  timer        Print TAC, TIMA, TMA and DIV info\n"
 "  bank         Print ROM/RAM Bank info\n"
-"  cartridge    Print Cartridge info\n";
+"  cartridge    Print Cartridge info\n"
+"  input        Print Input info\n";
 
 const char * CMD_HELP_BREAK = 
 "break [CONDITION|ADDRESS]\n"
@@ -38,7 +39,8 @@ const char * CMD_HELP_BREAK =
 "\n"
 "  CONDITION will be interpreted either as A=B\n"
 "  where B is a hex number, and A can be one of the following:\n"
-"    A, B, C, D, E, H, L, AF, BC, DE, HL, SP, PC, FZ, FN, FH, FC\n"
+"    A, B, C, D, E, H, L, AF, BC, DE, HL, SP, PC, FZ, FN, FH, FC, LY\n"
+"  CONDITION can also be SPCHNG, which will break when the stack changes.\n"
 "\n"
 "  ADDRESS will be interpreted as a 16-bit hex number\n"
 "\n"

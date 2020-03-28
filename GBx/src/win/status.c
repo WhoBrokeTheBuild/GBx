@@ -5,6 +5,7 @@
 #include <GBx/cpu.h>
 #include <GBx/cartridge.h>
 #include <GBx/clock.h>
+#include <GBx/input.h>
 #include <GBx/instruction.h>
 #include <GBx/interrupt.h>
 #include <GBx/lcd.h>
@@ -22,7 +23,7 @@ void StatusTabRender()
     int startX, startY;
     DUI_GetCursor(&startX, &startY);
 
-    DUI_Println("--STATUS--------");
+    DUI_Println("--------STATUS---------");
     DUI_Println("CPU: %s", 
         (CPUEnabled ? "ENABLED" : "DISABLED"));
 
@@ -37,7 +38,7 @@ void StatusTabRender()
     
     DUI_Newline();
 
-    DUI_Println("--REGISTERS-----");
+    DUI_Println("-------REGISTERS-------");
     DUI_Println("A: $%02X  F: $%02X", R.A, R.F);
     DUI_Println("B: $%02X  C: $%02X", R.B, R.C);
     DUI_Println("D: $%02X  E: $%02X", R.D, R.E);
@@ -52,8 +53,7 @@ void StatusTabRender()
 
     DUI_Newline();
 
-    DUI_Println("--TIMING--------");
-
+    DUI_Println("--------TIMING---------");
     DUI_Println("DIV:  $%02X", DIV);
     DUI_Println("TMA:  $%02X", TMA);
     DUI_Println("TIMA: $%02X", TIMA);
@@ -61,7 +61,7 @@ void StatusTabRender()
 
     DUI_Newline();
 
-    DUI_Println("--INTERRUPTS----");
+    DUI_Println("------INTERRUPTS-------");
 
     DUI_Println("VBLANK: %s", 
         (IE.VBlank ? "ENABLED" : "DISABLED"));
@@ -80,7 +80,7 @@ void StatusTabRender()
 
     DUI_Newline();
 
-    DUI_Println("--VIDEO---------");
+    DUI_Println("---------VIDEO---------");
 
     DUI_Println("LCD MODE: %s", GetLCDModeString(STAT.Mode));
     DUI_Println("LY:  $%02X (%d)", LY, LY);
@@ -92,7 +92,19 @@ void StatusTabRender()
 
     DUI_Newline();
 
-    DUI_Println("--HARDWARE------");
+    DUI_Println("---------INPUT---------");
+
+    DUI_Println("JOYP: $%02X", JOYP.raw);
+    DUI_Println(" DPAD:    %s", (JOYP.SelectDPad ? "SELECTED" : "-"));
+    DUI_Println(" Buttons: %s", (JOYP.SelectButtons ? "SELECTED" : "-"));
+    DUI_Println(" A/RIGHT:    %s", (JOYP.A ? "UP" : "DOWN"));
+    DUI_Println(" B/LEFT:     %s", (JOYP.B ? "UP" : "DOWN"));
+    DUI_Println(" SELECT/UP:  %s", (JOYP.Select ? "UP" : "DOWN"));
+    DUI_Println(" START/DOWN: %s", (JOYP.Start ? "UP" : "DOWN"));
+
+    DUI_Newline();
+
+    DUI_Println("-------HARDWARE--------");
 
     DUI_Println("DEVICE: %s", 
         (ColorEnabled ? "CGB" : (SuperEnabled ? "SGB" : "DMG")));
@@ -103,60 +115,60 @@ void StatusTabRender()
     DUI_Println("ROM: %s", GetROMTypeString());
     DUI_Println("RAM: %s", GetRAMTypeString());
 
-    DUI_MoveCursor(startX + (style->CharSize * 20), startY);
+    DUI_MoveCursor(startX + (style->CharSize * 25), startY);
 
-    DUI_Println("--AUDIO---------");
+    DUI_Println("---------AUDIO---------");
 
-    DUI_Println("VOLUME L: %d R: %d", 
+    DUI_Println("VOLUME LEFT: %d RIGHT: %d", 
         VolumeControl.LeftVolume, VolumeControl.RightVolume);
 
     DUI_Println("TONE1: %s", (APUC.Tone1Playing ? "PLAYING" : "STOPPED"));
-    DUI_Println(" SHIFT:   %d", Tone1.Shift);
-    DUI_Println(" NEGATE:  %s", (Tone1.Negate ? "TRUE" : "FALSE"));
-    DUI_Println(" SWEEP:   %d", Tone1.SweepPeriod);
-    DUI_Println(" LENLOAD: %d", Tone1.LengthLoad);
-    DUI_Println(" DUTY:    %d", Tone1.Duty);
-    DUI_Println(" PERIOD:  %d", Tone1.Period);
-    DUI_Println(" ENVADDM: %s", (Tone1.EnvelopeAddMode ? "TRUE" : "FALSE"));
-    DUI_Println(" VOLUME:  %d", Tone1.Volume);
-    DUI_Println(" FREQ:    %d", Tone1.Frequency);
-    DUI_Println(" LENGTH:  %s", (Tone1.LengthEnabled ? "ENABLED" : "DISABLED"));
-    DUI_Println(" TRIG:    %s", (Tone1.Trigger ? "ENABLED" : "DISABLED"));
+    DUI_Println(" SHIFT:        %d", Tone1.Shift);
+    DUI_Println(" NEGATE:       %s", (Tone1.Negate ? "TRUE" : "FALSE"));
+    DUI_Println(" SWEEP:        %d", Tone1.SweepPeriod);
+    DUI_Println(" LENGTH LOAD:  %d", Tone1.LengthLoad);
+    DUI_Println(" DUTY:         %d", Tone1.Duty);
+    DUI_Println(" PERIOD:       %d", Tone1.Period);
+    DUI_Println(" ENV ADD MODE: %s", (Tone1.EnvelopeAddMode ? "TRUE" : "FALSE"));
+    DUI_Println(" VOLUME:       %d", Tone1.Volume);
+    DUI_Println(" FREQUENCY:    %d", Tone1.Frequency);
+    DUI_Println(" LENGTH:       %s", (Tone1.LengthEnabled ? "ENABLED" : "DISABLED"));
+    DUI_Println(" TRIGGER:      %s", (Tone1.Trigger ? "ENABLED" : "DISABLED"));
 
     DUI_Newline();
 
     DUI_Println("TONE2: %s", (APUC.Tone2Playing ? "PLAYING" : "STOPPED"));
-    DUI_Println(" LENLOAD: %d", Tone2.LengthLoad);
-    DUI_Println(" DUTY:    %d", Tone2.Duty);
-    DUI_Println(" PERIOD:  %d", Tone2.Period);
-    DUI_Println(" ENVADDM: %s", (Tone2.EnvelopeAddMode ? "TRUE" : "FALSE"));
-    DUI_Println(" VOLUME:  %d", Tone2.Volume);
-    DUI_Println(" FREQ:    %d", Tone2.Frequency);
-    DUI_Println(" LENGTH:  %s", (Tone2.LengthEnabled ? "ENABLED" : "DISABLED"));
-    DUI_Println(" TRIG:    %s", (Tone2.Trigger ? "ENABLED" : "DISABLED"));
+    DUI_Println(" LENGTH LOAD:  %d", Tone2.LengthLoad);
+    DUI_Println(" DUTY:         %d", Tone2.Duty);
+    DUI_Println(" PERIOD:       %d", Tone2.Period);
+    DUI_Println(" ENV ADD MODE: %s", (Tone2.EnvelopeAddMode ? "TRUE" : "FALSE"));
+    DUI_Println(" VOLUME:       %d", Tone2.Volume);
+    DUI_Println(" FREQUENCY:    %d", Tone2.Frequency);
+    DUI_Println(" LENGTH:       %s", (Tone2.LengthEnabled ? "ENABLED" : "DISABLED"));
+    DUI_Println(" TRIGGER:      %s", (Tone2.Trigger ? "ENABLED" : "DISABLED"));
 
     DUI_Newline();
 
     DUI_Println("WAVE: %s", (APUC.WavePlaying ? "PLAYING" : "STOPPED"));
-    DUI_Println(" DACPWR:  %d", Wave.DACPower);
-    DUI_Println(" LENLOAD: %d", Wave.LengthLoad);
-    DUI_Println(" VOLCODE: %d", Wave.VolumeCode);
-    DUI_Println(" FREQ:    %d", Wave.Frequency);
-    DUI_Println(" LENGTH:  %s", (Wave.LengthEnabled ? "ENABLED" : "DISABLED"));
-    DUI_Println(" TRIG:    %s", (Wave.Trigger ? "ENABLED" : "DISABLED"));
+    DUI_Println(" DAC POWER:    %d", Wave.DACPower);
+    DUI_Println(" LENGTH LOAD:  %d", Wave.LengthLoad);
+    DUI_Println(" VOLUME CODE:  %d", Wave.VolumeCode);
+    DUI_Println(" FREQUENCY:    %d", Wave.Frequency);
+    DUI_Println(" LENGTH:       %s", (Wave.LengthEnabled ? "ENABLED" : "DISABLED"));
+    DUI_Println(" TRIGGER:      %s", (Wave.Trigger ? "ENABLED" : "DISABLED"));
 
     DUI_Newline();
 
     DUI_Println("NOISE: %s", (APUC.NoisePlaying ? "PLAYING" : "STOPPED"));
-    DUI_Println(" LENLOAD: %d", Noise.LengthLoad);
-    DUI_Println(" PERIOD:  %d", Noise.Period);
-    DUI_Println(" ENVADDM: %s", (Noise.EnvelopeAddMode ? "TRUE" : "FALSE"));
-    DUI_Println(" VOLUME:  %d", Noise.Volume);
-    DUI_Println(" DIVCODE: %d", Noise.DivisorCode);
-    DUI_Println(" LFSRWID: %s", (Noise.LFSRWidthMode ? "ENABLED" : "DISABLED"));
-    DUI_Println(" CLSHIFT: %d", Noise.ClockShift);
-    DUI_Println(" LENGTH:  %s", (Noise.LengthEnabled ? "ENABLED" : "DISABLED"));
-    DUI_Println(" TRIG:    %s", (Noise.Trigger ? "ENABLED" : "DISABLED"));
+    DUI_Println(" LENGTH LOAD:  %d", Noise.LengthLoad);
+    DUI_Println(" PERIOD:       %d", Noise.Period);
+    DUI_Println(" ENV ADD MODE: %s", (Noise.EnvelopeAddMode ? "TRUE" : "FALSE"));
+    DUI_Println(" VOLUME:       %d", Noise.Volume);
+    DUI_Println(" DIVISOR CODE: %d", Noise.DivisorCode);
+    DUI_Println(" LFSR W. MODE: %s", (Noise.LFSRWidthMode ? "ENABLED" : "DISABLED"));
+    DUI_Println(" CLOCK SHIFT:  %d", Noise.ClockShift);
+    DUI_Println(" LENGTH:       %s", (Noise.LengthEnabled ? "ENABLED" : "DISABLED"));
+    DUI_Println(" TRIGGER:      %s", (Noise.Trigger ? "ENABLED" : "DISABLED"));
 
 
     const int STACK_PREVIEW_LENGTH = 16;

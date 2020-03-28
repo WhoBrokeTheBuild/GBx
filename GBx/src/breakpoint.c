@@ -1,6 +1,7 @@
 #include "breakpoint.h"
 
 #include <GBx/cpu.h>
+#include <GBx/lcd.h>
 #include <GBx/log.h>
 
 #include <stdlib.h>
@@ -105,6 +106,16 @@ bool breakCompareFC(unsigned value)
     return (R.FC == (bool)value);
 }
 
+bool breakCompareLY(unsigned value)
+{
+    return (LY == value);
+}
+
+bool breakStackChanged(unsigned value)
+{
+    return (R.SP != value);
+}
+
 break_comp_func_t getBreakCompFunc(const char * reg)
 {
     if (reg[0] == '\0') {
@@ -152,6 +163,9 @@ break_comp_func_t getBreakCompFunc(const char * reg)
         else if (reg[0] == 'P' && reg[1] == 'C') {
             return breakComparePC;
         }
+        else if (reg[0] == 'L' && reg[1] == 'Y') {
+            return breakCompareLY;
+        }
         else if (reg[0] == 'F') {
             if (reg[1] == 'Z') {
                 return breakCompareFZ;
@@ -185,6 +199,20 @@ void SetBreakpoint(const char * reg, unsigned value)
             breakpoints[i].name = strdup(reg);
             breakpoints[i].comp = comp;
             breakpoints[i].value = value;
+            return;
+        }
+    }
+    
+    LogWarn("Maximum number of breakpoints reached: %d", MAX_BREAKPOINTS);
+}
+
+void SetBreakpointStackChanged()
+{
+    for (int i = 0; i < MAX_BREAKPOINTS; ++i) {
+        if (!breakpoints[i].comp) {
+            breakpoints[i].name = strdup("SP*");
+            breakpoints[i].comp = breakStackChanged;
+            breakpoints[i].value = R.SP;
             return;
         }
     }

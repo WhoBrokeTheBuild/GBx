@@ -315,15 +315,11 @@ inst_t instructions[] = {
 
 byte Fetch()
 {
-    if (CPUEnabled) {
-        LastInstructionAddress = R.PC;
+    LastInstructionAddress = R.PC;
 
-        byte op = NextByte();
-        Tick(4);
-        return op;
-    }
-
-    return 0x00;
+    byte op = NextByte();
+    Tick(4);
+    return op;
 }
 
 void Execute(byte op)

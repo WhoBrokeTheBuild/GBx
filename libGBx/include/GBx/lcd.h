@@ -16,9 +16,9 @@ extern bool LCDOriginalColors;
 #define LCD_BUFFER_SIZE \
     (LCD_BUFFER_WIDTH * LCD_BUFFER_HEIGHT * LCD_BUFFER_COMPONENTS)
 
-#define HBLANK_TICK_COUNT        (204)
-#define SEARCH_SPRITE_TICK_COUNT (80)
-#define DATA_TRANSFER_TICK_COUNT (172)
+#define HBLANK_TICK_COUNT        (204 * 4)
+#define SEARCH_SPRITE_TICK_COUNT (80  * 4)
+#define DATA_TRANSFER_TICK_COUNT (172 * 4)
 
 // 1/10th of VBlank period, or one line worth of ticks
 #define VBLANK_TICK_COUNT \

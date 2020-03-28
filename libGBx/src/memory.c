@@ -64,12 +64,12 @@ byte ReadByte(word address)
     }
     // External Cartridge RAM - A000-BFFF
     else if (address <= 0xBFFF) {
-        if (SRAMEnabled) {
+        // if (SRAMEnabled) {
             return SRAM[SRAMBank][address - 0xA000];
-        }
-        else {
-            LogFatal("Cartridge RAM Not Enabled %04X", address);
-        }
+        // }
+        // else {
+        //     LogFatal("Cartridge RAM Not Enabled %04X", address);
+        // }
     }
     // Work RAM Bank 0 - C000-CFFF
     else if (address <= 0xCFFF) {
@@ -233,17 +233,17 @@ void WriteByte(word address, byte data)
             VRAM[VRAMBank][address - 0x8000] = data;
         // }
         // else {
-        //     // LogWarn("Attempting to write to VRAM while in mode %d", STAT.Mode);
+        //     LogWarn("Attempting to write to VRAM while in mode %d", STAT.Mode);
         // }
     }
     // External Cartridge RAM - A000-BFFF
     else if (address <= 0xBFFF) {
-        if (SRAMEnabled) {
+        // if (SRAMEnabled) {
             SRAM[SRAMBank][address - 0xA000] = data;
-        }
-        else {
-            LogFatal("Cartridge RAM Not Enabled %04X", address);
-        }
+        // }
+        // else {
+        //     LogFatal("Cartridge RAM Not Enabled %04X", address);
+        // }
     }
     // Work RAM Bank 0 - C000-CFFF
     else if (address <= 0xCFFF) {
@@ -259,12 +259,12 @@ void WriteByte(word address, byte data)
     }
     // Object Attribute Memory - FE00-FE9F
     else if (address <= 0xFE9F) {
-        //if (STAT.Mode != STAT_MODE_DATA_TRANSFER && STAT.Mode != STAT_MODE_SEARCH_SPRITE) {
+        // if (STAT.Mode != STAT_MODE_DATA_TRANSFER && STAT.Mode != STAT_MODE_SEARCH_SPRITE) {
            OAM[address - 0xFE00] = data;
-        //}
-        //else {
-        //    // LogWarn("Attempting to write to OAM while in mode %d", STAT.Mode);
-        //}
+        // }
+        // else {
+        //    LogWarn("Attempting to write to OAM while in mode %d", STAT.Mode);
+        // }
     }
     // Unusable - FEA0-FEFF
     else if (address <= 0xFEFF) {
@@ -279,8 +279,10 @@ void WriteByte(word address, byte data)
         case 0xFF00:
             JOYP.raw ^= JOYP_WRITE_MASK;
             JOYP.raw |= data & JOYP_WRITE_MASK;
-            // TODO:
-            // updateJOYP();
+            UpdateInput();
+            if (VerboseLevel >= 2) {
+                PrintInput();
+            }
             break;
         case 0xFF01:
             SB = data;
@@ -477,11 +479,15 @@ void WriteByte(word address, byte data)
             break;
         case 0xFF46:
             {
-                // TODO: Background somehow?
+                CPUEnabled = false;
+
                 word addr = data << 8;
                 for (unsigned i = 0; i < 0xA0; ++i) {
                     OAM[i] = ReadByte(addr + i);
+                    Tick(4);
                 }
+
+                CPUEnabled = true;
             }
             break;
         case 0xFF47:
