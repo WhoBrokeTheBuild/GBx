@@ -1,7 +1,6 @@
 #include "debug.h"
 #include "breakpoint.h"
 #include "util.h"
-#include "ui.h"
 
 #include "cmd/break.h"
 #include "cmd/delete.h"
@@ -23,6 +22,9 @@
 #include <GBx/log.h>
 #include <GBx/memory.h>
 #include <GBx/types.h>
+
+#define DUI_IMPLEMENTATION
+#include <DUI/DUI.h>
 
 #ifdef HAVE_READLINE
     #include <readline/readline.h>
@@ -191,8 +193,8 @@ void DebugWindowInit()
         LogFatal("Failed to create SDL2 Renderer, %s", SDL_GetError());
     }
 
-    UIInit();
-
+    DUI_Init(sdlDebugWindow);
+    
     InitTileDataTab();
     InitTileMapTab();
 
@@ -203,7 +205,7 @@ void DebugWindowTerm()
 {
     debugWindowShown = false;
 
-    UITerm();
+    DUI_Term();
 
     TermTileMapTab();
     TermTileDataTab();
@@ -255,49 +257,43 @@ int dbgTabIndex = 0;
 
 void DebugWindowRender()
 {
+    DUI_Update();
+
     if (dbgAutoRefresh) {
         DebugWindowRefresh();
     }
 
-    UIUpdate();
-
-    SET_COLOR_BACKGROUND();
-
+    SDL_SetRenderDrawColor(sdlDebugRenderer, 0x33, 0x33, 0x33, 0xFF);
     SDL_RenderClear(sdlDebugRenderer);
 
-    UISetCursor(DEBUG_WINDOW_WIDTH - UI_MARGIN, UI_MARGIN);
-    UISetDirection(UI_DIR_LEFT);
+    DUI_CheckboxAt(DEBUG_WINDOW_WIDTH - 136, 8, "AUTO", &dbgAutoRefresh);
 
-    UICheckbox("AUTO", &dbgAutoRefresh);
-
-    if (UIButton("REFRESH")) {
+    if (DUI_ButtonAt(DEBUG_WINDOW_WIDTH - 72, 8, "REFRESH")) {
         DebugWindowRefresh();
     }
 
-    UISetCursor(UI_MARGIN, UI_MARGIN);
-    UISetDirection(UI_DIR_RIGHT);
+    DUI_MoveCursor(8, 8);
 
-    UITab("STATUS",    DBG_TAB_STATUS,    &dbgTabIndex);
-    UITab("TILE DATA", DBG_TAB_TILE_DATA, &dbgTabIndex);
-    UITab("TILE MAP",  DBG_TAB_TILE_MAP,  &dbgTabIndex);
-    UITab("SPRITE",    DBG_TAB_SPRITE,    &dbgTabIndex);
-    UITab("AUDIO",     DBG_TAB_AUDIO,     &dbgTabIndex);
+    DUI_BeginTabBar();
 
-    UISetCursor(DEBUG_CONTENT_X, DEBUG_CONTENT_Y);
-    UIPanel(DEBUG_CONTENT_WIDTH, DEBUG_CONTENT_HEIGHT);
-
-    switch (dbgTabIndex) {
-    case DBG_TAB_STATUS:
+    if (DUI_Tab("STATUS", DBG_TAB_STATUS, &dbgTabIndex)) {
         StatusTabRender();
-        break;
-    case DBG_TAB_TILE_DATA:
+    }
+    
+    if (DUI_Tab("TILE DATA", DBG_TAB_TILE_DATA, &dbgTabIndex)) {
         TileDataTabRender();
-        break;
-    case DBG_TAB_TILE_MAP:
+    }
+    
+    if (DUI_Tab("TILE MAP", DBG_TAB_TILE_MAP, &dbgTabIndex)) {
         TileMapTabRender();
-        break;
-    default:
-        break;
+    }
+    
+    if (DUI_Tab("SPRITE", DBG_TAB_SPRITE, &dbgTabIndex)) {
+
+    }
+    
+    if (DUI_Tab("AUDIO", DBG_TAB_AUDIO, &dbgTabIndex)) {
+
     }
 
     SDL_RenderPresent(sdlDebugRenderer);

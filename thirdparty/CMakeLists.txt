@@ -14,11 +14,31 @@ FIND_PACKAGE(cflags CONFIG QUIET)
 IF(NOT cflags_FOUND)
     ExternalProject_Add(
         thirdparty_cflags
-        GIT_REPOSITORY      "https://github.com/WhobrokeTheBuild/cflags.git"
+        GIT_REPOSITORY      "https://github.com/WhoBrokeTheBuild/cflags.git"
         GIT_TAG             "master"
         GIT_SHALLOW         TRUE
         SOURCE_DIR          ${cflags_SOURCE_DIR}
         CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${cflags_ROOT}
+        BUILD_COMMAND       ""
+        UPDATE_COMMAND      ""
+    )
+ENDIF()
+
+# DUI
+
+SET(DUI_ROOT       ${CMAKE_BINARY_DIR}/DUI)
+SET(DUI_SOURCE_DIR ${CMAKE_BINARY_DIR}/DUI_src)
+
+FIND_PACKAGE(DUI CONFIG QUIET)
+
+IF(NOT DUI_FOUND)
+    ExternalProject_Add(
+        thirdparty_DUI
+        GIT_REPOSITORY      "https://github.com/WhoBrokeTheBuild/DebugUI.git"
+        GIT_TAG             "master"
+        GIT_SHALLOW         TRUE
+        SOURCE_DIR          ${DUI_SOURCE_DIR}
+        CMAKE_ARGS          -DCMAKE_INSTALL_PREFIX=${DUI_ROOT}
         BUILD_COMMAND       ""
         UPDATE_COMMAND      ""
     )

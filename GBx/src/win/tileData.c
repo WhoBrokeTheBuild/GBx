@@ -1,10 +1,9 @@
 #include "tileData.h"
 #include "../debug.h"
-#include "../ui.h"
 
 #include <GBx/lcd.h>
 #include <GBx/memory.h>
-
+#include <DUI/DUI.h>
 #include <SDL.h>
 
 SDL_Texture * sdlTileDataTexture = NULL;
@@ -70,7 +69,7 @@ void TileDataTabRefresh()
             byte data2 = ReadByte(dataOffset + 1);
 
             for (int tileCol = 0; tileCol < TILE_WIDTH; ++tileCol) {
-                byte * color = GetColor(&BGP, tileCol, data1, data2);
+                const byte * color = GetColor(&BGP, tileCol, data1, data2);
 
                 uint off = ((y + tileRow) * pitch) 
                     + ((x + tileCol) * TILE_DATA_TEXTURE_COMP);
@@ -87,19 +86,26 @@ void TileDataTabRefresh()
 
 void TileDataTabRender(SDL_Point * mouse)
 {
+    DUI_MoveCursor(DEBUG_CONTENT_X, DEBUG_CONTENT_Y);
+    DUI_Panel(DEBUG_CONTENT_WIDTH, DEBUG_CONTENT_HEIGHT);
+
     int startX, startY;
-    UIGetCursor(&startX, &startY);
+    DUI_GetCursor(&startX, &startY);
 
-    UIPrintln("TILE DATA:");
-    UINewline();
+    DUI_Println("TILE DATA:");
+    DUI_Newline();
 
-    UISetDirection(UI_DIR_DOWN);
+    DUI_Radio("AUTO", TILE_DATA_ADDR_AUTO, &tileDataAddrSelect);
+    DUI_Newline();
+    DUI_Newline();
 
-    UIRadio("AUTO", TILE_DATA_ADDR_AUTO, &tileDataAddrSelect);
-    UIRadio("8000", TILE_DATA_ADDR_8000, &tileDataAddrSelect);
-    UIRadio("8800", TILE_DATA_ADDR_8800, &tileDataAddrSelect);
+    DUI_Radio("8000", TILE_DATA_ADDR_8000, &tileDataAddrSelect);
+    DUI_Newline();
+    DUI_Newline();
 
-    UISetDirection(UI_DIR_RIGHT);
+    DUI_Radio("8800", TILE_DATA_ADDR_8800, &tileDataAddrSelect);
+    DUI_Newline();
+    DUI_Newline();
 
     SDL_Rect src = {
         .x = 0,
@@ -109,7 +115,7 @@ void TileDataTabRender(SDL_Point * mouse)
     };
 
     SDL_Rect dst = {
-        .x = startX + (UI_CHAR_WIDTH * 18),
+        .x = startX + (DUI_GetStyle()->CharSize * 18),
         .y = startY,
         .w = (TILE_DATA_TEXTURE_WIDTH * 2),
         .h = (TILE_DATA_TEXTURE_HEIGHT * 2),

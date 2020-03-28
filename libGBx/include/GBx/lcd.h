@@ -171,7 +171,7 @@ extern byte OAM[0xA0];
 
 void ResetLCD();
 
-byte * GetColor(palette * pal, int bit, byte d1, byte d2);
+const byte * GetColor(palette * pal, int bit, byte d1, byte d2);
 
 const char * GetLCDModeString(uint mode);
 

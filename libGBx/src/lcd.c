@@ -79,7 +79,7 @@ void ResetLCD()
     OBP1.raw = 0b11100100;
 }
 
-byte * GetColor(palette * pal, int bit, byte d1, byte d2)
+const byte * GetColor(palette * pal, int bit, byte d1, byte d2)
 {
     bit = 0x80 >> bit;
     bool high = (d2 & bit);
@@ -167,7 +167,7 @@ void DrawTiles()
         byte data2 = ReadByte(dataOffset + line + 1);
 
         int bit = (xPos % TILE_WIDTH);
-        byte * color = GetColor(&BGP, bit, data1, data2);
+        const byte * color = GetColor(&BGP, bit, data1, data2);
 
         // if (LY < 0 || LY > (LCD_HEIGHT - 1) || 
         //     pixel > 0 || pixel < (LCD_WIDTH - 1)) {
@@ -219,7 +219,7 @@ void DrawSprites()
                 }
 
                 palette * pal = (spr.Palette ? &OBP1 : &OBP0);
-                byte * color = GetColor(pal, bit, data1, data2);
+                const byte * color = GetColor(pal, bit, data1, data2);
 
                 int x = -pixel + 7;
 

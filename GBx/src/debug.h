@@ -16,7 +16,7 @@ void DebugPrompt();
 #define DEBUG_WINDOW_HEIGHT (768)
 
 #define DEBUG_CONTENT_X (8)
-#define DEBUG_CONTENT_Y (32)
+#define DEBUG_CONTENT_Y (40)
 
 #define DEBUG_CONTENT_WIDTH \
     (DEBUG_WINDOW_WIDTH - 16)
