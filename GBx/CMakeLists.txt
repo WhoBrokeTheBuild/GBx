@@ -1,31 +1,24 @@
 
-# GBx
+FILE(
+    GLOB_RECURSE
+    private
+    "private/*.h"
+    "private/*.c"
+)
 
 FILE(
     GLOB_RECURSE
-    _SOURCES
-    src/*.h
-    src/*.c
+    public
+    "public/*.h"
 )
 
-ADD_EXECUTABLE(
-    GBx
-    ${_SOURCES}
-)
+ADD_LIBRARY(GBx "")
 
-TARGET_LINK_LIBRARIES(
-    GBx
-    PUBLIC
-        libGBx
-        SDL2::SDL2
-        DUI::DUI
-        cflags::cflags
-)
-
-TARGET_COMPILE_DEFINITIONS(
+TARGET_SOURCES(
     GBx
     PRIVATE
-        -DDUI_CHAR_SCALE=2
+        ${private}
+        ${public}
 )
 
 SET_TARGET_PROPERTIES(
@@ -33,10 +26,54 @@ SET_TARGET_PROPERTIES(
         C_STANDARD 11
 )
 
-IF(TARGET SDL2::SDL2main)
+TARGET_INCLUDE_DIRECTORIES(
+    GBx
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/private>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/public>
+        $<INSTALL_INTERFACE:include>
+)
+
+IF(Readline_FOUND)
     TARGET_LINK_LIBRARIES(
         GBx
         PUBLIC
-            SDL2::SDL2main
+            Readline::Readline
     )
+    
+    TARGET_COMPILE_DEFINITIONS(
+        GBx
+        PUBLIC
+            -DHAVE_READLINE
+    )
+ENDIF()
+
+# Tests
+
+IF(BUILD_TESTS)
+    FILE(GLOB_RECURSE
+        tests
+        "tests/*_test.c"
+    )
+
+    FOREACH(test_source ${tests})
+        GET_FILENAME_COMPONENT(test_target ${test_source} NAME_WE)
+        
+        ADD_EXECUTABLE(
+            ${test_target}
+            ${test_source}
+        )
+
+        TARGET_LINK_LIBRARIES(
+            ${test_target}
+            PRIVATE
+                GBx
+        )
+
+        ADD_TEST(
+            NAME ${test_target}
+            COMMAND $<TARGET_FILE:${test_target}>
+            WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/tests"
+        )
+    ENDFOREACH()
 ENDIF()
