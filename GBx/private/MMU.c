@@ -4,6 +4,7 @@
 #include <GBx/Bootstrap.h>
 #include <GBx/Cartridge.h>
 #include <GBx/CPU.h>
+#include <GBx/Debug.h>
 #include <GBx/Interrupts.h>
 #include <GBx/Joypad.h>
 #include <GBx/LCD.h>
@@ -33,6 +34,11 @@ void ResetMMU()
 
 byte ReadByte(word address)
 {
+    if (MemoryTrackingEnabled) {
+        byte inc = MemoryTracker[address].Read + 1;
+        MemoryTracker[address].Read = (inc < 0xF ? inc : 0xF);
+    }
+
     switch (address & 0xF000) {
     case 0x0000:
     case 0x1000:
@@ -200,6 +206,11 @@ word NextWord()
 
 void WriteByte(word address, byte data)
 {
+    if (MemoryTrackingEnabled) {
+        byte inc = MemoryTracker[address].Write + 1;
+        MemoryTracker[address].Write = (inc < 0xF ? inc : 0xF);
+    }
+
     switch (address & 0xF000) {
     case 0x0000:
     case 0x1000:

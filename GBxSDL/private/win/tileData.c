@@ -111,13 +111,6 @@ void TileDataTabRender(SDL_Point * mouse)
     DUI_Newline();
     DUI_Newline();
 
-    SDL_Rect src = {
-        .x = 0,
-        .y = 0,
-        .w = TILE_DATA_TEXTURE_WIDTH,
-        .h = TILE_DATA_TEXTURE_HEIGHT,
-    };
-
     SDL_Rect dst = {
         .x = startX + (DUI_GetStyle()->CharSize * 18),
         .y = startY,
@@ -125,5 +118,5 @@ void TileDataTabRender(SDL_Point * mouse)
         .h = (TILE_DATA_TEXTURE_HEIGHT * 2),
     };
 
-    SDL_RenderCopy(GetDebugWindowRenderer(), sdlTileDataTexture, &src, &dst);
+    SDL_RenderCopy(GetDebugWindowRenderer(), sdlTileDataTexture, NULL, &dst);
 }

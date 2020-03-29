@@ -14,6 +14,8 @@ void StatusTabRender()
     int startX, startY;
     DUI_GetCursor(&startX, &startY);
 
+    int columnWidth = (style->CharSize * 25);
+
     DUI_Println("--------STATUS---------");
     DUI_Println("CPU: %s", 
         (CPUEnabled ? "ENABLED" : "DISABLED"));
@@ -106,7 +108,7 @@ void StatusTabRender()
     DUI_Println("ROM: %s", GetROMTypeString());
     DUI_Println("RAM: %s", GetRAMTypeString());
 
-    DUI_MoveCursor(startX + (style->CharSize * 25), startY);
+    DUI_MoveCursor(startX + columnWidth, startY);
 
     DUI_Println("---------AUDIO---------");
 
@@ -161,6 +163,7 @@ void StatusTabRender()
     DUI_Println(" LENGTH:       %s", (Noise.LengthEnabled ? "ENABLED" : "DISABLED"));
     DUI_Println(" TRIGGER:      %s", (Noise.Trigger ? "ENABLED" : "DISABLED"));
 
+    int rightColumnX = startX + (style->CharSize * 61);
 
     const int STACK_PREVIEW_LENGTH = 16;
     const int STACK_PREVIEW_ENTRY_SIZE = 26;
@@ -168,7 +171,7 @@ void StatusTabRender()
     int stackLogWidth = (style->CharSize * STACK_PREVIEW_ENTRY_SIZE);
     int stackLogHeight = (style->LineHeight * STACK_PREVIEW_LENGTH);
 
-    DUI_MoveCursor(startX + (style->CharSize * 60), startY);
+    DUI_MoveCursor(startX + rightColumnX, startY);
 
     DUI_Println("STACK [%04X]", StackBaseAddress);
 
@@ -191,10 +194,16 @@ void StatusTabRender()
         addr += 2;
     }
 
-    DUI_MoveCursor(startX + (style->CharSize * 60), 
+    DUI_MoveCursor(startX + rightColumnX, 
         startY + stackLogHeight + (style->LineHeight * 6));
 
-    DUI_Println("INSTRUCTION LOG");
+    DUI_Print("INSTRUCTION LOG");
+
+    DUI_MoveCursorRelative(style->CharSize * 3, -style->ButtonPadding);
+    DUI_Checkbox("ENABLED", &InstructionLoggingEnabled);
+
+    DUI_MoveCursor(startX + rightColumnX, 
+        startY + stackLogHeight + (style->LineHeight * 8));
 
     int instLogWidth = (style->CharSize * STACK_PREVIEW_ENTRY_SIZE);
     int instLogHeight = (style->LineHeight * INSTRUCTION_LOG_LENGTH);
@@ -202,7 +211,7 @@ void StatusTabRender()
     DUI_Panel(instLogWidth + (style->PanelPadding * 2),
                instLogHeight + (style->PanelPadding * 2));
 
-    for (int i = 0; i < GetInstructionLogSize(); ++i) {
+    for (int i = 0; i < INSTRUCTION_LOG_LENGTH; ++i) {
         DUI_Println(GetInstructionLogEntry(i));
     }
 }

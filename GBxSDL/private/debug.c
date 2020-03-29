@@ -155,6 +155,7 @@ void DebugPrompt()
 #include "win/tileMap.h"
 // #include "win/spriteData.h"
 // #include "win/audio.h"
+#include "win/memory.h"
 
 bool debugWindowShown = false;
 bool debugAutoRefresh = true;
@@ -168,6 +169,7 @@ enum {
     DBG_TAB_TILE_MAP,
     DBG_TAB_SPRITE,
     DBG_TAB_AUDIO,
+    DBG_TAB_MEMORY,
 };
 
 void DebugWindowInit()
@@ -192,6 +194,7 @@ void DebugWindowInit()
     
     InitTileDataTab();
     InitTileMapTab();
+    InitMemoryTab();
 
     DebugWindowRender();
 }
@@ -202,6 +205,7 @@ void DebugWindowTerm()
 
     DUI_Term();
 
+    TermMemoryTab();
     TermTileMapTab();
     TermTileDataTab();
 
@@ -290,6 +294,10 @@ void DebugWindowRender()
     if (DUI_Tab("AUDIO", DBG_TAB_AUDIO, &dbgTabIndex)) {
 
     }
+    
+    if (DUI_Tab("MEMORY", DBG_TAB_MEMORY, &dbgTabIndex)) {
+        MemoryTabRender();
+    }
 
     SDL_RenderPresent(sdlDebugRenderer);
 }
@@ -302,6 +310,9 @@ void DebugWindowRefresh()
         break;
     case DBG_TAB_TILE_MAP:
         TileMapTabRefresh();
+        break;
+    case DBG_TAB_MEMORY:
+        MemoryTabRefresh();
         break;
     default:
         break;
