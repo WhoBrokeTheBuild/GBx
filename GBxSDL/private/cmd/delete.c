@@ -26,14 +26,14 @@ void cmdDelete(const char * input)
     if (equal) {
         *equal = '\0';
 
-        unsigned int value;
+        unsigned value;
         sscanf(equal + 1, "%04X", &value);
 
         ClearBreakpoint(input, value);
         LogInfo("Breakpoint %s=$%04X deleted", input, value);
     }
     else {
-        unsigned int pc;
+        unsigned pc;
         sscanf(input, "%04X", &pc);
         ClearBreakpoint("PC", pc);
         LogInfo("Breakpoint PC=$%04X deleted", pc);

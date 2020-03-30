@@ -3,6 +3,6 @@
 
 #include <GBx/Types.h>
 
-word Disassemble(char * str, uint len, word addr);
+word Disassemble(char * str, size_t len, word addr);
 
 #endif // DISASSEMBLER_H

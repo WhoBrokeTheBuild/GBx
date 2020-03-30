@@ -13,7 +13,7 @@ typedef struct
         struct {
             union {
                 struct {
-                    uint :4;
+                    byte :4;
                     bool FC:1; // Carry Flag
                     bool FH:1; // Half Carry Flag
                     bool FN:1; // Subtract Flag
@@ -55,7 +55,7 @@ extern registers R;
 
 extern bool CPUEnabled;
 
-extern uint64_t TotalTicks;
+extern uintmax_t TotalTicks;
 
 extern unsigned ClockSpeed;
 

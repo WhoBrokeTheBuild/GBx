@@ -2,9 +2,8 @@
 #define GBX_TYPES_H
 
 #include <stdint.h>
+#include <stddef.h>
 #include <stdbool.h>
-
-typedef unsigned uint;
 
 typedef uint8_t byte;
 

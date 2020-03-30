@@ -17,7 +17,7 @@
 
 byte WRAM[WRAM_BANK_COUNT][WRAM_BANK_SIZE];
 
-uint WRAMBank;
+unsigned WRAMBank;
 
 byte HRAM[0x7F];
 
@@ -82,7 +82,10 @@ byte ReadByte(word address)
             return OAM[address - 0xFE00];
         }
         // $FEA0-$FEFF - Unusable
-        else if (address <= 0xFEFF) { }
+        else if (address <= 0xFEFF) {
+            // LogWarn("Attempt to read from unusable uemory $FEA0-$FEFF at $%04X", address);
+            return 0;
+        }
         // $FF00-$FE7F - Hardware I/O Registers
         else if (address <= 0xFF7F) {
             if (address >= 0xFF30 && address <= 0xFF3F) {
@@ -255,7 +258,7 @@ void WriteByte(word address, byte data)
         }
         // $FEA0-$FEFF - Unusable
         else if (address <= 0xFEFF) {
-            LogWarn("Attempt to write to unusable uemory $FEA0-$FEFF");
+            // LogWarn("Attempt to write to unusable uemory $FEA0-$FEFF at $%04X", address);
             return;
         }
         // $FF00-$FE7F - Hardware I/O Registers

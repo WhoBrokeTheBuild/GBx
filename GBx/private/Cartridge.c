@@ -23,11 +23,11 @@ bool SRAMEnabled;
 
 byte SRAM[SRAM_BANK_COUNT][SRAM_BANK_SIZE];
 
-uint SRAMBank;
+unsigned SRAMBank;
 
 byte ROM[ROM_BANK_COUNT][ROM_BANK_SIZE];
 
-uint ROMBank;
+unsigned ROMBank;
 
 bool LoadCartridgeROM(const char * filename)
 {

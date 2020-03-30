@@ -24,7 +24,7 @@ void cmdBreak(const char * input)
     if (equal) {
         *equal = '\0';
 
-        unsigned int value;
+        unsigned value;
         sscanf(equal + 1, "%04X", &value);
 
         SetBreakpoint(input, value);
@@ -35,7 +35,7 @@ void cmdBreak(const char * input)
         printf("Breakpoint set when Stack Changed");
     }
     else {
-        unsigned int pc;
+        unsigned pc;
         sscanf(input, "%04X", &pc);
         SetBreakpoint("PC", pc);
         LogInfo("Breakpoint set when PC=$%04X", pc);

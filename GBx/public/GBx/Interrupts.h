@@ -11,7 +11,7 @@ typedef union
         bool Timer:1;
         bool Serial:1;
         bool Joypad:1;
-        uint :3;
+        byte :3;
     };
     byte raw;
 

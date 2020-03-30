@@ -11,9 +11,9 @@
 typedef union
 {
     struct {
-        unsigned Type:2;
-        bool     Enabled:1;
-        unsigned :5;
+        byte Type:2;
+        bool Enabled:1;
+        byte :5;
     };
     byte raw;
     

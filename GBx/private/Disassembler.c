@@ -384,7 +384,7 @@ const char * bit_instructionDefinitions[] = {
     "SET $b, A",
 };
 
-word Disassemble(char * str, uint len, word addr)
+word Disassemble(char * str, size_t len, word addr)
 {
     int bit = 0;
     const char * pch;
@@ -414,7 +414,7 @@ word Disassemble(char * str, uint len, word addr)
         pch = instructionDefinitions[op];
     }
     
-    uint i = 0;
+    unsigned i = 0;
     while (i < len - 1) {
         if (*pch == '$') {
             ++pch;

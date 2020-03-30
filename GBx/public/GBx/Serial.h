@@ -6,10 +6,10 @@
 typedef union
 {
     struct {
-        unsigned ShiftClock:1;
-        bool     FastClockEnable:1; // CGB
-        unsigned :5;
-        bool     TransferStart:1;
+        byte ShiftClock:1;
+        bool FastClockEnable:1; // CGB
+        byte :5;
+        bool TransferStart:1;
     };
     byte raw;
 

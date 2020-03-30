@@ -14,7 +14,7 @@ static inline word AddWords(word a, word b)
 
 static inline word AddWordSignedByte(word a, sbyte b)
 {
-    dword c = (uint32_t)(a + b);
+    dword c = a + b;
     R.FN = false;
     R.FH = (((a & 0x7FF) + b) & 0x800) == 0x800;
     R.FC = (c & 0xFFFF0000) > 0;

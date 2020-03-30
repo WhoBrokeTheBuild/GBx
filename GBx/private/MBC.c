@@ -18,7 +18,7 @@ void ResetMBC()
     SRAMBank = 0;
     ROMBank = 1;
 
-    for (uint i = 0; i < SRAM_BANK_COUNT; ++i) {
+    for (unsigned i = 0; i < SRAM_BANK_COUNT; ++i) {
         memset(SRAM[i], 0, sizeof(SRAM[i]));
     }
 }

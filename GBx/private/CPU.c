@@ -44,7 +44,7 @@ registers R;
 
 bool CPUEnabled;
 
-uint64_t TotalTicks;
+uintmax_t TotalTicks;
 
 unsigned ClockSpeed;
 

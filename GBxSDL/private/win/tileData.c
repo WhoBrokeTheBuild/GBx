@@ -75,7 +75,7 @@ void TileDataTabRefresh()
             for (int tileCol = 0; tileCol < TILE_WIDTH; ++tileCol) {
                 const byte * color = GetColor(&BGP, tileCol, data1, data2);
 
-                uint off = ((y + tileRow) * pitch) 
+                unsigned off = ((y + tileRow) * pitch) 
                     + ((x + tileCol) * TILE_DATA_TEXTURE_COMP);
 
                 pixels[off + 0] = color[0];

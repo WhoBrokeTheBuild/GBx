@@ -14,11 +14,11 @@ typedef union
     struct {
         bool TileDisplayEnabled:1;
         bool SpriteDisplayEnabled:1;
-        uint SpriteSize:1;
-        uint BGTileMapSelect:1;
-        uint TileDataSelect:1;
+        byte SpriteSize:1;
+        byte BGTileMapSelect:1;
+        byte TileDataSelect:1;
         bool WindowDisplayEnabled:1;
-        uint WindowTileMapSelect:1;
+        byte WindowTileMapSelect:1;
         bool Enabled:1;
     };
     byte raw;
@@ -28,13 +28,13 @@ typedef union
 typedef union
 {
     struct {
-        uint Mode:2;
+        byte Mode:2;
         bool Coincidence:1;
         bool IntHBlank:1;
         bool IntVBlank:1;
         bool IntSearchSprite:1;
         bool IntCoincidence:1;
-        uint :1;
+        byte :1;
     };
     byte raw;
 
@@ -50,10 +50,10 @@ typedef union
 typedef union
 {
     struct {
-        uint Color0:2;
-        uint Color1:2;
-        uint Color2:2;
-        uint Color3:2;
+        byte Color0:2;
+        byte Color1:2;
+        byte Color2:2;
+        byte Color3:2;
     };
     byte raw;
 
@@ -66,7 +66,7 @@ typedef union
         bool YFlip:1;
         bool XFlip:1;
         bool Palette:1;
-        uint :4;
+        byte :4;
     };
     byte raw;
 
@@ -110,7 +110,7 @@ extern palette_t OBP1;
 
 extern byte VRAM[VRAM_BANK_COUNT][VRAM_BANK_SIZE];
 
-extern uint VRAMBank;
+extern unsigned VRAMBank;
 
 extern byte OAM[0xA0];
 
@@ -132,15 +132,15 @@ void OAMDMATransfer(byte data);
 void DrawTiles();
 void DrawSprites();
 
-void LCDTick(uint cycles);
+void LCDTick(unsigned cycles);
 
-word GetTileMapAddress(uint index);
-word GetTileDataAddress(uint index);
+word GetTileMapAddress(unsigned index);
+word GetTileDataAddress(unsigned index);
 
-const char * GetLCDModeString(uint mode);
-const char * GetTileMapRangeString(uint index);
-const char * GetTileDataRangeString(uint index);
-const char * GetSpriteSizeString(uint index);
+const char * GetLCDModeString(unsigned mode);
+const char * GetTileMapRangeString(unsigned index);
+const char * GetTileDataRangeString(unsigned index);
+const char * GetSpriteSizeString(unsigned index);
 
 void PrintLCDC();
 void PrintSTAT();

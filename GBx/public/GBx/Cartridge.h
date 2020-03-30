@@ -39,14 +39,14 @@ extern bool SuperEnabled;
 
 extern byte SRAM[SRAM_BANK_COUNT][SRAM_BANK_SIZE];
 
-extern uint SRAMBank;
+extern unsigned SRAMBank;
 
 #define ROM_BANK_COUNT (512)
 #define ROM_BANK_SIZE  (0x4000)
 
 extern byte ROM[ROM_BANK_COUNT][ROM_BANK_SIZE];
 
-extern uint ROMBank;
+extern unsigned ROMBank;
 
 bool LoadCartridgeROM(const char * filename);
 

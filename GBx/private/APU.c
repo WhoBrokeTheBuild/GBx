@@ -3,33 +3,33 @@
 #include <GBx/Util.h>
 #include <GBx/Log.h>
 
-tone_control Tone1;
+tone_control_t Tone1;
 
 int Tone1Timer;
 int Tone1DutyIndex;
 
-tone_control Tone2;
+tone_control_t Tone2;
 
 int Tone2Timer;
 int Tone2DutyIndex;
 
-wave_control Wave;
+wave_control_t Wave;
 
 int WaveTimer;
 
 byte WaveRAM[0x10];
 
-noise_control Noise;
+noise_control_t Noise;
 
 int NoiseTimer;
 
-volume_control VolumeControl;
+volume_control_t VolumeControl;
 
-volume_control VolumeControl;
+volume_control_t VolumeControl;
 
-sound_output_terminal SoundOutputTerminal;
+sound_output_terminal_t SoundOutputTerminal;
 
-sound_control APUC;
+sound_control_t APUC;
 
 byte DutyCycles[4][8] = {
     { 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },
@@ -99,7 +99,7 @@ void APUTick(unsigned cycles)
     }
 }
 
-const char * GetVolumeCodeString(uint index)
+const char * GetVolumeCodeString(unsigned index)
 {
     const char * STR[4] = {
         "0%",

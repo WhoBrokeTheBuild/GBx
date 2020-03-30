@@ -10,20 +10,20 @@ typedef union
         bool Left:1;
         bool Up:1;
         bool Down:1;
-        uint :4;
+        byte :4;
     };
     struct {
         bool A:1;
         bool B:1;
         bool Select:1;
         bool Start:1;
-        uint :4;
+        byte :4;
     };
     struct {
-        uint InputStates:4;
+        byte InputStates:4;
         bool SelectDPad:1; 
         bool SelectButtons:1;
-        uint :2;
+        byte :2;
     };
     byte raw;
 

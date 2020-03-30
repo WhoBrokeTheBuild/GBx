@@ -29,7 +29,7 @@ palette_t OBP0;
 palette_t OBP1;
 
 byte VRAM[2][0x2000];
-uint VRAMBank;
+unsigned VRAMBank;
 
 byte OAM[0xA0];
 
@@ -37,14 +37,16 @@ void ResetLCD()
 {
     VRAMBank = 0;
     
-    for (uint i = 0; i < VRAM_BANK_COUNT; ++i) {
+    for (unsigned i = 0; i < VRAM_BANK_COUNT; ++i) {
         memset(VRAM[i], 0, sizeof(VRAM[i]));
     }
 
     memset(OAM, 0, sizeof(OAM));
 
+    memset(LCDBuffer, 0, sizeof(LCDBuffer));
+
     LCDC.raw = 0x91;
-    STAT.Mode = STAT_MODE_HBLANK;
+    STAT.raw = 0x00;
 
     SCY = 0x00;
     SCX = 0x00;
@@ -108,7 +110,7 @@ void OAMDMATransfer(byte data)
     CPUEnabled = false;
 
     word addr = data << 8;
-    for (unsigned i = 0; i < 0xA0; ++i) {
+    for (byte i = 0; i < 0xA0; ++i) {
         OAM[i] = ReadByte(addr + i);
         Tick(4);
     }
@@ -125,7 +127,7 @@ void DrawTiles()
 
     bool usingWindow = (LCDC.WindowDisplayEnabled && WY <= LY);
 
-    uint mapSelect = (usingWindow 
+    int mapSelect = (usingWindow 
         ? LCDC.WindowTileMapSelect 
         : LCDC.BGTileMapSelect);
 
@@ -166,7 +168,7 @@ void DrawTiles()
         int bit = (xPos % TILE_WIDTH);
         const byte * color = GetColor(&BGP, bit, data1, data2);
 
-        uint off = (LY * LCD_BUFFER_WIDTH * LCD_BUFFER_COMPONENTS) + 
+        unsigned off = (LY * LCD_BUFFER_WIDTH * LCD_BUFFER_COMPONENTS) + 
             (pixel * LCD_BUFFER_COMPONENTS);
         
         LCDBuffer[off + 0] = color[0];
@@ -183,8 +185,8 @@ void DrawSprites()
     const int SPRITE_X_OFFSET = 8; 
 
     sprite_attrib_t attrib;
-    for (uint sprite = 0; sprite < 40; ++sprite) {
-        uint offset = sprite * OAM_ENTRY_DATA_SIZE;
+    for (unsigned sprite = 0; sprite < 40; ++sprite) {
+        unsigned offset = sprite * OAM_ENTRY_DATA_SIZE;
 
         int y = ReadWord(OAM_ADDRESS + offset) - SPRITE_Y_OFFSET;
         
@@ -225,7 +227,7 @@ void DrawSprites()
 
                 int x = -pixel + 7;
 
-                uint off = (LY * LCD_BUFFER_WIDTH * LCD_BUFFER_COMPONENTS) 
+                unsigned off = (LY * LCD_BUFFER_WIDTH * LCD_BUFFER_COMPONENTS) 
                     + (x * LCD_BUFFER_COMPONENTS);
                 LCDBuffer[off + 0] = color[0];
                 LCDBuffer[off + 1] = color[1];
@@ -256,7 +258,7 @@ void updateCoincidence()
     }
 }
 
-void LCDTick(uint cycles)
+void LCDTick(unsigned cycles)
 {
     // Convert Ticks from M-Cycles to T-Cycles
     const int HBLANK_TICKS        = 204 * 4;
@@ -268,7 +270,7 @@ void LCDTick(uint cycles)
         + SEARCH_SPRITE_TICKS 
         + DATA_TRANSFER_TICKS);
 
-    static uint modeTicks = 0;
+    static unsigned modeTicks = 0;
     modeTicks += cycles;
 
     switch (STAT.Mode) {
@@ -309,7 +311,7 @@ void LCDTick(uint cycles)
                         IF.STAT = true;
                     }
 
-                    // static struct timespec last;
+                    static struct timespec last;
                     // static double fpsTotal = 0.0;
                     // static long fpsCount = 0;
                     
@@ -317,11 +319,11 @@ void LCDTick(uint cycles)
                     //     clock_gettime(CLOCK_MONOTONIC, &last);
                     // }
                     // else {
-                        // struct timespec now;
+                        struct timespec now;
                     
-                        // clock_gettime(CLOCK_MONOTONIC, &now);
-                        // struct timespec delta = timediff(last, now);
-                        // last = now;
+                        clock_gettime(CLOCK_MONOTONIC, &now);
+                        struct timespec delta = timediff(last, now);
+                        last = now;
                         
                     //     float fps = 1.0 / (delta.tv_nsec / 1000000000.0);
                     //     // LogInfo("VBL %ld %f", delta.tv_nsec, fps);
@@ -334,10 +336,10 @@ void LCDTick(uint cycles)
                     //     }
                     // }
                     
-                    // struct timespec wait;
-                    // wait.tv_sec = 0;
-                    // wait.tv_nsec = 16750419 - delta.tv_nsec;
-                    // clock_nanosleep(CLOCK_MONOTONIC, 0, &wait, NULL);
+                    struct timespec wait;
+                    wait.tv_sec = 0;
+                    wait.tv_nsec = 16750419 - delta.tv_nsec;
+                    clock_nanosleep(CLOCK_MONOTONIC, 0, &wait, NULL);
                 }
                 else {
                     STAT.Mode = STAT_MODE_SEARCH_SPRITE;
@@ -365,7 +367,7 @@ void LCDTick(uint cycles)
     }
 }
 
-word GetTileMapAddress(uint index)
+word GetTileMapAddress(unsigned index)
 {
     static const word ADDR[] = {
         0x9800,
@@ -375,7 +377,7 @@ word GetTileMapAddress(uint index)
     return ADDR[index];
 }
 
-word GetTileDataAddress(uint index)
+word GetTileDataAddress(unsigned index)
 {
     static const word ADDR[] = {
         0x9000,
@@ -385,7 +387,7 @@ word GetTileDataAddress(uint index)
     return ADDR[index];
 }
 
-const char * GetLCDModeString(uint mode)
+const char * GetLCDModeString(unsigned mode)
 {
     static const char * STR[] = {
         "HBlank",
@@ -397,7 +399,7 @@ const char * GetLCDModeString(uint mode)
     return STR[mode];
 }
 
-const char * GetTileMapRangeString(uint index)
+const char * GetTileMapRangeString(unsigned index)
 {
     static const char * STR[] = {
         "$9800-$9BFF",
@@ -407,7 +409,7 @@ const char * GetTileMapRangeString(uint index)
     return STR[index];
 }
 
-const char * GetTileDataRangeString(uint index)
+const char * GetTileDataRangeString(unsigned index)
 {
     static const char * STR[] = {
         "$8800-$97FF",
@@ -417,7 +419,7 @@ const char * GetTileDataRangeString(uint index)
     return STR[index];
 }
 
-const char * GetSpriteSizeString(uint index)
+const char * GetSpriteSizeString(unsigned index)
 {
     static const char * STR[] = {
         "8x8",

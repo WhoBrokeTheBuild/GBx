@@ -8,7 +8,7 @@
 
 extern byte WRAM[WRAM_BANK_COUNT][WRAM_BANK_SIZE];
 
-extern uint WRAMBank;
+extern unsigned WRAMBank;
 
 extern byte HRAM[0x7F];
 

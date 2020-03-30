@@ -90,7 +90,7 @@ void TileMapTabRefresh()
                 for (int tileCol = 0; tileCol < TILE_WIDTH; ++tileCol) {
                     const byte * color = GetColor(&BGP, tileCol, data1, data2);
 
-                    uint off = ((y + tileRow) * pitch) 
+                    unsigned off = ((y + tileRow) * pitch) 
                         + ((x + tileCol) * LCD_BUFFER_COMPONENTS);
 
                     pixels[off + 0] = color[0];
@@ -107,7 +107,7 @@ void TileMapTabRefresh()
 void TileMapTabRender(SDL_Point * mouse)
 {
     DUI_Style * style = DUI_GetStyle();
-    
+
     DUI_MoveCursor(DEBUG_CONTENT_X, DEBUG_CONTENT_Y);
     DUI_Panel(DEBUG_CONTENT_WIDTH, DEBUG_CONTENT_HEIGHT);
 
