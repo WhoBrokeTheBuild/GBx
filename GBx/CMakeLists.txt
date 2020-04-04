@@ -12,28 +12,30 @@ FILE(
     "public/*.h"
 )
 
-ADD_LIBRARY(GBx "")
+SET(target GBx)
+
+ADD_LIBRARY(${target} "")
 
 TARGET_SOURCES(
-    GBx
+    ${target}
     PRIVATE
         ${private}
         ${public}
 )
 
 SET_TARGET_PROPERTIES(
-    GBx PROPERTIES
+    ${target} PROPERTIES
         C_STANDARD 11
 )
 
 TARGET_LINK_LIBRARIES(
-    GBx
+    ${target}
     PUBLIC
         SM83
 )
 
 TARGET_INCLUDE_DIRECTORIES(
-    GBx
+    ${target}
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/private>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/public>
@@ -42,15 +44,29 @@ TARGET_INCLUDE_DIRECTORIES(
 
 IF(Readline_FOUND)
     TARGET_LINK_LIBRARIES(
-        GBx
+        ${target}
         PUBLIC
             Readline::Readline
     )
     
     TARGET_COMPILE_DEFINITIONS(
-        GBx
+        ${target}
         PUBLIC
             -DHAVE_READLINE
+    )
+ENDIF()
+
+IF(ClangFormat_FOUND)
+    ADD_CUSTOM_TARGET(
+        format-${target}
+        COMMAND ${ClangFormat_PROGRAM} -i ${public} ${private}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    )
+
+    SET_TARGET_PROPERTIES(
+        format-${target}
+        PROPERTIES 
+            FOLDER "Automation"
     )
 ENDIF()
 
@@ -73,7 +89,7 @@ IF(BUILD_TESTS)
         TARGET_LINK_LIBRARIES(
             ${test_target}
             PRIVATE
-                GBx
+                ${target}
         )
 
         ADD_TEST(

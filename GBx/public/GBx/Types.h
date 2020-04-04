@@ -1,9 +1,9 @@
 #ifndef GBX_TYPES_H
 #define GBX_TYPES_H
 
-#include <stdint.h>
-#include <stddef.h>
 #include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include <GBx/Macros.h>
 
@@ -24,7 +24,7 @@ typedef union
     });
 
     // clang-format on
-    
+
     uint8_t raw;
 
 } lcd_control_t;
@@ -45,7 +45,7 @@ typedef union
     });
 
     // clang-format on
-    
+
     uint8_t raw;
 
 } lcd_status_t;
@@ -70,7 +70,7 @@ typedef union
     });
 
     // clang-format on
-    
+
     uint8_t raw;
 
 } palette_t;

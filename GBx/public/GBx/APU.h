@@ -1,8 +1,8 @@
 #ifndef APU_H
 #define APU_H
 
-#include <GBx/Types.h>
 #include <GBx/Macros.h>
+#include <GBx/Types.h>
 
 typedef union
 {
@@ -115,20 +115,19 @@ typedef union
 
 } volume_control_t;
 
-typedef union 
+typedef union
 {
     // clang-format on
 
-    GBX_PACK(struct
-    {
-        bool Tone1ToSO1:1;
-        bool Tone2ToSO1:1;
-        bool WaveToSO1:1;
-        bool NoiseToSO1:1;
-        bool Tone1ToSO2:1;
-        bool Tone2ToSO2:1;
-        bool WaveToSO2:1;
-        bool NoiseToSO2:1;
+    GBX_PACK(struct {
+        bool Tone1ToSO1 : 1;
+        bool Tone2ToSO1 : 1;
+        bool WaveToSO1 : 1;
+        bool NoiseToSO1 : 1;
+        bool Tone1ToSO2 : 1;
+        bool Tone2ToSO2 : 1;
+        bool WaveToSO2 : 1;
+        bool NoiseToSO2 : 1;
     });
 
     // clang-format off
@@ -141,13 +140,13 @@ typedef union
 {
     // clang-format on
 
-    GBX_PACK(struct
-    {
+    GBX_PACK(struct {
         bool Tone1Playing;
         bool Tone2Playing;
         bool WavePlaying;
         bool NoisePlaying;
-        uint8_t :2;
+    uint8_t:
+        2;
         bool Enabled;
     });
 

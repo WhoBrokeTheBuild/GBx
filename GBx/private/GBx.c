@@ -20,8 +20,8 @@ void tick(void * _, unsigned cycles)
 void Reset()
 {
     SM83_Init(&CPU);
-    CPU.Tick = tick;
-    CPU.ReadByte = readByte;
+    CPU.Tick      = tick;
+    CPU.ReadByte  = readByte;
     CPU.WriteByte = writeByte;
 
     ResetAPU();

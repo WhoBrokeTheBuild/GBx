@@ -1,8 +1,8 @@
 #ifndef SERIAL_H
 #define SERIAL_H
 
-#include <GBx/Types.h>
 #include <GBx/Macros.h>
+#include <GBx/Types.h>
 
 typedef union
 {

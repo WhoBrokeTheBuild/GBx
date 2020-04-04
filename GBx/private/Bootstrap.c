@@ -2,7 +2,7 @@
 
 #include <GBx/Log.h>
 
-bool HasBootstrapROM = false;
+bool HasBootstrapROM     = false;
 bool BootstrapROMEnabled = false;
 
 uint8_t BootstrapROM[0x100];
@@ -25,8 +25,8 @@ bool LoadBootstrapROM(const char * filename)
     if (bytesRead < sizeof(BootstrapROM)) {
         LogFatal("Bootstrap ROM too small: '%s'", filename);
     }
-    
+
     BootstrapROMEnabled = true;
-    HasBootstrapROM = true;
+    HasBootstrapROM     = true;
     return true;
 }

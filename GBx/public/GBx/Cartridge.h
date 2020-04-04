@@ -1,8 +1,8 @@
 #ifndef CARTRIDGE_H
 #define CARTRIDGE_H
 
-#include <GBx/Types.h>
 #include <GBx/Macros.h>
+#include <GBx/Types.h>
 
 typedef union
 {

@@ -20,9 +20,9 @@ typedef union
     });
 
     // clang-format on
-    
+
     uint8_t raw;
-    
+
 } timer_control;
 
 // FF04 - Divider

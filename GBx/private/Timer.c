@@ -11,7 +11,7 @@ uint8_t TMA;
 timer_control TAC;
 
 int timerCounter = 0;
-int divCounter = 0;
+int divCounter   = 0;
 
 int GetTimerSpeed()
 {
@@ -33,8 +33,8 @@ int GetTimerSpeed()
 
 void ResetTimer()
 {
-    TIMA = 0x00;
-    TMA = 0x00;
+    TIMA    = 0x00;
+    TMA     = 0x00;
     TAC.raw = 0x00;
 }
 
@@ -55,10 +55,10 @@ void TimerTick(unsigned cycles)
     timerCounter += cycles;
     if (timerCounter > speed) {
         timerCounter -= speed;
-        
+
         if (TIMA == 0xFF) {
             LogVerbose(2, "Timer Rollover");
-            TIMA = TMA;
+            TIMA         = TMA;
             CPU.IF.Int50 = true;
         }
         else {

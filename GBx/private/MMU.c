@@ -2,13 +2,13 @@
 
 #include <GBx/APU.h>
 #include <GBx/Bootstrap.h>
-#include <GBx/Cartridge.h>
 #include <GBx/CPU.h>
+#include <GBx/Cartridge.h>
 #include <GBx/Debug.h>
 #include <GBx/Joypad.h>
-#include <GBx/PPU.h>
 #include <GBx/Log.h>
 #include <GBx/MBC.h>
+#include <GBx/PPU.h>
 #include <GBx/Serial.h>
 #include <GBx/Timer.h>
 
@@ -34,7 +34,7 @@ void ResetMMU()
 uint8_t ReadByte(uint16_t address)
 {
     if (MemoryTrackingEnabled) {
-        uint8_t inc = MemoryTracker[address].Read + 1;
+        uint8_t inc                 = MemoryTracker[address].Read + 1;
         MemoryTracker[address].Read = (inc < 0xF ? inc : 0xF);
     }
 
@@ -47,7 +47,7 @@ uint8_t ReadByte(uint16_t address)
         if (address <= 0x00FF && BootstrapROMEnabled) {
             return BootstrapROM[address];
         }
-        
+
         // $0000-$3FFF - Cartridge ROM Bank 0
         return ROM[0][address];
     case 0x4000:
@@ -82,7 +82,8 @@ uint8_t ReadByte(uint16_t address)
         }
         // $FEA0-$FEFF - Unusable
         else if (address <= 0xFEFF) {
-            // LogWarn("Attempt to read from unusable uemory $FEA0-$FEFF at $%04X", address);
+            // LogWarn("Attempt to read from unusable uemory $FEA0-$FEFF at
+            // $%04X", address);
             return 0;
         }
         // $FF00-$FE7F - Hardware I/O Registers
@@ -173,7 +174,9 @@ uint8_t ReadByte(uint16_t address)
             case 0xFF4B:
                 return WY;
             default:
-                LogWarn("Attempting to read from unimplemented hardware register $%04X", address);
+                LogWarn("Attempting to read from unimplemented hardware "
+                        "register $%04X",
+                    address);
                 return 0;
             };
         }
@@ -209,7 +212,7 @@ uint16_t NextWord()
 void WriteByte(uint16_t address, uint8_t data)
 {
     if (MemoryTrackingEnabled) {
-        uint8_t inc = MemoryTracker[address].Write + 1;
+        uint8_t inc                  = MemoryTracker[address].Write + 1;
         MemoryTracker[address].Write = (inc < 0xF ? inc : 0xF);
     }
 
@@ -257,7 +260,8 @@ void WriteByte(uint16_t address, uint8_t data)
         }
         // $FEA0-$FEFF - Unusable
         else if (address <= 0xFEFF) {
-            // LogWarn("Attempt to write to unusable uemory $FEA0-$FEFF at $%04X", address);
+            // LogWarn("Attempt to write to unusable uemory $FEA0-$FEFF at
+            // $%04X", address);
             return;
         }
         // $FF00-$FE7F - Hardware I/O Registers
@@ -436,7 +440,7 @@ void WriteByte(uint16_t address, uint8_t data)
                     PrintWave();
                 }
                 break;
-            
+
             case 0xFF40:
                 LCDC.raw = data;
                 if (VerboseLevel >= 2) {
@@ -496,7 +500,9 @@ void WriteByte(uint16_t address, uint8_t data)
                 LogVerbose(2, "Bootstrap ROM Disabled");
                 return;
             default:
-                LogWarn("Attempting to write to unimplemented hardware register $%04X", address);
+                LogWarn("Attempting to write to unimplemented hardware "
+                        "register $%04X",
+                    address);
                 return;
             };
         }
@@ -514,7 +520,7 @@ void WriteByte(uint16_t address, uint8_t data)
     }
 }
 
-void WriteWord(uint16_t address, uint16_t data) 
+void WriteWord(uint16_t address, uint16_t data)
 {
     WriteByte(address + 1, (uint8_t)(data >> 8));
     WriteByte(address, (uint8_t)(data & 0xFF));

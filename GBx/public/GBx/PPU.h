@@ -9,7 +9,6 @@
 
 extern bool LCDUseOriginalColors;
 
-
 #define VRAM_BANK_COUNT (2)
 #define VRAM_BANK_SIZE  (0x2000)
 
@@ -23,13 +22,13 @@ extern uint8_t OAM[0xA0];
 #define LCD_BUFFER_HEIGHT     (256)
 #define LCD_BUFFER_COMPONENTS (3) // RGB
 
-#define LCD_BUFFER_SIZE \
+#define LCD_BUFFER_SIZE                                                        \
     (LCD_BUFFER_WIDTH * LCD_BUFFER_HEIGHT * LCD_BUFFER_COMPONENTS)
 
 extern uint8_t LCDBuffer[LCD_BUFFER_SIZE];
 
 lcd_control_t LCDC;
-lcd_status_t STAT;
+lcd_status_t  STAT;
 
 uint8_t SCY;
 uint8_t SCX;
@@ -41,7 +40,6 @@ uint8_t WY;
 palette_t BGP;
 palette_t OBP0;
 palette_t OBP1;
-
 
 void ResetLCD();
 

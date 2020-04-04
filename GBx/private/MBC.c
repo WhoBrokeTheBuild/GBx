@@ -15,8 +15,8 @@ void ResetMBC()
     MBC.raw = 0x00;
 
     SRAMEnabled = false;
-    SRAMBank = 0;
-    ROMBank = 1;
+    SRAMBank    = 0;
+    ROMBank     = 1;
 
     for (unsigned i = 0; i < SRAM_BANK_COUNT; ++i) {
         memset(SRAM[i], 0, sizeof(SRAM[i]));
@@ -36,9 +36,9 @@ void WriteMBC(uint16_t address, uint8_t data)
             if (data == 0) {
                 data = 1;
             }
-            
+
             MBC.Lower = data;
-            ROMBank = MBC.Full;
+            ROMBank   = MBC.Full;
         }
         else if (address <= 0x5FFF) {
             // RAM Bank Number or ROM Upper Bank Number
@@ -68,21 +68,20 @@ void WriteMBC(uint16_t address, uint8_t data)
             if (data == 0) {
                 data = 1;
             }
-            
+
             MBC.Full = data;
-            ROMBank = MBC.Full;
+            ROMBank  = MBC.Full;
         }
         else if (address <= 0x5FFF) {
-            
         }
     }
 }
 
 void PrintMBC()
 {
-    LogInfo("MBC: Lower=%02X Upper=%01X Full=%04X Mode=%s", 
-        MBC.Lower, 
-        MBC.Upper, 
-        MBC.Full, 
+    LogInfo("MBC: Lower=%02X Upper=%01X Full=%04X Mode=%s",
+        MBC.Lower,
+        MBC.Upper,
+        MBC.Full,
         (MBC.RAMMode ? "RAM" : "ROM"));
 }

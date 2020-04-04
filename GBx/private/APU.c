@@ -1,7 +1,7 @@
 #include <GBx/APU.h>
 
-#include <GBx/Util.h>
 #include <GBx/Log.h>
+#include <GBx/Util.h>
 
 tone_control_t Tone1;
 
@@ -46,7 +46,7 @@ void ResetAPU()
     Tone1.raw[2] = 0xF3;
     Tone1.raw[4] = 0xBF;
 
-    Tone1Timer = 0;
+    Tone1Timer     = 0;
     Tone1DutyIndex = 0;
 
     // NR21-NR24
@@ -54,7 +54,7 @@ void ResetAPU()
     Tone2.raw[1] = 0x00;
     Tone2.raw[3] = 0xBF;
 
-    Tone2Timer = 0;
+    Tone2Timer     = 0;
     Tone2DutyIndex = 0;
 
     // NR30-NR34
@@ -89,13 +89,13 @@ void APUTick(unsigned cycles)
     Tone1Timer -= cycles;
     if (Tone1Timer <= 0) {
         Tone1DutyIndex = (Tone1DutyIndex + 1) % 8;
-        Tone1Timer = Tone1.Frequency;
+        Tone1Timer     = Tone1.Frequency;
     }
 
     Tone2Timer -= cycles;
     if (Tone2Timer <= 0) {
         Tone2DutyIndex = (Tone2DutyIndex + 1) % 8;
-        Tone2Timer = Tone2.Frequency;
+        Tone2Timer     = Tone2.Frequency;
     }
 }
 
@@ -123,12 +123,12 @@ void PrintAPUC()
 
 void PrintVolumeControl()
 {
-    LogInfo("VolumeControl RightVolume=%d RightVinEnable=%s LeftVolume=%d LeftVinEnable=%s",
+    LogInfo("VolumeControl RightVolume=%d RightVinEnable=%s LeftVolume=%d "
+            "LeftVinEnable=%s",
         VolumeControl.RightVolume,
         (VolumeControl.RightVinEnabled ? "true" : "false"),
         VolumeControl.LeftVolume,
-        (VolumeControl.LeftVinEnabled ? "true" : "false")
-    );
+        (VolumeControl.LeftVinEnabled ? "true" : "false"));
 }
 
 void PrintSoundOutputTerminal()
@@ -138,21 +138,26 @@ void PrintSoundOutputTerminal()
 
 void PrintTone1()
 {
-    LogInfo("Tone1 Shift=%d Negate=%s SweepPeriod=%d LengthLoad=%d Duty=%d Period=%d EnvelopeAddMode=%s Volume=%d Frequency=%d LengthEnabled=%s Trigger=%s",
+    LogInfo("Tone1 Shift=%d Negate=%s SweepPeriod=%d LengthLoad=%d Duty=%d "
+            "Period=%d EnvelopeAddMode=%s Volume=%d Frequency=%d "
+            "LengthEnabled=%s Trigger=%s",
         Tone1.Shift,
         GetEnabledString(Tone1.Negate),
         Tone1.SweepPeriod,
-        Tone1.LengthLoad, Tone1.Duty, Tone1.Period,
+        Tone1.LengthLoad,
+        Tone1.Duty,
+        Tone1.Period,
         (Tone1.EnvelopeAddMode ? "true" : "false"),
-        Tone1.Volume, Tone1.Frequency,
+        Tone1.Volume,
+        Tone1.Frequency,
         GetEnabledString(Tone1.LengthEnabled),
-        GetEnabledString(Tone1.Trigger)
-    );
+        GetEnabledString(Tone1.Trigger));
 }
 
 void PrintTone2()
 {
-    LogInfo("Tone2 LengthLoad=%d Duty=%d Period=%d EnvelopeAddMode=%s Volume=%d Frequency=%d LengthEnabled=%s Trigger=%s",
+    LogInfo("Tone2 LengthLoad=%d Duty=%d Period=%d EnvelopeAddMode=%s "
+            "Volume=%d Frequency=%d LengthEnabled=%s Trigger=%s",
         Tone2.LengthLoad,
         Tone2.Duty,
         Tone2.Period,
@@ -160,34 +165,48 @@ void PrintTone2()
         Tone2.Volume,
         Tone2.Frequency,
         GetEnabledString(Tone2.LengthEnabled),
-        GetEnabledString(Tone2.Trigger)
-    );
+        GetEnabledString(Tone2.Trigger));
 }
 
 void PrintWave()
 {
-    LogInfo("Wave DACPower=%s LengthLoad=%d VolumeCode=%s Frequency=%d LengthEnabled=%s Trigger=%s",
+    LogInfo("Wave DACPower=%s LengthLoad=%d VolumeCode=%s Frequency=%d "
+            "LengthEnabled=%s Trigger=%s",
         GetEnabledString(Wave.DACPower),
-        Wave.LengthLoad, 
+        Wave.LengthLoad,
         GetVolumeCodeString(Wave.VolumeCode),
         Wave.Frequency,
         GetEnabledString(Wave.LengthEnabled),
-        GetEnabledString(Wave.Trigger)
-    );
+        GetEnabledString(Wave.Trigger));
 }
 
 void PrintWaveRAM()
 {
-    LogInfo("WaveRAM %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
-        WaveRAM[0], WaveRAM[1], WaveRAM[2], WaveRAM[3], WaveRAM[4], WaveRAM[5], WaveRAM[6], WaveRAM[7], 
-        WaveRAM[8], WaveRAM[9], WaveRAM[10], WaveRAM[11], WaveRAM[12], WaveRAM[13], WaveRAM[14], WaveRAM[15]
-    );
+    LogInfo("WaveRAM "
+            "%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
+        WaveRAM[0],
+        WaveRAM[1],
+        WaveRAM[2],
+        WaveRAM[3],
+        WaveRAM[4],
+        WaveRAM[5],
+        WaveRAM[6],
+        WaveRAM[7],
+        WaveRAM[8],
+        WaveRAM[9],
+        WaveRAM[10],
+        WaveRAM[11],
+        WaveRAM[12],
+        WaveRAM[13],
+        WaveRAM[14],
+        WaveRAM[15]);
 }
-
 
 void PrintNoise()
 {
-    LogInfo("Noise LengthLoad=%d Period=%d EnvelopeAddMode=%s Volume=%d DivisorCode=%d LFSRWidthMode=%s ClockShift=%d LengthEnabled=%s Trigger=%s",
+    LogInfo("Noise LengthLoad=%d Period=%d EnvelopeAddMode=%s Volume=%d "
+            "DivisorCode=%d LFSRWidthMode=%s ClockShift=%d LengthEnabled=%s "
+            "Trigger=%s",
         Noise.LengthLoad,
         Noise.Period,
         (Noise.EnvelopeAddMode ? "true" : "false"),
@@ -196,6 +215,5 @@ void PrintNoise()
         (Noise.LFSRWidthMode ? "true" : "false"),
         Noise.ClockShift,
         GetEnabledString(Noise.LengthEnabled),
-        GetEnabledString(Noise.Trigger)
-    );
+        GetEnabledString(Noise.Trigger));
 }

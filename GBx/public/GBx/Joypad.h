@@ -1,8 +1,8 @@
 #ifndef JOYPAD_H
 #define JOYPAD_H
 
-#include <GBx/Types.h>
 #include <GBx/Macros.h>
+#include <GBx/Types.h>
 
 typedef union
 {
