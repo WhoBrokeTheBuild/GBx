@@ -2,6 +2,7 @@
 #define MBC_H
 
 #include <GBx/Types.h>
+#include <GBx/Macros.h>
 
 typedef enum
 {
@@ -18,17 +19,20 @@ typedef enum
 
 typedef struct
 {
-    struct {
-        union {
-            struct {
-                byte Lower:5;
-                byte Upper:2;
-            };
-            byte Full:7;
-        };
+    GBX_PACK(struct
+    {
+        uint8_t Lower:5;
+        uint8_t Upper:2;
+        uint8_t :1;
+    });
+
+    GBX_PACK(struct
+    {
+        uint8_t Full:7;
         bool RAMMode:1;
-    };
-    byte raw;
+    });
+    
+    uint8_t raw;
 
 } mbc_bank_control_t;
 
@@ -38,7 +42,7 @@ extern mbc_bank_control_t MBCBankControl;
 
 void ResetMBC();
 
-void WriteMBC(word address, byte data);
+void WriteMBC(uint16_t address, uint8_t data);
 
 void PrintMBC();
 

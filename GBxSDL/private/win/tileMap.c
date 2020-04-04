@@ -22,7 +22,7 @@ enum {
 int tileMapAddrSelect = TILE_MAP_ADDR_AUTO;
 
 bool showTileMapScroll = true;
-bool showTileMapWindow = true;
+bool showTileMapWindow = false;
 
 void InitTileMapTab()
 {
@@ -47,7 +47,7 @@ void TileMapTabRefresh()
     int pitch = 0;
     SDL_LockTexture(sdlTileMapTexture, NULL, (void **)&pixels, &pitch);
 
-    word mapAddr = GetTileMapAddress(
+    uint16_t mapAddr = GetTileMapAddress(
         (LCDC.WindowDisplayEnabled ? 
             LCDC.WindowTileMapSelect : 
             LCDC.BGTileMapSelect)
@@ -77,18 +77,18 @@ void TileMapTabRefresh()
             int tileIndex = ReadByte(mapAddr + (row * TILES_PER_ROW) + col);
 
             if (LCDC.TileDataSelect == 0) {
-                tileIndex = (sbyte)tileIndex; // Convert to [-128, 127]
+                tileIndex = (int8_t)tileIndex; // Convert to [-128, 127]
             }
 
             for (int tileRow = 0; tileRow < TILE_HEIGHT; ++tileRow) {
-                word dataOffset = GetTileDataAddress(LCDC.TileDataSelect)
+                uint16_t dataOffset = GetTileDataAddress(LCDC.TileDataSelect)
                     + (tileIndex * TILE_DATA_SIZE) + (tileRow * 2);
 
-                byte data1 = ReadByte(dataOffset);
-                byte data2 = ReadByte(dataOffset + 1);
+                uint8_t data1 = ReadByte(dataOffset);
+                uint8_t data2 = ReadByte(dataOffset + 1);
 
                 for (int tileCol = 0; tileCol < TILE_WIDTH; ++tileCol) {
-                    const byte * color = GetColor(&BGP, tileCol, data1, data2);
+                    const uint8_t * color = GetColor(&BGP, tileCol, data1, data2);
 
                     unsigned off = ((y + tileRow) * pitch) 
                         + ((x + tileCol) * LCD_BUFFER_COMPONENTS);
@@ -195,8 +195,8 @@ void TileMapTabRender(SDL_Point * mouse)
         &showTileMapScroll
     );
 
-    int wx = (((WX - 7) / 8.0) * 9.0) - 1;
-    int wy = ((WY / 8.0) * 9.0) - 1;
+    int wx = ((WX / 8.0) * 9.0);
+    int wy = ((WY / 8.0) * 9.0);
 
     SDL_Rect window = {
         .x = dst.x + (wx * 2),

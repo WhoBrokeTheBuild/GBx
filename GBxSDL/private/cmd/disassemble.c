@@ -8,11 +8,11 @@
 void cmdDisassemble(const char * input)
 {
     unsigned count;
-    word addr;
+    uint16_t addr;
 
     if (!input || strlen(input) == 0) {
         count = 1;
-        addr = R.PC;
+        addr = CPU.PC;
     }
     else {
         char * space = strchr(input, ' ');
@@ -24,7 +24,7 @@ void cmdDisassemble(const char * input)
         }
         else {
             sscanf(input, "%d", &count);
-            addr = R.PC;
+            addr = CPU.PC;
         }
     }
 
@@ -36,8 +36,8 @@ void cmdDisassemble(const char * input)
     VerboseLevel = 0;
 
     for (int i = 0; i < count; ++i) {
-        word tmp = addr;
-        addr = Disassemble(buffer, sizeof(buffer), addr);
+        uint16_t tmp = addr;
+        addr = SM83_Disassemble(&CPU, buffer, sizeof(buffer), addr);
         printf("%04X    %s\n", tmp, buffer);
     }
 

@@ -14,17 +14,17 @@ void cmdWrite(const char * input)
     }
     
     int size;
-    word addr;
+    uint16_t addr;
     sscanf(input, "%d %hX", &size, &addr);
 
     if (size == 8) {
-        byte value;
+        uint8_t value;
         sscanf(input, "%*s %*s %hhX", &value);
         LogInfo("Writing %02X to %04X", value, addr);
         WriteByte(addr, value);
     }
     else if (size == 16) {
-        word value;
+        uint16_t value;
         sscanf(input, "%*s %*s %hX", &value);
         LogInfo("Writing %04X to %04X", value, addr);
         WriteWord(addr, value);

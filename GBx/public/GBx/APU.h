@@ -2,25 +2,32 @@
 #define APU_H
 
 #include <GBx/Types.h>
+#include <GBx/Macros.h>
 
 typedef union
 {
-    struct {
-        byte Shift:3;
-        bool Negate:1;
-        byte SweepPeriod:3;
-        byte :1;
-        byte LengthLoad:6;
-        byte Duty:2;
-        byte Period:3;
-        bool EnvelopeAddMode:1;
-        byte Volume:4;
-        word Frequency:11;
-        byte :3;
-        bool LengthEnabled:1;
-        bool Trigger:1;
-    };
-    byte raw[5];
+    // clang-format off
+
+    GBX_PACK(struct
+    {
+        uint8_t  Shift:3;
+        bool     Negate:1;
+        uint8_t  SweepPeriod:3;
+        uint8_t  :1;
+        uint8_t  LengthLoad:6;
+        uint8_t  Duty:2;
+        uint8_t  Period:3;
+        bool     EnvelopeAddMode:1;
+        uint8_t  Volume:4;
+        uint16_t Frequency:11;
+        uint8_t  :3;
+        bool     LengthEnabled:1;
+        bool     Trigger:1;
+    });
+
+    // clang-format on
+
+    uint8_t raw[5];
 
 } tone_control_t;
 
@@ -32,19 +39,25 @@ typedef union
 
 typedef union
 {
-    struct {
-        byte :7;
-        bool DACPower:1;
-        byte LengthLoad;
-        byte :5;
-        byte VolumeCode:2;
-        byte :1;
-        word Frequency:11;
-        byte :3;
-        bool LengthEnabled:1;
-        bool Trigger:1;
-    };
-    byte raw[5];
+    // clang-format off
+
+    GBX_PACK(struct
+    {
+        uint8_t  :7;
+        bool     DACPower:1;
+        uint8_t  LengthLoad;
+        uint8_t  :5;
+        uint8_t  VolumeCode:2;
+        uint8_t  :1;
+        uint16_t Frequency:11;
+        uint8_t  :3;
+        bool     LengthEnabled:1;
+        bool     Trigger:1;
+    });
+
+    // clang-format on
+
+    uint8_t raw[5];
 
 } wave_control_t;
 
@@ -56,20 +69,26 @@ typedef union
 
 typedef union
 {
-    struct {
-        byte LengthLoad:6;
-        byte :2;
-        byte Period:3;
-        bool EnvelopeAddMode:1;
-        byte Volume:4;
-        byte DivisorCode:3;
-        bool LFSRWidthMode:1;
-        byte ClockShift:4;
-        byte :6;
-        bool LengthEnabled:1;
-        bool Trigger:1;
-    };
-    byte raw[4];
+    // clang-format off
+
+    GBX_PACK(struct
+    {
+        uint8_t LengthLoad:6;
+        uint8_t :2;
+        uint8_t Period:3;
+        bool    EnvelopeAddMode:1;
+        uint8_t Volume:4;
+        uint8_t DivisorCode:3;
+        bool    LFSRWidthMode:1;
+        uint8_t ClockShift:4;
+        uint8_t :6;
+        bool    LengthEnabled:1;
+        bool    Trigger:1;
+    });
+
+    // clang-format on
+
+    uint8_t raw[4];
 
 } noise_control_t;
 
@@ -80,43 +99,61 @@ typedef union
 
 typedef union
 {
-    struct {
-        byte RightVolume:3;
-        bool RightVinEnabled:1;
-        byte LeftVolume:3;
-        bool LeftVinEnabled:1;
-    };
-    byte raw;
+    // clang-format off
+
+    GBX_PACK(struct
+    {
+        uint8_t RightVolume:3;
+        bool    RightVinEnabled:1;
+        uint8_t LeftVolume:3;
+        bool    LeftVinEnabled:1;
+    });
+
+    // clang-format on
+
+    uint8_t raw;
 
 } volume_control_t;
 
 typedef union 
 {
-    struct {
-        bool Tone1ToSO1;
-        bool Tone2ToSO1;
-        bool WaveToSO1;
-        bool NoiseToSO1;
-        bool Tone1ToSO2;
-        bool Tone2ToSO2;
-        bool WaveToSO2;
-        bool NoiseToSO2;
-    };
-    byte raw;
+    // clang-format on
+
+    GBX_PACK(struct
+    {
+        bool Tone1ToSO1:1;
+        bool Tone2ToSO1:1;
+        bool WaveToSO1:1;
+        bool NoiseToSO1:1;
+        bool Tone1ToSO2:1;
+        bool Tone2ToSO2:1;
+        bool WaveToSO2:1;
+        bool NoiseToSO2:1;
+    });
+
+    // clang-format off
+
+    uint8_t raw;
 
 } sound_output_terminal_t;
 
 typedef union
 {
-    struct {
+    // clang-format on
+
+    GBX_PACK(struct
+    {
         bool Tone1Playing;
         bool Tone2Playing;
         bool WavePlaying;
         bool NoisePlaying;
-        byte :2;
+        uint8_t :2;
         bool Enabled;
-    };
-    byte raw;
+    });
+
+    // clang-format off
+
+    uint8_t raw;
 
 } sound_control_t;
 
@@ -140,7 +177,7 @@ extern wave_control_t Wave;
 extern int WaveTimer;
 
 // $FF30-$FF3F
-extern byte WaveRAM[0x10];
+extern uint8_t WaveRAM[0x10];
 
 // $FF20-$FF23
 extern noise_control_t Noise;
@@ -156,7 +193,7 @@ extern sound_output_terminal_t SoundOutputTerminal;
 // $FF26
 extern sound_control_t APUC;
 
-extern byte DutyCycles[4][8];
+extern uint8_t DutyCycles[4][8];
 
 void ResetAPU();
 

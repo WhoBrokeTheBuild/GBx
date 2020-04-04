@@ -2,6 +2,7 @@
 #include "../debug.h"
 
 #include <GBx/GBx.h>
+#include <SM83/SM83.h>
 #include <DUI/DUI.h>
 
 void StatusTabRender()
@@ -18,7 +19,7 @@ void StatusTabRender()
 
     DUI_Println("--------STATUS---------");
     DUI_Println("CPU: %s", 
-        (CPUEnabled ? "ENABLED" : "DISABLED"));
+        (CPU.Enabled ? "ENABLED" : "DISABLED"));
 
     DUI_Println("LCD: %s", 
         (LCDC.Enabled ? "ENABLED" : "DISABLED"));
@@ -32,17 +33,17 @@ void StatusTabRender()
     DUI_Newline();
 
     DUI_Println("-------REGISTERS-------");
-    DUI_Println("A: $%02X  F: $%02X", R.A, R.F);
-    DUI_Println("B: $%02X  C: $%02X", R.B, R.C);
-    DUI_Println("D: $%02X  E: $%02X", R.D, R.E);
-    DUI_Println("H: $%02X  L: $%02X", R.H, R.L);
-    DUI_Println("PC: $%04X", R.PC);
-    DUI_Println("SP: $%04X", R.SP);
+    DUI_Println("A: $%02X  F: $%02X", CPU.A, CPU.F);
+    DUI_Println("B: $%02X  C: $%02X", CPU.B, CPU.C);
+    DUI_Println("D: $%02X  E: $%02X", CPU.D, CPU.E);
+    DUI_Println("H: $%02X  L: $%02X", CPU.H, CPU.L);
+    DUI_Println("PC: $%04X", CPU.PC);
+    DUI_Println("SP: $%04X", CPU.SP);
     DUI_Println("FLAGS: [%c%c%c%c]",
-        (R.FZ ? 'Z' : '-'), 
-        (R.FN ? 'N' : '-'), 
-        (R.FH ? 'H' : '-'), 
-        (R.FC ? 'C' : '-'));
+        (CPU.FZ ? 'Z' : '-'), 
+        (CPU.FN ? 'N' : '-'), 
+        (CPU.FH ? 'H' : '-'), 
+        (CPU.FC ? 'C' : '-'));
 
     DUI_Newline();
 
@@ -57,19 +58,19 @@ void StatusTabRender()
     DUI_Println("------INTERRUPTS-------");
 
     DUI_Println("VBLANK: %s", 
-        (IE.VBlank ? "ENABLED" : "DISABLED"));
+        (CPU.IE.Int40 ? "ENABLED" : "DISABLED"));
 
     DUI_Println("STAT:   %s", 
-        (IE.STAT ? "ENABLED" : "DISABLED"));
+        (CPU.IE.Int48 ? "ENABLED" : "DISABLED"));
 
     DUI_Println("TIMER:  %s", 
-        (IE.Timer ? "ENABLED" : "DISABLED"));
+        (CPU.IE.Int50 ? "ENABLED" : "DISABLED"));
 
     DUI_Println("SERIAL: %s", 
-        (IE.Serial ? "ENABLED" : "DISABLED"));
+        (CPU.IE.Int58 ? "ENABLED" : "DISABLED"));
 
     DUI_Println("JOYPAD: %s", 
-        (IE.Joypad ? "ENABLED" : "DISABLED"));
+        (CPU.IE.Int60 ? "ENABLED" : "DISABLED"));
 
     DUI_Newline();
 
@@ -102,7 +103,7 @@ void StatusTabRender()
     DUI_Println("DEVICE: %s", 
         (ColorEnabled ? "CGB" : (SuperEnabled ? "SGB" : "DMG")));
 
-    DUI_Println("CLOCK: %d HZ", ClockSpeed);
+    DUI_Println("CLOCK: %d HZ", CPU.ClockSpeed);
     DUI_Println("TITLE: %.*s", 15, CartridgeHeader.Title);
     DUI_Println("CARTRIDGE: %s", GetCartridgeTypeString());
     DUI_Println("ROM: %s", GetROMTypeString());
@@ -173,22 +174,22 @@ void StatusTabRender()
 
     DUI_MoveCursor(startX + rightColumnX, startY);
 
-    DUI_Println("STACK [%04X]", StackBaseAddress);
+    DUI_Println("STACK [%04X]", CPU.StackBaseAddress);
 
     DUI_Panel(stackLogWidth + (style->PanelPadding * 2),
                stackLogHeight + (style->PanelPadding * 2));
 
     char stackLogEntry[32];
 
-    word addr = R.SP;
+    uint16_t addr = CPU.SP;
     for (int i = 0; i < STACK_PREVIEW_LENGTH; ++i) {
-        if (addr == StackBaseAddress) {
+        if (addr == CPU.StackBaseAddress) {
             break;
         }
 
-        word ptr = ReadWord(addr);
+        uint16_t ptr = ReadWord(addr);
 
-        Disassemble(stackLogEntry, sizeof(stackLogEntry), ptr);
+        SM83_Disassemble(&CPU, stackLogEntry, sizeof(stackLogEntry), ptr);
         DUI_Println("[%04X] $%04X: %s", addr, ptr, stackLogEntry);
 
         addr += 2;
@@ -200,7 +201,7 @@ void StatusTabRender()
     DUI_Print("INSTRUCTION LOG");
 
     DUI_MoveCursorRelative(style->CharSize * 3, -style->ButtonPadding);
-    DUI_Checkbox("ENABLED", &InstructionLoggingEnabled);
+    DUI_Checkbox("ENABLED", &CPU.InstructionLoggingEnabled);
 
     DUI_MoveCursor(startX + rightColumnX, 
         startY + stackLogHeight + (style->LineHeight * 8));
@@ -212,6 +213,6 @@ void StatusTabRender()
                instLogHeight + (style->PanelPadding * 2));
 
     for (int i = 0; i < INSTRUCTION_LOG_LENGTH; ++i) {
-        DUI_Println(GetInstructionLogEntry(i));
+        DUI_Println(SM83_GetInstructionLogEntry(&CPU, i));
     }
 }

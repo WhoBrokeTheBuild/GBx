@@ -1,3 +1,21 @@
+# FindReadline.cmake
+#
+# Finds the GNU Readline Library
+#
+# This will define the following variables
+#
+#   Readline_FOUND
+#   Readline_INCLUDE_DIRS
+#   Readline_LIBRARIES
+#
+# and the following imported targets
+#
+#   Readline::Readline
+#
+# The following variables can be set as arguments
+#
+#   Readline_ROOT_DIR
+#
 
 FIND_PATH(
     Readline_INCLUDE_DIRS

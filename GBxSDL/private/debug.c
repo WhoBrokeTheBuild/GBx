@@ -35,7 +35,7 @@ void handleSignal(int sig)
     LogInfo("Caught signal %d\n", sig);
 
     if (sig == SIGINT) {
-        SetBreakpoint("PC", R.PC);
+        SetBreakpoint("PC", CPU.PC);
     }
     else {
         DebugPrompt();
@@ -72,12 +72,12 @@ void DebugPrompt()
     int oldVerboseLevel = VerboseLevel;
     VerboseLevel = 4;
 
-    PrintRegisters();
+    SM83_PrintRegisters(&CPU);
 
     char prompt[2048];
-    snprintf(prompt, sizeof(prompt), "[%04X]> ", R.PC);
+    snprintf(prompt, sizeof(prompt), "[%04X]> ", CPU.PC);
 
-    word addr;
+    uint16_t addr;
     char * input = NULL;
     while ((input = readline(prompt)) != NULL) {
         size_t length = 0;
@@ -96,7 +96,7 @@ void DebugPrompt()
         }
 
         if (length == 0) {
-            NextInstruction();
+            SM83_Step(&CPU);
         }
         else if (strncmp(input, "help", length) == 0) {
             cmdHelp(args);
@@ -139,8 +139,8 @@ void DebugPrompt()
         free(input);
         input = NULL;
 
-        PrintRegisters();
-        snprintf(prompt, sizeof(prompt), "[%04X]> ", R.PC);
+        SM83_PrintRegisters(&CPU);
+        snprintf(prompt, sizeof(prompt), "[%04X]> ", CPU.PC);
     }
 
     free(input);

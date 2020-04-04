@@ -21,14 +21,13 @@ void cmdInfo(const char * input)
     }
 
     if (strncmp(input, "all", length) == 0) {
-        PrintRegisters();
+        SM83_PrintRegisters(&CPU);
         PrintTone1();
         PrintTone2();
         PrintWave();
         PrintWaveRAM();
         PrintVolumeControl();
-        PrintIE();
-        PrintIF();
+        SM83_PrintInterrupts(&CPU);
         PrintLCDC();
         PrintSTAT();
         PrintLCDCoordinates();
@@ -48,12 +47,10 @@ void cmdInfo(const char * input)
         PrintVolumeControl();
     }
     else if (strncmp(input, "registers", length) == 0) {
-        PrintRegisters();
+        SM83_PrintRegisters(&CPU);
     }
     else if (strncmp(input, "interrupts", length) == 0) {
-        PrintIE();
-        PrintIF();
-        LogInfo("IME=%s", (IME ? "true" : "false"));
+        SM83_PrintInterrupts(&CPU);
     }
     else if (strncmp(input, "lcd", length) == 0) {
         PrintLCDC();

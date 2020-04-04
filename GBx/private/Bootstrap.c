@@ -1,19 +1,11 @@
 #include <GBx/Bootstrap.h>
 
-#include <GBx/APU.h>
-#include <GBx/Cartridge.h>
-#include <GBx/CPU.h>
-#include <GBx/Joypad.h>
-#include <GBx/Interrupts.h>
 #include <GBx/Log.h>
-#include <GBx/MMU.h>
-#include <GBx/LCD.h>
-#include <GBx/Timer.h>
 
 bool HasBootstrapROM = false;
 bool BootstrapROMEnabled = false;
 
-byte BootstrapROM[0x100];
+uint8_t BootstrapROM[0x100];
 
 bool LoadBootstrapROM(const char * filename)
 {
@@ -33,8 +25,6 @@ bool LoadBootstrapROM(const char * filename)
     if (bytesRead < sizeof(BootstrapROM)) {
         LogFatal("Bootstrap ROM too small: '%s'", filename);
     }
-
-    STAT.Mode = STAT_MODE_HBLANK;
     
     BootstrapROMEnabled = true;
     HasBootstrapROM = true;

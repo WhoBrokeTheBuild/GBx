@@ -10,26 +10,32 @@
 
 typedef union
 {
-    struct {
-        byte Type:2;
+    // clang-format off
+
+    GBX_PACK(struct
+    {
+        uint8_t Type:2;
         bool Enabled:1;
-        byte :5;
-    };
-    byte raw;
+        uint8_t :5;
+    });
+
+    // clang-format on
+    
+    uint8_t raw;
     
 } timer_control;
 
 // FF04 - Divider
 
-extern byte DIV;
+extern uint8_t DIV;
 
 // FF05 Timer Counter
 
-extern byte TIMA;
+extern uint8_t TIMA;
 
 // FF06 - Timer Modulo
 
-extern byte TMA;
+extern uint8_t TMA;
 
 // FF07 - Timer Control
 

@@ -22,87 +22,87 @@ break_cond_t breakpoints[MAX_BREAKPOINTS];
 
 bool breakCompareA(unsigned value)
 {
-    return (R.A == value);
+    return (CPU.A == value);
 }
 
 bool breakCompareB(unsigned value)
 {
-    return (R.B == value);
+    return (CPU.B == value);
 }
 
 bool breakCompareC(unsigned value)
 {
-    return (R.C == value);
+    return (CPU.C == value);
 }
 
 bool breakCompareD(unsigned value)
 {
-    return (R.D == value);
+    return (CPU.D == value);
 }
 
 bool breakCompareE(unsigned value)
 {
-    return (R.E == value);
+    return (CPU.E == value);
 }
 
 bool breakCompareH(unsigned value)
 {
-    return (R.H == value);
+    return (CPU.H == value);
 }
 
 bool breakCompareL(unsigned value)
 {
-    return (R.L == value);
+    return (CPU.L == value);
 }
 
 bool breakCompareAF(unsigned value)
 {
-    return (R.AF == value);
+    return (CPU.AF == value);
 }
 
 bool breakCompareBC(unsigned value)
 {
-    return (R.BC == value);
+    return (CPU.BC == value);
 }
 
 bool breakCompareDE(unsigned value)
 {
-    return (R.DE == value);
+    return (CPU.DE == value);
 }
 
 bool breakCompareHL(unsigned value)
 {
-    return (R.HL == value);
+    return (CPU.HL == value);
 }
 
 bool breakComparePC(unsigned value)
 {
-    return (R.PC == value);
+    return (CPU.PC == value);
 }
 
 bool breakCompareSP(unsigned value)
 {
-    return (R.SP == value);
+    return (CPU.SP == value);
 }
 
 bool breakCompareFZ(unsigned value)
 {
-    return (R.FZ == (bool)value);
+    return (CPU.FZ == (bool)value);
 }
 
 bool breakCompareFN(unsigned value)
 {
-    return (R.FN == (bool)value);
+    return (CPU.FN == (bool)value);
 }
 
 bool breakCompareFH(unsigned value)
 {
-    return (R.FH == (bool)value);
+    return (CPU.FH == (bool)value);
 }
 
 bool breakCompareFC(unsigned value)
 {
-    return (R.FC == (bool)value);
+    return (CPU.FC == (bool)value);
 }
 
 bool breakCompareLY(unsigned value)
@@ -112,7 +112,7 @@ bool breakCompareLY(unsigned value)
 
 bool breakStackChanged(unsigned value)
 {
-    return (R.SP != value);
+    return (CPU.SP != value);
 }
 
 break_comp_func_t getBreakCompFunc(const char * reg)
@@ -211,7 +211,7 @@ void SetBreakpointStackChanged()
         if (!breakpoints[i].comp) {
             breakpoints[i].name = strdup("SP*");
             breakpoints[i].comp = breakStackChanged;
-            breakpoints[i].value = R.SP;
+            breakpoints[i].value = CPU.SP;
             return;
         }
     }

@@ -42,7 +42,7 @@ void TileDataTabRefresh()
     int pitch = 0;
     SDL_LockTexture(sdlTileDataTexture, NULL, (void **)&pixels, &pitch);
 
-    word dataAddr = GetTileDataAddress(LCDC.TileDataSelect);
+    uint16_t dataAddr = GetTileDataAddress(LCDC.TileDataSelect);
 
     if (tileDataAddrSelect == TILE_DATA_ADDR_8800) {
         dataAddr = GetTileDataAddress(0);
@@ -61,7 +61,7 @@ void TileDataTabRefresh()
 
         for (int tileRow = 0; tileRow < TILE_HEIGHT; ++tileRow) {
 
-            word dataOffset = dataAddr;
+            uint16_t dataOffset = dataAddr;
             if (dataAddr == 0x8800) {
                 dataOffset += ((i - 128) * TILE_DATA_SIZE) + (tileRow * 2);
             }
@@ -69,11 +69,11 @@ void TileDataTabRefresh()
                 dataOffset += (i * TILE_DATA_SIZE) + (tileRow * 2);
             }
 
-            byte data1 = ReadByte(dataOffset);
-            byte data2 = ReadByte(dataOffset + 1);
+            uint8_t data1 = ReadByte(dataOffset);
+            uint8_t data2 = ReadByte(dataOffset + 1);
 
             for (int tileCol = 0; tileCol < TILE_WIDTH; ++tileCol) {
-                const byte * color = GetColor(&BGP, tileCol, data1, data2);
+                const uint8_t * color = GetColor(&BGP, tileCol, data1, data2);
 
                 unsigned off = ((y + tileRow) * pitch) 
                     + ((x + tileCol) * TILE_DATA_TEXTURE_COMP);

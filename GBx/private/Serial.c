@@ -1,5 +1,5 @@
 #include <GBx/Serial.h>
 
-byte SB;
+uint8_t SB;
 
 serial_control_t SC;

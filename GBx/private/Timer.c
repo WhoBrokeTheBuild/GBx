@@ -1,13 +1,12 @@
 #include <GBx/Timer.h>
 
 #include <GBx/CPU.h>
-#include <GBx/Interrupts.h>
 #include <GBx/Log.h>
 #include <GBx/Util.h>
 
-byte DIV;
-byte TIMA;
-byte TMA;
+uint8_t DIV;
+uint8_t TIMA;
+uint8_t TMA;
 
 timer_control TAC;
 
@@ -18,13 +17,13 @@ int GetTimerSpeed()
 {
     switch (TAC.Type) {
     case 0b00:
-        return ClockSpeed / 1024;
+        return CPU.ClockSpeed / 1024;
     case 0b01:
-        return ClockSpeed / 16;
+        return CPU.ClockSpeed / 16;
     case 0b10:
-        return ClockSpeed / 64;
+        return CPU.ClockSpeed / 64;
     case 0b11:
-        return ClockSpeed / 256;
+        return CPU.ClockSpeed / 256;
     default:
         break;
     }
@@ -60,7 +59,7 @@ void TimerTick(unsigned cycles)
         if (TIMA == 0xFF) {
             LogVerbose(2, "Timer Rollover");
             TIMA = TMA;
-            IF.Timer = true;
+            CPU.IF.Int50 = true;
         }
         else {
             ++TIMA;

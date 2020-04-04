@@ -2,16 +2,23 @@
 #define SERIAL_H
 
 #include <GBx/Types.h>
+#include <GBx/Macros.h>
 
 typedef union
 {
-    struct {
-        byte ShiftClock:1;
-        bool FastClockEnable:1; // CGB
-        byte :5;
-        bool TransferStart:1;
-    };
-    byte raw;
+    // clang-format off
+
+    GBX_PACK(struct
+    {
+        uint8_t ShiftClock:1;
+        bool    FastClockEnable:1; // CGB
+        uint8_t :5;
+        bool    TransferStart:1;
+    });
+
+    // clang-format on
+
+    uint8_t raw;
 
 } serial_control_t;
 
@@ -20,7 +27,7 @@ typedef union
 
 // FF01 - Serial Data
 
-extern byte SB;
+extern uint8_t SB;
 
 // FF02 - Serial Control
 

@@ -2,30 +2,41 @@
 #define JOYPAD_H
 
 #include <GBx/Types.h>
+#include <GBx/Macros.h>
 
 typedef union
 {
-    struct {
-        bool Right:1;
-        bool Left:1;
-        bool Up:1;
-        bool Down:1;
-        byte :4;
-    };
-    struct {
-        bool A:1;
-        bool B:1;
-        bool Select:1;
-        bool Start:1;
-        byte :4;
-    };
-    struct {
-        byte InputStates:4;
-        bool SelectDPad:1; 
-        bool SelectButtons:1;
-        byte :2;
-    };
-    byte raw;
+    // clang-format off
+
+    GBX_PACK(struct
+    {
+        bool    Right:1;
+        bool    Left:1;
+        bool    Up:1;
+        bool    Down:1;
+        uint8_t :4;
+    });
+
+    GBX_PACK(struct
+    {
+        bool    A:1;
+        bool    B:1;
+        bool    Select:1;
+        bool    Start:1;
+        uint8_t :4;
+    });
+
+    GBX_PACK(struct
+    {
+        uint8_t InputStates:4;
+        bool    SelectDPad:1; 
+        bool    SelectButtons:1;
+        uint8_t :2;
+    });
+
+    // clang-format on
+
+    uint8_t raw;
 
 } joypad_state_t;
 

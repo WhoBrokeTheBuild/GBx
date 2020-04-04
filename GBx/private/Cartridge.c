@@ -1,8 +1,9 @@
 #include <GBx/Cartridge.h>
 
-#include <GBx/CPU.h>
+#include <SM83/SM83.h>
 #include <GBx/MBC.h>
 #include <GBx/Log.h>
+#include <GBx/CPU.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,11 +22,11 @@ bool HasCartridgeSRAM    = false;
 
 bool SRAMEnabled;
 
-byte SRAM[SRAM_BANK_COUNT][SRAM_BANK_SIZE];
+uint8_t SRAM[SRAM_BANK_COUNT][SRAM_BANK_SIZE];
 
 unsigned SRAMBank;
 
-byte ROM[ROM_BANK_COUNT][ROM_BANK_SIZE];
+uint8_t ROM[ROM_BANK_COUNT][ROM_BANK_SIZE];
 
 unsigned ROMBank;
 
@@ -41,12 +42,12 @@ bool LoadCartridgeROM(const char * filename)
 
     LogVerbose(1, "ROM Size %zu", size);
 
-    size_t bytesRead = fread(ROM, 1, size, file);
+    size_t uint8_tsRead = fread(ROM, 1, size, file);
     fclose(file);
 
-    LogVerbose(1, "Read %zu bytes", bytesRead);
+    LogVerbose(1, "Read %zu uint8_ts", uint8_tsRead);
 
-    if (bytesRead < size) {
+    if (uint8_tsRead < size) {
         LogFatal("Failed to load ROM: '%s'", filename);
         return false;
     }
@@ -58,8 +59,11 @@ bool LoadCartridgeROM(const char * filename)
     ColorEnabled = (CartridgeHeader.ColorEnabled == 0x80);
     SuperEnabled = (CartridgeHeader.SuperEnabled != 0x00);
     
-    if (SuperEnabled) {
-        ClockSpeed = SGB_CLOCK_SPEED;
+    if (ColorEnabled) {
+        SM83_SetMode(&CPU, SM83_MODE_CGB);
+    }
+    else if (SuperEnabled) {
+        SM83_SetMode(&CPU, SM83_MODE_SGB);
     }
 
     switch (CartridgeHeader.CartridgeType) {

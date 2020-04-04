@@ -5,9 +5,8 @@
 #include <GBx/Cartridge.h>
 #include <GBx/CPU.h>
 #include <GBx/Debug.h>
-#include <GBx/Interrupts.h>
 #include <GBx/Joypad.h>
-#include <GBx/LCD.h>
+#include <GBx/PPU.h>
 #include <GBx/Log.h>
 #include <GBx/MBC.h>
 #include <GBx/Serial.h>
@@ -15,11 +14,11 @@
 
 #include <string.h>
 
-byte WRAM[WRAM_BANK_COUNT][WRAM_BANK_SIZE];
+uint8_t WRAM[WRAM_BANK_COUNT][WRAM_BANK_SIZE];
 
 unsigned WRAMBank;
 
-byte HRAM[0x7F];
+uint8_t HRAM[0x7F];
 
 void ResetMMU()
 {
@@ -32,10 +31,10 @@ void ResetMMU()
     memset(HRAM, 0, sizeof(HRAM));
 }
 
-byte ReadByte(word address)
+uint8_t ReadByte(uint16_t address)
 {
     if (MemoryTrackingEnabled) {
-        byte inc = MemoryTracker[address].Read + 1;
+        uint8_t inc = MemoryTracker[address].Read + 1;
         MemoryTracker[address].Read = (inc < 0xF ? inc : 0xF);
     }
 
@@ -108,7 +107,7 @@ byte ReadByte(word address)
             case 0xFF07:
                 return TAC.raw;
             case 0xFF0F:
-                return IF.raw;
+                return CPU.IF.raw;
             case 0xFF10:
                 return Tone1.raw[0] & TONE_READ_MASK0;
             case 0xFF11:
@@ -184,7 +183,7 @@ byte ReadByte(word address)
         }
         // $FFFF - Interrupt Enable Flag
         else {
-            return IE.raw;
+            return CPU.IE.raw;
         }
     default:
         break;
@@ -193,24 +192,24 @@ byte ReadByte(word address)
     return 0;
 }
 
-byte NextByte()
+uint8_t NextByte()
 {
-    byte byte = ReadByte(R.PC);
-    ++R.PC;
-    return byte;
+    uint8_t uint8_t = ReadByte(CPU.PC);
+    ++CPU.PC;
+    return uint8_t;
 }
 
-word NextWord()
+uint16_t NextWord()
 {
-    word word = ReadWord(R.PC);
-    R.PC += 2;
-    return word;
+    uint16_t uint16_t = ReadWord(CPU.PC);
+    CPU.PC += 2;
+    return uint16_t;
 }
 
-void WriteByte(word address, byte data)
+void WriteByte(uint16_t address, uint8_t data)
 {
     if (MemoryTrackingEnabled) {
-        byte inc = MemoryTracker[address].Write + 1;
+        uint8_t inc = MemoryTracker[address].Write + 1;
         MemoryTracker[address].Write = (inc < 0xF ? inc : 0xF);
     }
 
@@ -305,9 +304,9 @@ void WriteByte(word address, byte data)
                 }
                 return;
             case 0xFF0F:
-                IF.raw = data;
+                CPU.IF.raw = data;
                 if (VerboseLevel >= 2) {
-                    PrintIF();
+                    SM83_PrintInterrupts(&CPU);
                 }
                 return;
             case 0xFF10:
@@ -507,29 +506,29 @@ void WriteByte(word address, byte data)
         }
         // Interrupt Enable Flag - FFFF
         else if (address == 0xFFFF) {
-            IE.raw = data;
+            CPU.IE.raw = data;
             if (VerboseLevel >= 2) {
-                PrintIE();
+                SM83_PrintInterrupts(&CPU);
             }
         }
     }
 }
 
-void WriteWord(word address, word data) 
+void WriteWord(uint16_t address, uint16_t data) 
 {
-    WriteByte(address + 1, (byte)(data >> 8));
-    WriteByte(address, (byte)(data & 0xFF));
+    WriteByte(address + 1, (uint8_t)(data >> 8));
+    WriteByte(address, (uint8_t)(data & 0xFF));
 }
 
-void PushWord(word data)
+void PushWord(uint16_t data)
 {
-    R.SP -= 2;
-    WriteWord(R.SP, data);
+    CPU.SP -= 2;
+    WriteWord(CPU.SP, data);
 }
 
-word PopWord()
+uint16_t PopWord()
 {
-    word data = ReadWord(R.SP);
-    R.SP += 2;
+    uint16_t data = ReadWord(CPU.SP);
+    CPU.SP += 2;
     return data;
 }

@@ -1,0 +1,17 @@
+﻿---
+BasedOnStyle: WebKit
+ColumnLimit: '80'
+IndentWidth: '4'
+PointerAlignment: Middle
+IndentPPDirectives: AfterHash
+
+BraceWrapping:
+  AfterEnum: true
+  AfterFunction: true
+  AfterStruct: true
+  AfterUnion: true
+  BeforeElse: true
+
+BreakBeforeBraces: Custom
+
+...

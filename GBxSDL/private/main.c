@@ -33,7 +33,7 @@ void * runThread(void * ptr)
             DebugPrompt();
         }
         
-        NextInstruction();
+        SM83_Step(&CPU);
     }
 
     if (DebugEnabled) {
@@ -86,17 +86,18 @@ int main(int argc, char ** argv)
         return 1;
     }
 
+    Reset();
+
     if (bootROMFilename) {
         LoadBootstrapROM(bootROMFilename);
+        CPU.PC = 0x0000;
     }
-
-    Reset();
 
     VideoInit(scale);
     AudioInit();
 
     if (DebugEnabled) {
-        SetBreakpoint("PC", R.PC);
+        SetBreakpoint("PC", CPU.PC);
 
         DebugWindowInit();
     }

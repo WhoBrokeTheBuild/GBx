@@ -14,15 +14,15 @@ void cmdRead(const char * input)
     }
 
     int size;
-    word addr;
+    uint16_t addr;
     sscanf(input, "%d %hX", &size, &addr);
 
     if (size == 1) {
-        byte value = ReadByte(addr);
+        uint8_t value = ReadByte(addr);
         LogInfo("(%04X) = %02X", addr, value);
     }
     else if (size == 2) {
-        word value = ReadWord(addr);
+        uint16_t value = ReadWord(addr);
         LogInfo("(%04X) = %04X", addr, value);
     }
     else {

@@ -8,11 +8,11 @@
 
 mbc_type_t MBCType;
 
-mbc_bank_control_t MBCBankControl;
+mbc_bank_control_t MBC;
 
 void ResetMBC()
 {
-    MBCBankControl.raw = 0x00;
+    MBC.raw = 0x00;
 
     SRAMEnabled = false;
     SRAMBank = 0;
@@ -23,7 +23,7 @@ void ResetMBC()
     }
 }
 
-void WriteMBC(word address, byte data)
+void WriteMBC(uint16_t address, uint8_t data)
 {
     if (MBCType == MBC_TYPE_MBC1) {
         if (address <= 0x1FFF) {
@@ -37,22 +37,22 @@ void WriteMBC(word address, byte data)
                 data = 1;
             }
             
-            MBCBankControl.Lower = data;
-            ROMBank = MBCBankControl.Full;
+            MBC.Lower = data;
+            ROMBank = MBC.Full;
         }
         else if (address <= 0x5FFF) {
             // RAM Bank Number or ROM Upper Bank Number
-            MBCBankControl.Upper = data;
-            if (MBCBankControl.RAMMode) {
-                SRAMBank = MBCBankControl.Upper;
+            MBC.Upper = data;
+            if (MBC.RAMMode) {
+                SRAMBank = MBC.Upper;
             }
             else {
-                ROMBank = MBCBankControl.Full;
+                ROMBank = MBC.Full;
             }
         }
         else {
             // ROM/RAM Mode Select
-            MBCBankControl.RAMMode = (data == 1);
+            MBC.RAMMode = (data == 1);
         }
     }
     else if (MBCType == MBC_TYPE_MBC2) {
@@ -69,8 +69,8 @@ void WriteMBC(word address, byte data)
                 data = 1;
             }
             
-            MBCBankControl.Full = data;
-            ROMBank = MBCBankControl.Full;
+            MBC.Full = data;
+            ROMBank = MBC.Full;
         }
         else if (address <= 0x5FFF) {
             
@@ -81,8 +81,8 @@ void WriteMBC(word address, byte data)
 void PrintMBC()
 {
     LogInfo("MBC: Lower=%02X Upper=%01X Full=%04X Mode=%s", 
-        MBCBankControl.Lower, 
-        MBCBankControl.Upper, 
-        MBCBankControl.Full, 
-        (MBCBankControl.RAMMode ? "RAM" : "ROM"));
+        MBC.Lower, 
+        MBC.Upper, 
+        MBC.Full, 
+        (MBC.RAMMode ? "RAM" : "ROM"));
 }

@@ -8,7 +8,7 @@
 void cmdNext(const char * input)
 {
     if (!input || strlen(input) == 0) {
-        NextInstruction();
+        SM83_Step(&CPU);
         return;
     }
 
@@ -16,6 +16,6 @@ void cmdNext(const char * input)
     sscanf(input, "%u", &count);
 
     for (int i = 0; i < count; ++i) {
-        NextInstruction();
+        SM83_Step(&CPU);
     }
 }
