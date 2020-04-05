@@ -9,16 +9,28 @@
     static void SM83_INST_##NAME(sm83_t * cpu, int bit)
 
 #define DEFINE_SIMPLE_BIT_INSTRUCTION(NAME, EXPR)                              \
-    static void SM83_INST_##NAME(sm83_t * cpu, int bit) { EXPR; }
+    static void SM83_INST_##NAME(sm83_t * cpu, int bit)                        \
+    {                                                                          \
+        EXPR;                                                                  \
+    }
 
 #define DEFINE_SIMPLE_INSTRUCTION(NAME, EXPR)                                  \
-    static void SM83_INST_##NAME(sm83_t * cpu) { EXPR; }
+    static void SM83_INST_##NAME(sm83_t * cpu)                                 \
+    {                                                                          \
+        EXPR;                                                                  \
+    }
 
 // Miscellenious
 
-DEFINE_INSTRUCTION(NOP) { (void)(cpu); }
+DEFINE_INSTRUCTION(NOP)
+{
+    (void)(cpu);
+}
 
-DEFINE_INSTRUCTION(HALT) { cpu->Enabled = false; }
+DEFINE_INSTRUCTION(HALT)
+{
+    cpu->Enabled = false;
+}
 
 DEFINE_INSTRUCTION(STOP)
 {
@@ -28,7 +40,10 @@ DEFINE_INSTRUCTION(STOP)
     // LCDC.Enabled = false;
 }
 
-DEFINE_INSTRUCTION(DI) { cpu->IME = false; }
+DEFINE_INSTRUCTION(DI)
+{
+    cpu->IME = false;
+}
 
 DEFINE_INSTRUCTION(EI)
 {
@@ -156,7 +171,10 @@ DEFINE_INSTRUCTION_RET_COND(RET_NC, !cpu->FC)
 
 // Jump
 
-DEFINE_INSTRUCTION(JP_HL) { cpu->PC = cpu->HL; }
+DEFINE_INSTRUCTION(JP_HL)
+{
+    cpu->PC = cpu->HL;
+}
 
 #define DEFINE_INSTRUCTION_JP_COND(NAME, COND)                                 \
     DEFINE_INSTRUCTION(NAME)                                                   \
@@ -207,7 +225,10 @@ DEFINE_INSTRUCTION_PUSH(PUSH_HL, cpu->HL)
 // Pop
 
 #define DEFINE_INSTRUCTION_POP(NAME, DST)                                      \
-    DEFINE_INSTRUCTION(NAME) { DST = SM83_PopWord(cpu); }
+    DEFINE_INSTRUCTION(NAME)                                                   \
+    {                                                                          \
+        DST = SM83_PopWord(cpu);                                               \
+    }
 
 DEFINE_INSTRUCTION_POP(POP_AF, cpu->AF)
 DEFINE_INSTRUCTION_POP(POP_BC, cpu->BC)
@@ -217,7 +238,10 @@ DEFINE_INSTRUCTION_POP(POP_HL, cpu->HL)
 // Load
 
 #define DEFINE_INSTRUCTION_LD(NAME, DST, SRC)                                  \
-    DEFINE_INSTRUCTION(NAME) { DST = SRC; }
+    DEFINE_INSTRUCTION(NAME)                                                   \
+    {                                                                          \
+        DST = SRC;                                                             \
+    }
 
 #define DEFINE_INSTRUCTION_LD_GROUP(PREFIX, DST)                               \
     DEFINE_INSTRUCTION_LD(PREFIX##_A, DST, cpu->A)                             \
@@ -239,7 +263,10 @@ DEFINE_INSTRUCTION_LD_GROUP(LD_H, cpu->H)
 DEFINE_INSTRUCTION_LD_GROUP(LD_L, cpu->L)
 
 #define DEFINE_INSTRUCTION_LD_WRITE_BYTE(NAME, ADDR, SRC)                      \
-    DEFINE_INSTRUCTION(NAME) { SM83_WriteByte(cpu, ADDR, SRC); }
+    DEFINE_INSTRUCTION(NAME)                                                   \
+    {                                                                          \
+        SM83_WriteByte(cpu, ADDR, SRC);                                        \
+    }
 
 DEFINE_INSTRUCTION_LD_WRITE_BYTE(LD_pHL_A, cpu->HL, cpu->A)
 DEFINE_INSTRUCTION_LD_WRITE_BYTE(LD_pHL_B, cpu->HL, cpu->B)
@@ -322,9 +349,15 @@ DEFINE_INSTRUCTION(LDH_A_pu8)
     cpu->A = SM83_ReadByte(cpu, 0xFF00 + SM83_NextByte(cpu));
 }
 
-DEFINE_INSTRUCTION(LDH_pC_A) { SM83_WriteByte(cpu, 0xFF00 + cpu->C, cpu->A); }
+DEFINE_INSTRUCTION(LDH_pC_A)
+{
+    SM83_WriteByte(cpu, 0xFF00 + cpu->C, cpu->A);
+}
 
-DEFINE_INSTRUCTION(LDH_A_pC) { cpu->A = SM83_ReadByte(cpu, 0xFF00 + cpu->C); }
+DEFINE_INSTRUCTION(LDH_A_pC)
+{
+    cpu->A = SM83_ReadByte(cpu, 0xFF00 + cpu->C);
+}
 
 DEFINE_INSTRUCTION(LD_HL_SP_s8)
 {
@@ -361,7 +394,10 @@ DEFINE_SIMPLE_INSTRUCTION(ADD_pHL, _ADD(SM83_ReadByte(cpu, cpu->HL)))
 DEFINE_SIMPLE_INSTRUCTION(ADD_u8, _ADD(SM83_NextByte(cpu)))
 
 #define DEFINE_INSTRUCTION_ADC(NAME, VALUE)                                    \
-    DEFINE_INSTRUCTION(NAME) { _ADD((VALUE) + (uint8_t)cpu->FC); }
+    DEFINE_INSTRUCTION(NAME)                                                   \
+    {                                                                          \
+        _ADD((VALUE) + (uint8_t)cpu->FC);                                      \
+    }
 
 DEFINE_INSTRUCTION_ADC(ADC_A, cpu->A)
 DEFINE_INSTRUCTION_ADC(ADC_B, cpu->B)
@@ -433,7 +469,10 @@ DEFINE_SIMPLE_INSTRUCTION(SUB_pHL, _SUB(SM83_ReadByte(cpu, cpu->HL)))
 DEFINE_SIMPLE_INSTRUCTION(SUB_u8, _SUB(SM83_NextByte(cpu)))
 
 #define DEFINE_INSTRUCTION_SBC(NAME, VALUE)                                    \
-    DEFINE_INSTRUCTION(NAME) { _SUB((VALUE) + (uint8_t)cpu->FC); }
+    DEFINE_INSTRUCTION(NAME)                                                   \
+    {                                                                          \
+        _SUB((VALUE) + (uint8_t)cpu->FC);                                      \
+    }
 
 DEFINE_INSTRUCTION_SBC(SBC_A, cpu->A)
 DEFINE_INSTRUCTION_SBC(SBC_B, cpu->B)

@@ -6,8 +6,6 @@ PointerAlignment: Middle
 IndentPPDirectives: AfterHash
 AllowShortFunctionsOnASingleLine: false
 BinPackArguments: false
-AlignConsecutiveDeclarations: true
-AlignConsecutiveAssignments: true
 AlignConsecutiveMacros: true
 AlignOperands: true
 AlignTrailingComments: true

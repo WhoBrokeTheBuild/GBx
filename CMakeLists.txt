@@ -37,8 +37,8 @@ ENDIF()
 ###
 
 IF(BUILD_THIRDPARTY)
-    SET(THIRDPARTY_SOURCE_DIR ${CMAKE_SOURCE_DIR}/thirdparty)
-    SET(THIRDPARTY_BINARY_DIR ${CMAKE_BINARY_DIR}/thirdparty)
+    SET(THIRDPARTY_SOURCE_DIR ${CMAKE_SOURCE_DIR}/ThirdParty)
+    SET(THIRDPARTY_BINARY_DIR ${CMAKE_BINARY_DIR}/ThirdParty)
 
     FILE(MAKE_DIRECTORY ${THIRDPARTY_BINARY_DIR})
 
@@ -58,7 +58,7 @@ IF(BUILD_THIRDPARTY)
     )
     IF(_result)
         MESSAGE("${_result}")
-        MESSAGE(FATAL_ERROR "Failed to configure THIRDPARTY projects")
+        MESSAGE(FATAL_ERROR "Failed to configure ThirdParty projects")
     ENDIF()
 
     SET(_THIRDPARTY_BUILD_COMMAND ${CMAKE_COMMAND} --build . )
@@ -74,7 +74,7 @@ IF(BUILD_THIRDPARTY)
 
     IF(_result)
         MESSAGE("${_result}")
-        MESSAGE(FATAL_ERROR "Failed to build THIRDPARTY projects")
+        MESSAGE(FATAL_ERROR "Failed to build ThirdParty projects")
     ENDIF()
 ENDIF()
 
@@ -91,6 +91,18 @@ GET_FILENAME_COMPONENT(SDL2_RUNTIME_DIR ${_location} DIRECTORY)
 SET(RUNTIME_SEARCH_PATH
     ${SDL2_RUNTIME_DIR}
 )
+
+# Automation
+
+IF(ClangFormat_FOUND)
+    ADD_CUSTOM_TARGET(format)
+
+    SET_TARGET_PROPERTIES(
+        format
+        PROPERTIES 
+            FOLDER "Automation"
+    )
+ENDIF()
 
 # Library
 

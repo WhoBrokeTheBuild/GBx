@@ -419,20 +419,26 @@ uint16_t SM83_Disassemble(sm83_t * cpu, char * str, size_t len, uint16_t addr)
             switch (*pch) {
             // unsigned word
             case 'w':
-                i += snprintf(str + i, len - i, "$%04X",
+                i += snprintf(str + i,
+                    len - i,
+                    "$%04X",
                     ((cpu->ReadByte(cpu->UserData, addr + 1) << 8)
                         | cpu->ReadByte(cpu->UserData, addr)));
                 addr += 2;
                 break;
             // unsigned byte
             case 'u':
-                i += snprintf(str + i, len - i, "$%02X",
+                i += snprintf(str + i,
+                    len - i,
+                    "$%02X",
                     cpu->ReadByte(cpu->UserData, addr));
                 ++addr;
                 break;
             // signed byte
             case 's':
-                i += snprintf(str + i, len - i, "%d",
+                i += snprintf(str + i,
+                    len - i,
+                    "%d",
                     (int8_t)cpu->ReadByte(cpu->UserData, addr));
                 ++addr;
                 break;

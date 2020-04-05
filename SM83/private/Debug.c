@@ -8,7 +8,8 @@ void SM83_AddInstructionLogEntry(sm83_t * cpu, const char * inst)
         return;
     }
 
-    strncpy(cpu->InstructionLog[cpu->InstructionLogIndex], inst,
+    strncpy(cpu->InstructionLog[cpu->InstructionLogIndex],
+        inst,
         INSTRUCTION_LOG_ENTRY_SIZE);
 
     ++cpu->InstructionLogIndex;

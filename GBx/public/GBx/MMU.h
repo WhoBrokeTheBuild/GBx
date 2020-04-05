@@ -18,7 +18,7 @@ uint8_t ReadByte(uint16_t address);
 
 #define ReadWord(address) (ReadByte(address) | (ReadByte((address) + 1) << 8))
 
-uint8_t  NextByte();
+uint8_t NextByte();
 uint16_t NextWord();
 
 void WriteByte(uint16_t address, uint8_t data);

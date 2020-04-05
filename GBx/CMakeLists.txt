@@ -56,6 +56,8 @@ IF(Readline_FOUND)
     )
 ENDIF()
 
+# Automation
+
 IF(ClangFormat_FOUND)
     ADD_CUSTOM_TARGET(
         format-${target}
@@ -68,6 +70,8 @@ IF(ClangFormat_FOUND)
         PROPERTIES 
             FOLDER "Automation"
     )
+
+    ADD_DEPENDENCIES(format format-${target})
 ENDIF()
 
 # Tests

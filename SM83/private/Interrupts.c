@@ -64,9 +64,17 @@ void SM83_PrintInterrupts(sm83_t * cpu)
 {
     LogInfo("IME %s", (cpu->IME ? "Enabled" : "Disabled"));
 
-    LogInfo("IF 0x40=%d 0x48=%d 0x50=%d 0x58=%d 0x60=%d", cpu->IF.Int40,
-        cpu->IF.Int48, cpu->IF.Int50, cpu->IF.Int58, cpu->IF.Int60);
+    LogInfo("IF 0x40=%d 0x48=%d 0x50=%d 0x58=%d 0x60=%d",
+        cpu->IF.Int40,
+        cpu->IF.Int48,
+        cpu->IF.Int50,
+        cpu->IF.Int58,
+        cpu->IF.Int60);
 
-    LogInfo("IF 0x40=%d 0x48=%d 0x50=%d 0x58=%d 0x60=%d", cpu->IE.Int40,
-        cpu->IE.Int48, cpu->IE.Int50, cpu->IE.Int58, cpu->IE.Int60);
+    LogInfo("IF 0x40=%d 0x48=%d 0x50=%d 0x58=%d 0x60=%d",
+        cpu->IE.Int40,
+        cpu->IE.Int48,
+        cpu->IE.Int50,
+        cpu->IE.Int58,
+        cpu->IE.Int60);
 }

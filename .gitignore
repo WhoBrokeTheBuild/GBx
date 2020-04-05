@@ -1,7 +1,8 @@
 *.gb
 *.bin
 *.zip
-roms/gb-test-roms
-roms/mooneye
-build/
+*.sav
+[Rr]oms/gb-test-roms
+[Rr]oms/mooneye
+[Bb]uild/
 .vscode/

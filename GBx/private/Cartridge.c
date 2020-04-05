@@ -17,8 +17,8 @@ bool ColorEnabled = false;
 bool SuperEnabled = false;
 
 bool HasCartridgeBattery = false;
-bool HasCartridgeTimer   = false;
-bool HasCartridgeSRAM    = false;
+bool HasCartridgeTimer = false;
+bool HasCartridgeSRAM = false;
 
 bool SRAMEnabled;
 
@@ -80,13 +80,13 @@ bool LoadCartridgeROM(const char * filename)
         break;
     case 0x02:
         // MBC1+RAM
-        MBCType          = MBC_TYPE_MBC1;
+        MBCType = MBC_TYPE_MBC1;
         HasCartridgeSRAM = true;
         break;
     case 0x03:
         // MBC1+RAM+Battery
-        MBCType             = MBC_TYPE_MBC1;
-        HasCartridgeSRAM    = true;
+        MBCType = MBC_TYPE_MBC1;
+        HasCartridgeSRAM = true;
         HasCartridgeBattery = true;
         break;
     case 0x05:
@@ -95,7 +95,7 @@ bool LoadCartridgeROM(const char * filename)
         break;
     case 0x06:
         // MBC2+Battery
-        MBCType             = MBC_TYPE_MBC2;
+        MBCType = MBC_TYPE_MBC2;
         HasCartridgeBattery = true;
         break;
     case 0x08:
@@ -104,7 +104,7 @@ bool LoadCartridgeROM(const char * filename)
         break;
     case 0x09:
         // RAM+Battery
-        HasCartridgeSRAM    = true;
+        HasCartridgeSRAM = true;
         HasCartridgeBattery = true;
         break;
     case 0x0B:
@@ -113,26 +113,26 @@ bool LoadCartridgeROM(const char * filename)
         break;
     case 0x0C:
         // MMM01+SRAM
-        MBCType          = MBC_TYPE_MMM01;
+        MBCType = MBC_TYPE_MMM01;
         HasCartridgeSRAM = true;
         break;
     case 0x0D:
         // MMM01+SRAM+Battery
-        MBCType             = MBC_TYPE_MMM01;
-        HasCartridgeSRAM    = true;
+        MBCType = MBC_TYPE_MMM01;
+        HasCartridgeSRAM = true;
         HasCartridgeBattery = true;
         break;
     case 0x0F:
         // MBC3+Timer+Battery
-        MBCType             = MBC_TYPE_MBC3;
-        HasCartridgeTimer   = true;
+        MBCType = MBC_TYPE_MBC3;
+        HasCartridgeTimer = true;
         HasCartridgeBattery = true;
         break;
     case 0x10:
         // MBC3+Timer+RAM+Battery
-        MBCType             = MBC_TYPE_MBC3;
-        HasCartridgeTimer   = true;
-        HasCartridgeSRAM    = true;
+        MBCType = MBC_TYPE_MBC3;
+        HasCartridgeTimer = true;
+        HasCartridgeSRAM = true;
         HasCartridgeBattery = true;
         break;
     case 0x11:
@@ -141,13 +141,13 @@ bool LoadCartridgeROM(const char * filename)
         break;
     case 0x12:
         // MBC3+RAM
-        MBCType          = MBC_TYPE_MBC3;
+        MBCType = MBC_TYPE_MBC3;
         HasCartridgeSRAM = true;
         break;
     case 0x13:
         // MBC3+RAM+Battery
-        MBCType             = MBC_TYPE_MBC3;
-        HasCartridgeSRAM    = true;
+        MBCType = MBC_TYPE_MBC3;
+        HasCartridgeSRAM = true;
         HasCartridgeBattery = true;
         break;
     case 0x19:
@@ -156,13 +156,13 @@ bool LoadCartridgeROM(const char * filename)
         break;
     case 0x1A:
         // MBC5+RAM
-        MBCType          = MBC_TYPE_MBC5;
+        MBCType = MBC_TYPE_MBC5;
         HasCartridgeSRAM = true;
         break;
     case 0x1B:
         // MBC5+RAM+Battery
-        MBCType             = MBC_TYPE_MBC5;
-        HasCartridgeSRAM    = true;
+        MBCType = MBC_TYPE_MBC5;
+        HasCartridgeSRAM = true;
         HasCartridgeBattery = true;
         break;
     case 0x1C:
@@ -171,13 +171,13 @@ bool LoadCartridgeROM(const char * filename)
         break;
     case 0x1D:
         // MBC5+Rumble+SRAM
-        MBCType          = MBC_TYPE_MBC5;
+        MBCType = MBC_TYPE_MBC5;
         HasCartridgeSRAM = true;
         break;
     case 0x1E:
         // MBC5+Rumble+SRAM+Battery
-        MBCType             = MBC_TYPE_MBC5;
-        HasCartridgeSRAM    = true;
+        MBCType = MBC_TYPE_MBC5;
+        HasCartridgeSRAM = true;
         HasCartridgeBattery = true;
         break;
     case 0x20:
@@ -186,8 +186,8 @@ bool LoadCartridgeROM(const char * filename)
         break;
     case 0x22:
         // MBC7+Sensor+Rumble+RAM+Battery
-        MBCType             = MBC_TYPE_MBC7;
-        HasCartridgeSRAM    = true;
+        MBCType = MBC_TYPE_MBC7;
+        HasCartridgeSRAM = true;
         HasCartridgeBattery = true;
         break;
     case 0xFC:

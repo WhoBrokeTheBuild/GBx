@@ -15,9 +15,9 @@
 
 #    include <Windows.h>
 
-#    define COLOR_CYAN (3)
-#    define COLOR_RED (4)
-#    define COLOR_YELLOW (6)
+#    define COLOR_CYAN    (3)
+#    define COLOR_RED     (4)
+#    define COLOR_YELLOW  (6)
 #    define COLOR_DEFAULT (7)
 
 #    define LogInfo(M, ...)                                                    \
@@ -63,10 +63,10 @@
 
 #else // !WIN32
 
-#    define COLOR_RED "\033[0;31m"
+#    define COLOR_RED    "\033[0;31m"
 #    define COLOR_YELLOW "\033[0;33m"
-#    define COLOR_CYAN "\033[0;36m"
-#    define COLOR_END "\033[0;m"
+#    define COLOR_CYAN   "\033[0;36m"
+#    define COLOR_END    "\033[0;m"
 
 #    define LogInfo(M, ...)                                                    \
         do {                                                                   \
@@ -75,7 +75,8 @@
 
 #    define LogWarn(M, ...)                                                    \
         do {                                                                   \
-            fprintf(stderr, COLOR_YELLOW "[WARN] " M "\n" COLOR_END,           \
+            fprintf(stderr,                                                    \
+                COLOR_YELLOW "[WARN] " M "\n" COLOR_END,                       \
                 ##__VA_ARGS__);                                                \
         } while (0)
 

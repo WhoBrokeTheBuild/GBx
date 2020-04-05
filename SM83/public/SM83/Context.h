@@ -4,7 +4,7 @@
 #include <SM83/Macros.h>
 #include <SM83/Types.h>
 
-#define INSTRUCTION_LOG_LENGTH (32)
+#define INSTRUCTION_LOG_LENGTH     (32)
 #define INSTRUCTION_LOG_ENTRY_SIZE (24)
 
 typedef struct

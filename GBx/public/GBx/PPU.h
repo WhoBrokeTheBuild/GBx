@@ -28,7 +28,7 @@ extern uint8_t OAM[0xA0];
 extern uint8_t LCDBuffer[LCD_BUFFER_SIZE];
 
 lcd_control_t LCDC;
-lcd_status_t  STAT;
+lcd_status_t STAT;
 
 uint8_t SCY;
 uint8_t SCX;

@@ -14,7 +14,7 @@ bool LCDUseOriginalColors = false;
 uint8_t LCDBuffer[LCD_BUFFER_SIZE];
 
 lcd_control_t LCDC;
-lcd_status_t  STAT;
+lcd_status_t STAT;
 
 uint8_t SCY;
 uint8_t SCX;
@@ -27,7 +27,7 @@ palette_t BGP;
 palette_t OBP0;
 palette_t OBP1;
 
-uint8_t  VRAM[2][0x2000];
+uint8_t VRAM[2][0x2000];
 unsigned VRAMBank;
 
 uint8_t OAM[0xA0];
@@ -49,12 +49,12 @@ void ResetLCD()
 
     SCY = 0x00;
     SCX = 0x00;
-    LY  = 0x00;
+    LY = 0x00;
     LYC = 0x00;
-    WY  = 0x00;
-    WX  = 0x00;
+    WY = 0x00;
+    WX = 0x00;
 
-    BGP.raw  = 0b11100100;
+    BGP.raw = 0b11100100;
     OBP0.raw = 0b11100100;
     OBP1.raw = 0b11100100;
 }
@@ -75,9 +75,9 @@ const uint8_t * GetColor(palette_t * pal, int bit, uint8_t d1, uint8_t d2)
         { 0x00, 0x00, 0x00 },
     };
 
-    bit                = 0x80 >> bit;
-    bool    high       = (d2 & bit);
-    bool    low        = (d1 & bit);
+    bit = 0x80 >> bit;
+    bool high = (d2 & bit);
+    bool low = (d1 & bit);
     uint8_t colorIndex = (high ? 0b10 : 0b00) | (low ? 0b01 : 0b00);
 
     switch (colorIndex) {
@@ -114,17 +114,17 @@ void OAMDMATransfer(uint8_t data)
 
 void DrawTiles()
 {
-    const int TILE_WIDTH     = 8;
-    const int TILE_HEIGHT    = 8;
+    const int TILE_WIDTH = 8;
+    const int TILE_HEIGHT = 8;
     const int TILE_DATA_SIZE = 16;
-    const int TILES_PER_ROW  = 32;
+    const int TILES_PER_ROW = 32;
 
     bool usingWindow = (LCDC.WindowDisplayEnabled && WY <= LY);
 
     int mapSelect
         = (usingWindow ? LCDC.WindowTileMapSelect : LCDC.BGTileMapSelect);
 
-    uint16_t mapBaseAddress  = GetTileMapAddress(mapSelect);
+    uint16_t mapBaseAddress = GetTileMapAddress(mapSelect);
     uint16_t dataBaseAddress = GetTileDataAddress(LCDC.TileDataSelect);
 
     uint8_t WXM7 = WX - 7;
@@ -154,11 +154,11 @@ void DrawTiles()
 
         uint16_t dataOffset = dataBaseAddress + (tileIndex * TILE_DATA_SIZE);
 
-        uint8_t line  = (yPos % TILE_HEIGHT) * 2;
+        uint8_t line = (yPos % TILE_HEIGHT) * 2;
         uint8_t data1 = ReadByte(dataOffset + line);
         uint8_t data2 = ReadByte(dataOffset + line + 1);
 
-        int             bit   = (xPos % TILE_WIDTH);
+        int bit = (xPos % TILE_WIDTH);
         const uint8_t * color = GetColor(&BGP, bit, data1, data2);
 
         unsigned off = (LY * LCD_BUFFER_WIDTH * LCD_BUFFER_COMPONENTS)
@@ -172,10 +172,10 @@ void DrawTiles()
 
 void DrawSprites()
 {
-    const int OAM_ADDRESS         = 0xFE00;
+    const int OAM_ADDRESS = 0xFE00;
     const int OAM_ENTRY_DATA_SIZE = 4;
-    const int SPRITE_Y_OFFSET     = 16;
-    const int SPRITE_X_OFFSET     = 8;
+    const int SPRITE_Y_OFFSET = 16;
+    const int SPRITE_X_OFFSET = 8;
 
     sprite_attrib_t attrib;
     for (unsigned sprite = 0; sprite < 40; ++sprite) {
@@ -206,8 +206,8 @@ void DrawSprites()
             line *= 2;
 
             uint16_t tileAddress = 0x8000 + (pattern * 16);
-            uint8_t  data1       = ReadByte(tileAddress + line);
-            uint8_t  data2       = ReadByte(tileAddress + line + 1);
+            uint8_t data1 = ReadByte(tileAddress + line);
+            uint8_t data2 = ReadByte(tileAddress + line + 1);
 
             for (int pixel = 7; pixel >= 0; --pixel) {
                 int bit = (1 << pixel);
@@ -215,7 +215,7 @@ void DrawSprites()
                     bit = (0x80 >> pixel);
                 }
 
-                palette_t *     pal   = (attrib.Palette ? &OBP1 : &OBP0);
+                palette_t * pal = (attrib.Palette ? &OBP1 : &OBP0);
                 const uint8_t * color = GetColor(pal, bit, data1, data2);
 
                 int x = -pixel + 7;
@@ -234,11 +234,11 @@ struct timespec timediff(struct timespec start, struct timespec end)
 {
     struct timespec temp;
     if ((end.tv_nsec - start.tv_nsec) < 0) {
-        temp.tv_sec  = end.tv_sec - start.tv_sec - 1;
+        temp.tv_sec = end.tv_sec - start.tv_sec - 1;
         temp.tv_nsec = 1000000000 + end.tv_nsec - start.tv_nsec;
     }
     else {
-        temp.tv_sec  = end.tv_sec - start.tv_sec;
+        temp.tv_sec = end.tv_sec - start.tv_sec;
         temp.tv_nsec = end.tv_nsec - start.tv_nsec;
     }
     return temp;
@@ -254,7 +254,7 @@ void updateCoincidence()
 
 void LCDTick(unsigned cycles)
 {
-    const int HBLANK_TICKS        = 204;
+    const int HBLANK_TICKS = 204;
     const int SEARCH_SPRITE_TICKS = 80;
     const int DATA_TRANSFER_TICKS = 172;
 
@@ -315,7 +315,7 @@ void LCDTick(unsigned cycles)
 
                 clock_gettime(CLOCK_MONOTONIC, &now);
                 struct timespec delta = timediff(last, now);
-                last                  = now;
+                last = now;
 
                 //     float fps = 1.0 / (delta.tv_nsec / 1000000000.0);
                 //     // LogInfo("VBL %ld %f", delta.tv_nsec, fps);
@@ -329,7 +329,7 @@ void LCDTick(unsigned cycles)
                 // }
 
                 struct timespec wait;
-                wait.tv_sec  = 0;
+                wait.tv_sec = 0;
                 wait.tv_nsec = 16750419 - delta.tv_nsec;
                 clock_nanosleep(CLOCK_MONOTONIC, 0, &wait, NULL);
             }

@@ -28,7 +28,7 @@ typedef struct
 
     GBX_PACK(struct {
         uint8_t Full : 7;
-        bool    RAMMode : 1;
+        bool RAMMode : 1;
     });
 
     uint8_t raw;

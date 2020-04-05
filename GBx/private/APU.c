@@ -46,7 +46,7 @@ void ResetAPU()
     Tone1.raw[2] = 0xF3;
     Tone1.raw[4] = 0xBF;
 
-    Tone1Timer     = 0;
+    Tone1Timer = 0;
     Tone1DutyIndex = 0;
 
     // NR21-NR24
@@ -54,7 +54,7 @@ void ResetAPU()
     Tone2.raw[1] = 0x00;
     Tone2.raw[3] = 0xBF;
 
-    Tone2Timer     = 0;
+    Tone2Timer = 0;
     Tone2DutyIndex = 0;
 
     // NR30-NR34
@@ -89,13 +89,13 @@ void APUTick(unsigned cycles)
     Tone1Timer -= cycles;
     if (Tone1Timer <= 0) {
         Tone1DutyIndex = (Tone1DutyIndex + 1) % 8;
-        Tone1Timer     = Tone1.Frequency;
+        Tone1Timer = Tone1.Frequency;
     }
 
     Tone2Timer -= cycles;
     if (Tone2Timer <= 0) {
         Tone2DutyIndex = (Tone2DutyIndex + 1) % 8;
-        Tone2Timer     = Tone2.Frequency;
+        Tone2Timer = Tone2.Frequency;
     }
 }
 

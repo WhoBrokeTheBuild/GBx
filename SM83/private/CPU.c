@@ -334,7 +334,14 @@ void SM83_PrintRegisters(sm83_t * cpu)
 {
     LogInfo(
         "AF=$%04X BC=$%04X DE=$%04X HL=$%04X SP=$%04X PC=$%04X F=[%c%c%c%c]",
-        cpu->AF, cpu->BC, cpu->DE, cpu->HL, cpu->SP, cpu->PC,
-        (cpu->FZ ? 'Z' : '-'), (cpu->FN ? 'N' : '-'), (cpu->FH ? 'H' : '-'),
+        cpu->AF,
+        cpu->BC,
+        cpu->DE,
+        cpu->HL,
+        cpu->SP,
+        cpu->PC,
+        (cpu->FZ ? 'Z' : '-'),
+        (cpu->FN ? 'N' : '-'),
+        (cpu->FH ? 'H' : '-'),
         (cpu->FC ? 'C' : '-'));
 }

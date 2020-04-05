@@ -1,6 +1,9 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.15)
 
-PROJECT(thirdparty)
+PROJECT(
+    ThirdParty
+    LANGUAGES C
+)
 
 INCLUDE(ExternalProject)
 
@@ -13,7 +16,7 @@ FIND_PACKAGE(cflags CONFIG QUIET)
 
 IF(NOT cflags_FOUND)
     ExternalProject_Add(
-        thirdparty_cflags
+        ThirdParty_cflags
         GIT_REPOSITORY      "https://github.com/WhoBrokeTheBuild/cflags.git"
         GIT_TAG             "master"
         GIT_SHALLOW         TRUE
@@ -33,7 +36,7 @@ FIND_PACKAGE(DUI CONFIG QUIET)
 
 IF(NOT DUI_FOUND)
     ExternalProject_Add(
-        thirdparty_DUI
+        ThirdParty_DUI
         GIT_REPOSITORY      "https://github.com/WhoBrokeTheBuild/DebugUI.git"
         GIT_TAG             "master"
         GIT_SHALLOW         TRUE
@@ -58,7 +61,7 @@ IF(NOT SDL2_FOUND)
     # ENDIF()
 
     ExternalProject_Add(
-        thirdparty_SDL2
+        ThirdParty_SDL2
         HG_REPOSITORY       "http://hg.libsdl.org/SDL"
         HG_TAG              "default"
         SOURCE_DIR          ${SDL2_SOURCE_DIR}
