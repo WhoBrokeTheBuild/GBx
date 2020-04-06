@@ -316,9 +316,17 @@ void SM83_Step(sm83_t * cpu)
     static char INST_DISASM[1024];
 
     if (cpu->Enabled) {
-        if (cpu->VerboseLevel >= 3) {
-            SM83_Disassemble(cpu, INST_DISASM, sizeof(INST_DISASM), cpu->PC);
-            LogInfo("$%04X: %s", cpu->PC, INST_DISASM);
+        if (cpu->VerboseLevel >= 3 || cpu->InstructionLoggingEnabled) {
+            int offset = snprintf(INST_DISASM, sizeof(INST_DISASM), 
+                "$%04X: ", cpu->PC);
+
+            SM83_Disassemble(cpu, 
+                INST_DISASM + offset, 
+                sizeof(INST_DISASM) - offset, 
+                cpu->PC);
+
+            SM83_AddInstructionLogEntry(cpu, INST_DISASM);
+            Verbose(cpu, 3, LogInfo("%s", INST_DISASM));
         }
 
         SM83_Execute(cpu, SM83_Decode(cpu, SM83_Fetch(cpu)));

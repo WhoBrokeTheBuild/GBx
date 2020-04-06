@@ -13,7 +13,7 @@ typedef union
 
     GBX_PACK(struct
     {
-        bool TileDisplayEnabled:1;
+        bool TileDisplayEnabled:1; // TODO: Research
         bool SpriteDisplayEnabled:1;
         uint8_t SpriteSize:1;
         uint8_t BGTileMapSelect:1;

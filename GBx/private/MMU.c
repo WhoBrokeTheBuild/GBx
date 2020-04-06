@@ -34,8 +34,7 @@ void ResetMMU()
 uint8_t ReadByte(uint16_t address)
 {
     if (MemoryTrackingEnabled) {
-        uint8_t inc = MemoryTracker[address].Read + 1;
-        MemoryTracker[address].Read = (inc < 0xF ? inc : 0xF);
+        MemoryTracker[address].Read = 0xF;
     }
 
     switch (address & 0xF000) {
@@ -212,8 +211,7 @@ uint16_t NextWord()
 void WriteByte(uint16_t address, uint8_t data)
 {
     if (MemoryTrackingEnabled) {
-        uint8_t inc = MemoryTracker[address].Write + 1;
-        MemoryTracker[address].Write = (inc < 0xF ? inc : 0xF);
+        MemoryTracker[address].Write = 0xF;
     }
 
     switch (address & 0xF000) {

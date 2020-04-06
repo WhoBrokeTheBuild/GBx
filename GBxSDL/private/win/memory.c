@@ -7,6 +7,9 @@
 
 SDL_Texture * sdlMemoryTexture = NULL;
 
+const int MEMORY_TRACKER_AGE_TIMEOUT = 4;
+int memoryTrackerAgeDelay = 0;
+
 #define MEMORY_TEXTURE_WIDTH  (256)
 #define MEMORY_TEXTURE_HEIGHT (256)
 #define MEMORY_TEXTURE_COMP   (3)
@@ -33,8 +36,8 @@ void MemoryTabRefresh()
         for (unsigned i = 0; i < sizeof(MemoryTracker); ++i) {
             int offset = (i * MEMORY_TEXTURE_COMP);
             pixels[offset + 0] = (MemoryTracker[i].Write << 4);
-            pixels[offset + 1] = 0x00;
-            pixels[offset + 2] = (MemoryTracker[i].Read << 4);
+            pixels[offset + 1] = (MemoryTracker[i].Read << 4);
+            pixels[offset + 2] = 0x00;
         }
     }
     else {
@@ -44,7 +47,11 @@ void MemoryTabRefresh()
 
     SDL_UnlockTexture(sdlMemoryTexture);
 
-    AgeMemoryTracker();
+    ++memoryTrackerAgeDelay;
+    if (memoryTrackerAgeDelay >= MEMORY_TRACKER_AGE_TIMEOUT) {
+        memoryTrackerAgeDelay = 0;
+        AgeMemoryTracker();
+    }
 }
 
 void MemoryTabRender()
@@ -75,7 +82,7 @@ void MemoryTabRender()
         .h = (style->CharHeight * 2),
     };
 
-    SDL_SetRenderDrawColor(GetDebugWindowRenderer(), 0x00, 0x00, 0xFF, 0xFF);
+    SDL_SetRenderDrawColor(GetDebugWindowRenderer(), 0x00, 0xFF, 0x00, 0xFF);
     SDL_RenderDrawRect(GetDebugWindowRenderer(), &read);
 
     DUI_PrintAt(
