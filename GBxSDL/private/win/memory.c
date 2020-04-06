@@ -50,23 +50,18 @@ void MemoryTabRefresh()
 void MemoryTabRender()
 {
     DUI_Style * style = DUI_GetStyle();
-    
-    DUI_MoveCursor(DEBUG_CONTENT_X, DEBUG_CONTENT_Y);
-    DUI_Panel(DEBUG_CONTENT_WIDTH, DEBUG_CONTENT_HEIGHT);
 
     int startX, startY;
     DUI_GetCursor(&startX, &startY);
 
     DUI_Println("MEMORY TRACKING");
 
-    DUI_CheckboxAt(
-        startX + (style->CharSize * 82),
-        startY,
-        "ENABLED", &MemoryTrackingEnabled);
+    DUI_Checkbox("ENABLED", &MemoryTrackingEnabled);
+    DUI_Newline();
 
     SDL_Rect dst = {
-        .x = startX + (style->CharSize * 14),
-        .y = startY + (style->CharSize * 10),
+        .x = startX + (style->CharWidth * 14),
+        .y = startY + (style->CharHeight * 10),
         .w = (MEMORY_TEXTURE_WIDTH * 2),
         .h = (MEMORY_TEXTURE_HEIGHT * 2),
     };
@@ -74,136 +69,136 @@ void MemoryTabRender()
     SDL_RenderCopy(GetDebugWindowRenderer(), sdlMemoryTexture, NULL, &dst);
 
     SDL_Rect read = {
-        .x = startX + (style->CharSize * 3),
-        .y = startY + (style->CharSize * 4),
-        .w = (style->CharSize * (strlen("READ") + 1)),
-        .h = (style->CharSize * 2),
+        .x = startX + (style->CharWidth * 4),
+        .y = startY + (style->CharHeight * 6),
+        .w = (style->CharWidth * (strlen("READ") + 1)),
+        .h = (style->CharHeight * 2),
     };
 
     SDL_SetRenderDrawColor(GetDebugWindowRenderer(), 0x00, 0x00, 0xFF, 0xFF);
     SDL_RenderDrawRect(GetDebugWindowRenderer(), &read);
 
     DUI_PrintAt(
-        read.x + (style->CharSize / 2),
-        read.y + (style->CharSize / 2),
+        read.x + (style->CharWidth / 2),
+        read.y + (style->CharHeight / 2),
         "READ");
 
-    int readOffsetX = startX + (style->CharSize * 13);
-    int readOffsetY = startY + (style->CharSize * 10);
+    int readOffsetX = startX + (style->CharWidth * 13);
+    int readOffsetY = startY + (style->CharHeight * 10);
 
     DUI_PrintAt(
-        readOffsetX - (style->CharSize * strlen("ROM[0]")),
+        readOffsetX - (style->CharWidth * strlen("ROM[0]")),
         readOffsetY,
         "ROM[0]");
 
-    readOffsetY += (style->CharSize * 16);
+    readOffsetY += (8 * 16);
 
     DUI_PrintAt(
-        readOffsetX - (style->CharSize * strlen("ROM[N]")),
+        readOffsetX - (style->CharWidth * strlen("ROM[N]")),
         readOffsetY,
         "ROM[N]");
 
-    readOffsetY += (style->CharSize * 16);
+    readOffsetY += (8 * 16);
 
     DUI_PrintAt(
-        readOffsetX - (style->CharSize * strlen("VRAM[N]")),
+        readOffsetX - (style->CharWidth * strlen("VRAM[N]")),
         readOffsetY,
         "VRAM[N]");
 
-    readOffsetY += (style->CharSize * 8);
+    readOffsetY += (8 * 8);
 
     DUI_PrintAt(
-        readOffsetX - (style->CharSize * strlen("SRAM[N]")),
+        readOffsetX - (style->CharWidth * strlen("SRAM[N]")),
         readOffsetY,
         "SRAM[N]");
 
-    readOffsetY += (style->CharSize * 8);
+    readOffsetY += (8 * 8);
 
     DUI_PrintAt(
-        readOffsetX - (style->CharSize * strlen("WRAM[0]")),
+        readOffsetX - (style->CharWidth * strlen("WRAM[0]")),
         readOffsetY,
         "WRAM[0]");
 
-    readOffsetY += (style->CharSize * 4);
+    readOffsetY += (8 * 4);
 
     DUI_PrintAt(
-        readOffsetX - (style->CharSize * strlen("WRAM[N]")),
+        readOffsetX - (style->CharWidth * strlen("WRAM[N]")),
         readOffsetY,
         "WRAM[N]");
 
-    readOffsetY += (style->CharSize * 4);
+    readOffsetY += (8 * 4);
 
     DUI_PrintAt(
-        readOffsetX - (style->CharSize * strlen("ECHO")),
+        readOffsetX - (style->CharWidth * strlen("ECHO")),
         readOffsetY,
         "ECHO");
 
-    readOffsetY += (style->CharSize * 4);
+    readOffsetY += (8 * 4);
 
     DUI_PrintAt(
-        readOffsetX - (style->CharSize * strlen("OAM/HW/HRAM")),
+        readOffsetX - (style->CharWidth * strlen("OAM/HW/HRAM")),
         readOffsetY,
         "OAM/HW/HRAM");
 
     SDL_Rect write = {
-        .x = startX + (style->CharSize * 82),
-        .y = startY + (style->CharSize * 4),
-        .w = (style->CharSize * (strlen("WRITE") + 1)),
-        .h = (style->CharSize * 2),
+        .x = startX + (style->CharWidth * 18) + (MEMORY_TEXTURE_WIDTH * 2),
+        .y = startY + (style->CharHeight * 6),
+        .w = (style->CharWidth * (strlen("WRITE") + 1)),
+        .h = (style->CharHeight * 2),
     };
 
     SDL_SetRenderDrawColor(GetDebugWindowRenderer(), 0xFF, 0x00, 0x00, 0xFF);
     SDL_RenderDrawRect(GetDebugWindowRenderer(), &write);
 
     DUI_PrintAt(
-        write.x + (style->CharSize / 2),
-        write.y + (style->CharSize / 2),
+        write.x + (style->CharWidth / 2),
+        write.y + (style->CharHeight / 2),
         "WRITE");
 
-    int writeOffsetX = startX + (style->CharSize * 79);
-    int writeOffsetY = startY + (style->CharSize * 10);
+    int writeOffsetX = startX +  (style->CharWidth * 15) + (MEMORY_TEXTURE_WIDTH * 2);
+    int writeOffsetY = startY + (style->CharHeight * 10);
 
     DUI_PrintAt(
         writeOffsetX,
         writeOffsetY,
         "MBC");
 
-    writeOffsetY += (style->CharSize * 32);
+    writeOffsetY += (8 * 32);
 
     DUI_PrintAt(
         writeOffsetX,
         writeOffsetY,
         "VRAM[N]");
 
-    writeOffsetY += (style->CharSize * 8);
+    writeOffsetY += (8 * 8);
 
     DUI_PrintAt(
         writeOffsetX,
         writeOffsetY,
         "SRAM[N]");
 
-    writeOffsetY += (style->CharSize * 8);
+    writeOffsetY += (8 * 8);
 
     DUI_PrintAt(
         writeOffsetX,
         writeOffsetY,
         "WRAM[0]");
 
-    writeOffsetY += (style->CharSize * 4);
+    writeOffsetY += (8 * 4);
 
     DUI_PrintAt(
         writeOffsetX,
         writeOffsetY,
         "WRAM[N]");
 
-    writeOffsetY += (style->CharSize * 4);
+    writeOffsetY += (8 * 4);
 
     DUI_PrintAt(
         writeOffsetX,
         writeOffsetY,
         "ECHO");
 
-    writeOffsetY += (style->CharSize * 4);
+    writeOffsetY += (8 * 4);
 
     DUI_PrintAt(
         writeOffsetX,

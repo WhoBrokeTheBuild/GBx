@@ -90,9 +90,6 @@ void TileDataTabRefresh()
 
 void TileDataTabRender(SDL_Point * mouse)
 {
-    DUI_MoveCursor(DEBUG_CONTENT_X, DEBUG_CONTENT_Y);
-    DUI_Panel(DEBUG_CONTENT_WIDTH, DEBUG_CONTENT_HEIGHT);
-
     int startX, startY;
     DUI_GetCursor(&startX, &startY);
 
@@ -112,7 +109,7 @@ void TileDataTabRender(SDL_Point * mouse)
     DUI_Newline();
 
     SDL_Rect dst = {
-        .x = startX + (DUI_GetStyle()->CharSize * 18),
+        .x = startX + (DUI_GetStyle()->CharWidth * 18),
         .y = startY,
         .w = (TILE_DATA_TEXTURE_WIDTH * 2),
         .h = (TILE_DATA_TEXTURE_HEIGHT * 2),

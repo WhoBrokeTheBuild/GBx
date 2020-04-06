@@ -108,9 +108,6 @@ void TileMapTabRender(SDL_Point * mouse)
 {
     DUI_Style * style = DUI_GetStyle();
 
-    DUI_MoveCursor(DEBUG_CONTENT_X, DEBUG_CONTENT_Y);
-    DUI_Panel(DEBUG_CONTENT_WIDTH, DEBUG_CONTENT_HEIGHT);
-
     int startX, startY;
     DUI_GetCursor(&startX, &startY);
 
@@ -136,7 +133,7 @@ void TileMapTabRender(SDL_Point * mouse)
     DUI_Radio("9C00", TILE_MAP_ADDR_9C00, &tileMapAddrSelect);
 
     SDL_Rect dst = {
-        .x = startX + (style->CharSize * 18),
+        .x = startX + (style->CharWidth * 18),
         .y = startY,
         .w = (TILE_MAP_TEXTURE_HEIGHT * 2),
         .h = (TILE_MAP_TEXTURE_HEIGHT * 2),
@@ -176,21 +173,21 @@ void TileMapTabRender(SDL_Point * mouse)
 
     SDL_Rect scrollLegend = {
         .x = startX,
-        .y = startY + (style->CharSize * 24),
-        .w = (style->CharSize * 7),
-        .h = (style->CharSize * 2),
+        .y = startY + (style->CharHeight * 24),
+        .w = (style->CharWidth * 7),
+        .h = (style->CharHeight * 2),
     };
 
     SDL_RenderDrawRect(GetDebugWindowRenderer(), &scrollLegend);
 
     DUI_PrintAt(
-        scrollLegend.x + (style->CharSize / 2), 
-        scrollLegend.y + (style->CharSize / 2),
+        scrollLegend.x + (style->CharWidth / 2), 
+        scrollLegend.y + (style->CharHeight / 2),
         "SCROLL");
 
     DUI_CheckboxAt(
         startX,
-        startY + (style->CharSize * 20),
+        startY + (style->CharHeight * 20),
         "SCROLL",
         &showTileMapScroll
     );
@@ -231,21 +228,21 @@ void TileMapTabRender(SDL_Point * mouse)
 
     SDL_Rect windowLegend = {
         .x = startX,
-        .y = startY + (style->CharSize * 32),
-        .w = (style->CharSize * 7),
-        .h = (style->CharSize * 2),
+        .y = startY + (style->CharHeight * 32),
+        .w = (style->CharWidth * 7),
+        .h = (style->CharHeight * 2),
     };
 
     SDL_RenderDrawRect(GetDebugWindowRenderer(), &windowLegend);
 
     DUI_PrintAt(
-        windowLegend.x + (style->CharSize / 2), 
-        windowLegend.y + (style->CharSize / 2), 
+        windowLegend.x + (style->CharWidth / 2), 
+        windowLegend.y + (style->CharHeight / 2), 
         "WINDOW");
 
     DUI_CheckboxAt(
         startX,
-        startY + (style->CharSize * 28),
+        startY + (style->CharHeight * 28),
         "WINDOW",
         &showTileMapWindow
     );

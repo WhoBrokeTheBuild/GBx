@@ -184,13 +184,16 @@ void DebugWindowInit()
     }
     
     sdlDebugRenderer = SDL_CreateRenderer(sdlDebugWindow, 0,
-        SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+        SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
 
     if (!sdlDebugRenderer) {
         fprintf(stderr, "Failed to create SDL2 Renderer, %s\n", SDL_GetError());
     }
 
     DUI_Init(sdlDebugWindow);
+    DUI_Style * style = DUI_GetStyle();
+    // style->CharWidth = 16;
+    // style->CharHeight = 16;
     
     InitTileDataTab();
     InitTileMapTab();
@@ -257,6 +260,7 @@ int dbgTabIndex = 0;
 void DebugWindowRender()
 {
     DUI_Update();
+    DUI_Style * style = DUI_GetStyle();
 
     if (dbgAutoRefresh) {
         DebugWindowRefresh();
@@ -265,9 +269,9 @@ void DebugWindowRender()
     SDL_SetRenderDrawColor(sdlDebugRenderer, 0x33, 0x33, 0x33, 0xFF);
     SDL_RenderClear(sdlDebugRenderer);
 
-    DUI_CheckboxAt(DEBUG_WINDOW_WIDTH - 136, 8, "AUTO", &dbgAutoRefresh);
+    DUI_CheckboxAt(DEBUG_WINDOW_WIDTH - 160, 8, "Auto", &dbgAutoRefresh);
 
-    if (DUI_ButtonAt(DEBUG_WINDOW_WIDTH - 72, 8, "REFRESH")) {
+    if (DUI_ButtonAt(DEBUG_WINDOW_WIDTH - 86, 8, "Refresh")) {
         DebugWindowRefresh();
     }
 
@@ -275,30 +279,42 @@ void DebugWindowRender()
 
     DUI_BeginTabBar();
 
-    if (DUI_Tab("STATUS", DBG_TAB_STATUS, &dbgTabIndex)) {
+    DUI_Tab("Status", DBG_TAB_STATUS, &dbgTabIndex);
+    DUI_Tab("Tile Data", DBG_TAB_TILE_DATA, &dbgTabIndex);
+    DUI_Tab("Tile Map", DBG_TAB_TILE_MAP, &dbgTabIndex);
+    DUI_Tab("Sprite", DBG_TAB_SPRITE, &dbgTabIndex);
+    DUI_Tab("Audio", DBG_TAB_AUDIO, &dbgTabIndex);
+    DUI_Tab("Memory", DBG_TAB_MEMORY, &dbgTabIndex);
+    
+    DUI_MoveCursor(8, 48);
+    DUI_PanelStart(NULL, 
+        DEBUG_WINDOW_WIDTH - 16 - (style->PanelPadding * 2),
+        DEBUG_WINDOW_HEIGHT - 56 - (style->PanelPadding * 2), true);
+
+    switch (dbgTabIndex) {
+    case DBG_TAB_STATUS:
         StatusTabRender();
-    }
-    
-    if (DUI_Tab("TILE DATA", DBG_TAB_TILE_DATA, &dbgTabIndex)) {
+        break;
+    case DBG_TAB_TILE_DATA:
         TileDataTabRender();
-    }
-    
-    if (DUI_Tab("TILE MAP", DBG_TAB_TILE_MAP, &dbgTabIndex)) {
+        break;
+    case DBG_TAB_TILE_MAP:
         TileMapTabRender();
-    }
-    
-    if (DUI_Tab("SPRITE", DBG_TAB_SPRITE, &dbgTabIndex)) {
-
-    }
-    
-    if (DUI_Tab("AUDIO", DBG_TAB_AUDIO, &dbgTabIndex)) {
-
-    }
-    
-    if (DUI_Tab("MEMORY", DBG_TAB_MEMORY, &dbgTabIndex)) {
+        break;
+    case DBG_TAB_SPRITE:
+        break;
+    case DBG_TAB_AUDIO:
+        break;
+    case DBG_TAB_MEMORY:
         MemoryTabRender();
+        break;
+    default:
+        break;
     }
 
+    DUI_PanelEnd();
+
+    DUI_Render();
     SDL_RenderPresent(sdlDebugRenderer);
 }
 
