@@ -4,6 +4,7 @@
 
 void SM83_CallInterrupt(sm83_t * cpu, uint16_t addr)
 {
+    cpu->Enabled = true;
     cpu->IME = false;
     SM83_Tick(cpu, 2);
 

@@ -13,7 +13,7 @@ void DebugPromptTerm();
 void DebugPrompt();
 
 #define DEBUG_WINDOW_WIDTH  (1086)
-#define DEBUG_WINDOW_HEIGHT (900)
+#define DEBUG_WINDOW_HEIGHT (908)
 
 void DebugWindowInit();
 void DebugWindowTerm();

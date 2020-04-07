@@ -162,7 +162,7 @@ void MemoryTabRender()
         write.y + (style->CharHeight / 2),
         "WRITE");
 
-    int writeOffsetX = startX +  (style->CharWidth * 15) + (MEMORY_TEXTURE_WIDTH * 2);
+    int writeOffsetX = startX + (style->CharWidth * 15) + (MEMORY_TEXTURE_WIDTH * 2);
     int writeOffsetY = startY + (style->CharHeight * 10);
 
     DUI_PrintAt(
@@ -211,4 +211,81 @@ void MemoryTabRender()
         writeOffsetX,
         writeOffsetY,
         "OAM/HW/HRAM");
+
+    struct hwaddr
+    {
+        uint16_t address;
+        const char * text;
+
+    };
+    
+    struct hwaddr hwaddrs[] = {
+        { 0xFF00, "FF00 - JOYP" },
+        { 0xFF01, "FF01 - SB" },
+        { 0xFF02, "FF02 - SC" },
+        { 0xFF04, "FF04 - DIV" },
+        { 0xFF05, "FF05 - TIMA" },
+        { 0xFF06, "FF06 - TMA" },
+        { 0xFF07, "FF07 - TAC" },
+        { 0xFF0F, "FF0F - IF" },
+        { 0xFF10, "FF10 - Tone1" },
+        { 0xFF11, "FF11 - " },
+        { 0xFF12, "FF12 - " },
+        { 0xFF13, "FF13 - " },
+        { 0xFF14, "FF14 - " },
+        { 0xFF16, "FF16 - Tone2" },
+        { 0xFF17, "FF17 - " },
+        { 0xFF18, "FF18 - " },
+        { 0xFF19, "FF19 - " },
+        { 0xFF20, "FF20 - Noise" },
+        { 0xFF21, "FF21 - " },
+        { 0xFF22, "FF22 - " },
+        { 0xFF23, "FF23 - " },
+        { 0xFF24, "FF24 - VolumeControl" },
+        { 0xFF25, "FF25 - SoundTerminal" },
+        { 0xFF26, "FF26 - APUC" },
+        { 0xFF1A, "FF1A - Wave" },
+        { 0xFF1B, "FF1B - " },
+        { 0xFF1C, "FF1C - " },
+        { 0xFF1D, "FF1D - " },
+        { 0xFF1E, "FF1E - " },
+        { 0xFF40, "FF40 - LCDC" },
+        { 0xFF41, "FF41 - STAT" },
+        { 0xFF42, "FF42 - SCY" },
+        { 0xFF43, "FF43 - SCX" },
+        { 0xFF44, "FF44 - LY" },
+        { 0xFF45, "FF45 - LYC" },
+        { 0xFF46, "FF46 - DMA" },
+        { 0xFF47, "FF47 - BGP" },
+        { 0xFF48, "FF48 - OBP0" },
+        { 0xFF49, "FF49 - OBP1" },
+        { 0xFF4A, "FF4A - WX" },
+        { 0xFF4B, "FF4B - WY" },
+        { 0xFFFF, "FFFF - IE" },
+    };
+
+    DUI_MoveCursor(startX + (style->CharWidth * 84), startY);
+
+    SDL_Rect box = {
+        .w = style->CharHeight,
+        .h = style->CharHeight,
+    };
+
+    DUI_GetCursor(&box.x, &box.y);
+
+    box.x -= style->CharWidth + box.w;
+
+    for (int i = 0; i < sizeof(hwaddrs) / sizeof(struct hwaddr); ++i) {
+        SDL_SetRenderDrawColor(GetDebugWindowRenderer(),
+            (MemoryTracker[i].Write << 4),
+            (MemoryTracker[i].Read << 4),
+            0x00,
+            0xFF
+        );
+
+        SDL_RenderFillRect(GetDebugWindowRenderer(), &box);
+        box.y += style->CharHeight + style->LinePadding;
+
+        DUI_Println(hwaddrs[i].text);
+    }
 }

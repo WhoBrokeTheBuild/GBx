@@ -74,6 +74,9 @@ void StatusTabRender()
 
     DUI_PanelStart("Interrupts", column1Width, 0, false);
 
+    DUI_Println("IME: %s",
+        (CPU.IME ? "Enabled" : "Disabled"));
+
     DUI_Println("VBlank: %s", 
         (CPU.IE.Int40 ? "Enabled" : "Disabled"));
 
@@ -112,9 +115,13 @@ void StatusTabRender()
 
     DUI_Println("Clock: %d HZ", CPU.ClockSpeed);
     DUI_Println("Title: %.*s", 15, CartridgeHeader.Title);
-    DUI_Println("Cartridge: %s", GetCartridgeTypeString());
+    DUI_Println("Cartridge Type:");
+    DUI_Println(" %s", GetCartridgeTypeString());
     DUI_Println("ROM: %s", GetROMTypeString());
     DUI_Println("RAM: %s", GetRAMTypeString());
+    DUI_Println("ROM Bank:  %d", ROMBank);
+    DUI_Println("SRAM Bank: %d", SRAMBank);
+    DUI_Println("WRAM Bank: %d", WRAMBank);
 
     DUI_PanelEnd();
 

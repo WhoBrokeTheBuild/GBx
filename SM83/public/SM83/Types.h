@@ -1,6 +1,7 @@
 #ifndef SM83_TYPES_H
 #define SM83_TYPES_H
 
+#include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -36,5 +37,8 @@ typedef union
     uint8_t raw;
 
 } sm83_interrupt_flags_t;
+
+static_assert(sizeof(sm83_interrupt_flags_t) == 1,
+    "sizeof(sm83_interrupt_flags_t) != 1");
 
 #endif // SM83_TYPES_H

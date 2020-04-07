@@ -42,18 +42,19 @@ bool LoadCartridgeROM(const char * filename)
 
     LogVerbose(1, "ROM Size %zu", size);
 
-    size_t uint8_tsRead = fread(ROM, 1, size, file);
+    size_t bytesRead = fread(ROM, 1, size, file);
     fclose(file);
 
-    LogVerbose(1, "Read %zu uint8_ts", uint8_tsRead);
+    LogVerbose(1, "Read %zu bytes", bytesRead);
 
-    if (uint8_tsRead < size) {
+    if (bytesRead < size) {
         LogFatal("Failed to load ROM: '%s'", filename);
         return false;
     }
 
-    memcpy(
-        CartridgeHeader.raw, &ROM[0][HEADER_OFFSET], sizeof(CartridgeHeader));
+    memcpy(CartridgeHeader.raw, 
+        &ROM[0][HEADER_OFFSET], 
+        sizeof(CartridgeHeader));
 
     LogVerbose(1,
         "ROM Title: %.*s",
@@ -84,7 +85,7 @@ bool LoadCartridgeROM(const char * filename)
         HasCartridgeSRAM = true;
         break;
     case 0x03:
-        // MBC1+RAM+Battery
+        // MBC1+RAM+BATT
         MBCType = MBC_TYPE_MBC1;
         HasCartridgeSRAM = true;
         HasCartridgeBattery = true;
@@ -94,7 +95,7 @@ bool LoadCartridgeROM(const char * filename)
         MBCType = MBC_TYPE_MBC2;
         break;
     case 0x06:
-        // MBC2+Battery
+        // MBC2+BATT
         MBCType = MBC_TYPE_MBC2;
         HasCartridgeBattery = true;
         break;
@@ -103,7 +104,7 @@ bool LoadCartridgeROM(const char * filename)
         HasCartridgeSRAM = true;
         break;
     case 0x09:
-        // RAM+Battery
+        // RAM+BATT
         HasCartridgeSRAM = true;
         HasCartridgeBattery = true;
         break;
@@ -117,19 +118,19 @@ bool LoadCartridgeROM(const char * filename)
         HasCartridgeSRAM = true;
         break;
     case 0x0D:
-        // MMM01+SRAM+Battery
+        // MMM01+SRAM+BATT
         MBCType = MBC_TYPE_MMM01;
         HasCartridgeSRAM = true;
         HasCartridgeBattery = true;
         break;
     case 0x0F:
-        // MBC3+Timer+Battery
+        // MBC3+Timer+BATT
         MBCType = MBC_TYPE_MBC3;
         HasCartridgeTimer = true;
         HasCartridgeBattery = true;
         break;
     case 0x10:
-        // MBC3+Timer+RAM+Battery
+        // MBC3+Timer+RAM+BATT
         MBCType = MBC_TYPE_MBC3;
         HasCartridgeTimer = true;
         HasCartridgeSRAM = true;
@@ -145,7 +146,7 @@ bool LoadCartridgeROM(const char * filename)
         HasCartridgeSRAM = true;
         break;
     case 0x13:
-        // MBC3+RAM+Battery
+        // MBC3+RAM+BATT
         MBCType = MBC_TYPE_MBC3;
         HasCartridgeSRAM = true;
         HasCartridgeBattery = true;
@@ -160,7 +161,7 @@ bool LoadCartridgeROM(const char * filename)
         HasCartridgeSRAM = true;
         break;
     case 0x1B:
-        // MBC5+RAM+Battery
+        // MBC5+RAM+BATT
         MBCType = MBC_TYPE_MBC5;
         HasCartridgeSRAM = true;
         HasCartridgeBattery = true;
@@ -175,7 +176,7 @@ bool LoadCartridgeROM(const char * filename)
         HasCartridgeSRAM = true;
         break;
     case 0x1E:
-        // MBC5+Rumble+SRAM+Battery
+        // MBC5+Rumble+SRAM+BATT
         MBCType = MBC_TYPE_MBC5;
         HasCartridgeSRAM = true;
         HasCartridgeBattery = true;
@@ -185,7 +186,7 @@ bool LoadCartridgeROM(const char * filename)
         MBCType = MBC_TYPE_MBC6;
         break;
     case 0x22:
-        // MBC7+Sensor+Rumble+RAM+Battery
+        // MBC7+Sensor+Rumble+RAM+BATT
         MBCType = MBC_TYPE_MBC7;
         HasCartridgeSRAM = true;
         HasCartridgeBattery = true;
@@ -234,47 +235,47 @@ const char * GetCartridgeTypeString()
     case 0x02:
         return "MBC1+RAM";
     case 0x03:
-        return "MBC1+RAM+Battery";
+        return "MBC1+RAM+BATT";
     case 0x05:
         return "MBC2";
     case 0x06:
-        return "MBC2+Battery";
+        return "MBC2+BATT";
     case 0x08:
         return "RAM";
     case 0x09:
-        return "RAM+Battery";
+        return "RAM+BATT";
     case 0x0B:
         return "MMM01";
     case 0x0C:
         return "MMM01+SRAM";
     case 0x0D:
-        return "MMM01+SRAM+Battery";
+        return "MMM01+SRAM+BATT";
     case 0x0F:
-        return "MBC3+TIMER+Battery";
+        return "MBC3+TIMER+BATT";
     case 0x10:
-        return "MBC3+TIMER+RAM+Battery";
+        return "MBC3+TIMER+RAM+BATT";
     case 0x11:
         return "MBC3";
     case 0x12:
         return "MBC3+RAM";
     case 0x13:
-        return "MBC3+RAM+Battery";
+        return "MBC3+RAM+BATT";
     case 0x19:
         return "MBC5";
     case 0x1A:
         return "MBC5+RAM";
     case 0x1B:
-        return "MBC5+RAM+Battery";
+        return "MBC5+RAM+BATT";
     case 0x1C:
-        return "MBC5+Rumble";
+        return "MBC5+RMBL";
     case 0x1D:
-        return "MBC5+Rumble+SRAM";
+        return "MBC5+RMBL+SRAM";
     case 0x1E:
-        return "MBC5+Rumble+SRAM+Battery";
+        return "MBC5+RMBL+SRAM+BATT";
     case 0x20:
         return "MBC6";
     case 0x22:
-        return "MBC7+Sensor+Rumble+RAM+Battery";
+        return "MBC7+SNSR+RMBL+RAM+BATT";
     case 0xFC:
         return "Pocket Camera";
     case 0xFD:
