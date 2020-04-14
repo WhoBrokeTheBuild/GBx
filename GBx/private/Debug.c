@@ -1,11 +1,22 @@
 #include <GBx/Debug.h>
 
+#include <stdlib.h>
 #include <string.h>
 
 #include "Internal.h"
 #include "Log.h"
 
 #define GBX_MEMORY_TRACKER_SIZE (0x10000)
+
+void GBx_InitDebug(gbx_t * ctx)
+{
+    ctx->internal->MemoryTracker = NULL;
+}
+
+void GBx_TermDebug(gbx_t * ctx)
+{
+    GBx_TermMemoryTracker(ctx);
+}
 
 void GBx_InitMemoryTracker(gbx_t * ctx)
 {

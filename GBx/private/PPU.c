@@ -34,6 +34,8 @@ void GBx_ResetPPU(gbx_t * ctx)
     
     ctx->LCDC.raw = 0x91;
     ctx->STAT.raw = 0x00;
+
+    ctx->internal->PPUModeTicks = 0;
 }
 
 struct timespec timediff(struct timespec start, struct timespec end)

@@ -23,7 +23,7 @@ void GBx_ResetMMU(gbx_t * ctx)
 
 uint8_t GBx_ReadByte(gbx_t * ctx, uint16_t address)
 {
-    if (ctx->internal->MemoryTrackingEnabled) {
+    if (ctx->internal->MemoryTracker) {
         ctx->internal->MemoryTracker[address].Read = 0xF;
     }
 
@@ -186,7 +186,7 @@ uint8_t GBx_ReadByte(gbx_t * ctx, uint16_t address)
 
 void GBx_WriteByte(gbx_t * ctx, uint16_t address, uint8_t data)
 {
-    if (ctx->internal->MemoryTrackingEnabled) {
+    if (ctx->internal->MemoryTracker) {
         ctx->internal->MemoryTracker[address].Write = 0xF;
     }
 

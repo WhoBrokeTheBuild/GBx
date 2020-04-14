@@ -22,7 +22,7 @@ sm83_t * SM83_Init()
 
     ctx->internal->InstructionLoggingEnabled = false;
     ctx->internal->LastInstructionAddress = ctx->PC;
-    ctx->internal->StackBaseAddress = ctx->SP;
+    ctx->internal->StackLoggingEnabled = false;
 
     SM83_SetMode(ctx, SM83_MODE_DMG);
 

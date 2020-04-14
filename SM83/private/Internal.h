@@ -4,8 +4,11 @@
 #include <SM83/Context.h>
 #include <SM83/Types.h>
 
-#define INSTRUCTION_LOG_LENGTH     (32)
+#define INSTRUCTION_LOG_LENGTH     (64)
 #define INSTRUCTION_LOG_ENTRY_SIZE (24)
+
+#define STACK_LOG_LENGTH     (64)
+#define STACK_LOG_ENTRY_SIZE (24)
 
 typedef struct sm83_internal
 {
@@ -19,13 +22,17 @@ typedef struct sm83_internal
 
     uint16_t LastInstructionAddress;
 
-    uint16_t StackBaseAddress;
-
     bool InstructionLoggingEnabled;
 
     char InstructionLog[INSTRUCTION_LOG_LENGTH][INSTRUCTION_LOG_ENTRY_SIZE];
 
     int InstructionLogIndex;
+
+    bool StackLoggingEnabled;
+
+    char StackLog[STACK_LOG_LENGTH][STACK_LOG_ENTRY_SIZE];
+
+    int StackLogIndex;
 
 } sm83_internal_t;
 

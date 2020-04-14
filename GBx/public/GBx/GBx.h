@@ -5,6 +5,7 @@
 #include <GBx/Bootstrap.h>
 #include <GBx/Cartridge.h>
 #include <GBx/Joypad.h>
+#include <GBx/Debug.h>
 #include <GBx/MMU.h>
 #include <GBx/PPU.h>
 #include <GBx/Serial.h>

@@ -12,22 +12,24 @@
 
 void GBx_ResetAPU(gbx_t * ctx)
 {
+    gbx_internal_t * inctx = ctx->internal;
+
     // NR10-NR14
     ctx->Tone1.raw[0] = 0x80;
     ctx->Tone1.raw[1] = 0xBF;
     ctx->Tone1.raw[2] = 0xF3;
     ctx->Tone1.raw[4] = 0xBF;
 
-    ctx->internal->Tone1Timer = 0;
-    ctx->internal->Tone1DutyIndex = 0;
+    inctx->Tone1Timer = 0;
+    inctx->Tone1DutyIndex = 0;
 
     // NR21-NR24
     ctx->Tone2.raw[0] = 0x3F;
     ctx->Tone2.raw[1] = 0x00;
     ctx->Tone2.raw[3] = 0xBF;
 
-    ctx->internal->Tone2Timer = 0;
-    ctx->internal->Tone2DutyIndex = 0;
+    inctx->Tone2Timer = 0;
+    inctx->Tone2DutyIndex = 0;
 
     // NR30-NR34
     ctx->Wave.raw[0] = 0x7F;
@@ -36,7 +38,7 @@ void GBx_ResetAPU(gbx_t * ctx)
     ctx->Wave.raw[3] = 0xBF;
     ctx->Wave.raw[4] = 0x00;
 
-    ctx->internal->WaveTimer = 0;
+    inctx->WaveTimer = 0;
 
     // NR41-NR44
     ctx->Noise.raw[0] = 0xFF;
@@ -44,7 +46,7 @@ void GBx_ResetAPU(gbx_t * ctx)
     ctx->Noise.raw[2] = 0x00;
     ctx->Noise.raw[3] = 0xBF;
 
-    ctx->internal->NoiseTimer = 0;
+    inctx->NoiseTimer = 0;
 
     // NR50
     ctx->VolumeControl.raw = 0x77;

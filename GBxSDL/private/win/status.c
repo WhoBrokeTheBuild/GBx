@@ -238,24 +238,12 @@ void StatusTabRender(gbx_t * ctx)
 
     DUI_MoveCursor(column4X, startY);
 
-    DUI_Println("STACK [%04X]", SM83_GetStackBaseAddress(ctx->CPU));
+    DUI_Println("STACK");
 
     DUI_PanelStart(NULL, stackLogWidth, stackLogHeight, false);
 
-    char stackLogEntry[STACK_PREVIEW_ENTRY_SIZE + 1];
-
-    uint16_t addr = ctx->CPU->SP;
     for (int i = 0; i < STACK_PREVIEW_LENGTH; ++i) {
-        if (addr == SM83_GetStackBaseAddress(ctx->CPU)) {
-            break;
-        }
-
-        // uint16_t ptr = ReadWord(addr);
-
-        // SM83_Disassemble(ctx->CPU, stackLogEntry, sizeof(stackLogEntry), ptr);
-        // DUI_Println("[%04X] $%04X: %s", addr, ptr, stackLogEntry);
-
-        addr += 2;
+        DUI_Println(SM83_GetStackLogEntry(ctx->CPU, i));
     }
 
     DUI_PanelEnd();
@@ -269,9 +257,6 @@ void StatusTabRender(gbx_t * ctx)
 
     DUI_MoveCursor(bounds->x + bounds->w 
         - (style->CharWidth * 9) - (style->ButtonPadding * 2), tmpY - style->ButtonPadding);
-
-    // bool instLogEnabled = SM83_GetInstructionLoggingEnabled(CPU);
-    // DUI_Checkbox("Enabled", &instLogEnabled);
 
     DUI_MoveCursor(column4X, 
         tmpY + style->CharHeight + (style->LinePadding * 2));

@@ -190,6 +190,11 @@ void DebugWindowInit(gbx_t * ctx)
     DUI_Style * style = DUI_GetStyle();
     // style->CharWidth = 16;
     // style->CharHeight = 16;
+
+    SM83_EnableInstructionLogging(ctx->CPU);
+    SM83_EnableStackLogging(ctx->CPU);
+
+    GBx_InitMemoryTracker(ctx);
     
     InitTileDataTab(ctx);
     InitTileMapTab(ctx);
@@ -201,6 +206,8 @@ void DebugWindowInit(gbx_t * ctx)
 void DebugWindowTerm(gbx_t * ctx)
 {
     debugWindowShown = false;
+
+    GBx_TermMemoryTracker(ctx);
 
     DUI_Term();
 

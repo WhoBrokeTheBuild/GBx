@@ -8,6 +8,8 @@
 
 typedef struct gbx gbx_t;
 
+void GBx_ResetCartridge(gbx_t * ctx);
+
 bool GBx_LoadCartridge(gbx_t * ctx, const char * filename);
 
 void GBx_WriteByteMBC(gbx_t * ctx, uint16_t address, uint8_t data);

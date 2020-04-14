@@ -28,7 +28,7 @@ void cmdBreak(gbx_t * ctx, const char * input)
         SetBreakpoint(input, value);
         printf("Breakpoint set when %s=$%04X\n", input, value);
     }
-    if (strcmp(input, "SPCHNG") == 0) {
+    else if (strcmp(input, "SPCHNG") == 0) {
         SetBreakpointStackChanged(ctx);
         printf("Breakpoint set when Stack Changed");
     }

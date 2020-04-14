@@ -36,8 +36,6 @@ typedef struct gbx_internal
 
     // Debug
 
-    bool MemoryTrackingEnabled;
-
     gbx_memory_tracker_entry_t * MemoryTracker;
 
 } gbx_internal_t;

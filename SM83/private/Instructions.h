@@ -102,47 +102,50 @@ DEFINE_INSTRUCTION(CPL)
 
 // Call
 
-#define DEFINE_INSTRUCTION_CALL_COND(NAME, COND)                               \
+#define DEFINE_INSTRUCTION_CALL_COND(NAME, TEXT, COND)                         \
     DEFINE_INSTRUCTION(NAME)                                                   \
     {                                                                          \
         uint16_t u16 = SM83_NextWord(cpu);                                     \
         SM83_Tick(cpu, 1);                                                     \
         if (COND) {                                                            \
             SM83_PushWord(cpu, cpu->PC);                                       \
+            SM83_PushStackLogEntry(cpu, TEXT " $%04X", u16);                   \
             cpu->PC = u16;                                                     \
         }                                                                      \
     }
 
-DEFINE_INSTRUCTION_CALL_COND(CALL_u16, true)
-DEFINE_INSTRUCTION_CALL_COND(CALL_Z_u16, cpu->FZ)
-DEFINE_INSTRUCTION_CALL_COND(CALL_C_u16, cpu->FC)
-DEFINE_INSTRUCTION_CALL_COND(CALL_NZ_u16, !cpu->FZ)
-DEFINE_INSTRUCTION_CALL_COND(CALL_NC_u16, !cpu->FC)
+DEFINE_INSTRUCTION_CALL_COND(CALL_u16,    "CALL",    true)
+DEFINE_INSTRUCTION_CALL_COND(CALL_Z_u16,  "CALL Z",  cpu->FZ)
+DEFINE_INSTRUCTION_CALL_COND(CALL_C_u16,  "CALL C",  cpu->FC)
+DEFINE_INSTRUCTION_CALL_COND(CALL_NZ_u16, "CALL NZ", !cpu->FZ)
+DEFINE_INSTRUCTION_CALL_COND(CALL_NC_u16, "CALL NC", !cpu->FC)
 
 // Restart
 
-#define DEFINE_INSTRUCTION_RST(NAME, ADDR)                                     \
+#define DEFINE_INSTRUCTION_RST(NAME, TEXT, ADDR)                               \
     DEFINE_INSTRUCTION(NAME)                                                   \
     {                                                                          \
         SM83_PushWord(cpu, cpu->PC);                                           \
+        SM83_PushStackLogEntry(cpu, TEXT);                                     \
         SM83_Tick(cpu, 1);                                                     \
         cpu->PC = (ADDR);                                                      \
     }
 
-DEFINE_INSTRUCTION_RST(RST_00, 0x00)
-DEFINE_INSTRUCTION_RST(RST_08, 0x08)
-DEFINE_INSTRUCTION_RST(RST_10, 0x10)
-DEFINE_INSTRUCTION_RST(RST_18, 0x18)
-DEFINE_INSTRUCTION_RST(RST_20, 0x20)
-DEFINE_INSTRUCTION_RST(RST_28, 0x28)
-DEFINE_INSTRUCTION_RST(RST_30, 0x30)
-DEFINE_INSTRUCTION_RST(RST_38, 0x38)
+DEFINE_INSTRUCTION_RST(RST_00, "RST $00", 0x00)
+DEFINE_INSTRUCTION_RST(RST_08, "RST $08", 0x08)
+DEFINE_INSTRUCTION_RST(RST_10, "RST $10", 0x10)
+DEFINE_INSTRUCTION_RST(RST_18, "RST $18", 0x18)
+DEFINE_INSTRUCTION_RST(RST_20, "RST $20", 0x20)
+DEFINE_INSTRUCTION_RST(RST_28, "RST $28", 0x28)
+DEFINE_INSTRUCTION_RST(RST_30, "RST $30", 0x30)
+DEFINE_INSTRUCTION_RST(RST_38, "RST $38", 0x38)
 
 // Return
 
 DEFINE_INSTRUCTION(RET)
 {
     uint16_t pc = SM83_PopWord(cpu);
+    SM83_PopStackLogEntry(cpu);
     SM83_Tick(cpu, 1);
     cpu->PC = pc;
 }
@@ -150,6 +153,7 @@ DEFINE_INSTRUCTION(RET)
 DEFINE_INSTRUCTION(RETI)
 {
     uint16_t pc = SM83_PopWord(cpu);
+    SM83_PopStackLogEntry(cpu);
     SM83_Tick(cpu, 1);
     cpu->PC = pc;
     cpu->IME = true;
@@ -161,6 +165,7 @@ DEFINE_INSTRUCTION(RETI)
         SM83_Tick(cpu, 2);                                                     \
         if (COND) {                                                            \
             uint16_t pc = SM83_PopWord(cpu);                                   \
+            SM83_PopStackLogEntry(cpu);                                        \
             SM83_Tick(cpu, 1);                                                 \
             cpu->PC = pc;                                                      \
         }                                                                      \
@@ -212,17 +217,18 @@ DEFINE_INSTRUCTION_JR_COND(JR_NC_s8, !cpu->FC)
 
 // Push
 
-#define DEFINE_INSTRUCTION_PUSH(NAME, SRC)                                     \
+#define DEFINE_INSTRUCTION_PUSH(NAME, TEXT, SRC)                               \
     DEFINE_INSTRUCTION(NAME)                                                   \
     {                                                                          \
         SM83_Tick(cpu, 1);                                                     \
         SM83_PushWord(cpu, (SRC));                                             \
+        SM83_PushStackLogEntry(cpu, TEXT);                                     \
     }
 
-DEFINE_INSTRUCTION_PUSH(PUSH_AF, cpu->AF)
-DEFINE_INSTRUCTION_PUSH(PUSH_BC, cpu->BC)
-DEFINE_INSTRUCTION_PUSH(PUSH_DE, cpu->DE)
-DEFINE_INSTRUCTION_PUSH(PUSH_HL, cpu->HL)
+DEFINE_INSTRUCTION_PUSH(PUSH_AF, "PUSH AF", cpu->AF)
+DEFINE_INSTRUCTION_PUSH(PUSH_BC, "PUSH BC", cpu->BC)
+DEFINE_INSTRUCTION_PUSH(PUSH_DE, "PUSH DE", cpu->DE)
+DEFINE_INSTRUCTION_PUSH(PUSH_HL, "PUSH HL", cpu->HL)
 
 // Pop
 
@@ -230,6 +236,7 @@ DEFINE_INSTRUCTION_PUSH(PUSH_HL, cpu->HL)
     DEFINE_INSTRUCTION(NAME)                                                   \
     {                                                                          \
         DST = SM83_PopWord(cpu);                                               \
+        SM83_PopStackLogEntry(cpu);                                            \
     }
 
 DEFINE_INSTRUCTION_POP(POP_AF, cpu->AF)
@@ -291,15 +298,11 @@ DEFINE_INSTRUCTION_LD(LD_HL_u16, cpu->HL, SM83_NextWord(cpu))
 DEFINE_INSTRUCTION(LD_SP_u16)
 {
     cpu->SP = SM83_NextWord(cpu);
-
-    cpu->internal->StackBaseAddress = cpu->SP;
 }
 
 DEFINE_INSTRUCTION(LD_SP_HL)
 {
     cpu->SP = cpu->HL;
-
-    cpu->internal->StackBaseAddress = cpu->SP;
 }
 
 DEFINE_INSTRUCTION(LD_pu16_SP)
@@ -442,8 +445,6 @@ DEFINE_INSTRUCTION(ADD_SP_s8)
     cpu->SP = (uint16_t)result;
 
     SM83_Tick(cpu, 1);
-
-    cpu->internal->StackBaseAddress = cpu->SP;
 }
 
 // Subtract
@@ -533,8 +534,6 @@ DEFINE_INSTRUCTION(INC_SP)
 {
     SM83_Tick(cpu, 1);
     ++cpu->SP;
-
-    cpu->internal->StackBaseAddress = cpu->SP;
 }
 
 // Decrement
@@ -584,8 +583,6 @@ DEFINE_INSTRUCTION(DEC_SP)
 {
     SM83_Tick(cpu, 1);
     --cpu->SP;
-
-    cpu->internal->StackBaseAddress = cpu->SP;
 }
 
 // Compare

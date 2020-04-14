@@ -18,11 +18,15 @@ gbx_t * GBx_Init()
 
     GBx_Reset(ctx);
 
+    GBx_InitDebug(ctx);
+
     return ctx;
 }
 
 void GBx_Term(gbx_t * ctx)
 {
+    GBx_TermDebug(ctx);
+    
     free(ctx->internal);
 
     SM83_Term(ctx->CPU);
@@ -45,8 +49,11 @@ void GBx_Reset(gbx_t * ctx)
         GBx_StubBootstrap(ctx);
     }
 
+    GBx_ResetCartridge(ctx);
     GBx_ResetAPU(ctx);
     GBx_ResetJoypad(ctx);
+    GBx_ResetMMU(ctx);
+    GBx_ResetSerial(ctx);
     GBx_ResetPPU(ctx);
     GBx_ResetTimer(ctx);
 }
