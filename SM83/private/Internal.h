@@ -74,9 +74,8 @@ static SM83_INLINE uint8_t SM83_NextByte(sm83_t * cpu)
 
 static SM83_INLINE uint16_t SM83_NextWord(sm83_t * cpu)
 {
-    uint16_t data = SM83_ReadWord(cpu, cpu->PC);
     cpu->PC += 2;
-    return data;
+    return SM83_ReadWord(cpu, cpu->PC - 2);
 }
 
 static SM83_INLINE void SM83_PushWord(sm83_t * cpu, uint16_t data)
@@ -87,9 +86,8 @@ static SM83_INLINE void SM83_PushWord(sm83_t * cpu, uint16_t data)
 
 static SM83_INLINE uint16_t SM83_PopWord(sm83_t * cpu)
 {
-    uint16_t data = SM83_ReadWord(cpu, cpu->SP);
     cpu->SP += 2;
-    return data;
+    return SM83_ReadWord(cpu, cpu->SP - 2);
 }
 
 #endif // SM83_INTERNAL_H

@@ -1,24 +1,22 @@
-#include "Inst/RES.h"
+#include "Instructions.h"
 
-#include <GBx/GBx.h>
-
+#include "stub.inc.h"
 #include "unit.h"
 
-const word RAM_OFFSET = 0xC100;
-
-void setup() 
+void setup()
 {
-    TotalTicks = 0;
-    memset(&R, sizeof(R), 0);
-    R.HL = RAM_OFFSET;
+    SM83_Reset(CPU);
+    memset(Memory, 0, sizeof(Memory));
+    CPU->HL = 0x1234;
 }
 
 #define MAKE_RES_REG_TEST(REG, BIT)                 \
     UNIT_TEST(RES_##BIT##_##REG)                    \
     {                                               \
-        R.REG = 1 << BIT;                           \
-        _RES_b_##REG(BIT);                          \
-        unit_assert_hex_eq(0x00, R.REG);            \
+        CPU->REG = 1 << BIT;                           \
+        SM83_INST_RES_b_##REG(CPU, BIT);                          \
+        unit_assert_hex_eq(0x00, CPU->REG);            \
+        unit_assert_int_eq(0, CPU->internal->TotalTicks);                \
     }
 
 #define MAKE_RES_REG_TEST_LIST(REG)                 \
@@ -42,10 +40,10 @@ MAKE_RES_REG_TEST_LIST(L);
 #define MAKE_RES_pHL_TEST(RES)                          \
     UNIT_TEST(RES_##RES##_pHL)                          \
     {                                                   \
-        WriteByte(RAM_OFFSET, 1 << RES);                \
-        _RES_b_pHL(RES);                                \
-        unit_assert_hex_eq(0x00, ReadByte(RAM_OFFSET)); \
-        unit_assert_int_eq(TotalTicks, 8);                \
+        writeByte(0x1234, 1 << RES);                \
+        SM83_INST_RES_b_pHL(CPU, RES);                                \
+        unit_assert_hex_eq(0x00, readByte(0x1234)); \
+        unit_assert_int_eq(2, CPU->internal->TotalTicks);                \
     }
 
 MAKE_RES_pHL_TEST(0)
@@ -136,7 +134,8 @@ UNIT_TEST_SUITE(RES)
 
 int main(int argc, char ** argv)
 {
-    VerboseLevel = 4;
+    stub_init();
+
 	UNIT_RUN_SUITE(RES);
 	UNIT_REPORT();
 	return UNIT_EXIT_CODE;

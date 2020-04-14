@@ -1,50 +1,49 @@
-#include "Inst/PUSH.h"
+#include "Instructions.h"
 
-#include <GBx/GBx.h>
-
+#include "stub.inc.h"
 #include "unit.h"
 
 void setup() 
 {
-    TotalTicks = 0;
-    memset(&R, sizeof(R), 0);
-    R.SP = 0xFFFE;
+    SM83_Reset(CPU);
+    memset(Memory, 0, sizeof(Memory));
+    CPU->SP = 0xFFFE;
 }
 
 UNIT_TEST(PUSH_AF)
 {
-    R.AF = 0x1234;
-    _PUSH_AF();
-    unit_assert_hex_eq(0xFFFC, R.SP);
-    unit_assert_hex_eq(0x1234, ReadWord(R.SP));
-    unit_assert_int_eq(16, TotalTicks);
+    CPU->AF = 0x1234;
+    SM83_INST_PUSH_AF(CPU);
+    unit_assert_hex_eq(0xFFFC, CPU->SP);
+    unit_assert_hex_eq(0x1234, readWord(CPU->SP));
+    unit_assert_int_eq(3, CPU->internal->TotalTicks);
 }
 
 UNIT_TEST(PUSH_BC)
 {
-    R.BC = 0x1234;
-    _PUSH_BC();
-    unit_assert_hex_eq(0xFFFC, R.SP);
-    unit_assert_hex_eq(0x1234, ReadWord(R.SP));
-    unit_assert_int_eq(16, TotalTicks);
+    CPU->BC = 0x1234;
+    SM83_INST_PUSH_BC(CPU);
+    unit_assert_hex_eq(0xFFFC, CPU->SP);
+    unit_assert_hex_eq(0x1234, readWord(CPU->SP));
+    unit_assert_int_eq(3, CPU->internal->TotalTicks);
 }
 
 UNIT_TEST(PUSH_DE)
 {
-    R.DE = 0x1234;
-    _PUSH_DE();
-    unit_assert_hex_eq(0xFFFC, R.SP);
-    unit_assert_hex_eq(0x1234, ReadWord(R.SP));
-    unit_assert_int_eq(16, TotalTicks);
+    CPU->DE = 0x1234;
+    SM83_INST_PUSH_DE(CPU);
+    unit_assert_hex_eq(0xFFFC, CPU->SP);
+    unit_assert_hex_eq(0x1234, readWord(CPU->SP));
+    unit_assert_int_eq(3, CPU->internal->TotalTicks);
 }
 
 UNIT_TEST(PUSH_HL)
 {
-    R.HL = 0x1234;
-    _PUSH_HL();
-    unit_assert_hex_eq(0xFFFC, R.SP);
-    unit_assert_hex_eq(0x1234, ReadWord(R.SP));
-    unit_assert_int_eq(16, TotalTicks);
+    CPU->HL = 0x1234;
+    SM83_INST_PUSH_HL(CPU);
+    unit_assert_hex_eq(0xFFFC, CPU->SP);
+    unit_assert_hex_eq(0x1234, readWord(CPU->SP));
+    unit_assert_int_eq(3, CPU->internal->TotalTicks);
 }
 
 UNIT_TEST_SUITE(PUSH)
@@ -59,7 +58,8 @@ UNIT_TEST_SUITE(PUSH)
 
 int main(int argc, char ** argv)
 {
-    VerboseLevel = 4;
+    stub_init();
+
 	UNIT_RUN_SUITE(PUSH);
 	UNIT_REPORT();
 	return UNIT_EXIT_CODE;

@@ -1,24 +1,22 @@
-#include "Inst/SET.h"
+#include "Instructions.h"
 
-#include <GBx/GBx.h>
-
+#include "stub.inc.h"
 #include "unit.h"
 
-const word RAM_OFFSET = 0xC100;
-
-void setup() 
+void setup()
 {
-    TotalTicks = 0;
-    memset(&R, sizeof(R), 0);
-    R.HL = RAM_OFFSET;
+    SM83_Reset(CPU);
+    memset(Memory, 0, sizeof(Memory));
+    CPU->HL = 0x1234;
 }
 
 #define MAKE_SET_REG_TEST(REG, BIT)                 \
     UNIT_TEST(SET_##BIT##_##REG)                    \
     {                                               \
-        R.REG = 0;                                  \
-        _SET_b_##REG(BIT);                          \
-        unit_assert_hex_eq(1 << BIT, R.REG);        \
+        CPU->REG = 0;                                  \
+        SM83_INST_SET_b_##REG(CPU, BIT);                          \
+        unit_assert_hex_eq(1 << BIT, CPU->REG);        \
+        unit_assert_int_eq(0, CPU->internal->TotalTicks);  \
     }
 
 #define MAKE_SET_REG_TEST_LIST(REG)                 \
@@ -39,13 +37,13 @@ MAKE_SET_REG_TEST_LIST(E);
 MAKE_SET_REG_TEST_LIST(H);
 MAKE_SET_REG_TEST_LIST(L);
 
-#define MAKE_SET_pHL_TEST(SET)                              \
-    UNIT_TEST(SET_##SET##_pHL)                              \
+#define MAKE_SET_pHL_TEST(BIT)                              \
+    UNIT_TEST(SET_##BIT##_pHL)                              \
     {                                                       \
-        WriteByte(RAM_OFFSET, 0);                           \
-        _SET_b_pHL(SET);                                    \
-        unit_assert_hex_eq(1 << SET, ReadByte(RAM_OFFSET)); \
-        unit_assert_int_eq(TotalTicks, 8);                    \
+        writeByte(0x1234, 0);                           \
+        SM83_INST_SET_b_pHL(CPU, BIT);                                    \
+        unit_assert_hex_eq(1 << BIT, readByte(0x1234)); \
+        unit_assert_int_eq(2, CPU->internal->TotalTicks);                    \
     }
 
 MAKE_SET_pHL_TEST(0)
@@ -136,7 +134,8 @@ UNIT_TEST_SUITE(SET)
 
 int main(int argc, char ** argv)
 {
-    VerboseLevel = 4;
+    stub_init();
+
 	UNIT_RUN_SUITE(SET);
 	UNIT_REPORT();
 	return UNIT_EXIT_CODE;

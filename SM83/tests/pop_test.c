@@ -1,50 +1,49 @@
-#include "Inst/POP.h"
+#include "Instructions.h"
 
-#include <GBx/GBx.h>
-
+#include "stub.inc.h"
 #include "unit.h"
 
 void setup() 
 {
-    TotalTicks = 0;
-    memset(&R, sizeof(R), 0);
-    R.SP = 0xFFFE;
+    SM83_Reset(CPU);
+    memset(Memory, 0, sizeof(Memory));
+    CPU->SP = 0xFFFE;
 }
 
 UNIT_TEST(POP_AF)
 {
-    PushWord(0x1234);
-    _POP_AF();
-    unit_assert_hex_eq(0xFFFE, R.SP);
-    unit_assert_hex_eq(0x1234, R.AF);
-    unit_assert_int_eq(12, TotalTicks);
+    pushWord(0x1234);
+    SM83_INST_POP_AF(CPU);
+    unit_assert_hex_eq(0xFFFE, CPU->SP);
+    unit_assert_hex_eq(0x1234, CPU->AF);
+    unit_assert_int_eq(2, CPU->internal->TotalTicks);
 }
 
 UNIT_TEST(POP_BC)
 {
-    PushWord(0x1234);
-    _POP_BC();
-    unit_assert_hex_eq(0xFFFE, R.SP);
-    unit_assert_hex_eq(0x1234, R.BC);
-    unit_assert_int_eq(12, TotalTicks);
+    pushWord(0x1234);
+    SM83_INST_POP_BC(CPU);
+    unit_assert_hex_eq(0xFFFE, CPU->SP);
+    unit_assert_hex_eq(0x1234, CPU->BC);
+    unit_assert_int_eq(2, CPU->internal->TotalTicks);
 }
 
 UNIT_TEST(POP_DE)
 {
-    PushWord(0x1234);
-    _POP_DE();
-    unit_assert_hex_eq(0xFFFE, R.SP);
-    unit_assert_hex_eq(0x1234, R.DE);
-    unit_assert_int_eq(12, TotalTicks);
+    pushWord(0x1234);
+    SM83_INST_POP_DE(CPU);
+    unit_assert_hex_eq(0xFFFE, CPU->SP);
+    unit_assert_hex_eq(0x1234, CPU->DE);
+    unit_assert_int_eq(2, CPU->internal->TotalTicks);
 }
 
 UNIT_TEST(POP_HL)
 {
-    PushWord(0x1234);
-    _POP_HL();
-    unit_assert_int_eq(0xFFFE, R.SP);
-    unit_assert_int_eq(0x1234, R.HL);
-    unit_assert_int_eq(12, TotalTicks);
+    pushWord(0x1234);
+    SM83_INST_POP_HL(CPU);
+    unit_assert_int_eq(0xFFFE, CPU->SP);
+    unit_assert_int_eq(0x1234, CPU->HL);
+    unit_assert_int_eq(2, CPU->internal->TotalTicks);
 }
 
 UNIT_TEST_SUITE(POP)
@@ -59,7 +58,8 @@ UNIT_TEST_SUITE(POP)
 
 int main(int argc, char ** argv)
 {
-    VerboseLevel = 4;
+    stub_init();
+
 	UNIT_RUN_SUITE(POP);
 	UNIT_REPORT();
 	return UNIT_EXIT_CODE;

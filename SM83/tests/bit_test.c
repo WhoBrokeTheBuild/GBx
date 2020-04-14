@@ -1,42 +1,39 @@
-#include "Inst/BIT.h"
+#include "Instructions.h"
 
-#include <GBx/GBx.h>
-
+#include "stub.inc.h"
 #include "unit.h"
 
-const word RAM_OFFSET = 0xC100;
-
-void setup() 
+void setup()
 {
-    TotalTicks = 0;
-    memset(&R, sizeof(R), 0);
-    R.HL = RAM_OFFSET;
+    SM83_Reset(CPU);
+    memset(Memory, 0, sizeof(Memory));
+    CPU->HL = 0x1234;
 }
 
-#define MAKE_BIT_REG_TEST(REG, BIT)                 \
-    UNIT_TEST(BIT_##BIT##_##REG)                    \
-    {                                               \
-        R.REG = 1 << BIT;                           \
-        _BIT_b_##REG(BIT);                          \
-        unit_assert_false(R.FZ);                    \
-        unit_assert_false(R.FN);                    \
-        unit_assert_true(R.FH);                     \
-                                                    \
-        R.REG = 0;                                  \
-        _BIT_b_##REG(BIT);                          \
-        unit_assert_true(R.FZ);                     \
-        unit_assert_false(R.FN);                    \
-        unit_assert_true(R.FH);                     \
+#define MAKE_BIT_REG_TEST(REG, BIT)                                            \
+    UNIT_TEST(BIT_##BIT##_##REG)                                               \
+    {                                                                          \
+        CPU->REG = 1 << BIT;                                                   \
+        SM83_INST_BIT_b_##REG(CPU, BIT);                                       \
+        unit_assert_false(CPU->FZ);                                            \
+        unit_assert_false(CPU->FN);                                            \
+        unit_assert_true(CPU->FH);                                             \
+                                                                               \
+        CPU->REG = 0;                                                          \
+        SM83_INST_BIT_b_##REG(CPU, BIT);                                       \
+        unit_assert_true(CPU->FZ);                                             \
+        unit_assert_false(CPU->FN);                                            \
+        unit_assert_true(CPU->FH);                                             \
     }
 
-#define MAKE_BIT_REG_TEST_LIST(REG)                 \
-    MAKE_BIT_REG_TEST(REG, 0)                           \
-    MAKE_BIT_REG_TEST(REG, 1)                           \
-    MAKE_BIT_REG_TEST(REG, 2)                           \
-    MAKE_BIT_REG_TEST(REG, 3)                           \
-    MAKE_BIT_REG_TEST(REG, 4)                           \
-    MAKE_BIT_REG_TEST(REG, 5)                           \
-    MAKE_BIT_REG_TEST(REG, 6)                           \
+#define MAKE_BIT_REG_TEST_LIST(REG)                                            \
+    MAKE_BIT_REG_TEST(REG, 0)                                                  \
+    MAKE_BIT_REG_TEST(REG, 1)                                                  \
+    MAKE_BIT_REG_TEST(REG, 2)                                                  \
+    MAKE_BIT_REG_TEST(REG, 3)                                                  \
+    MAKE_BIT_REG_TEST(REG, 4)                                                  \
+    MAKE_BIT_REG_TEST(REG, 5)                                                  \
+    MAKE_BIT_REG_TEST(REG, 6)                                                  \
     MAKE_BIT_REG_TEST(REG, 7)
 
 MAKE_BIT_REG_TEST_LIST(A);
@@ -47,36 +44,31 @@ MAKE_BIT_REG_TEST_LIST(E);
 MAKE_BIT_REG_TEST_LIST(H);
 MAKE_BIT_REG_TEST_LIST(L);
 
-#define MAKE_BIT_pHL_TEST(BIT)                      \
-    UNIT_TEST(BIT_##BIT##_pHL)                      \
-    {                                               \
-        WriteByte(RAM_OFFSET, 1 << BIT);            \
-        _BIT_b_pHL(BIT);                            \
-        unit_assert_false(R.FZ);                    \
-        unit_assert_false(R.FN);                    \
-        unit_assert_true(R.FH);                     \
-        unit_assert_int_eq(TotalTicks, 4);            \
-                                                    \
-        WriteByte(RAM_OFFSET, 0);                   \
-        _BIT_b_pHL(BIT);                            \
-        unit_assert_true(R.FZ);                     \
-        unit_assert_false(R.FN);                    \
-        unit_assert_true(R.FH);                     \
-        unit_assert_int_eq(TotalTicks, 8);            \
+#define MAKE_BIT_pHL_TEST(BIT)                                                 \
+    UNIT_TEST(BIT_##BIT##_pHL)                                                 \
+    {                                                                          \
+        writeByte(0x1234, 1 << BIT);                                           \
+        SM83_INST_BIT_b_pHL(CPU, BIT);                                         \
+        unit_assert_false(CPU->FZ);                                            \
+        unit_assert_false(CPU->FN);                                            \
+        unit_assert_true(CPU->FH);                                             \
+        unit_assert_int_eq(CPU->internal->TotalTicks, 1);                      \
+                                                                               \
+        writeByte(0x1234, 0);                                                  \
+        SM83_INST_BIT_b_pHL(CPU, BIT);                                         \
+        unit_assert_true(CPU->FZ);                                             \
+        unit_assert_false(CPU->FN);                                            \
+        unit_assert_true(CPU->FH);                                             \
+        unit_assert_int_eq(CPU->internal->TotalTicks, 2);                      \
     }
 
-MAKE_BIT_pHL_TEST(0)
-MAKE_BIT_pHL_TEST(1)
-MAKE_BIT_pHL_TEST(2)
-MAKE_BIT_pHL_TEST(3)
-MAKE_BIT_pHL_TEST(4)
-MAKE_BIT_pHL_TEST(5)
-MAKE_BIT_pHL_TEST(6)
-MAKE_BIT_pHL_TEST(7)
+MAKE_BIT_pHL_TEST(0) MAKE_BIT_pHL_TEST(1) MAKE_BIT_pHL_TEST(2)
+    MAKE_BIT_pHL_TEST(3) MAKE_BIT_pHL_TEST(4) MAKE_BIT_pHL_TEST(5)
+        MAKE_BIT_pHL_TEST(6) MAKE_BIT_pHL_TEST(7)
 
-UNIT_TEST_SUITE(BIT)
+            UNIT_TEST_SUITE(BIT)
 {
-	UNIT_SUITE_SETUP(&setup);
+    UNIT_SUITE_SETUP(&setup);
 
     UNIT_RUN_TEST(BIT_0_A);
     UNIT_RUN_TEST(BIT_0_B);
@@ -153,8 +145,9 @@ UNIT_TEST_SUITE(BIT)
 
 int main(int argc, char ** argv)
 {
-    VerboseLevel = 4;
-	UNIT_RUN_SUITE(BIT);
-	UNIT_REPORT();
-	return UNIT_EXIT_CODE;
+    stub_init();
+
+    UNIT_RUN_SUITE(BIT);
+    UNIT_REPORT();
+    return UNIT_EXIT_CODE;
 }

@@ -13,16 +13,13 @@ sm83_t * SM83_Init()
 
     ctx->VerboseLevel = 0;
 
-    SM83_Reset(ctx);
-
     ctx->internal = malloc(sizeof(sm83_internal_t));
     assert(ctx->internal);
 
-    ctx->internal->TotalTicks = 0;
-
     ctx->internal->InstructionLoggingEnabled = false;
-    ctx->internal->LastInstructionAddress = ctx->PC;
     ctx->internal->StackLoggingEnabled = false;
+
+    SM83_Reset(ctx);
 
     SM83_SetMode(ctx, SM83_MODE_DMG);
 
@@ -51,6 +48,11 @@ void SM83_Reset(sm83_t * ctx)
 
     ctx->IF.raw = 0x00;
     ctx->IE.raw = 0x00;
+
+    ctx->internal->TotalTicks = 0;
+    ctx->internal->StackLogIndex = 0;
+    ctx->internal->InstructionLogIndex = 0;
+    ctx->internal->LastInstructionAddress = ctx->PC;
 }
 
 bool SM83_GetEnabled(sm83_t * ctx)

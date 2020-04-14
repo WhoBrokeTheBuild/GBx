@@ -1,117 +1,115 @@
-#include "Inst/CALL.h"
+#include "Instructions.h"
 
-#include <GBx/GBx.h>
-
+#include "stub.inc.h"
 #include "unit.h"
-
-const word RAM_OFFSET = 0xC100;
 
 void setup() 
 {
-    TotalTicks = 0;
-    memset(&R, sizeof(R), 0);
-    R.PC = RAM_OFFSET;
-    R.SP = RAM_OFFSET + 0x0100;
+    SM83_Reset(CPU);
+    memset(Memory, 0, sizeof(Memory));
+    CPU->PC = 0x0000;
+    CPU->SP = 0xFFFE;
 }
 
-UNIT_TEST(CALL_uu)
+UNIT_TEST(CALL_u16)
 {
-    WriteWord(R.PC, 0x1234);
-    _CALL_uu();
-    unit_assert_hex_eq(0x1234, R.PC);
-    unit_assert_int_eq(20, TotalTicks);
+    writeWord(CPU->PC, 0x1234);
+    SM83_INST_CALL_u16(CPU);
+    unit_assert_hex_eq(0x1234, CPU->PC);
+    unit_assert_int_eq(5, CPU->internal->TotalTicks);
 }
 
-UNIT_TEST(CALL_NZ_uu_true)
+UNIT_TEST(CALL_NZ_u16_true)
 {
-    WriteWord(R.PC, 0x1234);
-    R.FZ = true;
-    _CALL_NZ_uu();
-    unit_assert_hex_eq(RAM_OFFSET + 2, R.PC);
-    unit_assert_int_eq(8, TotalTicks);
+    writeWord(CPU->PC, 0x1234);
+    CPU->FZ = true;
+    SM83_INST_CALL_NZ_u16(CPU);
+    unit_assert_hex_eq(0x0002, CPU->PC);
+    unit_assert_int_eq(3, CPU->internal->TotalTicks);
 }
 
-UNIT_TEST(CALL_NZ_uu_false)
+UNIT_TEST(CALL_NZ_u16_false)
 {
-    WriteWord(R.PC, 0x1234);
-    R.FZ = false;
-    _CALL_NZ_uu();
-    unit_assert_hex_eq(0x1234, R.PC);
-    unit_assert_int_eq(20, TotalTicks);
+    writeWord(CPU->PC, 0x1234);
+    CPU->FZ = false;
+    SM83_INST_CALL_NZ_u16(CPU);
+    unit_assert_hex_eq(0x1234, CPU->PC);
+    unit_assert_int_eq(5, CPU->internal->TotalTicks);
 }
 
-UNIT_TEST(CALL_Z_uu_false)
+UNIT_TEST(CALL_Z_u16_false)
 {
-    WriteWord(R.PC, 0x1234);
-    R.FZ = false;
-    _CALL_Z_uu();
-    unit_assert_hex_eq(RAM_OFFSET + 2, R.PC);
-    unit_assert_int_eq(8, TotalTicks);
+    writeWord(CPU->PC, 0x1234);
+    CPU->FZ = false;
+    SM83_INST_CALL_Z_u16(CPU);
+    unit_assert_hex_eq(0x0002, CPU->PC);
+    unit_assert_int_eq(3, CPU->internal->TotalTicks);
 }
 
-UNIT_TEST(CALL_Z_uu_true)
+UNIT_TEST(CALL_Z_u16_true)
 {
-    WriteWord(R.PC, 0x1234);
-    R.FZ = true;
-    _CALL_Z_uu();
-    unit_assert_hex_eq(0x1234, R.PC);
-    unit_assert_int_eq(20, TotalTicks);
+    writeWord(CPU->PC, 0x1234);
+    CPU->FZ = true;
+    SM83_INST_CALL_Z_u16(CPU);
+    unit_assert_hex_eq(0x1234, CPU->PC);
+    unit_assert_int_eq(5, CPU->internal->TotalTicks);
 }
 
-UNIT_TEST(CALL_NC_uu_true)
+UNIT_TEST(CALL_NC_u16_true)
 {
-    WriteWord(R.PC, 0x1234);
-    R.FC = true;
-    _CALL_NC_uu();
-    unit_assert_hex_eq(RAM_OFFSET + 2, R.PC);
-    unit_assert_int_eq(8, TotalTicks);
+    writeWord(CPU->PC, 0x1234);
+    CPU->FC = true;
+    SM83_INST_CALL_NC_u16(CPU);
+    unit_assert_hex_eq(0x0002, CPU->PC);
+    unit_assert_int_eq(3, CPU->internal->TotalTicks);
 }
 
-UNIT_TEST(CALL_NC_uu_false)
+UNIT_TEST(CALL_NC_u16_false)
 {
-    WriteWord(R.PC, 0x1234);
-    R.FC = false;
-    _CALL_NC_uu();
-    unit_assert_hex_eq(0x1234, R.PC);
-    unit_assert_int_eq(20, TotalTicks);
+    writeWord(CPU->PC, 0x1234);
+    CPU->FC = false;
+    SM83_INST_CALL_NC_u16(CPU);
+    unit_assert_hex_eq(0x1234, CPU->PC);
+    unit_assert_int_eq(5, CPU->internal->TotalTicks);
 }
 
-UNIT_TEST(CALL_C_uu_false)
+UNIT_TEST(CALL_C_u16_false)
 {
-    WriteWord(R.PC, 0x1234);
-    R.FC = false;
-    _CALL_C_uu();
-    unit_assert_hex_eq(RAM_OFFSET + 2, R.PC);
-    unit_assert_int_eq(8, TotalTicks);
+    writeWord(CPU->PC, 0x1234);
+    CPU->FC = false;
+    SM83_INST_CALL_C_u16(CPU);
+    unit_assert_hex_eq(0x0002, CPU->PC);
+    unit_assert_int_eq(3, CPU->internal->TotalTicks);
 }
 
-UNIT_TEST(CALL_C_uu_true)
+UNIT_TEST(CALL_C_u16_true)
 {
-    WriteWord(R.PC, 0x1234);
-    R.FC = true;
-    _CALL_C_uu();
-    unit_assert_hex_eq(0x1234, R.PC);
-    unit_assert_int_eq(20, TotalTicks);
+    writeWord(CPU->PC, 0x1234);
+    CPU->FC = true;
+    SM83_INST_CALL_C_u16(CPU);
+    unit_assert_hex_eq(0x1234, CPU->PC);
+    unit_assert_int_eq(5, CPU->internal->TotalTicks);
 }
 
 UNIT_TEST_SUITE(CALL)
 {
 	UNIT_SUITE_SETUP(&setup);
 
-	UNIT_RUN_TEST(CALL_uu);
-	UNIT_RUN_TEST(CALL_NZ_uu_true);
-	UNIT_RUN_TEST(CALL_NZ_uu_false);
-	UNIT_RUN_TEST(CALL_Z_uu_false);
-	UNIT_RUN_TEST(CALL_Z_uu_true);
-	UNIT_RUN_TEST(CALL_NC_uu_true);
-	UNIT_RUN_TEST(CALL_NC_uu_false);
-	UNIT_RUN_TEST(CALL_C_uu_false);
-	UNIT_RUN_TEST(CALL_C_uu_true);
+	UNIT_RUN_TEST(CALL_u16);
+	UNIT_RUN_TEST(CALL_NZ_u16_true);
+	UNIT_RUN_TEST(CALL_NZ_u16_false);
+	UNIT_RUN_TEST(CALL_Z_u16_false);
+	UNIT_RUN_TEST(CALL_Z_u16_true);
+	UNIT_RUN_TEST(CALL_NC_u16_true);
+	UNIT_RUN_TEST(CALL_NC_u16_false);
+	UNIT_RUN_TEST(CALL_C_u16_false);
+	UNIT_RUN_TEST(CALL_C_u16_true);
 }
 
 int main(int argc, char ** argv)
 {
-    VerboseLevel = 4;
+    stub_init();
+
 	UNIT_RUN_SUITE(CALL);
 	UNIT_REPORT();
 	return UNIT_EXIT_CODE;

@@ -312,7 +312,7 @@ DEFINE_INSTRUCTION(LD_pu16_SP)
 
 DEFINE_INSTRUCTION(LD_pu16_A)
 {
-    SM83_WriteWord(cpu, SM83_NextWord(cpu), cpu->A);
+    SM83_WriteByte(cpu, SM83_NextWord(cpu), cpu->A);
 }
 
 DEFINE_INSTRUCTION(LD_A_pu16)
@@ -861,7 +861,7 @@ DEFINE_INSTRUCTION(SWAP_pHL)
 #define _BIT(X)                                                                \
     cpu->FZ = (((X) & (1 << bit)) == 0);                                       \
     cpu->FN = false;                                                           \
-    cpu->FH = true;
+    cpu->FH = true
 
 DEFINE_SIMPLE_BIT_INSTRUCTION(BIT_b_A, _BIT(cpu->A))
 DEFINE_SIMPLE_BIT_INSTRUCTION(BIT_b_B, _BIT(cpu->B))
@@ -874,15 +874,15 @@ DEFINE_SIMPLE_BIT_INSTRUCTION(BIT_b_pHL, _BIT(SM83_ReadByte(cpu, cpu->HL)))
 
 // Reset Bit
 
-#define _RES(X) (X) &= ~(1 << bit);
+#define _RES(X) (X) &= ~(1 << bit)
 
-DEFINE_SIMPLE_BIT_INSTRUCTION(RES_b_A, _BIT(cpu->A))
-DEFINE_SIMPLE_BIT_INSTRUCTION(RES_b_B, _BIT(cpu->B))
-DEFINE_SIMPLE_BIT_INSTRUCTION(RES_b_C, _BIT(cpu->C))
-DEFINE_SIMPLE_BIT_INSTRUCTION(RES_b_D, _BIT(cpu->D))
-DEFINE_SIMPLE_BIT_INSTRUCTION(RES_b_E, _BIT(cpu->E))
-DEFINE_SIMPLE_BIT_INSTRUCTION(RES_b_H, _BIT(cpu->H))
-DEFINE_SIMPLE_BIT_INSTRUCTION(RES_b_L, _BIT(cpu->L))
+DEFINE_SIMPLE_BIT_INSTRUCTION(RES_b_A, _RES(cpu->A))
+DEFINE_SIMPLE_BIT_INSTRUCTION(RES_b_B, _RES(cpu->B))
+DEFINE_SIMPLE_BIT_INSTRUCTION(RES_b_C, _RES(cpu->C))
+DEFINE_SIMPLE_BIT_INSTRUCTION(RES_b_D, _RES(cpu->D))
+DEFINE_SIMPLE_BIT_INSTRUCTION(RES_b_E, _RES(cpu->E))
+DEFINE_SIMPLE_BIT_INSTRUCTION(RES_b_H, _RES(cpu->H))
+DEFINE_SIMPLE_BIT_INSTRUCTION(RES_b_L, _RES(cpu->L))
 
 DEFINE_BIT_INSTRUCTION(RES_b_pHL)
 {
@@ -895,7 +895,7 @@ DEFINE_BIT_INSTRUCTION(RES_b_pHL)
 
 // Set Bit
 
-#define _SET(X) (X) |= (1 << bit);
+#define _SET(X) (X) |= (1 << bit)
 
 DEFINE_SIMPLE_BIT_INSTRUCTION(SET_b_A, _SET(cpu->A))
 DEFINE_SIMPLE_BIT_INSTRUCTION(SET_b_B, _SET(cpu->B))

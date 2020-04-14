@@ -1,64 +1,62 @@
-#include "Inst/SLA.h"
-#include "Inst/SRA.h"
-#include "Inst/SRL.h"
-#include "Inst/SWAP.h"
+#include "Instructions.h"
 
-#include <GBx/GBx.h>
-
+#include "stub.inc.h"
 #include "unit.h"
 
-const word RAM_OFFSET = 0xC100;
-
-void setup() 
+void setup()
 {
-    TotalTicks = 0;
-    memset(&R, sizeof(R), 0);
-    R.HL = RAM_OFFSET;
+    SM83_Reset(CPU);
+    memset(Memory, 0, sizeof(Memory));
+    CPU->HL = 0x1234;
 }
 
 #define MAKE_SLA_TEST(REG)                          \
     UNIT_TEST(SLA_##REG##_00)                       \
     {                                               \
-        R.REG = 0x00;                               \
-        _SLA_##REG();                               \
-        unit_assert_true(R.FZ);                     \
-        unit_assert_false(R.FN);                    \
-        unit_assert_false(R.FH);                    \
-        unit_assert_false(R.FC);                    \
-        unit_assert_hex_eq(0x00, R.REG);            \
+        CPU->REG = 0x00;                               \
+        SM83_INST_SLA_##REG(CPU);                               \
+        unit_assert_true(CPU->FZ);                     \
+        unit_assert_false(CPU->FN);                    \
+        unit_assert_false(CPU->FH);                    \
+        unit_assert_false(CPU->FC);                    \
+        unit_assert_hex_eq(0x00, CPU->REG);            \
+        unit_assert_int_eq(0, CPU->internal->TotalTicks);   \
     }                                               \
                                                     \
     UNIT_TEST(SLA_##REG##_01)                       \
     {                                               \
-        R.REG = 0x01;                               \
-        _SLA_##REG();                               \
-        unit_assert_false(R.FZ);                    \
-        unit_assert_false(R.FN);                    \
-        unit_assert_false(R.FH);                    \
-        unit_assert_false(R.FC);                    \
-        unit_assert_hex_eq(0x02, R.REG);            \
+        CPU->REG = 0x01;                               \
+        SM83_INST_SLA_##REG(CPU);                               \
+        unit_assert_false(CPU->FZ);                    \
+        unit_assert_false(CPU->FN);                    \
+        unit_assert_false(CPU->FH);                    \
+        unit_assert_false(CPU->FC);                    \
+        unit_assert_hex_eq(0x02, CPU->REG);            \
+        unit_assert_int_eq(0, CPU->internal->TotalTicks);   \
     }                                               \
                                                     \
     UNIT_TEST(SLA_##REG##_80)                       \
     {                                               \
-        R.REG = 0x80;                               \
-        _SLA_##REG();                               \
-        unit_assert_true(R.FZ);                     \
-        unit_assert_false(R.FN);                    \
-        unit_assert_false(R.FH);                    \
-        unit_assert_true(R.FC);                     \
-        unit_assert_hex_eq(0x00, R.REG);            \
+        CPU->REG = 0x80;                               \
+        SM83_INST_SLA_##REG(CPU);                               \
+        unit_assert_true(CPU->FZ);                     \
+        unit_assert_false(CPU->FN);                    \
+        unit_assert_false(CPU->FH);                    \
+        unit_assert_true(CPU->FC);                     \
+        unit_assert_hex_eq(0x00, CPU->REG);            \
+        unit_assert_int_eq(0, CPU->internal->TotalTicks);   \
     }                                               \
                                                     \
     UNIT_TEST(SLA_##REG##_FF)                       \
     {                                               \
-        R.REG = 0xFF;                               \
-        _SLA_##REG();                               \
-        unit_assert_false(R.FZ);                    \
-        unit_assert_false(R.FN);                    \
-        unit_assert_false(R.FH);                    \
-        unit_assert_true(R.FC);                     \
-        unit_assert_hex_eq(0xFE, R.REG);            \
+        CPU->REG = 0xFF;                               \
+        SM83_INST_SLA_##REG(CPU);                               \
+        unit_assert_false(CPU->FZ);                    \
+        unit_assert_false(CPU->FN);                    \
+        unit_assert_false(CPU->FH);                    \
+        unit_assert_true(CPU->FC);                     \
+        unit_assert_hex_eq(0xFE, CPU->REG);            \
+        unit_assert_int_eq(0, CPU->internal->TotalTicks);   \
     }
 
 MAKE_SLA_TEST(A);
@@ -71,46 +69,50 @@ MAKE_SLA_TEST(L);
 
 UNIT_TEST(SLA_pHL_00)
 {
-    WriteByte(R.HL, 0x00);
-    _SLA_pHL();
-    unit_assert_true(R.FZ);
-    unit_assert_false(R.FN);
-    unit_assert_false(R.FH);
-    unit_assert_false(R.FC);
-    unit_assert_hex_eq(0x00, ReadByte(R.HL));
+    writeByte(CPU->HL, 0x00);
+    SM83_INST_SLA_pHL(CPU);
+    unit_assert_true(CPU->FZ);
+    unit_assert_false(CPU->FN);
+    unit_assert_false(CPU->FH);
+    unit_assert_false(CPU->FC);
+    unit_assert_hex_eq(0x00, readByte(CPU->HL));
+    unit_assert_int_eq(2, CPU->internal->TotalTicks);
 }
 
 UNIT_TEST(SLA_pHL_01)
 {
-    WriteByte(R.HL, 0x01);
-    _SLA_pHL();
-    unit_assert_false(R.FZ);
-    unit_assert_false(R.FN);
-    unit_assert_false(R.FH);
-    unit_assert_false(R.FC);
-    unit_assert_hex_eq(0x02, ReadByte(R.HL));
+    writeByte(CPU->HL, 0x01);
+    SM83_INST_SLA_pHL(CPU);
+    unit_assert_false(CPU->FZ);
+    unit_assert_false(CPU->FN);
+    unit_assert_false(CPU->FH);
+    unit_assert_false(CPU->FC);
+    unit_assert_hex_eq(0x02, readByte(CPU->HL));
+    unit_assert_int_eq(2, CPU->internal->TotalTicks);
 }
 
 UNIT_TEST(SLA_pHL_80)
 {
-    WriteByte(R.HL, 0x80);
-    _SLA_pHL();
-    unit_assert_true(R.FZ);
-    unit_assert_false(R.FN);
-    unit_assert_false(R.FH);
-    unit_assert_true(R.FC);
-    unit_assert_hex_eq(0x00, ReadByte(R.HL));
+    writeByte(CPU->HL, 0x80);
+    SM83_INST_SLA_pHL(CPU);
+    unit_assert_true(CPU->FZ);
+    unit_assert_false(CPU->FN);
+    unit_assert_false(CPU->FH);
+    unit_assert_true(CPU->FC);
+    unit_assert_hex_eq(0x00, readByte(CPU->HL));
+    unit_assert_int_eq(2, CPU->internal->TotalTicks);
 }
 
 UNIT_TEST(SLA_pHL_FF)
 {
-    WriteByte(R.HL, 0xFF);
-    _SLA_pHL();
-    unit_assert_false(R.FZ);
-    unit_assert_false(R.FN);
-    unit_assert_false(R.FH);
-    unit_assert_true(R.FC);
-    unit_assert_hex_eq(0xFE, ReadByte(R.HL));
+    writeByte(CPU->HL, 0xFF);
+    SM83_INST_SLA_pHL(CPU);
+    unit_assert_false(CPU->FZ);
+    unit_assert_false(CPU->FN);
+    unit_assert_false(CPU->FH);
+    unit_assert_true(CPU->FC);
+    unit_assert_hex_eq(0xFE, readByte(CPU->HL));
+    unit_assert_int_eq(2, CPU->internal->TotalTicks);
 }
 
 UNIT_TEST_SUITE(SLA)
@@ -161,35 +163,38 @@ UNIT_TEST_SUITE(SLA)
 #define MAKE_SRA_TEST(REG)                          \
     UNIT_TEST(SRA_##REG##_00)                       \
     {                                               \
-        R.REG = 0x00;                               \
-        _SRA_##REG();                               \
-        unit_assert_true(R.FZ);                     \
-        unit_assert_false(R.FN);                    \
-        unit_assert_false(R.FH);                    \
-        unit_assert_false(R.FC);                    \
-        unit_assert_hex_eq(0x00, R.REG);            \
+        CPU->REG = 0x00;                               \
+        SM83_INST_SRA_##REG(CPU);                               \
+        unit_assert_true(CPU->FZ);                     \
+        unit_assert_false(CPU->FN);                    \
+        unit_assert_false(CPU->FH);                    \
+        unit_assert_false(CPU->FC);                    \
+        unit_assert_hex_eq(0x00, CPU->REG);            \
+        unit_assert_int_eq(0, CPU->internal->TotalTicks);   \
     }                                               \
                                                     \
     UNIT_TEST(SRA_##REG##_01)                       \
     {                                               \
-        R.REG = 0x01;                               \
-        _SRA_##REG();                               \
-        unit_assert_true(R.FZ);                     \
-        unit_assert_false(R.FN);                    \
-        unit_assert_false(R.FH);                    \
-        unit_assert_true(R.FC);                     \
-        unit_assert_hex_eq(0x00, R.REG);            \
+        CPU->REG = 0x01;                               \
+        SM83_INST_SRA_##REG(CPU);                               \
+        unit_assert_true(CPU->FZ);                     \
+        unit_assert_false(CPU->FN);                    \
+        unit_assert_false(CPU->FH);                    \
+        unit_assert_true(CPU->FC);                     \
+        unit_assert_hex_eq(0x00, CPU->REG);            \
+        unit_assert_int_eq(0, CPU->internal->TotalTicks);   \
     }                                               \
                                                     \
     UNIT_TEST(SRA_##REG##_FF)                       \
     {                                               \
-        R.REG = 0xFF;                               \
-        _SRA_##REG();                               \
-        unit_assert_false(R.FZ);                    \
-        unit_assert_false(R.FN);                    \
-        unit_assert_false(R.FH);                    \
-        unit_assert_true(R.FC);                     \
-        unit_assert_hex_eq(0xFF, R.REG);            \
+        CPU->REG = 0xFF;                               \
+        SM83_INST_SRA_##REG(CPU);                               \
+        unit_assert_false(CPU->FZ);                    \
+        unit_assert_false(CPU->FN);                    \
+        unit_assert_false(CPU->FH);                    \
+        unit_assert_true(CPU->FC);                     \
+        unit_assert_hex_eq(0xFF, CPU->REG);            \
+        unit_assert_int_eq(0, CPU->internal->TotalTicks);   \
     }
 
 MAKE_SRA_TEST(A);
@@ -202,35 +207,38 @@ MAKE_SRA_TEST(L);
 
 UNIT_TEST(SRA_pHL_00)
 {
-    WriteByte(R.HL, 0x00);
-    _SRA_pHL();
-    unit_assert_true(R.FZ);
-    unit_assert_false(R.FN);
-    unit_assert_false(R.FH);
-    unit_assert_false(R.FC);
-    unit_assert_hex_eq(0x00, ReadByte(R.HL));
+    writeByte(CPU->HL, 0x00);
+    SM83_INST_SRA_pHL(CPU);
+    unit_assert_true(CPU->FZ);
+    unit_assert_false(CPU->FN);
+    unit_assert_false(CPU->FH);
+    unit_assert_false(CPU->FC);
+    unit_assert_hex_eq(0x00, readByte(CPU->HL));
+    unit_assert_int_eq(2, CPU->internal->TotalTicks);
 }
 
 UNIT_TEST(SRA_pHL_01)
 {
-    WriteByte(R.HL, 0x01);
-    _SRA_pHL();
-    unit_assert_true(R.FZ);
-    unit_assert_false(R.FN);
-    unit_assert_false(R.FH);
-    unit_assert_true(R.FC);
-    unit_assert_hex_eq(0x00, ReadByte(R.HL));
+    writeByte(CPU->HL, 0x01);
+    SM83_INST_SRA_pHL(CPU);
+    unit_assert_true(CPU->FZ);
+    unit_assert_false(CPU->FN);
+    unit_assert_false(CPU->FH);
+    unit_assert_true(CPU->FC);
+    unit_assert_hex_eq(0x00, readByte(CPU->HL));
+    unit_assert_int_eq(2, CPU->internal->TotalTicks);
 }
 
 UNIT_TEST(SRA_pHL_FF)
 {
-    WriteByte(R.HL, 0xFF);
-    _SRA_pHL();
-    unit_assert_false(R.FZ);
-    unit_assert_false(R.FN);
-    unit_assert_false(R.FH);
-    unit_assert_true(R.FC);
-    unit_assert_hex_eq(0xFF, ReadByte(R.HL));
+    writeByte(CPU->HL, 0xFF);
+    SM83_INST_SRA_pHL(CPU);
+    unit_assert_false(CPU->FZ);
+    unit_assert_false(CPU->FN);
+    unit_assert_false(CPU->FH);
+    unit_assert_true(CPU->FC);
+    unit_assert_hex_eq(0xFF, readByte(CPU->HL));
+    unit_assert_int_eq(2, CPU->internal->TotalTicks);
 }
 
 UNIT_TEST_SUITE(SRA)
@@ -273,46 +281,50 @@ UNIT_TEST_SUITE(SRA)
 #define MAKE_SRL_TEST(REG)                          \
     UNIT_TEST(SRL_##REG##_00)                       \
     {                                               \
-        R.REG = 0x00;                               \
-        _SRL_##REG();                               \
-        unit_assert_true(R.FZ);                     \
-        unit_assert_false(R.FN);                    \
-        unit_assert_false(R.FH);                    \
-        unit_assert_false(R.FC);                    \
-        unit_assert_hex_eq(0x00, R.REG);            \
+        CPU->REG = 0x00;                               \
+        SM83_INST_SRL_##REG(CPU);                               \
+        unit_assert_true(CPU->FZ);                     \
+        unit_assert_false(CPU->FN);                    \
+        unit_assert_false(CPU->FH);                    \
+        unit_assert_false(CPU->FC);                    \
+        unit_assert_hex_eq(0x00, CPU->REG);            \
+        unit_assert_int_eq(0, CPU->internal->TotalTicks);   \
     }                                               \
                                                     \
     UNIT_TEST(SRL_##REG##_01)                       \
     {                                               \
-        R.REG = 0x01;                               \
-        _SRL_##REG();                               \
-        unit_assert_true(R.FZ);                     \
-        unit_assert_false(R.FN);                    \
-        unit_assert_false(R.FH);                    \
-        unit_assert_true(R.FC);                     \
-        unit_assert_hex_eq(0x00, R.REG);            \
+        CPU->REG = 0x01;                               \
+        SM83_INST_SRL_##REG(CPU);                               \
+        unit_assert_true(CPU->FZ);                     \
+        unit_assert_false(CPU->FN);                    \
+        unit_assert_false(CPU->FH);                    \
+        unit_assert_true(CPU->FC);                     \
+        unit_assert_hex_eq(0x00, CPU->REG);            \
+        unit_assert_int_eq(0, CPU->internal->TotalTicks);   \
     }                                               \
                                                     \
     UNIT_TEST(SRL_##REG##_AA)                       \
     {                                               \
-        R.REG = 0xAA;                               \
-        _SRL_##REG();                               \
-        unit_assert_false(R.FZ);                    \
-        unit_assert_false(R.FN);                    \
-        unit_assert_false(R.FH);                    \
-        unit_assert_false(R.FC);                     \
-        unit_assert_hex_eq(0x55, R.REG);            \
+        CPU->REG = 0xAA;                               \
+        SM83_INST_SRL_##REG(CPU);                               \
+        unit_assert_false(CPU->FZ);                    \
+        unit_assert_false(CPU->FN);                    \
+        unit_assert_false(CPU->FH);                    \
+        unit_assert_false(CPU->FC);                     \
+        unit_assert_hex_eq(0x55, CPU->REG);            \
+        unit_assert_int_eq(0, CPU->internal->TotalTicks);   \
     }                                               \
                                                     \
     UNIT_TEST(SRL_##REG##_FF)                       \
     {                                               \
-        R.REG = 0xFF;                               \
-        _SRL_##REG();                               \
-        unit_assert_false(R.FZ);                    \
-        unit_assert_false(R.FN);                    \
-        unit_assert_false(R.FH);                    \
-        unit_assert_true(R.FC);                     \
-        unit_assert_hex_eq(0x7F, R.REG);            \
+        CPU->REG = 0xFF;                               \
+        SM83_INST_SRL_##REG(CPU);                               \
+        unit_assert_false(CPU->FZ);                    \
+        unit_assert_false(CPU->FN);                    \
+        unit_assert_false(CPU->FH);                    \
+        unit_assert_true(CPU->FC);                     \
+        unit_assert_hex_eq(0x7F, CPU->REG);            \
+        unit_assert_int_eq(0, CPU->internal->TotalTicks);   \
     }
 
 MAKE_SRL_TEST(A);
@@ -325,46 +337,50 @@ MAKE_SRL_TEST(L);
 
 UNIT_TEST(SRL_pHL_00)
 {
-    WriteByte(R.HL, 0x00);
-    _SRL_pHL();
-    unit_assert_true(R.FZ);
-    unit_assert_false(R.FN);
-    unit_assert_false(R.FH);
-    unit_assert_false(R.FC);
-    unit_assert_hex_eq(0x00, ReadByte(R.HL));
+    writeByte(CPU->HL, 0x00);
+    SM83_INST_SRL_pHL(CPU);
+    unit_assert_true(CPU->FZ);
+    unit_assert_false(CPU->FN);
+    unit_assert_false(CPU->FH);
+    unit_assert_false(CPU->FC);
+    unit_assert_hex_eq(0x00, readByte(CPU->HL));
+    unit_assert_int_eq(2, CPU->internal->TotalTicks);
 }
 
 UNIT_TEST(SRL_pHL_01)
 {
-    WriteByte(R.HL, 0x01);
-    _SRL_pHL();
-    unit_assert_true(R.FZ);
-    unit_assert_false(R.FN);
-    unit_assert_false(R.FH);
-    unit_assert_true(R.FC);
-    unit_assert_hex_eq(0x00, ReadByte(R.HL));
+    writeByte(CPU->HL, 0x01);
+    SM83_INST_SRL_pHL(CPU);
+    unit_assert_true(CPU->FZ);
+    unit_assert_false(CPU->FN);
+    unit_assert_false(CPU->FH);
+    unit_assert_true(CPU->FC);
+    unit_assert_hex_eq(0x00, readByte(CPU->HL));
+    unit_assert_int_eq(2, CPU->internal->TotalTicks);
 }
 
 UNIT_TEST(SRL_pHL_AA)
 {
-    WriteByte(R.HL, 0xAA);
-    _SRL_pHL();
-    unit_assert_false(R.FZ);
-    unit_assert_false(R.FN);
-    unit_assert_false(R.FH);
-    unit_assert_false(R.FC);
-    unit_assert_hex_eq(0x55, ReadByte(R.HL));
+    writeByte(CPU->HL, 0xAA);
+    SM83_INST_SRL_pHL(CPU);
+    unit_assert_false(CPU->FZ);
+    unit_assert_false(CPU->FN);
+    unit_assert_false(CPU->FH);
+    unit_assert_false(CPU->FC);
+    unit_assert_hex_eq(0x55, readByte(CPU->HL));
+    unit_assert_int_eq(2, CPU->internal->TotalTicks);
 }
 
 UNIT_TEST(SRL_pHL_FF)
 {
-    WriteByte(R.HL, 0xFF);
-    _SRL_pHL();
-    unit_assert_false(R.FZ);
-    unit_assert_false(R.FN);
-    unit_assert_false(R.FH);
-    unit_assert_true(R.FC);
-    unit_assert_hex_eq(0x7F, ReadByte(R.HL));
+    writeByte(CPU->HL, 0xFF);
+    SM83_INST_SRL_pHL(CPU);
+    unit_assert_false(CPU->FZ);
+    unit_assert_false(CPU->FN);
+    unit_assert_false(CPU->FH);
+    unit_assert_true(CPU->FC);
+    unit_assert_hex_eq(0x7F, readByte(CPU->HL));
+    unit_assert_int_eq(2, CPU->internal->TotalTicks);
 }
 
 UNIT_TEST_SUITE(SRL)
@@ -413,95 +429,13 @@ UNIT_TEST_SUITE(SRL)
 
 }
 
-#define MAKE_SWAP_TEST(REG)                         \
-    UNIT_TEST(SWAP_##REG##_00)                      \
-    {                                               \
-        R.REG = 0x00;                               \
-        _SWAP_##REG();                              \
-        unit_assert_true(R.FZ);                     \
-        unit_assert_false(R.FN);                    \
-        unit_assert_false(R.FH);                    \
-        unit_assert_false(R.FC);                    \
-        unit_assert_hex_eq(0x00, R.REG);            \
-    }                                               \
-                                                    \
-    UNIT_TEST(SWAP_##REG##_0A)                      \
-    {                                               \
-        R.REG = 0x0A;                               \
-        _SWAP_##REG();                              \
-        unit_assert_false(R.FZ);                    \
-        unit_assert_false(R.FN);                    \
-        unit_assert_false(R.FH);                    \
-        unit_assert_false(R.FC);                    \
-        unit_assert_hex_eq(0xA0, R.REG);            \
-    }
-
-MAKE_SWAP_TEST(A);
-MAKE_SWAP_TEST(B);
-MAKE_SWAP_TEST(C);
-MAKE_SWAP_TEST(D);
-MAKE_SWAP_TEST(E);
-MAKE_SWAP_TEST(H);
-MAKE_SWAP_TEST(L);
-
-UNIT_TEST(SWAP_pHL_00)
-{
-    WriteByte(R.HL, 0x00);
-    _SWAP_pHL();
-    unit_assert_true(R.FZ);
-    unit_assert_false(R.FN);
-    unit_assert_false(R.FH);
-    unit_assert_false(R.FC);
-    unit_assert_hex_eq(0x00, ReadByte(R.HL));
-}
-                                                
-UNIT_TEST(SWAP_pHL_0A)
-{
-    WriteByte(R.HL, 0x0A);
-    _SWAP_pHL();
-    unit_assert_false(R.FZ);
-    unit_assert_false(R.FN);
-    unit_assert_false(R.FH);
-    unit_assert_false(R.FC);
-    unit_assert_hex_eq(0xA0, ReadByte(R.HL));
-}
-
-UNIT_TEST_SUITE(SWAP)
-{
-    UNIT_SUITE_SETUP(&setup);
-
-    UNIT_RUN_TEST(SWAP_A_00);
-    UNIT_RUN_TEST(SWAP_A_0A);
-
-    UNIT_RUN_TEST(SWAP_B_00);
-    UNIT_RUN_TEST(SWAP_B_0A);
-
-    UNIT_RUN_TEST(SWAP_C_00);
-    UNIT_RUN_TEST(SWAP_C_0A);
-
-    UNIT_RUN_TEST(SWAP_D_00);
-    UNIT_RUN_TEST(SWAP_D_0A);
-
-    UNIT_RUN_TEST(SWAP_E_00);
-    UNIT_RUN_TEST(SWAP_E_0A);
-
-    UNIT_RUN_TEST(SWAP_H_00);
-    UNIT_RUN_TEST(SWAP_H_0A);
-
-    UNIT_RUN_TEST(SWAP_L_00);
-    UNIT_RUN_TEST(SWAP_L_0A);
-
-    UNIT_RUN_TEST(SWAP_pHL_00);
-    UNIT_RUN_TEST(SWAP_pHL_0A);
-}
-
 int main(int argc, char ** argv)
 {
-    VerboseLevel = 4;
+    stub_init();
+
     UNIT_RUN_SUITE(SLA);
     UNIT_RUN_SUITE(SRA);
     UNIT_RUN_SUITE(SRL);
-    UNIT_RUN_SUITE(SWAP);
     UNIT_REPORT();
     return UNIT_EXIT_CODE;
 }

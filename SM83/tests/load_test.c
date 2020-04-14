@@ -1,34 +1,32 @@
-#include "Inst/LD.h"
+#include "Instructions.h"
 
-#include <GBx/GBx.h>
-
+#include "stub.inc.h"
 #include "unit.h"
-
-const word RAM_OFFSET = 0xC100;
 
 void setup() 
 {
-    TotalTicks = 0;
-    memset(&R, sizeof(R), 0);
-    R.HL = RAM_OFFSET;
-    R.PC = RAM_OFFSET + 0x0100;
+    SM83_Reset(CPU);
+    memset(Memory, 0, sizeof(Memory));
+    CPU->PC = 0x0000;
+    CPU->HL = 0x1234;
 }
 
 #define MAKE_LOAD_TEST_R_R(REG1, REG2)              \
     UNIT_TEST(LD_##REG1##_##REG2)                   \
     {                                               \
-        R.REG2 = 0xAF;                              \
-        _LD_##REG1##_##REG2();                      \
-        unit_assert_hex_eq(0xAF, R.REG1);           \
+        CPU->REG2 = 0xAF;                              \
+        SM83_INST_LD_##REG1##_##REG2(CPU);                      \
+        unit_assert_hex_eq(0xAF, CPU->REG1);           \
+        unit_assert_int_eq(0, CPU->internal->TotalTicks);            \
     }
 
 #define MAKE_LOAD_TEST_R_pHL(REG)                   \
     UNIT_TEST(LD_##REG##_pHL)                       \
     {                                               \
-        WriteByte(RAM_OFFSET, 0xAF);                \
-        _LD_##REG##_pHL();                          \
-        unit_assert_hex_eq(0xAF, R.REG);            \
-        unit_assert_int_eq(4, TotalTicks);            \
+        writeByte(0x1234, 0xAF);                \
+        SM83_INST_LD_##REG##_pHL(CPU);                          \
+        unit_assert_hex_eq(0xAF, CPU->REG);            \
+        unit_assert_int_eq(1, CPU->internal->TotalTicks);            \
     }
 
 MAKE_LOAD_TEST_R_R(A, A);
@@ -104,10 +102,10 @@ MAKE_LOAD_TEST_R_pHL(L);
 #define MAKE_LOAD_TEST_pHL_R(REG)                   \
     UNIT_TEST(LD_pHL_##REG)                         \
     {                                               \
-        R.REG = 0xAF;                               \
-        _LD_pHL_##REG();                            \
-        unit_assert_hex_eq(0xAF, ReadByte(R.HL));   \
-        unit_assert_int_eq(8, TotalTicks);            \
+        CPU->REG = 0xAF;                               \
+        SM83_INST_LD_pHL_##REG(CPU);                            \
+        unit_assert_hex_eq(0xAF, readByte(CPU->HL));   \
+        unit_assert_int_eq(1, CPU->internal->TotalTicks);            \
     }
 
 MAKE_LOAD_TEST_pHL_R(A);
@@ -118,216 +116,216 @@ MAKE_LOAD_TEST_pHL_R(E);
 
 UNIT_TEST(LD_pHL_H)
 {
-    R.H = 0xCF;
-    _LD_pHL_H();
-    unit_assert_hex_eq(0xCF, ReadByte(R.HL));
-    unit_assert_int_eq(8, TotalTicks);
+    CPU->H = 0xCF;
+    SM83_INST_LD_pHL_H(CPU);
+    unit_assert_hex_eq(0xCF, readByte(CPU->HL));
+    unit_assert_int_eq(1, CPU->internal->TotalTicks);
 }
 
 UNIT_TEST(LD_pHL_L)
 {
-    R.L = 0xFF;
-    _LD_pHL_L();
-    unit_assert_hex_eq(0xFF, ReadByte(R.HL));
-    unit_assert_int_eq(8, TotalTicks);
+    CPU->L = 0xFF;
+    SM83_INST_LD_pHL_L(CPU);
+    unit_assert_hex_eq(0xFF, readByte(CPU->HL));
+    unit_assert_int_eq(1, CPU->internal->TotalTicks);
 }
 
-#define MAKE_LOAD_TEST_R_u(REG)                     \
-    UNIT_TEST(LD_##REG##_u)                         \
+#define MAKE_LOAD_TEST_R_u8(REG)                     \
+    UNIT_TEST(LD_##REG##_u8)                         \
     {                                               \
-        WriteByte(R.PC, 0xAF);                      \
-        _LD_##REG##_u();                            \
-        unit_assert_hex_eq(0xAF, R.REG);            \
-        unit_assert_int_eq(4, TotalTicks);            \
+        writeByte(CPU->PC, 0xAF);                      \
+        SM83_INST_LD_##REG##_u8(CPU);                            \
+        unit_assert_hex_eq(0xAF, CPU->REG);            \
+        unit_assert_int_eq(1, CPU->internal->TotalTicks);            \
     }
 
-MAKE_LOAD_TEST_R_u(A);
-MAKE_LOAD_TEST_R_u(B);
-MAKE_LOAD_TEST_R_u(C);
-MAKE_LOAD_TEST_R_u(D);
-MAKE_LOAD_TEST_R_u(E);
-MAKE_LOAD_TEST_R_u(H);
-MAKE_LOAD_TEST_R_u(L);
+MAKE_LOAD_TEST_R_u8(A);
+MAKE_LOAD_TEST_R_u8(B);
+MAKE_LOAD_TEST_R_u8(C);
+MAKE_LOAD_TEST_R_u8(D);
+MAKE_LOAD_TEST_R_u8(E);
+MAKE_LOAD_TEST_R_u8(H);
+MAKE_LOAD_TEST_R_u8(L);
 
-UNIT_TEST(LD_pHL_u)
+UNIT_TEST(LD_pHL_u8)
 {
-    WriteByte(R.PC, 0xAF);
-    _LD_pHL_u();
-    unit_assert_hex_eq(0xAF, ReadByte(R.HL));
-    unit_assert_int_eq(8, TotalTicks);
+    writeByte(CPU->PC, 0xAF);
+    SM83_INST_LD_pHL_u8(CPU);
+    unit_assert_hex_eq(0xAF, readByte(CPU->HL));
+    unit_assert_int_eq(2, CPU->internal->TotalTicks);
 }
 
 UNIT_TEST(LD_A_pBC)
 {
-    R.BC = RAM_OFFSET;
-    WriteByte(R.BC, 0xAF);
-    _LD_A_pBC();
-    unit_assert_hex_eq(0xAF, ReadByte(R.BC));
-    unit_assert_int_eq(4, TotalTicks);
+    CPU->BC = 0x1234;
+    writeByte(CPU->BC, 0xAF);
+    SM83_INST_LD_A_pBC(CPU);
+    unit_assert_hex_eq(0xAF, readByte(CPU->BC));
+    unit_assert_int_eq(1, CPU->internal->TotalTicks);
 }
 
 UNIT_TEST(LD_A_pDE)
 {
-    R.DE = RAM_OFFSET;
-    WriteByte(R.DE, 0xAF);
-    _LD_A_pDE();
-    unit_assert_hex_eq(0xAF, ReadByte(R.DE));
-    unit_assert_int_eq(4, TotalTicks);
+    CPU->DE = 0x1234;
+    writeByte(CPU->DE, 0xAF);
+    SM83_INST_LD_A_pDE(CPU);
+    unit_assert_hex_eq(0xAF, readByte(CPU->DE));
+    unit_assert_int_eq(1, CPU->internal->TotalTicks);
 }
 
-UNIT_TEST(LD_BC_uu)
+UNIT_TEST(LD_BC_u16)
 {
-    WriteWord(R.PC, 0xAFBC);
-    _LD_BC_uu();
-    unit_assert_hex_eq(0xAFBC, R.BC);
-    unit_assert_int_eq(8, TotalTicks);
+    writeWord(CPU->PC, 0xAFBC);
+    SM83_INST_LD_BC_u16(CPU);
+    unit_assert_hex_eq(0xAFBC, CPU->BC);
+    unit_assert_int_eq(2, CPU->internal->TotalTicks);
 }
 
-UNIT_TEST(LD_DE_uu)
+UNIT_TEST(LD_DE_u16)
 {
-    WriteWord(R.PC, 0xAFBC);
-    _LD_DE_uu();
-    unit_assert_hex_eq(0xAFBC, R.DE);
-    unit_assert_int_eq(8, TotalTicks);
+    writeWord(CPU->PC, 0xAFBC);
+    SM83_INST_LD_DE_u16(CPU);
+    unit_assert_hex_eq(0xAFBC, CPU->DE);
+    unit_assert_int_eq(2, CPU->internal->TotalTicks);
 }
 
-UNIT_TEST(LD_HL_uu)
+UNIT_TEST(LD_HL_u16)
 {
-    WriteWord(R.PC, 0xAFBC);
-    _LD_HL_uu();
-    unit_assert_hex_eq(0xAFBC, R.HL);
-    unit_assert_int_eq(8, TotalTicks);
+    writeWord(CPU->PC, 0xAFBC);
+    SM83_INST_LD_HL_u16(CPU);
+    unit_assert_hex_eq(0xAFBC, CPU->HL);
+    unit_assert_int_eq(2, CPU->internal->TotalTicks);
 }
 
-UNIT_TEST(LD_SP_uu)
+UNIT_TEST(LD_SP_u16)
 {
-    WriteWord(R.PC, 0xAFBC);
-    _LD_SP_uu();
-    unit_assert_hex_eq(0xAFBC, R.SP);
-    unit_assert_int_eq(8, TotalTicks);
+    writeWord(CPU->PC, 0xAFBC);
+    SM83_INST_LD_SP_u16(CPU);
+    unit_assert_hex_eq(0xAFBC, CPU->SP);
+    unit_assert_int_eq(2, CPU->internal->TotalTicks);
 }
 
 UNIT_TEST(LD_SP_HL)
 {
-    _LD_SP_HL();
-    unit_assert_hex_eq(R.HL, R.SP);
-    unit_assert_int_eq(4, TotalTicks);
+    SM83_INST_LD_SP_HL(CPU);
+    unit_assert_hex_eq(CPU->HL, CPU->SP);
+    unit_assert_int_eq(1, CPU->internal->TotalTicks);
 }
 
-UNIT_TEST(LD_puu_SP)
+UNIT_TEST(LD_pu16_SP)
 {
-    WriteWord(R.PC, RAM_OFFSET);
-    R.SP = 0xAFBC;
-    _LD_puu_SP();
-    unit_assert_hex_eq(0xAFBC, ReadWord(RAM_OFFSET));
-    unit_assert_int_eq(16, TotalTicks);
+    writeWord(CPU->PC, 0x1234);
+    CPU->SP = 0xAFBC;
+    SM83_INST_LD_pu16_SP(CPU);
+    unit_assert_hex_eq(0xAFBC, readWord(0x1234));
+    unit_assert_int_eq(4, CPU->internal->TotalTicks);
 }
 
-UNIT_TEST(LD_puu_A)
+UNIT_TEST(LD_pu16_A)
 {
-    WriteWord(R.PC, RAM_OFFSET);
-    R.A = 0xAF;
-    _LD_puu_A();
-    unit_assert_hex_eq(0xAF, ReadByte(RAM_OFFSET));
-    unit_assert_int_eq(12, TotalTicks);
+    writeWord(CPU->PC, 0x1234);
+    CPU->A = 0xAF;
+    SM83_INST_LD_pu16_A(CPU);
+    unit_assert_hex_eq(0xAF, readByte(0x1234));
+    unit_assert_int_eq(3, CPU->internal->TotalTicks);
 }
 
-UNIT_TEST(LD_A_puu)
+UNIT_TEST(LD_A_pu16)
 {
-    WriteWord(R.PC, RAM_OFFSET);
-    WriteByte(RAM_OFFSET, 0xAF);
-    _LD_A_puu();
-    unit_assert_hex_eq(0xAF, R.A);
-    unit_assert_int_eq(12, TotalTicks);
+    writeWord(CPU->PC, 0x1234);
+    writeByte(0x1234, 0xAF);
+    SM83_INST_LD_A_pu16(CPU);
+    unit_assert_hex_eq(0xAF, CPU->A);
+    unit_assert_int_eq(3, CPU->internal->TotalTicks);
 }
 
 UNIT_TEST(LDI_pHL_A)
 {
-    R.A = 0xAF;
-    _LDI_pHL_A();
-    unit_assert_hex_eq(0xAF, R.A);
-    unit_assert_hex_eq(RAM_OFFSET + 1, R.HL);
-    unit_assert_int_eq(4, TotalTicks);
+    CPU->A = 0xAF;
+    SM83_INST_LDI_pHL_A(CPU);
+    unit_assert_hex_eq(0xAF, CPU->A);
+    unit_assert_hex_eq(0x1234 + 1, CPU->HL);
+    unit_assert_int_eq(1, CPU->internal->TotalTicks);
 }
 
 UNIT_TEST(LDD_pHL_A)
 {
-    R.A = 0xAF;
-    _LDD_pHL_A();
-    unit_assert_hex_eq(0xAF, R.A);
-    unit_assert_hex_eq(RAM_OFFSET - 1, R.HL);
-    unit_assert_int_eq(4, TotalTicks);
+    CPU->A = 0xAF;
+    SM83_INST_LDD_pHL_A(CPU);
+    unit_assert_hex_eq(0xAF, CPU->A);
+    unit_assert_hex_eq(0x1234 - 1, CPU->HL);
+    unit_assert_int_eq(1, CPU->internal->TotalTicks);
 }
 
 UNIT_TEST(LDI_A_pHL)
 {
-    WriteByte(R.HL, 0xAF);
-    _LDI_A_pHL();
-    unit_assert_hex_eq(0xAF, ReadByte(R.HL - 1));
-    unit_assert_hex_eq(RAM_OFFSET + 1, R.HL);
-    unit_assert_int_eq(4, TotalTicks);
+    writeByte(CPU->HL, 0xAF);
+    SM83_INST_LDI_A_pHL(CPU);
+    unit_assert_hex_eq(0xAF, readByte(CPU->HL - 1));
+    unit_assert_hex_eq(0x1234 + 1, CPU->HL);
+    unit_assert_int_eq(1, CPU->internal->TotalTicks);
 }
 
 UNIT_TEST(LDD_A_pHL)
 {
-    WriteByte(R.HL, 0xAF);
-    _LDD_A_pHL();
-    unit_assert_hex_eq(0xAF, ReadByte(R.HL + 1));
-    unit_assert_hex_eq(RAM_OFFSET - 1, R.HL);
-    unit_assert_int_eq(4, TotalTicks);
+    writeByte(CPU->HL, 0xAF);
+    SM83_INST_LDD_A_pHL(CPU);
+    unit_assert_hex_eq(0xAF, readByte(CPU->HL + 1));
+    unit_assert_hex_eq(0x1234 - 1, CPU->HL);
+    unit_assert_int_eq(1, CPU->internal->TotalTicks);
 }
 
-UNIT_TEST(LDH_pu_A)
+UNIT_TEST(LDH_pu8_A)
 {
-    WriteByte(R.PC, 0x80);
-    R.A = 0xAF;
-    _LDH_pu_A();
-    unit_assert_hex_eq(0xAF, ReadByte(0xFF80));
-    unit_assert_int_eq(8, TotalTicks);
+    writeByte(CPU->PC, 0x80);
+    CPU->A = 0xAF;
+    SM83_INST_LDH_pu8_A(CPU);
+    unit_assert_hex_eq(0xAF, readByte(0xFF80));
+    unit_assert_int_eq(2, CPU->internal->TotalTicks);
 }
 
-UNIT_TEST(LDH_A_pu)
+UNIT_TEST(LDH_A_pu8)
 {
-    WriteByte(R.PC, 0x80);
-    WriteByte(0xFF80, 0xAF);
-    _LDH_A_pu();
-    unit_assert_hex_eq(0xAF, R.A);
-    unit_assert_int_eq(8, TotalTicks);
+    writeByte(CPU->PC, 0x80);
+    writeByte(0xFF80, 0xAF);
+    SM83_INST_LDH_A_pu8(CPU);
+    unit_assert_hex_eq(0xAF, CPU->A);
+    unit_assert_int_eq(2, CPU->internal->TotalTicks);
 }
 
 UNIT_TEST(LDH_pC_A)
 {
-    R.C = 0x80;
-    R.A = 0xAF;
-    _LDH_pC_A();
-    unit_assert_hex_eq(0xAF, ReadByte(0xFF80));
-    unit_assert_int_eq(4, TotalTicks);
+    CPU->C = 0x80;
+    CPU->A = 0xAF;
+    SM83_INST_LDH_pC_A(CPU);
+    unit_assert_hex_eq(0xAF, readByte(0xFF80));
+    unit_assert_int_eq(1, CPU->internal->TotalTicks);
 }
 
 UNIT_TEST(LDH_A_pC)
 {
-    R.C = 0x80;
-    WriteByte(0xFF80, 0xAF);
-    _LDH_A_pC();
-    unit_assert_hex_eq(0xAF, R.A);
-    unit_assert_int_eq(4, TotalTicks);
+    CPU->C = 0x80;
+    writeByte(0xFF80, 0xAF);
+    SM83_INST_LDH_A_pC(CPU);
+    unit_assert_hex_eq(0xAF, CPU->A);
+    unit_assert_int_eq(1, CPU->internal->TotalTicks);
 }
 
-UNIT_TEST(LD_HL_SP_s)
+UNIT_TEST(LD_HL_SP_s8)
 {
-    R.SP = 0x1234;
-    WriteByte(R.PC, 2);
-    _LD_HL_SP_s();
-    unit_assert_hex_eq(0x1236, R.HL);
-    unit_assert_false(R.FZ);
-    unit_assert_int_eq(8, TotalTicks);
+    CPU->SP = 0x1234;
+    writeByte(CPU->PC, 2);
+    SM83_INST_LD_HL_SP_s8(CPU);
+    unit_assert_hex_eq(0x1236, CPU->HL);
+    unit_assert_false(CPU->FZ);
+    unit_assert_int_eq(2, CPU->internal->TotalTicks);
 
-    R.SP = 0x1234;
-    WriteByte(R.PC, -2);
-    _LD_HL_SP_s();
-    unit_assert_hex_eq(0x1232, R.HL);
-    unit_assert_false(R.FZ);
-    unit_assert_int_eq(16, TotalTicks);
+    CPU->SP = 0x1234;
+    writeByte(CPU->PC, -2);
+    SM83_INST_LD_HL_SP_s8(CPU);
+    unit_assert_hex_eq(0x1232, CPU->HL);
+    unit_assert_false(CPU->FZ);
+    unit_assert_int_eq(4, CPU->internal->TotalTicks);
 }
 
 UNIT_TEST_SUITE(LD)
@@ -412,44 +410,45 @@ UNIT_TEST_SUITE(LD)
     UNIT_RUN_TEST(LD_pHL_H);
     UNIT_RUN_TEST(LD_pHL_L);
 
-    UNIT_RUN_TEST(LD_A_u);
-    UNIT_RUN_TEST(LD_B_u);
-    UNIT_RUN_TEST(LD_C_u);
-    UNIT_RUN_TEST(LD_D_u);
-    UNIT_RUN_TEST(LD_E_u);
-    UNIT_RUN_TEST(LD_H_u);
-    UNIT_RUN_TEST(LD_L_u);
+    UNIT_RUN_TEST(LD_A_u8);
+    UNIT_RUN_TEST(LD_B_u8);
+    UNIT_RUN_TEST(LD_C_u8);
+    UNIT_RUN_TEST(LD_D_u8);
+    UNIT_RUN_TEST(LD_E_u8);
+    UNIT_RUN_TEST(LD_H_u8);
+    UNIT_RUN_TEST(LD_L_u8);
 
-    UNIT_RUN_TEST(LD_pHL_u);
+    UNIT_RUN_TEST(LD_pHL_u8);
 
     UNIT_RUN_TEST(LD_A_pBC);
     UNIT_RUN_TEST(LD_A_pDE);
 
-    UNIT_RUN_TEST(LD_BC_uu);
-    UNIT_RUN_TEST(LD_DE_uu);
-    UNIT_RUN_TEST(LD_HL_uu);
-    UNIT_RUN_TEST(LD_SP_uu);
+    UNIT_RUN_TEST(LD_BC_u16);
+    UNIT_RUN_TEST(LD_DE_u16);
+    UNIT_RUN_TEST(LD_HL_u16);
+    UNIT_RUN_TEST(LD_SP_u16);
 
-    UNIT_RUN_TEST(LD_puu_SP);
-    UNIT_RUN_TEST(LD_puu_A);
-    UNIT_RUN_TEST(LD_A_puu);
+    UNIT_RUN_TEST(LD_pu16_SP);
+    UNIT_RUN_TEST(LD_pu16_A);
+    UNIT_RUN_TEST(LD_A_pu16);
 
     UNIT_RUN_TEST(LDI_pHL_A);
     UNIT_RUN_TEST(LDD_pHL_A);
     UNIT_RUN_TEST(LDI_A_pHL);
     UNIT_RUN_TEST(LDD_A_pHL);
 
-    UNIT_RUN_TEST(LDH_pu_A);
-    UNIT_RUN_TEST(LDH_A_pu);
+    UNIT_RUN_TEST(LDH_pu8_A);
+    UNIT_RUN_TEST(LDH_A_pu8);
     UNIT_RUN_TEST(LDH_pC_A);
     UNIT_RUN_TEST(LDH_A_pC);
 
-    UNIT_RUN_TEST(LD_HL_SP_s);
+    UNIT_RUN_TEST(LD_HL_SP_s8);
 }
 
 int main(int argc, char ** argv)
 {
-    VerboseLevel = 4;
+    stub_init();
+
 	UNIT_RUN_SUITE(LD);
 	UNIT_REPORT();
 	return UNIT_EXIT_CODE;

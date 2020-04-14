@@ -1,50 +1,47 @@
-#include "Inst/DEC.h"
+#include "Instructions.h"
 
-#include <GBx/GBx.h>
-
+#include "stub.inc.h"
 #include "unit.h"
-
-const word RAM_OFFSET = 0xC100;
 
 void setup() 
 {
-    TotalTicks = 0;
-    memset(&R, sizeof(R), 0);
-    R.HL = RAM_OFFSET;
+    SM83_Reset(CPU);
+    memset(Memory, 0, sizeof(Memory));
+    CPU->HL = 0x1234;
 }
 
 #define MAKE_DEC_TEST8(REG)                         \
     UNIT_TEST(DEC_##REG##_01)                       \
     {                                               \
-        R.REG = 0x01;                               \
-        _DEC_##REG();                               \
-        unit_assert_hex_eq(0x00, R.REG);            \
-        unit_assert_true(R.FZ);                     \
-        unit_assert_true(R.FN);                     \
-        unit_assert_false(R.FH);                    \
-        unit_assert_int_eq(4, TotalTicks);            \
+        CPU->REG = 0x01;                               \
+        SM83_INST_DEC_##REG(CPU);                               \
+        unit_assert_hex_eq(0x00, CPU->REG);            \
+        unit_assert_true(CPU->FZ);                     \
+        unit_assert_true(CPU->FN);                     \
+        unit_assert_false(CPU->FH);                    \
+        unit_assert_int_eq(0, CPU->internal->TotalTicks);            \
     }                                               \
                                                     \
     UNIT_TEST(DEC_##REG##_F0)                       \
     {                                               \
-        R.REG = 0xF0;                               \
-        _DEC_##REG();                               \
-        unit_assert_hex_eq(0xEF, R.REG);            \
-        unit_assert_false(R.FZ);                    \
-        unit_assert_true(R.FN);                     \
-        unit_assert_true(R.FH);                     \
-        unit_assert_int_eq(4, TotalTicks);            \
+        CPU->REG = 0xF0;                               \
+        SM83_INST_DEC_##REG(CPU);                               \
+        unit_assert_hex_eq(0xEF, CPU->REG);            \
+        unit_assert_false(CPU->FZ);                    \
+        unit_assert_true(CPU->FN);                     \
+        unit_assert_true(CPU->FH);                     \
+        unit_assert_int_eq(0, CPU->internal->TotalTicks);            \
     }                                               \
                                                     \
     UNIT_TEST(DEC_##REG##_00)                       \
     {                                               \
-        R.REG = 0x00;                               \
-        _DEC_##REG();                               \
-        unit_assert_hex_eq(0xFF, R.REG);            \
-        unit_assert_false(R.FZ);                    \
-        unit_assert_true(R.FN);                     \
-        unit_assert_true(R.FH);                     \
-        unit_assert_int_eq(4, TotalTicks);            \
+        CPU->REG = 0x00;                               \
+        SM83_INST_DEC_##REG(CPU);                               \
+        unit_assert_hex_eq(0xFF, CPU->REG);            \
+        unit_assert_false(CPU->FZ);                    \
+        unit_assert_true(CPU->FN);                     \
+        unit_assert_true(CPU->FH);                     \
+        unit_assert_int_eq(0, CPU->internal->TotalTicks);            \
     }
 
 MAKE_DEC_TEST8(A);
@@ -57,18 +54,18 @@ MAKE_DEC_TEST8(L);
 
 UNIT_TEST(DEC_pHL_01)
 {
-    WriteByte(R.HL, 0x01);
-    _DEC_pHL();
-    unit_assert_hex_eq(0x00, ReadByte(R.HL));
-    unit_assert_int_eq(12, TotalTicks);
+    writeByte(CPU->HL, 0x01);
+    SM83_INST_DEC_pHL(CPU);
+    unit_assert_hex_eq(0x00, readByte(CPU->HL));
+    unit_assert_int_eq(2, CPU->internal->TotalTicks);
 }
 
 UNIT_TEST(DEC_pHL_00)
 {
-    WriteByte(R.HL, 0x00);
-    _DEC_pHL();
-    unit_assert_hex_eq(0xFF, ReadByte(R.HL));
-    unit_assert_int_eq(12, TotalTicks);
+    writeByte(CPU->HL, 0x00);
+    SM83_INST_DEC_pHL(CPU);
+    unit_assert_hex_eq(0xFF, readByte(CPU->HL));
+    unit_assert_int_eq(2, CPU->internal->TotalTicks);
 }
 
 UNIT_TEST_SUITE(DEC8)
@@ -110,18 +107,18 @@ UNIT_TEST_SUITE(DEC8)
 #define MAKE_DEC_TEST16(REG)                        \
     UNIT_TEST(DEC_##REG##_0001)                     \
     {                                               \
-        R.REG = 0x0001;                             \
-        _DEC_##REG();                               \
-        unit_assert_hex_eq(0x0000, R.REG);          \
-        unit_assert_int_eq(8, TotalTicks);            \
+        CPU->REG = 0x0001;                             \
+        SM83_INST_DEC_##REG(CPU);                               \
+        unit_assert_hex_eq(0x0000, CPU->REG);          \
+        unit_assert_int_eq(1, CPU->internal->TotalTicks);            \
     }                                               \
                                                     \
     UNIT_TEST(DEC_##REG##_0000)                     \
     {                                               \
-        R.REG = 0x0000;                             \
-        _DEC_##REG();                               \
-        unit_assert_hex_eq(0xFFFF, R.REG);          \
-        unit_assert_int_eq(8, TotalTicks);            \
+        CPU->REG = 0x0000;                             \
+        SM83_INST_DEC_##REG(CPU);                               \
+        unit_assert_hex_eq(0xFFFF, CPU->REG);          \
+        unit_assert_int_eq(1, CPU->internal->TotalTicks);            \
     }
 
 MAKE_DEC_TEST16(BC);
@@ -148,7 +145,8 @@ UNIT_TEST_SUITE(DEC16)
 
 int main(int argc, char ** argv)
 {
-    VerboseLevel = 4;
+    stub_init();
+
     UNIT_RUN_SUITE(DEC8);
     UNIT_RUN_SUITE(DEC16);
     UNIT_REPORT();
