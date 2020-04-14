@@ -19,19 +19,19 @@ enum {
 
 int tileDataAddrSelect;
 
-void InitTileDataTab()
+void InitTileDataTab(gbx_t * ctx)
 {
     sdlTileDataTexture = SDL_CreateTexture(GetDebugWindowRenderer(),
         SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_STREAMING,
         TILE_DATA_TEXTURE_WIDTH, TILE_DATA_TEXTURE_HEIGHT);
 }
 
-void TermTileDataTab()
+void TermTileDataTab(gbx_t * ctx)
 {
     SDL_DestroyTexture(sdlTileDataTexture);
 }
 
-void TileDataTabRefresh()
+void TileDataTabRefresh(gbx_t * ctx)
 {
     const int TILE_WIDTH     = 8;
     const int TILE_HEIGHT    = 8;
@@ -42,13 +42,13 @@ void TileDataTabRefresh()
     int pitch = 0;
     SDL_LockTexture(sdlTileDataTexture, NULL, (void **)&pixels, &pitch);
 
-    uint16_t dataAddr = GetTileDataAddress(LCDC.TileDataSelect);
+    uint16_t dataAddr = GBx_GetTileDataAddress(ctx->LCDC.TileDataSelect);
 
     if (tileDataAddrSelect == TILE_DATA_ADDR_8800) {
-        dataAddr = GetTileDataAddress(0);
+        dataAddr = GBx_GetTileDataAddress(0);
     }
     else if (tileDataAddrSelect == TILE_DATA_ADDR_8000) {
-        dataAddr = GetTileDataAddress(1);
+        dataAddr = GBx_GetTileDataAddress(1);
     }
 
     const int TILE_DRAW_PER_ROW = 16;
@@ -69,11 +69,11 @@ void TileDataTabRefresh()
                 dataOffset += (i * TILE_DATA_SIZE) + (tileRow * 2);
             }
 
-            uint8_t data1 = ReadByte(dataOffset);
-            uint8_t data2 = ReadByte(dataOffset + 1);
+            uint8_t data1 = GBx_ReadByte(ctx, dataOffset);
+            uint8_t data2 = GBx_ReadByte(ctx, dataOffset + 1);
 
             for (int tileCol = 0; tileCol < TILE_WIDTH; ++tileCol) {
-                const uint8_t * color = GetColor(&BGP, tileCol, data1, data2);
+                const uint8_t * color = GBx_GetPixelColor(ctx, &ctx->BGP, tileCol, data1, data2);
 
                 unsigned off = ((y + tileRow) * pitch) 
                     + ((x + tileCol) * TILE_DATA_TEXTURE_COMP);
@@ -88,7 +88,7 @@ void TileDataTabRefresh()
     SDL_UnlockTexture(sdlTileDataTexture);
 }
 
-void TileDataTabRender(SDL_Point * mouse)
+void TileDataTabRender(gbx_t * ctx)
 {
     int startX, startY;
     DUI_GetCursor(&startX, &startY);

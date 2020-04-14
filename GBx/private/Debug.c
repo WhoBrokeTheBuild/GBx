@@ -1,24 +1,38 @@
 #include <GBx/Debug.h>
-#include <GBx/Log.h>
 
 #include <string.h>
 
-int VerboseLevel = 0;
+#include "Internal.h"
+#include "Log.h"
 
-bool InstructionLoggingEnabled = false;
+#define GBX_MEMORY_TRACKER_SIZE (0x10000)
 
-bool MemoryTrackingEnabled = false;
-
-memory_tracker_entry_t MemoryTracker[0x10000];
-
-void AgeMemoryTracker()
+void GBx_InitMemoryTracker(gbx_t * ctx)
 {
-    for (unsigned i = 0; i < sizeof(MemoryTracker); ++i) {
-        if (MemoryTracker[i].Read > 0) {
-            --MemoryTracker[i].Read;
+    ctx->internal->MemoryTracker = 
+        malloc(sizeof(gbx_memory_tracker_entry_t) * GBX_MEMORY_TRACKER_SIZE);
+}
+
+void GBx_TermMemoryTracker(gbx_t * ctx)
+{
+    free(ctx->internal->MemoryTracker);
+    ctx->internal->MemoryTracker = NULL;
+}
+
+void GBx_AgeMemoryTracker(gbx_t * ctx)
+{
+    gbx_internal_t * inctx = ctx->internal;
+
+    if (!inctx->MemoryTracker) {
+        return;
+    }
+
+    for (unsigned i = 0; i < sizeof(GBX_MEMORY_TRACKER_SIZE); ++i) {
+        if (inctx->MemoryTracker[i].Read > 0) {
+            --inctx->MemoryTracker[i].Read;
         }
-        if (MemoryTracker[i].Write > 0) {
-            --MemoryTracker[i].Write;
+        if (inctx->MemoryTracker[i].Write > 0) {
+            --inctx->MemoryTracker[i].Write;
         }
     }
 }

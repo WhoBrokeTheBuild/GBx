@@ -1,29 +1,25 @@
 #include <GBx/Timer.h>
 
-#include <GBx/CPU.h>
-#include <GBx/Log.h>
-#include <GBx/Util.h>
+#include "Internal.h"
+#include "Log.h"
 
-uint8_t DIV;
-uint8_t TIMA;
-uint8_t TMA;
-
-timer_control TAC;
-
-int timerCounter = 0;
-int divCounter = 0;
-
-int GetTimerSpeed()
+int GBx_GetTimerSpeed(gbx_t * ctx)
 {
-    switch (TAC.Type) {
+    int clockSpeed = SM83_GetClockSpeed(ctx->CPU);
+
+    switch (ctx->TAC.Type) {
     case 0b00:
-        return CPU.ClockSpeed / 1024;
+        // 4096 Hz
+        return clockSpeed / 1024;
     case 0b01:
-        return CPU.ClockSpeed / 16;
+        // 262144 Hz
+        return clockSpeed / 16;
     case 0b10:
-        return CPU.ClockSpeed / 64;
+        // 65536 Hz
+        return clockSpeed / 64;
     case 0b11:
-        return CPU.ClockSpeed / 256;
+        // 16384 Hz
+        return clockSpeed / 256;
     default:
         break;
     }
@@ -31,49 +27,56 @@ int GetTimerSpeed()
     return 0;
 }
 
-void ResetTimer()
+void GBx_ResetTimer(gbx_t * ctx)
 {
-    TIMA = 0x00;
-    TMA = 0x00;
-    TAC.raw = 0x00;
+    ctx->TAC.raw = 0x00;
+
+    ctx->DIV = 0;
+    ctx->TIMA = 0;
+    ctx->TMA = 0;
+
+    ctx->internal->TimerCounter = 0;
+    ctx->internal->DIVCounter = 0;
 }
 
-void TimerTick(unsigned cycles)
+void GBx_TickTimer(gbx_t * ctx, unsigned cycles)
 {
-    divCounter += cycles;
-    if (divCounter >= 0xFF) {
-        divCounter -= 0xFF;
-        ++DIV;
+    gbx_internal_t * inctx = ctx->internal;
+
+    inctx->DIVCounter += cycles;
+    if (inctx->DIVCounter >= 0xFF) {
+        inctx->DIVCounter -= 0xFF;
+        ++ctx->DIV;
     }
 
-    if (!TAC.Enabled) {
+    if (!ctx->TAC.Enabled) {
         return;
     }
 
-    int speed = GetTimerSpeed();
+    int speed = GBx_GetTimerSpeed(ctx);
 
-    timerCounter += cycles;
-    if (timerCounter > speed) {
-        timerCounter -= speed;
+    inctx->TimerCounter += cycles;
+    if (inctx->TimerCounter > speed) {
+        inctx->TimerCounter -= speed;
 
-        if (TIMA == 0xFF) {
-            LogVerbose(2, "Timer Rollover");
-            TIMA = TMA;
-            CPU.IF.Int50 = true;
+        if (ctx->TIMA == 0xFF) {
+            Verbose(ctx, 2, LogInfo("Timer Rollover"));
+            ctx->TIMA = ctx->TMA;
+            ctx->CPU->IF.Int50 = true;
         }
         else {
-            ++TIMA;
+            ++ctx->TIMA;
         }
     }
 }
 
-void PrintTimer()
+void GBx_PrintTimer(gbx_t * ctx)
 {
     LogInfo("Timer %s Type=%d (%d Hz) TIMA=%d TMA=%d DIV=%d",
-        GetEnabledString(TAC.Enabled),
-        TAC.Type,
-        GetTimerSpeed(),
-        TIMA,
-        TMA,
-        DIV);
+        GBx_GetEnabledString(ctx->TAC.Enabled),
+        ctx->TAC.Type,
+        GBx_GetTimerSpeed(ctx),
+        ctx->TIMA,
+        ctx->TMA,
+        ctx->DIV);
 }

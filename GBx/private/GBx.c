@@ -1,33 +1,52 @@
 #include <GBx/GBx.h>
 
-uint8_t readByte(void * _, uint16_t address)
+#include <stdlib.h>
+
+#include "Internal.h"
+
+gbx_t * GBx_Init()
 {
-    return ReadByte(address);
+    gbx_t * ctx = malloc(sizeof(gbx_t));
+
+    ctx->CPU = SM83_Init();
+    ctx->CPU->UserData = ctx;
+    ctx->CPU->Tick = (sm83_tick_func_t)GBx_Tick;
+    ctx->CPU->ReadByte = (sm83_read_byte_func_t)GBx_ReadByte;
+    ctx->CPU->WriteByte = (sm83_write_byte_func_t)GBx_WriteByte;
+    
+    ctx->internal = malloc(sizeof(gbx_internal_t));
+
+    GBx_Reset(ctx);
+
+    return ctx;
 }
 
-void writeByte(void * _, uint16_t address, uint8_t data)
+void GBx_Term(gbx_t * ctx)
 {
-    WriteByte(address, data);
+    free(ctx->internal);
+
+    SM83_Term(ctx->CPU);
+
+    free(ctx);
 }
 
-void tick(void * _, unsigned cycles)
+void GBx_Tick(gbx_t * ctx, unsigned cycles)
 {
-    APUTick(cycles);
-    TimerTick(cycles);
-    LCDTick(cycles);
+    GBx_TickAPU(ctx, cycles);
+    GBx_TickPPU(ctx, cycles);
+    GBx_TickTimer(ctx, cycles);
 }
 
-void Reset()
+void GBx_Reset(gbx_t * ctx)
 {
-    SM83_Init(&CPU);
-    CPU.Tick = tick;
-    CPU.ReadByte = readByte;
-    CPU.WriteByte = writeByte;
+    SM83_Reset(ctx->CPU);
 
-    ResetAPU();
-    ResetJoypad();
-    ResetLCD();
-    ResetMBC();
-    ResetMMU();
-    ResetTimer();
+    if (!ctx->internal->HaveBootstrap) {
+        GBx_StubBootstrap(ctx);
+    }
+
+    GBx_ResetAPU(ctx);
+    GBx_ResetJoypad(ctx);
+    GBx_ResetPPU(ctx);
+    GBx_ResetTimer(ctx);
 }

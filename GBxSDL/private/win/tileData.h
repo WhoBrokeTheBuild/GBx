@@ -1,12 +1,14 @@
 #ifndef TILE_DATA_H
 #define TILE_DATA_H
 
-#include <SDL.h>
+#include <GBx/GBx.h>
 
-void InitTileDataTab();
-void TermTileDataTab();
+void InitTileDataTab(gbx_t * ctx);
 
-void TileDataTabRefresh();
-void TileDataTabRender();
+void TermTileDataTab(gbx_t * ctx);
+
+void TileDataTabRefresh(gbx_t * ctx);
+
+void TileDataTabRender(gbx_t * ctx);
 
 #endif // TILE_DATA_H

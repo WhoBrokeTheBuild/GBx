@@ -3,6 +3,8 @@
 
 #include <SM83/SM83.h>
 
+#include "Internal.h"
+
 #define DEFINE_INSTRUCTION(NAME) static void SM83_INST_##NAME(sm83_t * cpu)
 
 #define DEFINE_BIT_INSTRUCTION(NAME)                                           \
@@ -290,14 +292,14 @@ DEFINE_INSTRUCTION(LD_SP_u16)
 {
     cpu->SP = SM83_NextWord(cpu);
 
-    cpu->StackBaseAddress = cpu->SP;
+    cpu->internal->StackBaseAddress = cpu->SP;
 }
 
 DEFINE_INSTRUCTION(LD_SP_HL)
 {
     cpu->SP = cpu->HL;
 
-    cpu->StackBaseAddress = cpu->SP;
+    cpu->internal->StackBaseAddress = cpu->SP;
 }
 
 DEFINE_INSTRUCTION(LD_pu16_SP)
@@ -441,7 +443,7 @@ DEFINE_INSTRUCTION(ADD_SP_s8)
 
     SM83_Tick(cpu, 1);
 
-    cpu->StackBaseAddress = cpu->SP;
+    cpu->internal->StackBaseAddress = cpu->SP;
 }
 
 // Subtract
@@ -532,7 +534,7 @@ DEFINE_INSTRUCTION(INC_SP)
     SM83_Tick(cpu, 1);
     ++cpu->SP;
 
-    cpu->StackBaseAddress = cpu->SP;
+    cpu->internal->StackBaseAddress = cpu->SP;
 }
 
 // Decrement
@@ -583,7 +585,7 @@ DEFINE_INSTRUCTION(DEC_SP)
     SM83_Tick(cpu, 1);
     --cpu->SP;
 
-    cpu->StackBaseAddress = cpu->SP;
+    cpu->internal->StackBaseAddress = cpu->SP;
 }
 
 // Compare

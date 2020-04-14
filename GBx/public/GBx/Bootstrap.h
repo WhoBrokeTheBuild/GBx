@@ -3,12 +3,10 @@
 
 #include <GBx/Types.h>
 
-extern bool HasBootstrapROM;
+typedef struct gbx gbx_t;
 
-extern bool BootstrapROMEnabled;
+bool GBx_LoadBootstrap(gbx_t * ctx, const char * filename);
 
-extern uint8_t BootstrapROM[0x100];
-
-bool LoadBootstrapROM(const char * filename);
+void GBx_StubBootstrap(gbx_t * ctx);
 
 #endif // BOOTSTRAP_H

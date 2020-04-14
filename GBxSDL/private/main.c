@@ -22,27 +22,31 @@
     #include <readline/readline.h>
 #endif
 
-void * runThread(void * ptr)
+void * runThread(void * arg)
 {
+    gbx_t * ctx = (gbx_t *)arg;
+
     if (DebugEnabled) {
-        DebugPromptInit();
+        DebugPromptInit(ctx);
     }
 
     for (;;) {
-        if (AtBreakpoint()) {
-            DebugPrompt();
+        if (AtBreakpoint(ctx)) {
+            DebugPrompt(ctx);
         }
         
-        SM83_Step(&CPU);
+        SM83_Step(ctx->CPU);
     }
 
     if (DebugEnabled) {
-        DebugPromptTerm();
+        DebugPromptTerm(ctx);
     }
 }
 
 int main(int argc, char ** argv)
 {
+    gbx_t * GBx = GBx_Init();
+
     cflags_t * flags = cflags_init();
 
     cflags_add_bool(flags, 'd', "debug", &DebugEnabled, "Enable Debug Mode");
@@ -55,10 +59,11 @@ int main(int argc, char ** argv)
     const char * bootROMFilename = NULL;
     cflags_add_string(flags, 'b', "bootstrap", &bootROMFilename, "Load a Bootstrap ROM");
 
-    cflags_add_bool(flags, '\0', "orig-colors", &LCDUseOriginalColors, "Use original green-tinted LCD colors");
+    cflags_add_bool(flags, '\0', "orig-colors", &GBx->UseOriginalColors, "Use original green-tinted LCD colors");
 
     cflags_parse(flags, argc, argv);
-    VerboseLevel = verbose->count;
+    GBx->VerboseLevel = verbose->count;
+    GBx->CPU->VerboseLevel = verbose->count;
 
     if (flags->argc == 0) {
         cflags_print_usage(flags,
@@ -70,36 +75,43 @@ int main(int argc, char ** argv)
     }
 
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMECONTROLLER) < 0) {
-        LogFatal("Failed to initialize SDL2, %s", SDL_GetError());
+        fprintf(stderr, "Failed to initialize SDL2, %s", SDL_GetError());
     }
 
     SDL_version sdlVer;
     SDL_GetVersion(&sdlVer);
-    LogVerbose(1, "SDL Version: %d.%d.%d",
-        sdlVer.major, sdlVer.minor, sdlVer.patch);
+
+    if (GBx->VerboseLevel >= 1) {
+        printf("SDL Version: %d.%d.%d\n",
+            sdlVer.major, sdlVer.minor, sdlVer.patch);
+    }
 
     #if defined(HAVE_READLINE)
-        LogVerbose(1, "Readline Version: %s", rl_library_version);
+    if (GBx->VerboseLevel >= 1) {
+        printf("Readline Version: %s\n", rl_library_version);
+    }
     #endif
 
-    if (!LoadCartridgeROM(flags->argv[0])) {
+
+    if (!GBx_LoadCartridge(GBx, flags->argv[0])) {
         return 1;
     }
 
-    Reset();
+    SM83_PrintRegisters(GBx->CPU);
 
     if (bootROMFilename) {
-        LoadBootstrapROM(bootROMFilename);
-        CPU.PC = 0x0000;
+        GBx_LoadBootstrap(GBx, bootROMFilename);
     }
 
-    VideoInit(scale);
-    AudioInit();
+    GBx_Reset(GBx);
+
+    VideoInit(GBx, scale);
+    AudioInit(GBx);
 
     if (DebugEnabled) {
-        SetBreakpoint("PC", CPU.PC);
+        SetBreakpoint("PC", GBx->CPU->PC);
 
-        DebugWindowInit();
+        DebugWindowInit(GBx);
     }
 
 #if defined(WIN32)
@@ -111,15 +123,15 @@ int main(int argc, char ** argv)
 #else
 
     pthread_t thread;
-    pthread_create(&thread, NULL, runThread, NULL);
+    pthread_create(&thread, NULL, runThread, GBx);
 
 #endif // defined(WIN32)
     
     for (;;) {
-        PollEvents();
+        PollEvents(GBx);
         
-        Render();
-        DebugWindowRender();
+        Render(GBx);
+        DebugWindowRender(GBx);
     }
    
 #if defined(WIN32)
@@ -134,11 +146,13 @@ int main(int argc, char ** argv)
 #endif // defined(WIN32)
 
     if (DebugEnabled) {
-        DebugWindowTerm();
+        DebugWindowTerm(GBx);
     }
 
-    VideoTerm();
-    AudioTerm();
+    VideoTerm(GBx);
+    AudioTerm(GBx);
+
+    GBx_Term(GBx);
 
     SDL_Quit();
 

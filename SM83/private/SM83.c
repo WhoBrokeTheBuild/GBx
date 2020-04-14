@@ -1,60 +1,95 @@
 #include <SM83/SM83.h>
 
+#include <assert.h>
+#include <stdlib.h>
+
+#include "Internal.h"
 #include "Log.h"
 
-void SM83_Init(sm83_t * cpu)
+sm83_t * SM83_Init()
 {
-    cpu->Enabled = true;
+    sm83_t * ctx = malloc(sizeof(sm83_t));
+    assert(ctx);
 
-    cpu->AF = 0x01B0;
-    cpu->BC = 0x0013;
-    cpu->DE = 0x00D8;
-    cpu->HL = 0x014D;
-    cpu->PC = 0x0100;
-    cpu->SP = 0xFFFE;
+    ctx->VerboseLevel = 0;
 
-    cpu->IME = true;
-    cpu->RequestEnableIME = false;
+    SM83_Reset(ctx);
 
-    cpu->IF.raw = 0x00;
-    cpu->IE.raw = 0x00;
+    ctx->internal = malloc(sizeof(sm83_internal_t));
+    assert(ctx->internal);
 
-    cpu->LastInstructionAddress = cpu->PC;
-    cpu->StackBaseAddress = cpu->SP;
+    ctx->internal->TotalTicks = 0;
 
-    cpu->TotalTicks = 0;
+    ctx->internal->InstructionLoggingEnabled = false;
+    ctx->internal->LastInstructionAddress = ctx->PC;
+    ctx->internal->StackBaseAddress = ctx->SP;
 
-    cpu->UserData = NULL;
-    cpu->Tick = NULL;
-    cpu->ReadByte = NULL;
-    cpu->WriteByte = NULL;
+    SM83_SetMode(ctx, SM83_MODE_DMG);
 
-    SM83_SetMode(cpu, SM83_MODE_DMG);
+    return ctx;
 }
 
-void SM83_Tick(sm83_t * cpu, unsigned mcycles)
+void SM83_Term(sm83_t * ctx)
 {
-    cpu->TotalTicks += mcycles;
-    cpu->Tick(cpu->UserData, mcycles);
+    free(ctx->internal);
+    free(ctx);
 }
 
-void SM83_SetMode(sm83_t * cpu, sm83_mode_t mode)
+void SM83_Reset(sm83_t * ctx)
+{
+    ctx->Enabled = true;
+
+    ctx->AF = 0x0000;
+    ctx->BC = 0x0000;
+    ctx->DE = 0x0000;
+    ctx->HL = 0x0000;
+    ctx->PC = 0x0000;
+    ctx->SP = 0x0000;
+
+    ctx->IME = true;
+    ctx->RequestEnableIME = false;
+
+    ctx->IF.raw = 0x00;
+    ctx->IE.raw = 0x00;
+}
+
+bool SM83_GetEnabled(sm83_t * ctx)
+{
+    return ctx->Enabled;
+}
+
+void SM83_SetEnabled(sm83_t * ctx, bool enabled)
+{
+    ctx->Enabled = enabled;
+}
+
+sm83_mode_t SM83_GetMode(sm83_t * ctx)
+{
+    return ctx->internal->Mode;
+}
+
+void SM83_SetMode(sm83_t * ctx, sm83_mode_t mode)
 {
     static const int DMG_CLOCK_SPEED = 4194304; // Hz
     static const int SGB_CLOCK_SPEED = 4295454; // Hz
     static const int CGB_CLOCK_SPEED = 8388608; // Hz
 
-    cpu->Mode = mode;
+    ctx->internal->Mode = mode;
 
-    switch (cpu->Mode) {
+    switch (mode) {
     case SM83_MODE_DMG:
-        cpu->ClockSpeed = DMG_CLOCK_SPEED;
+        ctx->internal->ClockSpeed = DMG_CLOCK_SPEED;
         break;
     case SM83_MODE_SGB:
-        cpu->ClockSpeed = SGB_CLOCK_SPEED;
+        ctx->internal->ClockSpeed = SGB_CLOCK_SPEED;
         break;
     case SM83_MODE_CGB:
-        cpu->ClockSpeed = CGB_CLOCK_SPEED;
+        ctx->internal->ClockSpeed = CGB_CLOCK_SPEED;
         break;
     }
+}
+
+int SM83_GetClockSpeed(sm83_t * ctx)
+{
+    return ctx->internal->ClockSpeed;
 }

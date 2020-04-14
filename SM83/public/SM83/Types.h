@@ -6,6 +6,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include <SM83/Macros.h>
+
 typedef enum
 {
     SM83_MODE_DMG,
@@ -15,7 +17,9 @@ typedef enum
 } sm83_mode_t;
 
 typedef void (*sm83_tick_func_t)(void *, unsigned);
+
 typedef uint8_t (*sm83_read_byte_func_t)(void *, uint16_t);
+
 typedef void (*sm83_write_byte_func_t)(void *, uint16_t, uint8_t);
 
 typedef union
@@ -38,7 +42,7 @@ typedef union
 
 } sm83_interrupt_flags_t;
 
-static_assert(sizeof(sm83_interrupt_flags_t) == 1,
-    "sizeof(sm83_interrupt_flags_t) != 1");
+static_assert(
+    sizeof(sm83_interrupt_flags_t) == 1, "sizeof(sm83_interrupt_flags_t) != 1");
 
 #endif // SM83_TYPES_H

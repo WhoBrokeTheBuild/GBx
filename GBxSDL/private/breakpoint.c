@@ -6,7 +6,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-typedef bool (*break_comp_func_t)(unsigned);
+typedef bool (*break_comp_func_t)(gbx_t *, unsigned);
 
 typedef struct
 {
@@ -20,99 +20,99 @@ typedef struct
 
 break_cond_t breakpoints[MAX_BREAKPOINTS];
 
-bool breakCompareA(unsigned value)
+bool breakCompareA(gbx_t * ctx, unsigned value)
 {
-    return (CPU.A == value);
+    return (ctx->CPU->A == value);
 }
 
-bool breakCompareB(unsigned value)
+bool breakCompareB(gbx_t * ctx, unsigned value)
 {
-    return (CPU.B == value);
+    return (ctx->CPU->B == value);
 }
 
-bool breakCompareC(unsigned value)
+bool breakCompareC(gbx_t * ctx, unsigned value)
 {
-    return (CPU.C == value);
+    return (ctx->CPU->C == value);
 }
 
-bool breakCompareD(unsigned value)
+bool breakCompareD(gbx_t * ctx, unsigned value)
 {
-    return (CPU.D == value);
+    return (ctx->CPU->D == value);
 }
 
-bool breakCompareE(unsigned value)
+bool breakCompareE(gbx_t * ctx, unsigned value)
 {
-    return (CPU.E == value);
+    return (ctx->CPU->E == value);
 }
 
-bool breakCompareH(unsigned value)
+bool breakCompareH(gbx_t * ctx, unsigned value)
 {
-    return (CPU.H == value);
+    return (ctx->CPU->H == value);
 }
 
-bool breakCompareL(unsigned value)
+bool breakCompareL(gbx_t * ctx, unsigned value)
 {
-    return (CPU.L == value);
+    return (ctx->CPU->L == value);
 }
 
-bool breakCompareAF(unsigned value)
+bool breakCompareAF(gbx_t * ctx, unsigned value)
 {
-    return (CPU.AF == value);
+    return (ctx->CPU->AF == value);
 }
 
-bool breakCompareBC(unsigned value)
+bool breakCompareBC(gbx_t * ctx, unsigned value)
 {
-    return (CPU.BC == value);
+    return (ctx->CPU->BC == value);
 }
 
-bool breakCompareDE(unsigned value)
+bool breakCompareDE(gbx_t * ctx, unsigned value)
 {
-    return (CPU.DE == value);
+    return (ctx->CPU->DE == value);
 }
 
-bool breakCompareHL(unsigned value)
+bool breakCompareHL(gbx_t * ctx, unsigned value)
 {
-    return (CPU.HL == value);
+    return (ctx->CPU->HL == value);
 }
 
-bool breakComparePC(unsigned value)
+bool breakComparePC(gbx_t * ctx, unsigned value)
 {
-    return (CPU.PC == value);
+    return (ctx->CPU->PC == value);
 }
 
-bool breakCompareSP(unsigned value)
+bool breakCompareSP(gbx_t * ctx, unsigned value)
 {
-    return (CPU.SP == value);
+    return (ctx->CPU->SP == value);
 }
 
-bool breakCompareFZ(unsigned value)
+bool breakCompareFZ(gbx_t * ctx, unsigned value)
 {
-    return (CPU.FZ == (bool)value);
+    return (ctx->CPU->FZ == (bool)value);
 }
 
-bool breakCompareFN(unsigned value)
+bool breakCompareFN(gbx_t * ctx, unsigned value)
 {
-    return (CPU.FN == (bool)value);
+    return (ctx->CPU->FN == (bool)value);
 }
 
-bool breakCompareFH(unsigned value)
+bool breakCompareFH(gbx_t * ctx, unsigned value)
 {
-    return (CPU.FH == (bool)value);
+    return (ctx->CPU->FH == (bool)value);
 }
 
-bool breakCompareFC(unsigned value)
+bool breakCompareFC(gbx_t * ctx, unsigned value)
 {
-    return (CPU.FC == (bool)value);
+    return (ctx->CPU->FC == (bool)value);
 }
 
-bool breakCompareLY(unsigned value)
+bool breakCompareLY(gbx_t * ctx, unsigned value)
 {
-    return (LY == value);
+    return (ctx->LY == value);
 }
 
-bool breakStackChanged(unsigned value)
+bool breakStackChanged(gbx_t * ctx, unsigned value)
 {
-    return (CPU.SP != value);
+    return (ctx->CPU->SP != value);
 }
 
 break_comp_func_t getBreakCompFunc(const char * reg)
@@ -189,7 +189,7 @@ void SetBreakpoint(const char * reg, unsigned value)
     break_comp_func_t comp = getBreakCompFunc(reg);
     
     if (!comp) {
-        LogFatal("Unknown breakpoint register '%s'", reg);
+        fprintf(stderr, "Unknown breakpoint register '%s'\n", reg);
         return;
     }
     
@@ -202,21 +202,21 @@ void SetBreakpoint(const char * reg, unsigned value)
         }
     }
     
-    LogFatal("Maximum number of breakpoints reached: %d", MAX_BREAKPOINTS);
+    fprintf(stderr, "Maximum number of breakpoints reached: %d", MAX_BREAKPOINTS);
 }
 
-void SetBreakpointStackChanged()
+void SetBreakpointStackChanged(gbx_t * ctx)
 {
     for (int i = 0; i < MAX_BREAKPOINTS; ++i) {
         if (!breakpoints[i].comp) {
             breakpoints[i].name = strdup("SP*");
             breakpoints[i].comp = breakStackChanged;
-            breakpoints[i].value = CPU.SP;
+            breakpoints[i].value = ctx->CPU->SP;
             return;
         }
     }
     
-    LogWarn("Maximum number of breakpoints reached: %d", MAX_BREAKPOINTS);
+    fprintf(stderr, "Maximum number of breakpoints reached: %d", MAX_BREAKPOINTS);
 }
 
 void ClearBreakpoint(const char * reg, unsigned value)
@@ -224,7 +224,7 @@ void ClearBreakpoint(const char * reg, unsigned value)
     break_comp_func_t comp = getBreakCompFunc(reg);
     
     if (!comp) {
-        LogError("Unknown breakpoint register '%s'", reg);
+        fprintf(stderr, "Unknown breakpoint register '%s'\n", reg);
         return;
     }
     
@@ -250,11 +250,11 @@ void ClearAllBreakpoints()
     }
 }
 
-bool AtBreakpoint()
+bool AtBreakpoint(gbx_t * ctx)
 {
     for (int i = 0; i < MAX_BREAKPOINTS; ++i) {
         if (breakpoints[i].comp) {
-            if (breakpoints[i].comp(breakpoints[i].value)) {
+            if (breakpoints[i].comp(ctx, breakpoints[i].value)) {
                 free(breakpoints[i].name);
                 breakpoints[i].name = NULL;
                 breakpoints[i].comp = NULL;
@@ -270,7 +270,7 @@ void PrintBreakpoints()
 {
     for (int i = 0; i < MAX_BREAKPOINTS; ++i) {
         if (breakpoints[i].name) {
-            LogInfo("Breakpoint when %s=%04X", breakpoints[i].name, breakpoints[i].value);
+            printf("Breakpoint when %s=%04X\n", breakpoints[i].name, breakpoints[i].value);
         }
     }
 }

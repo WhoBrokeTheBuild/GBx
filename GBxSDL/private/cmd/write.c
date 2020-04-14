@@ -1,12 +1,10 @@
 #include "write.h"
 #include "help.h"
 
-#include <GBx/GBx.h>
-
 #include <stdio.h>
 #include <string.h>
 
-void cmdWrite(const char * input)
+void cmdWrite(gbx_t * ctx, const char * input)
 {
     if (!input || strlen(input) == 0) {
         printf("%s", CMD_HELP_READ);
@@ -20,16 +18,16 @@ void cmdWrite(const char * input)
     if (size == 8) {
         uint8_t value;
         sscanf(input, "%*s %*s %hhX", &value);
-        LogInfo("Writing %02X to %04X", value, addr);
-        WriteByte(addr, value);
+        printf("Writing %02X to %04X\n", value, addr);
+        GBx_WriteByte(ctx, addr, value);
     }
     else if (size == 16) {
         uint16_t value;
         sscanf(input, "%*s %*s %hX", &value);
-        LogInfo("Writing %04X to %04X", value, addr);
-        WriteWord(addr, value);
+        printf("Writing %04X to %04X\n", value, addr);
+        GBx_WriteWord(ctx, addr, value);
     }
     else {
-        LogError("Unsupported size '%d'", size);
+        fprintf(stderr, "Unsupported size '%d'\n", size);
     }
 }

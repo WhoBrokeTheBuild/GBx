@@ -1,5 +1,8 @@
 #include <GBx/Serial.h>
+#include <GBx/Context.h>
 
-uint8_t SB;
-
-serial_control_t SC;
+void GBx_ResetSerial(gbx_t * ctx)
+{
+    ctx->SB = 0;
+    ctx->SC.raw = 0x00;
+}

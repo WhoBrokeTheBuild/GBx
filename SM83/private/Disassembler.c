@@ -1,10 +1,11 @@
-#include <SM83/SM83.h>
+#include <SM83/Context.h>
+#include <SM83/Disassembler.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-uint16_t SM83_Disassemble(sm83_t * cpu, char * str, size_t len, uint16_t addr)
+uint16_t SM83_Disassemble(sm83_t * ctx, char * str, size_t len, uint16_t addr)
 {
     // !w = unsigned word
     // !u = unsigned byte
@@ -387,11 +388,11 @@ uint16_t SM83_Disassemble(sm83_t * cpu, char * str, size_t len, uint16_t addr)
     int bit = 0;
     const char * pch;
 
-    uint8_t op = cpu->ReadByte(cpu->UserData, addr);
+    uint8_t op = ctx->ReadByte(ctx->UserData, addr);
     ++addr;
 
     if (op == 0xCB) {
-        op = cpu->ReadByte(cpu->UserData, addr);
+        op = ctx->ReadByte(ctx->UserData, addr);
         ++addr;
 
         if (op < 0x40) {
@@ -422,8 +423,8 @@ uint16_t SM83_Disassemble(sm83_t * cpu, char * str, size_t len, uint16_t addr)
                 i += snprintf(str + i,
                     len - i,
                     "$%04X",
-                    ((cpu->ReadByte(cpu->UserData, addr + 1) << 8)
-                        | cpu->ReadByte(cpu->UserData, addr)));
+                    ((ctx->ReadByte(ctx->UserData, addr + 1) << 8)
+                        | ctx->ReadByte(ctx->UserData, addr)));
                 addr += 2;
                 break;
             // unsigned byte
@@ -431,7 +432,7 @@ uint16_t SM83_Disassemble(sm83_t * cpu, char * str, size_t len, uint16_t addr)
                 i += snprintf(str + i,
                     len - i,
                     "$%02X",
-                    cpu->ReadByte(cpu->UserData, addr));
+                    ctx->ReadByte(ctx->UserData, addr));
                 ++addr;
                 break;
             // signed byte
@@ -439,7 +440,7 @@ uint16_t SM83_Disassemble(sm83_t * cpu, char * str, size_t len, uint16_t addr)
                 i += snprintf(str + i,
                     len - i,
                     "%d",
-                    (int8_t)cpu->ReadByte(cpu->UserData, addr));
+                    (int8_t)ctx->ReadByte(ctx->UserData, addr));
                 ++addr;
                 break;
             // bit, for CB instructions

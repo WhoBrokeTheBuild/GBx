@@ -1,7 +1,6 @@
 #include "tileMap.h"
 #include "../debug.h"
 
-#include <GBx/GBx.h>
 #include <DUI/DUI.h>
 #include <SDL.h>
 
@@ -24,19 +23,19 @@ int tileMapAddrSelect = TILE_MAP_ADDR_AUTO;
 bool showTileMapScroll = true;
 bool showTileMapWindow = false;
 
-void InitTileMapTab()
+void InitTileMapTab(gbx_t * ctx)
 {
     sdlTileMapTexture = SDL_CreateTexture(GetDebugWindowRenderer(),
         SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_STREAMING,
         TILE_MAP_TEXTURE_WIDTH, TILE_MAP_TEXTURE_HEIGHT);
 }
 
-void TermTileMapTab()
+void TermTileMapTab(gbx_t * ctx)
 {
     SDL_DestroyTexture(sdlTileMapTexture);
 }
 
-void TileMapTabRefresh()
+void TileMapTabRefresh(gbx_t * ctx)
 {
     const int TILE_WIDTH     = 8;
     const int TILE_HEIGHT    = 8;
@@ -47,23 +46,23 @@ void TileMapTabRefresh()
     int pitch = 0;
     SDL_LockTexture(sdlTileMapTexture, NULL, (void **)&pixels, &pitch);
 
-    uint16_t mapAddr = GetTileMapAddress(
-        (LCDC.WindowDisplayEnabled ? 
-            LCDC.WindowTileMapSelect : 
-            LCDC.BGTileMapSelect)
+    uint16_t mapAddr = GBx_GetTileMapAddress(
+        (ctx->LCDC.WindowDisplayEnabled ? 
+            ctx->LCDC.WindowTileMapSelect : 
+            ctx->LCDC.BGTileMapSelect)
     );
 
     if (tileMapAddrSelect == TILE_MAP_ADDR_WIN) {
-        mapAddr = GetTileMapAddress(LCDC.WindowTileMapSelect);
+        mapAddr = GBx_GetTileMapAddress(ctx->LCDC.WindowTileMapSelect);
     }
     else if (tileMapAddrSelect == TILE_MAP_ADDR_BG) {
-        mapAddr = GetTileMapAddress(LCDC.BGTileMapSelect);
+        mapAddr = GBx_GetTileMapAddress(ctx->LCDC.BGTileMapSelect);
     }
     else if (tileMapAddrSelect == TILE_MAP_ADDR_9800) {
-        mapAddr = GetTileMapAddress(0);
+        mapAddr = GBx_GetTileMapAddress(0);
     }
     else if (tileMapAddrSelect == TILE_MAP_ADDR_9C00) {
-        mapAddr = GetTileMapAddress(1);
+        mapAddr = GBx_GetTileMapAddress(1);
     }
 
     const int TILE_DRAW_ROWS = 32;
@@ -74,24 +73,24 @@ void TileMapTabRefresh()
         for (int col = 0; col < TILE_DRAW_COLS; ++col) {
             int x = 1 + (col * (TILE_WIDTH + 1));
 
-            int tileIndex = ReadByte(mapAddr + (row * TILES_PER_ROW) + col);
+            int tileIndex = GBx_ReadByte(ctx, mapAddr + (row * TILES_PER_ROW) + col);
 
-            if (LCDC.TileDataSelect == 0) {
+            if (ctx->LCDC.TileDataSelect == 0) {
                 tileIndex = (int8_t)tileIndex; // Convert to [-128, 127]
             }
 
             for (int tileRow = 0; tileRow < TILE_HEIGHT; ++tileRow) {
-                uint16_t dataOffset = GetTileDataAddress(LCDC.TileDataSelect)
+                uint16_t dataOffset = GBx_GetTileDataAddress(ctx->LCDC.TileDataSelect)
                     + (tileIndex * TILE_DATA_SIZE) + (tileRow * 2);
 
-                uint8_t data1 = ReadByte(dataOffset);
-                uint8_t data2 = ReadByte(dataOffset + 1);
+                uint8_t data1 = GBx_ReadByte(ctx, dataOffset);
+                uint8_t data2 = GBx_ReadByte(ctx, dataOffset + 1);
 
                 for (int tileCol = 0; tileCol < TILE_WIDTH; ++tileCol) {
-                    const uint8_t * color = GetColor(&BGP, tileCol, data1, data2);
+                    const uint8_t * color = GBx_GetPixelColor(ctx, &ctx->BGP, tileCol, data1, data2);
 
                     unsigned off = ((y + tileRow) * pitch) 
-                        + ((x + tileCol) * LCD_BUFFER_COMPONENTS);
+                        + ((x + tileCol) * GBX_BACKBUFFER_COMPONENTS);
 
                     pixels[off + 0] = color[0];
                     pixels[off + 1] = color[1];
@@ -104,7 +103,7 @@ void TileMapTabRefresh()
     SDL_UnlockTexture(sdlTileMapTexture);
 }
 
-void TileMapTabRender(SDL_Point * mouse)
+void TileMapTabRender(gbx_t * ctx)
 {
     DUI_Style * style = DUI_GetStyle();
 
@@ -141,11 +140,11 @@ void TileMapTabRender(SDL_Point * mouse)
 
     SDL_RenderCopy(GetDebugWindowRenderer(), sdlTileMapTexture, NULL, &dst);
 
-    int scx = (SCX / 8.0) * 9.0;
-    int scy = (SCY / 8.0) * 9.0;
+    int scx = (ctx->SCX / 8.0) * 9.0;
+    int scy = (ctx->SCY / 8.0) * 9.0;
 
-    int width  = ((LCD_WIDTH / 8.0) * 9.0) + 1;
-    int height = ((LCD_HEIGHT / 8.0) * 9.0) + 1;
+    int width  = ((GBX_LCD_WIDTH / 8.0) * 9.0) + 1;
+    int height = ((GBX_LCD_HEIGHT / 8.0) * 9.0) + 1;
 
     SDL_SetRenderDrawColor(GetDebugWindowRenderer(), 0xFF, 0x00, 0x00, 0xFF);
         
@@ -192,8 +191,8 @@ void TileMapTabRender(SDL_Point * mouse)
         &showTileMapScroll
     );
 
-    int wx = ((WX / 8.0) * 9.0);
-    int wy = ((WY / 8.0) * 9.0);
+    int wx = ((ctx->WX / 8.0) * 9.0);
+    int wy = ((ctx->WY / 8.0) * 9.0);
 
     SDL_Rect window = {
         .x = dst.x + (wx * 2),

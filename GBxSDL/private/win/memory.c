@@ -14,43 +14,43 @@ int memoryTrackerAgeDelay = 0;
 #define MEMORY_TEXTURE_HEIGHT (256)
 #define MEMORY_TEXTURE_COMP   (3)
 
-void InitMemoryTab()
+void InitMemoryTab(gbx_t * ctx)
 {
     sdlMemoryTexture = SDL_CreateTexture(GetDebugWindowRenderer(),
         SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_STREAMING,
         MEMORY_TEXTURE_WIDTH, MEMORY_TEXTURE_HEIGHT);
 }
 
-void TermMemoryTab()
+void TermMemoryTab(gbx_t * ctx)
 {
     SDL_DestroyTexture(sdlMemoryTexture);
 }
 
-void MemoryTabRefresh()
+void MemoryTabRefresh(gbx_t * ctx)
 {
     uint8_t * pixels = NULL;
     int pitch = 0;
     SDL_LockTexture(sdlMemoryTexture, NULL, (void **)&pixels, &pitch);
 
-    if (MemoryTrackingEnabled) {
-        for (unsigned i = 0; i < sizeof(MemoryTracker); ++i) {
-            int offset = (i * MEMORY_TEXTURE_COMP);
-            pixels[offset + 0] = (MemoryTracker[i].Write << 4);
-            pixels[offset + 1] = (MemoryTracker[i].Read << 4);
-            pixels[offset + 2] = 0x00;
-        }
-    }
-    else {
-        memset(pixels, 0, 
-            MEMORY_TEXTURE_WIDTH * MEMORY_TEXTURE_HEIGHT * MEMORY_TEXTURE_COMP);
-    }
+    // if (MemoryTrackingEnabled) {
+    //     for (unsigned i = 0; i < sizeof(MemoryTracker); ++i) {
+    //         int offset = (i * MEMORY_TEXTURE_COMP);
+    //         pixels[offset + 0] = (MemoryTracker[i].Write << 4);
+    //         pixels[offset + 1] = (MemoryTracker[i].Read << 4);
+    //         pixels[offset + 2] = 0x00;
+    //     }
+    // }
+    // else {
+    //     memset(pixels, 0, 
+    //         MEMORY_TEXTURE_WIDTH * MEMORY_TEXTURE_HEIGHT * MEMORY_TEXTURE_COMP);
+    // }
 
     SDL_UnlockTexture(sdlMemoryTexture);
 
     ++memoryTrackerAgeDelay;
     if (memoryTrackerAgeDelay >= MEMORY_TRACKER_AGE_TIMEOUT) {
         memoryTrackerAgeDelay = 0;
-        AgeMemoryTracker();
+        // GBx_AgeMemoryTracker(ctx);
     }
 }
 
@@ -63,7 +63,7 @@ void MemoryTabRender()
 
     DUI_Println("MEMORY TRACKING");
 
-    DUI_Checkbox("ENABLED", &MemoryTrackingEnabled);
+    // DUI_Checkbox("ENABLED", &MemoryTrackingEnabled);
     DUI_Newline();
 
     SDL_Rect dst = {
@@ -276,12 +276,12 @@ void MemoryTabRender()
     box.x -= style->CharWidth + box.w;
 
     for (int i = 0; i < sizeof(hwaddrs) / sizeof(struct hwaddr); ++i) {
-        SDL_SetRenderDrawColor(GetDebugWindowRenderer(),
-            (MemoryTracker[i].Write << 4),
-            (MemoryTracker[i].Read << 4),
-            0x00,
-            0xFF
-        );
+        // SDL_SetRenderDrawColor(GetDebugWindowRenderer(),
+        //     (MemoryTracker[i].Write << 4),
+        //     (MemoryTracker[i].Read << 4),
+        //     0x00,
+        //     0xFF
+        // );
 
         SDL_RenderFillRect(GetDebugWindowRenderer(), &box);
         box.y += style->CharHeight + style->LinePadding;

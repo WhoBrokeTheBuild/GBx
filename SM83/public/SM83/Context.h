@@ -4,20 +4,15 @@
 #include <SM83/Macros.h>
 #include <SM83/Types.h>
 
-#define INSTRUCTION_LOG_LENGTH     (32)
-#define INSTRUCTION_LOG_ENTRY_SIZE (24)
+typedef struct sm83_internal sm83_internal_t;
 
-typedef struct
+typedef struct sm83
 {
+    // General
+
     int VerboseLevel;
 
     bool Enabled;
-
-    unsigned ClockSpeed;
-
-    sm83_mode_t Mode;
-
-    uintmax_t TotalTicks;
 
     // Callbacks
 
@@ -95,25 +90,15 @@ typedef struct
     uint16_t SP;
     uint16_t PC;
 
-    // Interrupts
-
     bool IME;
     bool RequestEnableIME;
 
     sm83_interrupt_flags_t IF;
     sm83_interrupt_flags_t IE;
 
-    // Debug
+    // Internal
 
-    uint16_t LastInstructionAddress;
-
-    uint16_t StackBaseAddress;
-
-    bool InstructionLoggingEnabled;
-
-    char InstructionLog[INSTRUCTION_LOG_LENGTH][INSTRUCTION_LOG_ENTRY_SIZE];
-
-    int InstructionLogIndex;
+    sm83_internal_t * internal;
 
 } sm83_t;
 

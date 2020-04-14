@@ -1,40 +1,30 @@
 #include <GBx/MMU.h>
-
-#include <GBx/APU.h>
-#include <GBx/Bootstrap.h>
-#include <GBx/CPU.h>
-#include <GBx/Cartridge.h>
-#include <GBx/Debug.h>
-#include <GBx/Joypad.h>
-#include <GBx/Log.h>
-#include <GBx/MBC.h>
 #include <GBx/PPU.h>
-#include <GBx/Serial.h>
+#include <GBx/APU.h>
+#include <GBx/Context.h>
+#include <GBx/Joypad.h>
 #include <GBx/Timer.h>
+#include <GBx/Cartridge.h>
 
 #include <string.h>
 
-uint8_t WRAM[WRAM_BANK_COUNT][WRAM_BANK_SIZE];
+#include "Internal.h"
+#include "Log.h"
 
-unsigned WRAMBank;
-
-uint8_t HRAM[0x7F];
-
-void ResetMMU()
+void GBx_ResetMMU(gbx_t * ctx)
 {
-    WRAMBank = 1;
-
-    for (unsigned i = 0; i < WRAM_BANK_COUNT; ++i) {
-        memset(WRAM[i], 0, sizeof(WRAM[i]));
+    ctx->WRAMBank = 1;
+    for (unsigned i = 0; i < GBX_WRAM_BANK_COUNT; ++i) {
+        memset(ctx->WRAM[i], 0, sizeof(ctx->WRAM[i]));
     }
 
-    memset(HRAM, 0, sizeof(HRAM));
+    memset(ctx->HRAM, 0, sizeof(ctx->HRAM));
 }
 
-uint8_t ReadByte(uint16_t address)
+uint8_t GBx_ReadByte(gbx_t * ctx, uint16_t address)
 {
-    if (MemoryTrackingEnabled) {
-        MemoryTracker[address].Read = 0xF;
+    if (ctx->internal->MemoryTrackingEnabled) {
+        ctx->internal->MemoryTracker[address].Read = 0xF;
     }
 
     switch (address & 0xF000) {
@@ -43,41 +33,41 @@ uint8_t ReadByte(uint16_t address)
     case 0x2000:
     case 0x3000:
         // $0000-$00FF - BIOS / Jump Vectors
-        if (address <= 0x00FF && BootstrapROMEnabled) {
-            return BootstrapROM[address];
+        if (address <= 0x00FF && ctx->BootstrapEnabled) {
+            return ctx->Bootstrap[address];
         }
 
         // $0000-$3FFF - Cartridge ROM Bank 0
-        return ROM[0][address];
+        return ctx->ROM[0][address];
     case 0x4000:
     case 0x5000:
     case 0x6000:
     case 0x7000:
         // $4000-$7FFF - Switchable Cartridge ROM
-        return ROM[ROMBank][address - 0x4000];
+        return ctx->ROM[ctx->ROMBank][address - 0x4000];
     case 0x8000:
     case 0x9000:
         // $8000-$9FFF - Video RAM
-        return VRAM[VRAMBank][address - 0x8000];
+        return ctx->VRAM[ctx->VRAMBank][address - 0x8000];
     case 0xA000:
     case 0xB000:
         // $A000-$BFFF - External Cartridge RAM
-        return SRAM[SRAMBank][address - 0xA000];
+        return ctx->SRAM[ctx->SRAMBank][address - 0xA000];
     case 0xC000:
         // $C000-$CFFF - Work RAM Bank 0
-        return WRAM[0][address - 0xC000];
+        return ctx->WRAM[0][address - 0xC000];
     case 0xD000:
         // $D000-$DFFF - Switchable Work RAM
-        return WRAM[WRAMBank][address - 0xD000];
+        return ctx->WRAM[ctx->WRAMBank][address - 0xD000];
     case 0xE000:
     case 0xF000:
         // $E000-$FDFF - Echo RAM
         if (address <= 0xFDFF) {
-            return WRAM[0][address - 0xE000];
+            return ctx->WRAM[0][address - 0xE000];
         }
         // $FE00-$FE9F - Object Attribute Memory
         else if (address <= 0xFE9F) {
-            return OAM[address - 0xFE00];
+            return ctx->OAM[address - 0xFE00];
         }
         // $FEA0-$FEFF - Unusable
         else if (address <= 0xFEFF) {
@@ -88,90 +78,90 @@ uint8_t ReadByte(uint16_t address)
         // $FF00-$FE7F - Hardware I/O Registers
         else if (address <= 0xFF7F) {
             if (address >= 0xFF30 && address <= 0xFF3F) {
-                return WaveRAM[address - 0xFF30];
+                return ctx->WaveRAM[address - 0xFF30];
             }
 
             switch (address) {
             case 0xFF00:
-                return JOYP.raw;
+                return ctx->JOYP.raw;
             case 0xFF01:
-                return SB;
+                return ctx->SB;
             case 0xFF02:
-                return SC.raw;
+                return ctx->SC.raw;
             case 0xFF04:
-                return DIV;
+                return ctx->DIV;
             case 0xFF05:
-                return TIMA;
+                return ctx->TIMA;
             case 0xFF06:
-                return TMA;
+                return ctx->TMA;
             case 0xFF07:
-                return TAC.raw;
+                return ctx->TAC.raw;
             case 0xFF0F:
-                return CPU.IF.raw;
+                return ctx->CPU->IF.raw;
             case 0xFF10:
-                return Tone1.raw[0] & TONE_READ_MASK0;
+                return ctx->Tone1.raw[0] & GBX_TONE_READ_MASK0;
             case 0xFF11:
-                return Tone1.raw[1] & TONE_READ_MASK1;
+                return ctx->Tone1.raw[1] & GBX_TONE_READ_MASK1;
             case 0xFF12:
-                return Tone1.raw[2] & TONE_READ_MASK2;
+                return ctx->Tone1.raw[2] & GBX_TONE_READ_MASK2;
             case 0xFF13:
-                return Tone1.raw[3] & TONE_READ_MASK3;
+                return ctx->Tone1.raw[3] & GBX_TONE_READ_MASK3;
             case 0xFF14:
-                return Tone1.raw[4] & TONE_READ_MASK4;
+                return ctx->Tone1.raw[4] & GBX_TONE_READ_MASK4;
             case 0xFF16:
-                return Tone2.raw[1] & TONE_READ_MASK1;
+                return ctx->Tone2.raw[1] & GBX_TONE_READ_MASK1;
             case 0xFF17:
-                return Tone2.raw[2] & TONE_READ_MASK2;
+                return ctx->Tone2.raw[2] & GBX_TONE_READ_MASK2;
             case 0xFF18:
-                return Tone2.raw[3] & TONE_READ_MASK3;
+                return ctx->Tone2.raw[3] & GBX_TONE_READ_MASK3;
             case 0xFF19:
-                return Tone2.raw[4] & TONE_READ_MASK4;
+                return ctx->Tone2.raw[4] & GBX_TONE_READ_MASK4;
             case 0xFF20:
-                return Noise.raw[0] & NOISE_READ_MASK0;
+                return ctx->Noise.raw[0] & GBX_NOISE_READ_MASK0;
             case 0xFF21:
-                return Noise.raw[1] & NOISE_READ_MASK1;
+                return ctx->Noise.raw[1] & GBX_NOISE_READ_MASK1;
             case 0xFF22:
-                return Noise.raw[2] & NOISE_READ_MASK2;
+                return ctx->Noise.raw[2] & GBX_NOISE_READ_MASK2;
             case 0xFF23:
-                return Noise.raw[3] & NOISE_READ_MASK3;
+                return ctx->Noise.raw[3] & GBX_NOISE_READ_MASK3;
             case 0xFF24:
-                return VolumeControl.raw;
+                return ctx->VolumeControl.raw;
             case 0xFF25:
                 // return NR51;
             case 0xFF26:
                 // return NR52;
             case 0xFF1A:
-                return Wave.raw[0] & WAVE_READ_MASK0;
+                return ctx->Wave.raw[0] & GBX_WAVE_READ_MASK0;
             case 0xFF1B:
-                return Wave.raw[1] & WAVE_READ_MASK1;
+                return ctx->Wave.raw[1] & GBX_WAVE_READ_MASK1;
             case 0xFF1C:
-                return Wave.raw[2] & WAVE_READ_MASK2;
+                return ctx->Wave.raw[2] & GBX_WAVE_READ_MASK2;
             case 0xFF1D:
-                return Wave.raw[3] & WAVE_READ_MASK3;
+                return ctx->Wave.raw[3] & GBX_WAVE_READ_MASK3;
             case 0xFF1E:
-                return Wave.raw[4] & WAVE_READ_MASK4;
+                return ctx->Wave.raw[4] & GBX_WAVE_READ_MASK4;
             case 0xFF40:
-                return LCDC.raw;
+                return ctx->LCDC.raw;
             case 0xFF41:
-                return STAT.raw;
+                return ctx->STAT.raw;
             case 0xFF42:
-                return SCY;
+                return ctx->SCY;
             case 0xFF43:
-                return SCX;
+                return ctx->SCX;
             case 0xFF44:
-                return LY;
+                return ctx->LY;
             case 0xFF45:
-                return LYC;
+                return ctx->LYC;
             case 0xFF47:
-                return BGP.raw;
+                return ctx->BGP.raw;
             case 0xFF48:
-                return OBP0.raw;
+                return ctx->OBP0.raw;
             case 0xFF49:
-                return OBP1.raw;
+                return ctx->OBP1.raw;
             case 0xFF4A:
-                return WX;
+                return ctx->WX;
             case 0xFF4B:
-                return WY;
+                return ctx->WY;
             default:
                 LogWarn("Attempting to read from unimplemented hardware "
                         "register $%04X",
@@ -181,11 +171,11 @@ uint8_t ReadByte(uint16_t address)
         }
         // $FF80-$FFFE - High RAM
         else if (address <= 0xFFFE) {
-            return HRAM[address - 0xFF80];
+            return ctx->HRAM[address - 0xFF80];
         }
         // $FFFF - Interrupt Enable Flag
         else {
-            return CPU.IE.raw;
+            return ctx->CPU->IE.raw;
         }
     default:
         break;
@@ -194,24 +184,10 @@ uint8_t ReadByte(uint16_t address)
     return 0;
 }
 
-uint8_t NextByte()
+void GBx_WriteByte(gbx_t * ctx, uint16_t address, uint8_t data)
 {
-    uint8_t uint8_t = ReadByte(CPU.PC);
-    ++CPU.PC;
-    return uint8_t;
-}
-
-uint16_t NextWord()
-{
-    uint16_t uint16_t = ReadWord(CPU.PC);
-    CPU.PC += 2;
-    return uint16_t;
-}
-
-void WriteByte(uint16_t address, uint8_t data)
-{
-    if (MemoryTrackingEnabled) {
-        MemoryTracker[address].Write = 0xF;
+    if (ctx->internal->MemoryTrackingEnabled) {
+        ctx->internal->MemoryTracker[address].Write = 0xF;
     }
 
     switch (address & 0xF000) {
@@ -224,36 +200,36 @@ void WriteByte(uint16_t address, uint8_t data)
     case 0x6000:
     case 0x7000:
         // $0000-$7FFF - Cartridge Memory Bank Controller
-        WriteMBC(address, data);
+        GBx_WriteByteMBC(ctx, address, data);
         return;
     case 0x8000:
     case 0x9000:
         // $8000-$9FFF - Video RAM
-        VRAM[VRAMBank][address - 0x8000] = data;
+        ctx->VRAM[ctx->VRAMBank][address - 0x8000] = data;
         return;
     case 0xA000:
     case 0xB000:
         // $A000-$BFFF - External Cartridge RAM
-        SRAM[SRAMBank][address - 0xA000] = data;
+        ctx->SRAM[ctx->SRAMBank][address - 0xA000] = data;
         return;
     case 0xC000:
         // $C000-$CFFF - Work RAM Bank 0
-        WRAM[0][address - 0xC000] = data;
+        ctx->WRAM[0][address - 0xC000] = data;
         return;
     case 0xD000:
         // $D000-$DFFF - Switchable Work RAM
-        WRAM[WRAMBank][address - 0xD000] = data;
+        ctx->WRAM[ctx->WRAMBank][address - 0xD000] = data;
         return;
     case 0xE000:
     case 0xF000:
         // $E000-$FDFF - Echo RAM
         if (address <= 0xFDFF) {
-            WRAM[0][address - 0xE000] = data;
+            ctx->WRAM[0][address - 0xE000] = data;
             return;
         }
         // $FE00-$FE9F - Object Attribute Memory
         else if (address <= 0xFE9F) {
-            OAM[address - 0xFE00] = data;
+            ctx->OAM[address - 0xFE00] = data;
             return;
         }
         // $FEA0-$FEFF - Unusable
@@ -265,237 +241,175 @@ void WriteByte(uint16_t address, uint8_t data)
         // $FF00-$FE7F - Hardware I/O Registers
         else if (address <= 0xFF7F) {
             if (address >= 0xFF30 && address <= 0xFF3F) {
-                WaveRAM[address - 0xFF30] = data;
+                ctx->WaveRAM[address - 0xFF30] = data;
                 return;
             }
 
             switch (address) {
             case 0xFF00:
-                JOYP.raw |= data & JOYP_WRITE_MASK;
-                UpdateJoypad();
-                if (VerboseLevel >= 2) {
-                    PrintJoypad();
-                }
+                ctx->JOYP.raw ^= GBX_JOYP_WRITE_MASK;
+                ctx->JOYP.raw |= data & GBX_JOYP_WRITE_MASK;
+                GBx_UpdateJoypad(ctx);
+                Verbose(ctx, 2, GBx_PrintJoypad(ctx));
                 return;
             case 0xFF01:
-                SB = data;
+                ctx->SB = data;
                 return;
             case 0xFF02:
-                SC.raw = data;
+                ctx->SC.raw = data;
                 return;
             case 0xFF04:
-                DIV = 0;
-                LogVerbose(2, "Resetting DIV");
+                ctx->DIV = 0;
+                Verbose(ctx, 2, LogInfo("Resetting DIV"));
                 return;
             case 0xFF05:
-                TIMA = data;
-                if (VerboseLevel >= 2) {
-                    PrintTimer();
-                }
+                ctx->TIMA = data;
+                Verbose(ctx, 2, GBx_PrintTimer(ctx));
                 return;
             case 0xFF06:
-                TMA = data;
-                if (VerboseLevel >= 2) {
-                    PrintTimer();
-                }
+                ctx->TMA = data;
+                Verbose(ctx, 2, GBx_PrintTimer(ctx));
                 return;
             case 0xFF07:
-                TAC.raw = data;
-                if (VerboseLevel >= 2) {
-                    PrintTimer();
-                }
+                ctx->TAC.raw = data;
+                Verbose(ctx, 2, GBx_PrintTimer(ctx));
                 return;
             case 0xFF0F:
-                CPU.IF.raw = data;
-                if (VerboseLevel >= 2) {
-                    SM83_PrintInterrupts(&CPU);
-                }
+                ctx->CPU->IF.raw = data;
+                Verbose(ctx, 2, SM83_PrintInterrupts(ctx->CPU));
                 return;
             case 0xFF10:
-                Tone1.raw[0] = data;
-                if (VerboseLevel >= 2) {
-                    PrintTone1();
-                }
+                ctx->Tone1.raw[0] = data;
+                Verbose(ctx, 2, GBx_PrintTone1(ctx));
                 return;
             case 0xFF11:
-                Tone1.raw[1] = data;
-                if (VerboseLevel >= 2) {
-                    PrintTone1();
-                }
+                ctx->Tone1.raw[1] = data;
+                Verbose(ctx, 2, GBx_PrintTone1(ctx));
                 return;
             case 0xFF12:
-                Tone1.raw[2] = data;
-                if (VerboseLevel >= 2) {
-                    PrintTone1();
-                }
+                ctx->Tone1.raw[2] = data;
+                Verbose(ctx, 2, GBx_PrintTone1(ctx));
                 return;
             case 0xFF13:
-                Tone1.raw[3] = data;
-                if (VerboseLevel >= 2) {
-                    PrintTone1();
-                }
+                ctx->Tone1.raw[3] = data;
+                Verbose(ctx, 2, GBx_PrintTone1(ctx));
                 return;
             case 0xFF14:
-                Tone1.raw[4] = data;
-                if (VerboseLevel >= 2) {
-                    PrintTone1();
-                }
+                ctx->Tone1.raw[4] = data;
+                Verbose(ctx, 2, GBx_PrintTone1(ctx));
                 return;
             case 0xFF16:
-                Tone2.raw[1] = data;
-                if (VerboseLevel >= 2) {
-                    PrintTone2();
-                }
+                ctx->Tone2.raw[1] = data;
+                Verbose(ctx, 2, GBx_PrintTone2(ctx));
                 return;
             case 0xFF17:
-                Tone2.raw[2] = data;
-                if (VerboseLevel >= 2) {
-                    PrintTone2();
-                }
+                ctx->Tone2.raw[2] = data;
+                Verbose(ctx, 2, GBx_PrintTone2(ctx));
                 return;
             case 0xFF18:
-                Tone2.raw[3] = data;
-                if (VerboseLevel >= 2) {
-                    PrintTone2();
-                }
+                ctx->Tone2.raw[3] = data;
+                Verbose(ctx, 2, GBx_PrintTone2(ctx));
                 return;
             case 0xFF19:
-                Tone2.raw[4] = data;
-                if (VerboseLevel >= 2) {
-                    PrintTone2();
-                }
+                ctx->Tone2.raw[4] = data;
+                Verbose(ctx, 2, GBx_PrintTone2(ctx));
                 return;
             case 0xFF20:
-                Noise.raw[0] = data;
-                if (VerboseLevel >= 2) {
-                    PrintNoise();
-                }
+                ctx->Noise.raw[0] = data;
+                Verbose(ctx, 2, GBx_PrintNoise(ctx));
                 return;
             case 0xFF21:
-                Noise.raw[1] = data;
-                if (VerboseLevel >= 2) {
-                    PrintNoise();
-                }
+                ctx->Noise.raw[1] = data;
+                Verbose(ctx, 2, GBx_PrintNoise(ctx));
                 return;
             case 0xFF22:
-                Noise.raw[2] = data;
-                if (VerboseLevel >= 2) {
-                    PrintNoise();
-                }
+                ctx->Noise.raw[2] = data;
+                Verbose(ctx, 2, GBx_PrintNoise(ctx));
                 return;
             case 0xFF23:
-                Noise.raw[3] = data;
-                if (VerboseLevel >= 2) {
-                    PrintNoise();
-                }
+                ctx->Noise.raw[3] = data;
+                Verbose(ctx, 2, GBx_PrintNoise(ctx));
                 return;
             case 0xFF24:
-                VolumeControl.raw = data;
-                if (VerboseLevel >= 2) {
-                    PrintVolumeControl();
-                }
+                ctx->VolumeControl.raw = data;
+                Verbose(ctx, 2, GBx_PrintVolumeControl(ctx));
                 return;
             case 0xFF25:
-                SoundOutputTerminal.raw = data;
-                if (VerboseLevel >= 2) {
-                    // PrintSoundOutputTerminal();
-                }
+                ctx->SoundOutputTerminal.raw = data;
+                // Verbose(ctx, 2, GBx_PrintSoundOutputTerminal(ctx));
                 return;
             case 0xFF26:
-                APUC.raw |= data & SOUND_CONTROL_WRITE_MASK;
+                ctx->APUC.raw |= data & GBX_APUC_WRITE_MASK;
+                // Verbose(ctx, 2, GBx_PrintAPUC(ctx));
                 // TODO: Stop APU
-                if (VerboseLevel >= 2) {
-                    // PrintAPUC();
-                }
                 return;
             case 0xFF1A:
-                Wave.raw[0] = data;
-                if (VerboseLevel >= 2) {
-                    PrintWave();
-                }
+                ctx->Wave.raw[0] = data;
+                Verbose(ctx, 2, GBx_PrintWave(ctx));
                 break;
             case 0xFF1B:
-                Wave.raw[1] = data;
-                if (VerboseLevel >= 2) {
-                    PrintWave();
-                }
+                ctx->Wave.raw[1] = data;
+                Verbose(ctx, 2, GBx_PrintWave(ctx));
                 break;
             case 0xFF1C:
-                Wave.raw[2] = data;
-                if (VerboseLevel >= 2) {
-                    PrintWave();
-                }
+                ctx->Wave.raw[2] = data;
+                Verbose(ctx, 2, GBx_PrintWave(ctx));
                 break;
             case 0xFF1D:
-                Wave.raw[3] = data;
-                if (VerboseLevel >= 2) {
-                    PrintWave();
-                }
+                ctx->Wave.raw[3] = data;
+                Verbose(ctx, 2, GBx_PrintWave(ctx));
                 break;
             case 0xFF1E:
-                Wave.raw[4] = data;
-                if (VerboseLevel >= 2) {
-                    PrintWave();
-                }
+                ctx->Wave.raw[4] = data;
+                Verbose(ctx, 2, GBx_PrintWave(ctx));
                 break;
-
             case 0xFF40:
-                LCDC.raw = data;
-                if (VerboseLevel >= 2) {
-                    PrintLCDC();
-                }
+                ctx->LCDC.raw = data;
+                Verbose(ctx, 2, GBx_PrintLCDC(ctx));
                 break;
             case 0xFF41:
-                STAT.raw ^= STAT_WRITE_MASK;
-                STAT.raw |= data & STAT_WRITE_MASK;
-                if (VerboseLevel >= 2) {
-                    PrintSTAT();
-                }
+                ctx->STAT.raw ^= GBX_STAT_WRITE_MASK;
+                ctx->STAT.raw |= data & GBX_STAT_WRITE_MASK;
+                Verbose(ctx, 2, GBx_PrintSTAT(ctx));
                 break;
             case 0xFF42:
-                SCY = data;
-                LogVerbose(2, "Setting SCY=%02X", data);
+                ctx->SCY = data;
+                Verbose(ctx, 2, LogInfo("Setting SCY=%02X", data));
                 break;
             case 0xFF43:
-                SCX = data;
-                LogVerbose(2, "Setting SCX=%02X", data);
+                ctx->SCX = data;
+                Verbose(ctx, 2, LogInfo("Setting SCX=%02X", data));
                 break;
             case 0xFF45:
-                LYC = data;
-                LogVerbose(2, "Setting LYC=%02X", data);
+                ctx->LYC = data;
+                Verbose(ctx, 2, LogInfo("Setting LYC=%02X", data));
                 break;
             case 0xFF46:
-                OAMDMATransfer(data);
+                GBx_DMATransferOAM(ctx, data);
                 return;
             case 0xFF47:
-                BGP.raw = data;
-                if (VerboseLevel >= 2) {
-                    PrintPalette("BGP", &BGP);
-                }
+                ctx->BGP.raw = data;
+                Verbose(ctx, 2, GBx_PrintPalettes(ctx));
                 break;
             case 0xFF48:
-                OBP0.raw = data;
-                if (VerboseLevel >= 2) {
-                    PrintPalette("OBP0", &OBP0);
-                }
+                ctx->OBP0.raw = data;
+                Verbose(ctx, 2, GBx_PrintPalettes(ctx));
                 return;
             case 0xFF49:
-                OBP1.raw = data;
-                if (VerboseLevel >= 2) {
-                    PrintPalette("OBP1", &OBP1);
-                }
+                ctx->OBP1.raw = data;
+                Verbose(ctx, 2, GBx_PrintPalettes(ctx));
                 return;
             case 0xFF4A:
-                WX = data;
-                LogVerbose(2, "Setting WX=%02X", data);
+                ctx->WX = data;
+                Verbose(ctx, 2, LogInfo("Setting WX=%02X", data));
                 return;
             case 0xFF4B:
-                WY = data;
-                LogVerbose(2, "Setting WY=%02X", data);
+                ctx->WY = data;
+                Verbose(ctx, 2, LogInfo("Setting WY=%02X", data));
                 return;
             case 0xFF50:
-                BootstrapROMEnabled = false;
-                LogVerbose(2, "Bootstrap ROM Disabled");
+                ctx->BootstrapEnabled = false;
+                Verbose(ctx, 2, LogInfo("Bootstrap ROM Disabled"));
                 return;
             default:
                 LogWarn("Attempting to write to unimplemented hardware "
@@ -506,33 +420,24 @@ void WriteByte(uint16_t address, uint8_t data)
         }
         // High RAM - FF80-FFFE
         else if (address <= 0xFFFE) {
-            HRAM[address - 0xFF80] = data;
+            ctx->HRAM[address - 0xFF80] = data;
         }
         // Interrupt Enable Flag - FFFF
         else if (address == 0xFFFF) {
-            CPU.IE.raw = data;
-            if (VerboseLevel >= 2) {
-                SM83_PrintInterrupts(&CPU);
-            }
+            ctx->CPU->IE.raw = data;
+            Verbose(ctx, 2, SM83_PrintInterrupts(ctx->CPU));
         }
     }
 }
 
-void WriteWord(uint16_t address, uint16_t data)
+uint16_t GBx_ReadWord(gbx_t * ctx, uint16_t address)
 {
-    WriteByte(address + 1, (uint8_t)(data >> 8));
-    WriteByte(address, (uint8_t)(data & 0xFF));
+    return GBx_ReadByte(ctx, address)
+        | (GBx_ReadByte(ctx, address + 1) << 8);
 }
 
-void PushWord(uint16_t data)
+void GBx_WriteWord(gbx_t * ctx, uint16_t address, uint16_t data)
 {
-    CPU.SP -= 2;
-    WriteWord(CPU.SP, data);
-}
-
-uint16_t PopWord()
-{
-    uint16_t data = ReadWord(CPU.SP);
-    CPU.SP += 2;
-    return data;
+    GBx_WriteByte(ctx, address + 1, (uint8_t)(data >> 8));
+    GBx_WriteByte(ctx, address, (uint8_t)(data & 0xFF));
 }

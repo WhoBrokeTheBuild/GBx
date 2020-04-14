@@ -1,6 +1,8 @@
 #ifndef CMD_BREAK_H
 #define CMD_BREAK_H
 
-void cmdBreak(const char * input);
+#include <GBx/GBx.h>
+
+void cmdBreak(gbx_t * ctx, const char * input);
 
 #endif // CMD_BREAK_H

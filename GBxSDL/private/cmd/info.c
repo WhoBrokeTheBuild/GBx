@@ -1,12 +1,10 @@
 #include "info.h"
 #include "help.h"
 
-#include <GBx/GBx.h>
-
 #include <stdio.h>
 #include <string.h>
 
-void cmdInfo(const char * input)
+void cmdInfo(gbx_t * ctx, const char * input)
 {
     if (!input) {
         printf("%s", CMD_HELP_INFO);
@@ -21,58 +19,54 @@ void cmdInfo(const char * input)
     }
 
     if (strncmp(input, "all", length) == 0) {
-        SM83_PrintRegisters(&CPU);
-        PrintTone1();
-        PrintTone2();
-        PrintWave();
-        PrintWaveRAM();
-        PrintVolumeControl();
-        SM83_PrintInterrupts(&CPU);
-        PrintLCDC();
-        PrintSTAT();
-        PrintLCDCoordinates();
-        PrintPalette("BGP", &BGP);
-        PrintPalette("OBP0", &OBP0);
-        PrintPalette("OBP1", &OBP1);
-        PrintTimer();
-        PrintMBC();
-        PrintCartridge();
-        PrintJoypad();
+        SM83_PrintRegisters(ctx->CPU);
+        GBx_PrintTone1(ctx);
+        GBx_PrintTone2(ctx);
+        GBx_PrintWave(ctx);
+        GBx_PrintWaveRAM(ctx);
+        GBx_PrintVolumeControl(ctx);
+        SM83_PrintInterrupts(ctx->CPU);
+        GBx_PrintLCDC(ctx);
+        GBx_PrintSTAT(ctx);
+        GBx_PrintLCDCoordinates(ctx);
+        GBx_PrintPalettes(ctx);
+        GBx_PrintTimer(ctx);
+        GBx_PrintMBC(ctx);
+        GBx_PrintCartridge(ctx);
+        GBx_PrintJoypad(ctx);
     }
     else if (strncmp(input, "apu", length) == 0) {
-        PrintTone1();
-        PrintTone2();
-        PrintWave();
-        PrintWaveRAM();
-        PrintVolumeControl();
+        GBx_PrintTone1(ctx);
+        GBx_PrintTone2(ctx);
+        GBx_PrintWave(ctx);
+        GBx_PrintWaveRAM(ctx);
+        GBx_PrintVolumeControl(ctx);
     }
     else if (strncmp(input, "registers", length) == 0) {
-        SM83_PrintRegisters(&CPU);
+        SM83_PrintRegisters(ctx->CPU);
     }
     else if (strncmp(input, "interrupts", length) == 0) {
-        SM83_PrintInterrupts(&CPU);
+        SM83_PrintInterrupts(ctx->CPU);
     }
     else if (strncmp(input, "lcd", length) == 0) {
-        PrintLCDC();
-        PrintSTAT();
-        PrintLCDCoordinates();
-        PrintPalette("BGP", &BGP);
-        PrintPalette("OBP0", &OBP0);
-        PrintPalette("OBP1", &OBP1);
+        GBx_PrintLCDC(ctx);
+        GBx_PrintSTAT(ctx);
+        GBx_PrintLCDCoordinates(ctx);
+        GBx_PrintPalettes(ctx);
     }
     else if (strncmp(input, "timer", length) == 0) {
-        PrintTimer();
+        GBx_PrintTimer(ctx);
     }
     else if (strncmp(input, "mbc", length) == 0) {
-        PrintMBC();
+        GBx_PrintMBC(ctx);
     }
     else if (strncmp(input, "cartridge", length) == 0) {
-        PrintCartridge();
+        GBx_PrintCartridge(ctx);
     }
     else if (strncmp(input, "joypad", length) == 0) {
-        PrintJoypad();
+        GBx_PrintJoypad(ctx);
     }
     else {
-        LogError("Unrecognized command 'info %s'", input);
+        fprintf(stderr, "Unrecognized command 'info %s'\n", input);
     }
 }

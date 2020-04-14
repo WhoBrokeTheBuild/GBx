@@ -1,16 +1,14 @@
 #include "delete.h"
 #include "../breakpoint.h"
 
-#include <GBx/Log.h>
-
 #include <stdio.h>
 #include <string.h>
 
-void cmdDelete(const char * input)
+void cmdDelete(gbx_t * ctx, const char * input)
 {
     if (!input) {
         ClearAllBreakpoints();
-        LogInfo("All Breakpoints deleted");
+        printf("All Breakpoints deleted\n");
         return;
     }
 
@@ -18,7 +16,7 @@ void cmdDelete(const char * input)
     
     if (length == 0) {
         ClearAllBreakpoints();
-        LogInfo("All Breakpoints deleted");
+        printf("All Breakpoints deleted\n");
         return;
     }
     
@@ -30,12 +28,12 @@ void cmdDelete(const char * input)
         sscanf(equal + 1, "%04X", &value);
 
         ClearBreakpoint(input, value);
-        LogInfo("Breakpoint %s=$%04X deleted", input, value);
+        printf("Breakpoint %s=$%04X deleted\n", input, value);
     }
     else {
         unsigned pc;
         sscanf(input, "%04X", &pc);
         ClearBreakpoint("PC", pc);
-        LogInfo("Breakpoint PC=$%04X deleted", pc);
+        printf("Breakpoint PC=$%04X deleted\n", pc);
     }
 }

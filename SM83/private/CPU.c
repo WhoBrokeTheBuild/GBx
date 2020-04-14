@@ -1,17 +1,22 @@
-#include <SM83/SM83.h>
+#include <SM83/CPU.h>
+#include <SM83/Context.h>
+#include <SM83/Debug.h>
+#include <SM83/Disassembler.h>
+#include <SM83/Interrupts.h>
 
 #include "Instructions.h"
+#include "Internal.h"
 #include "Log.h"
 
-uint8_t SM83_Fetch(sm83_t * cpu)
+uint8_t SM83_Fetch(sm83_t * ctx)
 {
-    cpu->LastInstructionAddress = cpu->PC;
+    ctx->internal->LastInstructionAddress = ctx->PC;
 
-    uint8_t op = SM83_NextByte(cpu);
+    uint8_t op = SM83_NextByte(ctx);
     return op;
 }
 
-sm83_instruction_t SM83_Decode(sm83_t * cpu, uint8_t opcode)
+sm83_instruction_t SM83_Decode(sm83_t * ctx, uint8_t opcode)
 {
     static const sm83_instruction_t instructions[] = {
         // Miscellenious
@@ -294,62 +299,63 @@ sm83_instruction_t SM83_Decode(sm83_t * cpu, uint8_t opcode)
     return instructions[opcode];
 }
 
-void SM83_Execute(sm83_t * cpu, sm83_instruction_t inst)
+void SM83_Execute(sm83_t * ctx, sm83_instruction_t inst)
 {
     if (inst) {
-        bool needEnableIME = cpu->RequestEnableIME;
+        bool needEnableIME = ctx->RequestEnableIME;
 
-        inst(cpu);
+        inst(ctx);
 
         if (needEnableIME) {
-            cpu->IME = true;
-            cpu->RequestEnableIME = false;
+            ctx->IME = true;
+            ctx->RequestEnableIME = false;
         }
     }
     else {
-        Verbose(cpu, 1, LogWarn("unknown instruction at $%04X", cpu->PC));
+        Verbose(ctx, 1, LogWarn("unknown instruction at $%04X", ctx->PC));
     }
 }
 
-void SM83_Step(sm83_t * cpu)
+void SM83_Step(sm83_t * ctx)
 {
     static char INST_DISASM[1024];
 
-    if (cpu->Enabled) {
-        if (cpu->VerboseLevel >= 3 || cpu->InstructionLoggingEnabled) {
-            int offset = snprintf(INST_DISASM, sizeof(INST_DISASM), 
-                "$%04X: ", cpu->PC);
+    if (ctx->Enabled) {
+        if (ctx->VerboseLevel >= 3
+            || ctx->internal->InstructionLoggingEnabled) {
+            int offset = snprintf(
+                INST_DISASM, sizeof(INST_DISASM), "$%04X: ", ctx->PC);
 
-            SM83_Disassemble(cpu, 
-                INST_DISASM + offset, 
-                sizeof(INST_DISASM) - offset, 
-                cpu->PC);
+            SM83_Disassemble(ctx,
+                INST_DISASM + offset,
+                sizeof(INST_DISASM) - offset,
+                ctx->PC);
 
-            SM83_AddInstructionLogEntry(cpu, INST_DISASM);
-            Verbose(cpu, 3, LogInfo("%s", INST_DISASM));
+            SM83_AddInstructionLogEntry(ctx, INST_DISASM);
+            Verbose(ctx, 3, LogInfo("%s", INST_DISASM));
         }
 
-        SM83_Execute(cpu, SM83_Decode(cpu, SM83_Fetch(cpu)));
+        SM83_Execute(ctx, SM83_Decode(ctx, SM83_Fetch(ctx)));
     }
     else {
-        SM83_Tick(cpu, 4);
+        SM83_Tick(ctx, 4);
     }
 
-    SM83_CheckInterrupts(cpu);
+    SM83_CheckInterrupts(ctx);
 }
 
-void SM83_PrintRegisters(sm83_t * cpu)
+void SM83_PrintRegisters(sm83_t * ctx)
 {
     LogInfo(
         "AF=$%04X BC=$%04X DE=$%04X HL=$%04X SP=$%04X PC=$%04X F=[%c%c%c%c]",
-        cpu->AF,
-        cpu->BC,
-        cpu->DE,
-        cpu->HL,
-        cpu->SP,
-        cpu->PC,
-        (cpu->FZ ? 'Z' : '-'),
-        (cpu->FN ? 'N' : '-'),
-        (cpu->FH ? 'H' : '-'),
-        (cpu->FC ? 'C' : '-'));
+        ctx->AF,
+        ctx->BC,
+        ctx->DE,
+        ctx->HL,
+        ctx->SP,
+        ctx->PC,
+        (ctx->FZ ? 'Z' : '-'),
+        (ctx->FN ? 'N' : '-'),
+        (ctx->FH ? 'H' : '-'),
+        (ctx->FC ? 'C' : '-'));
 }

@@ -3,15 +3,17 @@
 
 #include <stdbool.h>
 
+#include <GBx/GBx.h>
+
 void SetBreakpoint(const char * reg, unsigned value);
 
-void SetBreakpointStackChanged();
+void SetBreakpointStackChanged(gbx_t * ctx);
 
 void ClearBreakpoint(const char * reg, unsigned value);
 
 void ClearAllBreakpoints();
 
-bool AtBreakpoint();
+bool AtBreakpoint(gbx_t * ctx);
 
 void PrintBreakpoints();
 

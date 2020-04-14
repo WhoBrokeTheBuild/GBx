@@ -1,31 +1,18 @@
-#ifndef MMU_H
-#define MMU_H
+#ifndef GBX_MMU_H
+#define GBX_MMU_H
 
 #include <GBx/Types.h>
 
-#define WRAM_BANK_COUNT (8)
-#define WRAM_BANK_SIZE  (0x1000)
+typedef struct gbx gbx_t;
 
-extern uint8_t WRAM[WRAM_BANK_COUNT][WRAM_BANK_SIZE];
+void GBx_ResetMMU(gbx_t * ctx);
 
-extern unsigned WRAMBank;
+uint8_t GBx_ReadByte(gbx_t * ctx, uint16_t address);
 
-extern uint8_t HRAM[0x7F];
+void GBx_WriteByte(gbx_t * ctx, uint16_t address, uint8_t data);
 
-void ResetMMU();
+uint16_t GBx_ReadWord(gbx_t * ctx, uint16_t address);
 
-uint8_t ReadByte(uint16_t address);
+void GBx_WriteWord(gbx_t * ctx, uint16_t address, uint16_t data);
 
-#define ReadWord(address) (ReadByte(address) | (ReadByte((address) + 1) << 8))
-
-uint8_t NextByte();
-uint16_t NextWord();
-
-void WriteByte(uint16_t address, uint8_t data);
-void WriteWord(uint16_t address, uint16_t data);
-
-void PushWord(uint16_t data);
-
-uint16_t PopWord();
-
-#endif // MMU_H
+#endif // GBX_MMU_H

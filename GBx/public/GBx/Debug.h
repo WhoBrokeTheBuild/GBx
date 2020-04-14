@@ -1,26 +1,14 @@
 #ifndef GBX_DEBUG_H
 #define GBX_DEBUG_H
 
-#include <GBx/Types.h>
+#include <GBx/Types/Debug.h>
 
-#include <assert.h>
+typedef struct gbx gbx_t;
 
-extern int VerboseLevel;
+void GBx_InitMemoryTracker(gbx_t * ctx);
 
-extern bool MemoryTrackingEnabled;
+void GBx_TermMemoryTracker(gbx_t * ctx);
 
-typedef struct
-{
-    uint8_t Read : 4;
-    uint8_t Write : 4;
-
-} memory_tracker_entry_t;
-
-static_assert(
-    sizeof(memory_tracker_entry_t) == 1, "sizeof(memory_tracker_entry_t) != 1");
-
-extern memory_tracker_entry_t MemoryTracker[0x10000];
-
-void AgeMemoryTracker();
+void GBx_AgeMemoryTracker(gbx_t * ctx);
 
 #endif // GBX_DEBUG_H

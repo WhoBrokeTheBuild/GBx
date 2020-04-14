@@ -96,7 +96,7 @@ const char * CMD_HELP_DISASSEMBLE =
 "  ADDRESS will be interpreted as a 16-bit hex number\n"
 "  If ADDRESS is not present, it will default to PC\n";
 
-void cmdHelp(const char * input)
+void cmdHelp(gbx_t * ctx, const char * input)
 {
     if (!input) {
         printf("%s", CMD_HELP);

@@ -1,195 +1,192 @@
 #include <GBx/Cartridge.h>
 
-#include <GBx/CPU.h>
-#include <GBx/Log.h>
-#include <GBx/MBC.h>
-#include <SM83/SM83.h>
+#include <GBx/Context.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define HEADER_OFFSET 0x0100
+#include "Internal.h"
+#include "Log.h"
 
-cartridge_header_t CartridgeHeader;
-
-bool ColorEnabled = false;
-bool SuperEnabled = false;
-
-bool HasCartridgeBattery = false;
-bool HasCartridgeTimer = false;
-bool HasCartridgeSRAM = false;
-
-bool SRAMEnabled;
-
-uint8_t SRAM[SRAM_BANK_COUNT][SRAM_BANK_SIZE];
-
-unsigned SRAMBank;
-
-uint8_t ROM[ROM_BANK_COUNT][ROM_BANK_SIZE];
-
-unsigned ROMBank;
-
-bool LoadCartridgeROM(const char * filename)
+void GBx_ResetCartridge(gbx_t * ctx)
 {
-    LogVerbose(1, "Opening ROM: '%s'", filename);
+    ctx->MBC.raw = 0x00;
+
+    ctx->SRAMEnabled = false;
+    ctx->SRAMBank = 0;
+    ctx->ROMBank = 1;
+
+    for (unsigned i = 0; i < GBX_SRAM_BANK_COUNT; ++i) {
+        memset(ctx->SRAM[i], 0, sizeof(ctx->SRAM[i]));
+    }
+}
+
+bool GBx_LoadCartridge(gbx_t * ctx, const char * filename)
+{
+    const uint16_t HEADER_OFFSET = 0x0100;
+
+    Verbose(ctx, 1, LogInfo("Opening ROM: '%s'", filename));
 
     FILE * file = fopen(filename, "rb");
+    if (!file) {
+        LogFatal("Unable to open ROM '%s'", filename);
+    }
 
     fseek(file, 0, SEEK_END);
     size_t size = ftell(file);
     fseek(file, 0, SEEK_SET);
 
-    LogVerbose(1, "ROM Size %zu", size);
+    Verbose(ctx, 1, LogInfo("ROM Size %zu", size));
 
-    size_t bytesRead = fread(ROM, 1, size, file);
+    size_t bytesRead = fread(ctx->ROM, 1, size, file);
     fclose(file);
 
-    LogVerbose(1, "Read %zu bytes", bytesRead);
+    Verbose(ctx, 1, LogInfo("Read %zu bytes", bytesRead));
 
     if (bytesRead < size) {
         LogFatal("Failed to load ROM: '%s'", filename);
         return false;
     }
 
-    memcpy(CartridgeHeader.raw, 
-        &ROM[0][HEADER_OFFSET], 
-        sizeof(CartridgeHeader));
+    memcpy(ctx->CartridgeHeader.raw, 
+        &ctx->ROM[0][HEADER_OFFSET], 
+        sizeof(ctx->CartridgeHeader));
 
-    LogVerbose(1,
+    Verbose(ctx, 1, LogInfo(
         "ROM Title: %.*s",
-        (int)sizeof(CartridgeHeader.Title),
-        CartridgeHeader.Title);
+        (int)sizeof(ctx->CartridgeHeader.Title),
+        ctx->CartridgeHeader.Title));
 
-    ColorEnabled = (CartridgeHeader.ColorEnabled == 0x80);
-    SuperEnabled = (CartridgeHeader.SuperEnabled != 0x00);
+    ctx->ColorEnabled = (ctx->CartridgeHeader.ColorEnabled == 0x80);
+    ctx->SuperEnabled = (ctx->CartridgeHeader.SuperEnabled != 0x00);
 
-    if (ColorEnabled) {
-        SM83_SetMode(&CPU, SM83_MODE_CGB);
+    if (ctx->ColorEnabled) {
+        SM83_SetMode(ctx->CPU, SM83_MODE_CGB);
     }
-    else if (SuperEnabled) {
-        SM83_SetMode(&CPU, SM83_MODE_SGB);
+    else if (ctx->SuperEnabled) {
+        SM83_SetMode(ctx->CPU, SM83_MODE_SGB);
     }
 
-    switch (CartridgeHeader.CartridgeType) {
+    switch (ctx->CartridgeHeader.CartridgeType) {
     case 0x00:
         // ROM Only
         break;
     case 0x01:
         // MBC1
-        MBCType = MBC_TYPE_MBC1;
+        ctx->MBCType = GBX_MBC_TYPE_MBC1;
         break;
     case 0x02:
         // MBC1+RAM
-        MBCType = MBC_TYPE_MBC1;
-        HasCartridgeSRAM = true;
+        ctx->MBCType = GBX_MBC_TYPE_MBC1;
+        ctx->HaveCartridgeSRAM = true;
         break;
     case 0x03:
         // MBC1+RAM+BATT
-        MBCType = MBC_TYPE_MBC1;
-        HasCartridgeSRAM = true;
-        HasCartridgeBattery = true;
+        ctx->MBCType = GBX_MBC_TYPE_MBC1;
+        ctx->HaveCartridgeSRAM = true;
+        ctx->HaveCartridgeBattery = true;
         break;
     case 0x05:
         // MBC2
-        MBCType = MBC_TYPE_MBC2;
+        ctx->MBCType = GBX_MBC_TYPE_MBC2;
         break;
     case 0x06:
         // MBC2+BATT
-        MBCType = MBC_TYPE_MBC2;
-        HasCartridgeBattery = true;
+        ctx->MBCType = GBX_MBC_TYPE_MBC2;
+        ctx->HaveCartridgeBattery = true;
         break;
     case 0x08:
         // RAM
-        HasCartridgeSRAM = true;
+        ctx->HaveCartridgeSRAM = true;
         break;
     case 0x09:
         // RAM+BATT
-        HasCartridgeSRAM = true;
-        HasCartridgeBattery = true;
+        ctx->HaveCartridgeSRAM = true;
+        ctx->HaveCartridgeBattery = true;
         break;
     case 0x0B:
         // MMM01
-        MBCType = MBC_TYPE_MMM01;
+        ctx->MBCType = GBX_MBC_TYPE_MMM01;
         break;
     case 0x0C:
         // MMM01+SRAM
-        MBCType = MBC_TYPE_MMM01;
-        HasCartridgeSRAM = true;
+        ctx->MBCType = GBX_MBC_TYPE_MMM01;
+        ctx->HaveCartridgeSRAM = true;
         break;
     case 0x0D:
         // MMM01+SRAM+BATT
-        MBCType = MBC_TYPE_MMM01;
-        HasCartridgeSRAM = true;
-        HasCartridgeBattery = true;
+        ctx->MBCType = GBX_MBC_TYPE_MMM01;
+        ctx->HaveCartridgeSRAM = true;
+        ctx->HaveCartridgeBattery = true;
         break;
     case 0x0F:
         // MBC3+Timer+BATT
-        MBCType = MBC_TYPE_MBC3;
-        HasCartridgeTimer = true;
-        HasCartridgeBattery = true;
+        ctx->MBCType = GBX_MBC_TYPE_MBC3;
+        ctx->HaveCartridgeTimer = true;
+        ctx->HaveCartridgeBattery = true;
         break;
     case 0x10:
         // MBC3+Timer+RAM+BATT
-        MBCType = MBC_TYPE_MBC3;
-        HasCartridgeTimer = true;
-        HasCartridgeSRAM = true;
-        HasCartridgeBattery = true;
+        ctx->MBCType = GBX_MBC_TYPE_MBC3;
+        ctx->HaveCartridgeTimer = true;
+        ctx->HaveCartridgeSRAM = true;
+        ctx->HaveCartridgeBattery = true;
         break;
     case 0x11:
         // MBC3
-        MBCType = MBC_TYPE_MBC3;
+        ctx->MBCType = GBX_MBC_TYPE_MBC3;
         break;
     case 0x12:
         // MBC3+RAM
-        MBCType = MBC_TYPE_MBC3;
-        HasCartridgeSRAM = true;
+        ctx->MBCType = GBX_MBC_TYPE_MBC3;
+        ctx->HaveCartridgeSRAM = true;
         break;
     case 0x13:
         // MBC3+RAM+BATT
-        MBCType = MBC_TYPE_MBC3;
-        HasCartridgeSRAM = true;
-        HasCartridgeBattery = true;
+        ctx->MBCType = GBX_MBC_TYPE_MBC3;
+        ctx->HaveCartridgeSRAM = true;
+        ctx->HaveCartridgeBattery = true;
         break;
     case 0x19:
         // MBC5
-        MBCType = MBC_TYPE_MBC5;
+        ctx->MBCType = GBX_MBC_TYPE_MBC5;
         break;
     case 0x1A:
         // MBC5+RAM
-        MBCType = MBC_TYPE_MBC5;
-        HasCartridgeSRAM = true;
+        ctx->MBCType = GBX_MBC_TYPE_MBC5;
+        ctx->HaveCartridgeSRAM = true;
         break;
     case 0x1B:
         // MBC5+RAM+BATT
-        MBCType = MBC_TYPE_MBC5;
-        HasCartridgeSRAM = true;
-        HasCartridgeBattery = true;
+        ctx->MBCType = GBX_MBC_TYPE_MBC5;
+        ctx->HaveCartridgeSRAM = true;
+        ctx->HaveCartridgeBattery = true;
         break;
     case 0x1C:
         // MBC5+Rumble
-        MBCType = MBC_TYPE_MBC5;
+        ctx->MBCType = GBX_MBC_TYPE_MBC5;
         break;
     case 0x1D:
         // MBC5+Rumble+SRAM
-        MBCType = MBC_TYPE_MBC5;
-        HasCartridgeSRAM = true;
+        ctx->MBCType = GBX_MBC_TYPE_MBC5;
+        ctx->HaveCartridgeSRAM = true;
         break;
     case 0x1E:
         // MBC5+Rumble+SRAM+BATT
-        MBCType = MBC_TYPE_MBC5;
-        HasCartridgeSRAM = true;
-        HasCartridgeBattery = true;
+        ctx->MBCType = GBX_MBC_TYPE_MBC5;
+        ctx->HaveCartridgeSRAM = true;
+        ctx->HaveCartridgeBattery = true;
         break;
     case 0x20:
         // MBC6
-        MBCType = MBC_TYPE_MBC6;
+        ctx->MBCType = GBX_MBC_TYPE_MBC6;
         break;
     case 0x22:
         // MBC7+Sensor+Rumble+RAM+BATT
-        MBCType = MBC_TYPE_MBC7;
-        HasCartridgeSRAM = true;
-        HasCartridgeBattery = true;
+        ctx->MBCType = GBX_MBC_TYPE_MBC7;
+        ctx->HaveCartridgeSRAM = true;
+        ctx->HaveCartridgeBattery = true;
         break;
     case 0xFC:
         // Pocket Camera
@@ -207,27 +204,29 @@ bool LoadCartridgeROM(const char * filename)
         break;
     }
 
-    switch (CartridgeHeader.RAMType) {
+    switch (ctx->CartridgeHeader.RAMType) {
     case 0x01: // 2KB
     case 0x02: // 8KB
     case 0x03: // 32KB (4 mbc_banks of 8KB)
     case 0x04: // 128KB (16 mbc_banks of 8KB)
     case 0x05: // 64KB (8 mbc_banks of 8KB)
-        SRAMEnabled = true;
+        ctx->internal->HaveSRAM = true;
     default:
         break;
     }
 
-    if (VerboseLevel >= 1) {
-        PrintCartridge();
+    ctx->SRAMEnabled = false;
+
+    if (ctx->VerboseLevel >= 1) {
+        GBx_PrintCartridge(ctx);
     }
 
     return true;
 }
 
-const char * GetCartridgeTypeString()
+const char * GBx_GetCartridgeTypeString(uint8_t type)
 {
-    switch (CartridgeHeader.CartridgeType) {
+    switch (type) {
     case 0x00:
         return "ROM Only";
     case 0x01:
@@ -291,9 +290,9 @@ const char * GetCartridgeTypeString()
     return NULL;
 }
 
-const char * GetROMTypeString()
+const char * GBx_GetROMTypeString(uint8_t type)
 {
-    switch (CartridgeHeader.ROMType) {
+    switch (type) {
     case 0x00:
         return "32KB (no banks)";
     case 0x01:
@@ -325,9 +324,9 @@ const char * GetROMTypeString()
     return NULL;
 }
 
-const char * GetRAMTypeString()
+const char * GBx_GetRAMTypeString(uint8_t type)
 {
-    switch (CartridgeHeader.RAMType) {
+    switch (type) {
     case 0x00:
         return "None";
     case 0x01:
@@ -346,30 +345,92 @@ const char * GetRAMTypeString()
 
     return NULL;
 }
-
-void PrintCartridge()
+void GBx_WriteByteMBC(gbx_t * ctx, uint16_t address, uint8_t data)
 {
-    const char * cartridgeType = GetCartridgeTypeString();
+    if (ctx->MBCType == GBX_MBC_TYPE_MBC1) {
+        if (address <= 0x1FFF) {
+            // RAM Enable
+            ctx->SRAMEnabled = ((data & 0x0F) == 0x0A);
+            LogInfo("SRAM: %s", GBx_GetEnabledString(ctx->SRAMEnabled));
+        }
+        else if (address <= 0x3FFF) {
+            // Cartridge ROM Bank Number
+            if (data == 0) {
+                data = 1;
+            }
+
+            ctx->MBC.Lower = data;
+            ctx->ROMBank = ctx->MBC.Full;
+        }
+        else if (address <= 0x5FFF) {
+            // RAM Bank Number or ROM Upper Bank Number
+            ctx->MBC.Upper = data;
+            if (ctx->MBC.RAMMode) {
+                ctx->SRAMBank = ctx->MBC.Upper;
+            }
+            else {
+                ctx->ROMBank = ctx->MBC.Full;
+            }
+        }
+        else {
+            // ROM/RAM Mode Select
+            ctx->MBC.RAMMode = (data == 1);
+        }
+    }
+    else if (ctx->MBCType == GBX_MBC_TYPE_MBC2) {
+        // Crazy
+    }
+    else if (ctx->MBCType == GBX_MBC_TYPE_MBC3) {
+        if (address <= 0x1FFF) {
+            // RAM Enable
+            ctx->SRAMEnabled = ((data & 0x0F) == 0x0A);
+        }
+        else if (address <= 0x3FFF) {
+            // Cartridge ROM Bank Number
+            if (data == 0) {
+                data = 1;
+            }
+
+            ctx->MBC.Full = data;
+            ctx->ROMBank = ctx->MBC.Full;
+        }
+        else if (address <= 0x5FFF) {
+        }
+    }
+}
+
+void GBx_PrintCartridge(gbx_t * ctx)
+{
+    const char * cartridgeType = GBx_GetCartridgeTypeString(ctx->CartridgeHeader.CartridgeType);
     if (cartridgeType) {
         LogInfo("Cartridge: %s", cartridgeType);
     }
     else {
-        LogWarn("Cartridge: Type %02X unknown", CartridgeHeader.CartridgeType);
+        LogWarn("Cartridge: Type %02X unknown", ctx->CartridgeHeader.CartridgeType);
     }
 
-    const char * romType = GetROMTypeString();
+    const char * romType = GBx_GetROMTypeString(ctx->CartridgeHeader.ROMType);
     if (romType) {
         LogInfo("ROM: %s", romType);
     }
     else {
-        LogWarn("ROM: Type %02X unknown", CartridgeHeader.ROMType);
+        LogWarn("ROM: Type %02X unknown", ctx->CartridgeHeader.ROMType);
     }
 
-    const char * ramType = GetRAMTypeString();
+    const char * ramType = GBx_GetRAMTypeString(ctx->CartridgeHeader.RAMType);
     if (ramType) {
         LogInfo("RAM: %s", ramType);
     }
     else {
-        LogWarn("RAM: Type %02X unknown", CartridgeHeader.RAMType);
+        LogWarn("RAM: Type %02X unknown", ctx->CartridgeHeader.RAMType);
     }
+}
+
+void GBx_PrintMBC(gbx_t * ctx)
+{
+    LogInfo("MBC: Lower=%02X Upper=%01X Full=%04X Mode=%s",
+        ctx->MBC.Lower,
+        ctx->MBC.Upper,
+        ctx->MBC.Full,
+        (ctx->MBC.RAMMode ? "RAM" : "ROM"));
 }

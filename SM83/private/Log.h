@@ -1,10 +1,10 @@
 #ifndef SM83_LOG_H
 #define SM83_LOG_H
 
-#include <SM83/Context.h>
-
 #include <signal.h>
 #include <stdio.h>
+
+#include <SM83/Context.h>
 
 #define Verbose(CTX, LVL, EXPR)                                                \
     if ((CTX)->VerboseLevel >= (LVL)) {                                        \

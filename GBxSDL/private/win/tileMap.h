@@ -1,12 +1,14 @@
 #ifndef TILE_MAP_H
 #define TILE_MAP_H
 
-#include <SDL.h>
+#include <GBx/GBx.h>
 
-void InitTileMapTab();
-void TermTileMapTab();
+void InitTileMapTab(gbx_t * ctx);
 
-void TileMapTabRefresh();
-void TileMapTabRender();
+void TermTileMapTab(gbx_t * ctx);
+
+void TileMapTabRefresh(gbx_t * ctx);
+
+void TileMapTabRender(gbx_t * ctx);
 
 #endif // TILE_MAP_H

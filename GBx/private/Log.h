@@ -1,10 +1,13 @@
-#ifndef LOG_H
-#define LOG_H
-
-#include <GBx/Debug.h>
+#ifndef GBX_LOG_H
+#define GBX_LOG_H
 
 #include <signal.h>
 #include <stdio.h>
+
+#define Verbose(CTX, LVL, EXPR)                                                \
+    if ((CTX)->VerboseLevel >= (LVL)) {                                        \
+        EXPR;                                                                  \
+    }
 
 #if defined(WIN32)
 
@@ -48,14 +51,6 @@
             raise(SIGINT);                                                     \
         } while (0)
 
-#    define LogVerbose(LVL, M, ...)                                            \
-        if (VerboseLevel >= LVL) {                                             \
-            HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);                 \
-            SetConsoleTextAttribute(hConsole, COLOR_CYAN);                     \
-            printf("[VERB] " M "\n", ##__VA_ARGS__);                           \
-            SetConsoleTextAttribute(hConsole, COLOR_DEFAULT);                  \
-        }
-
 #else // !WIN32
 
 #    define COLOR_RED    "\033[0;31m"
@@ -88,26 +83,6 @@
             raise(SIGINT);                                                     \
         } while (0)
 
-#    define LogVerbose(LVL, M, ...)                                            \
-        if (VerboseLevel >= LVL) {                                             \
-            printf(COLOR_CYAN "[VERB] " M "\n" COLOR_END, ##__VA_ARGS__);      \
-        }
-
 #endif // WIN32
 
-static char LOG_INST_BUFFER[1024];
-
-#define LogInst(M, ...)                                                        \
-    do {                                                                       \
-        snprintf(LOG_INST_BUFFER,                                              \
-            sizeof(LOG_INST_BUFFER),                                           \
-            "$%04X: " M,                                                       \
-            LastInstructionAddress,                                            \
-            ##__VA_ARGS__);                                                    \
-        AddInstructionLogEntry(LOG_INST_BUFFER);                               \
-        if (VerboseLevel >= 3) {                                               \
-            printf("[INST] %s\n", LOG_INST_BUFFER);                            \
-        }                                                                      \
-    } while (0)
-
-#endif // LOG_H
+#endif // GBX_LOG_H

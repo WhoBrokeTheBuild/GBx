@@ -1,30 +1,48 @@
-#include <SM83/SM83.h>
+#include <SM83/Context.h>
+#include <SM83/Debug.h>
+
+#include "Internal.h"
 
 #include <string.h>
 
-void SM83_AddInstructionLogEntry(sm83_t * cpu, const char * inst)
+uint16_t SM83_GetLastInstructionAddress(sm83_t * ctx)
 {
-    if (!cpu->InstructionLoggingEnabled) {
+    return ctx->internal->LastInstructionAddress;
+}
+
+uint16_t SM83_GetStackBaseAddress(sm83_t * ctx)
+{
+    return ctx->internal->StackBaseAddress;
+}
+
+void SM83_AddInstructionLogEntry(sm83_t * ctx, const char * inst)
+{
+    sm83_internal_t * inctx = ctx->internal;
+
+    if (!inctx->InstructionLoggingEnabled) {
         return;
     }
 
-    strncpy(cpu->InstructionLog[cpu->InstructionLogIndex],
+    strncpy(inctx->InstructionLog[inctx->InstructionLogIndex],
         inst,
         INSTRUCTION_LOG_ENTRY_SIZE);
 
-    ++cpu->InstructionLogIndex;
-    cpu->InstructionLogIndex %= INSTRUCTION_LOG_LENGTH;
+    ++inctx->InstructionLogIndex;
+    inctx->InstructionLogIndex %= INSTRUCTION_LOG_LENGTH;
 }
 
-const char * SM83_GetInstructionLogEntry(sm83_t * cpu, int index)
+const char * SM83_GetInstructionLogEntry(sm83_t * ctx, int index)
 {
-    if (!cpu->InstructionLoggingEnabled) {
-        NULL;
+    sm83_internal_t * inctx = ctx->internal;
+
+    if (!inctx->InstructionLoggingEnabled) {
+        return NULL;
     }
 
-    index = cpu->InstructionLogIndex - index - 1;
+    index = inctx->InstructionLogIndex - index - 1;
     if (index < 0) {
         index += INSTRUCTION_LOG_LENGTH;
     }
-    return cpu->InstructionLog[index];
+
+    return inctx->InstructionLog[index];
 }

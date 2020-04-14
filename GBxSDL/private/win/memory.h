@@ -1,10 +1,14 @@
 #ifndef WIN_MEMORY_H
 #define WIN_MEMORY_H
 
-void InitMemoryTab();
-void TermMemoryTab();
+#include <GBx/GBx.h>
 
-void MemoryTabRefresh();
-void MemoryTabRender();
+void InitMemoryTab(gbx_t * ctx);
+
+void TermMemoryTab(gbx_t * ctx);
+
+void MemoryTabRefresh(gbx_t * ctx);
+
+void MemoryTabRender(gbx_t * ctx);
 
 #endif // WIN_MEMORY_H

@@ -32,18 +32,12 @@ bool DebugEnabled = false;
 
 void handleSignal(int sig)
 {
-    LogInfo("Caught signal %d\n", sig);
+    printf("Caught signal %d\n", sig);
 
-    if (sig == SIGINT) {
-        SetBreakpoint("PC", CPU.PC);
-    }
-    else {
-        DebugPrompt();
-        exit(1);
-    }
+    // TODO
 }
 
-void DebugPromptInit()
+void DebugPromptInit(gbx_t * ctx)
 {
     signal(SIGINT, handleSignal);
     signal(SIGSEGV, handleSignal);
@@ -53,7 +47,7 @@ void DebugPromptInit()
     #endif
 }
 
-void DebugPromptTerm()
+void DebugPromptTerm(gbx_t * ctx)
 {   
     #ifdef HAVE_READLINE
         write_history(HISTORY_FILENAME);
@@ -63,19 +57,20 @@ void DebugPromptTerm()
     signal(SIGSEGV, SIG_DFL);
 }
 
-void DebugPrompt() 
+void DebugPrompt(gbx_t * ctx) 
 {
 #ifdef HAVE_READLINE
 
     signal(SIGINT, SIG_DFL);
 
-    int oldVerboseLevel = VerboseLevel;
-    VerboseLevel = 4;
+    int oldVerboseLevel = ctx->VerboseLevel;
+    ctx->VerboseLevel = 4;
+    ctx->CPU->VerboseLevel = 4;
 
-    SM83_PrintRegisters(&CPU);
+    SM83_PrintRegisters(ctx->CPU);
 
     char prompt[2048];
-    snprintf(prompt, sizeof(prompt), "[%04X]> ", CPU.PC);
+    snprintf(prompt, sizeof(prompt), "[%04X]> ", ctx->CPU->PC);
 
     uint16_t addr;
     char * input = NULL;
@@ -96,35 +91,36 @@ void DebugPrompt()
         }
 
         if (length == 0) {
-            SM83_Step(&CPU);
+            SM83_Step(ctx->CPU);
         }
         else if (strncmp(input, "help", length) == 0) {
-            cmdHelp(args);
+            cmdHelp(ctx, args);
         }
         else if (strncmp(input, "info", length) == 0) {
-            cmdInfo(args);
+            cmdInfo(ctx, args);
         }
         else if (strncmp(input, "break", length) == 0) {
-            cmdBreak(args);
+            cmdBreak(ctx, args);
         }
         else if (strncmp(input, "delete", length) == 0) {
-            cmdDelete(args);
+            cmdDelete(ctx, args);
         }
         else if (strncmp(input, "continue", length) == 0) {
-            VerboseLevel = oldVerboseLevel;
+            ctx->VerboseLevel = oldVerboseLevel;
+            ctx->CPU->VerboseLevel = oldVerboseLevel;
             break;
         }
         else if (strncmp(input, "next", length) == 0) {
-            cmdNext(args);
+            cmdNext(ctx, args);
         }
         else if (strncmp(input, "read", length) == 0) {
-            cmdRead(args);
+            cmdRead(ctx, args);
         }
         else if (strncmp(input, "write", length) == 0) {
-            cmdWrite(args);
+            cmdWrite(ctx, args);
         }
         else if (strncmp(input, "disassemble", length) == 0) {
-            cmdDisassemble(args);
+            cmdDisassemble(ctx, args);
         }
         else if (strncmp(input, "quit", length) == 0
             || strncmp(input, "exit", length) == 0) {
@@ -133,14 +129,14 @@ void DebugPrompt()
             break;
         }
         else if (strncmp(input, "reset", length) == 0) {
-            Reset();
+            GBx_Reset(ctx);
         }
 
         free(input);
         input = NULL;
 
-        SM83_PrintRegisters(&CPU);
-        snprintf(prompt, sizeof(prompt), "[%04X]> ", CPU.PC);
+        SM83_PrintRegisters(ctx->CPU);
+        snprintf(prompt, sizeof(prompt), "[%04X]> ", ctx->CPU->PC);
     }
 
     free(input);
@@ -172,7 +168,7 @@ enum {
     DBG_TAB_MEMORY,
 };
 
-void DebugWindowInit()
+void DebugWindowInit(gbx_t * ctx)
 {
     sdlDebugWindow = SDL_CreateWindow("GBx - Debug",
         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
@@ -195,22 +191,22 @@ void DebugWindowInit()
     // style->CharWidth = 16;
     // style->CharHeight = 16;
     
-    InitTileDataTab();
-    InitTileMapTab();
-    InitMemoryTab();
+    InitTileDataTab(ctx);
+    InitTileMapTab(ctx);
+    InitMemoryTab(ctx);
 
-    DebugWindowRender();
+    DebugWindowRender(ctx);
 }
 
-void DebugWindowTerm()
+void DebugWindowTerm(gbx_t * ctx)
 {
     debugWindowShown = false;
 
     DUI_Term();
 
-    TermMemoryTab();
-    TermTileMapTab();
-    TermTileDataTab();
+    TermMemoryTab(ctx);
+    TermTileMapTab(ctx);
+    TermTileDataTab(ctx);
 
     SDL_DestroyRenderer(sdlDebugRenderer);
     SDL_DestroyWindow(sdlDebugWindow);
@@ -232,7 +228,7 @@ void ToggleDebugWindow()
     }
 }
 
-void DebugWindowHandleEvent(SDL_Event * evt)
+void DebugWindowHandleEvent(gbx_t * ctx, SDL_Event * evt)
 {
     if (evt->type == SDL_WINDOWEVENT) {
         SDL_Window * window = SDL_GetWindowFromID(evt->window.windowID);
@@ -257,13 +253,13 @@ void DebugWindowHandleEvent(SDL_Event * evt)
 bool dbgAutoRefresh = true;
 int dbgTabIndex = 0;
 
-void DebugWindowRender()
+void DebugWindowRender(gbx_t * ctx)
 {
     DUI_Update();
     DUI_Style * style = DUI_GetStyle();
 
     if (dbgAutoRefresh) {
-        DebugWindowRefresh();
+        DebugWindowRefresh(ctx);
     }
 
     SDL_SetRenderDrawColor(sdlDebugRenderer, 0x33, 0x33, 0x33, 0xFF);
@@ -272,7 +268,7 @@ void DebugWindowRender()
     DUI_CheckboxAt(DEBUG_WINDOW_WIDTH - 160, 8, "Auto", &dbgAutoRefresh);
 
     if (DUI_ButtonAt(DEBUG_WINDOW_WIDTH - 86, 8, "Refresh")) {
-        DebugWindowRefresh();
+        DebugWindowRefresh(ctx);
     }
 
     DUI_MoveCursor(8, 8);
@@ -293,20 +289,20 @@ void DebugWindowRender()
 
     switch (dbgTabIndex) {
     case DBG_TAB_STATUS:
-        StatusTabRender();
+        StatusTabRender(ctx);
         break;
     case DBG_TAB_TILE_DATA:
-        TileDataTabRender();
+        TileDataTabRender(ctx);
         break;
     case DBG_TAB_TILE_MAP:
-        TileMapTabRender();
+        TileMapTabRender(ctx);
         break;
     case DBG_TAB_SPRITE:
         break;
     case DBG_TAB_AUDIO:
         break;
     case DBG_TAB_MEMORY:
-        MemoryTabRender();
+        MemoryTabRender(ctx);
         break;
     default:
         break;
@@ -318,17 +314,17 @@ void DebugWindowRender()
     SDL_RenderPresent(sdlDebugRenderer);
 }
 
-void DebugWindowRefresh()
+void DebugWindowRefresh(gbx_t * ctx)
 {
     switch (dbgTabIndex) {
     case DBG_TAB_TILE_DATA:
-        TileDataTabRefresh();
+        TileDataTabRefresh(ctx);
         break;
     case DBG_TAB_TILE_MAP:
-        TileMapTabRefresh();
+        TileMapTabRefresh(ctx);
         break;
     case DBG_TAB_MEMORY:
-        MemoryTabRefresh();
+        MemoryTabRefresh(ctx);
         break;
     default:
         break;
