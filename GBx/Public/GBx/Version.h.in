@@ -1,0 +1,14 @@
+#ifndef GBX_VERSION_H
+#define GBX_VERSION_H
+
+#define GBX_VERSION_MAJOR @PROJECT_VERSION_MAJOR@
+#define GBX_VERSION_MINOR @PROJECT_VERSION_MINOR@
+#define GBX_VERSION_PATCH @PROJECT_VERSION_PATCH@
+
+#define GBX_VERSION_NUMBER ((GBX_VERSION_MAJOR << 16) |                        \
+                            (GBX_VERSION_MINOR << 8) |                         \
+                             GBX_VERSION_PATCH);
+
+#define GBX_VERSION_STRING "@PROJECT_VERSION@"
+
+#endif // GBX_VERSION_H

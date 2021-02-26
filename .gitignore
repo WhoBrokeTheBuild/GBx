@@ -1,8 +1,10 @@
 *.gb
+*.gbc
 *.bin
 *.zip
 *.sav
-[Rr]oms/gb-test-roms
-[Rr]oms/mooneye
+*.log
+[Rr]oms/*
 [Bb]uild/
 .vscode/
+*~
