@@ -1,13 +1,16 @@
 #ifndef GBXASM_CONTEXT_H
 #define GBXASM_CONTEXT_H
 
-#include "Util/SymbolTable.h"
-#include "Util/SymbolReferenceList.h"
+#include "SymbolTable.h"
+#include "SymbolReferenceList.h"
+#include "Instruction.h"
 
 #include <stdio.h>
 
 typedef struct _GBxASM
 {
+    bool PreprocessOnly;
+
     FILE * Output;
 
     SymbolTable GlobalSymbols;

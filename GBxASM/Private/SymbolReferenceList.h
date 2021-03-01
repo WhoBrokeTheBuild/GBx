@@ -2,23 +2,15 @@
 #define GBXASM_SYMBOL_REFERENCE_LIST_H
 
 #include "SymbolTable.h"
+#include "Instruction.h"
 
 #include <stdio.h>
 
-typedef enum _SymbolReferenceType
-{
-    SYM_REF_TYPE_NONE = 0,
-    SYM_REF_TYPE_U8,
-    SYM_REF_TYPE_U16,
-    SYM_REF_TYPE_S8,
-
-} SymbolReferenceType;
-
 typedef struct _SymbolReference
 {
-    char Name[SYMBOL_MAX_NAME_LENGTH];
+    char Name[SYM_MAX_NAME_LEN];
 
-    SymbolReferenceType Type;
+    ArgumentType Type;
 
     long WriteOffset;
 
@@ -45,7 +37,7 @@ void SymbolReferenceList_Clear(SymbolReferenceList * list);
 bool SymbolReferenceList_Grow(SymbolReferenceList * list, size_t newCapacity);
 
 bool SymbolReferenceList_Add(SymbolReferenceList * list, const char * name,
-    SymbolReferenceType type, long writeOffset, long baseAddress);
+    ArgumentType type, long writeOffset, long baseAddress);
 
 void SymbolReferenceList_Write(SymbolReferenceList * list, 
     SymbolTable * table, FILE * file);

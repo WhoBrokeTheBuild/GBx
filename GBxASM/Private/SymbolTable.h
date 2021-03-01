@@ -7,11 +7,11 @@
 #include <stdbool.h>
 #include <limits.h>
 
-#define SYMBOL_MAX_NAME_LENGTH (32)
+#define SYM_MAX_NAME_LEN (32)
 
 typedef struct _Symbol
 {
-    char Name[SYMBOL_MAX_NAME_LENGTH];
+    char Name[SYM_MAX_NAME_LEN];
 
     long Address;
 

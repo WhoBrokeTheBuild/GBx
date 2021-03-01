@@ -2,6 +2,9 @@
 #define GBXASM_INSTRUCTION_H
 
 #include <stdlib.h>
+#include <stdbool.h>
+
+#define INST_ARG_MAX_LEN (512)
 
 typedef enum _ArgumentType
 {
@@ -34,8 +37,11 @@ typedef struct _Instruction
 
 } Instruction;
 
-extern Instruction _InstructionList[];
-
 int GetInstructionSize(Instruction * inst);
+
+bool ParseInstructionArgument(char out[INST_ARG_MAX_LEN], 
+    const char * arg, ArgumentType type, const char * literal);
+
+Instruction * GetInstructionList();
 
 #endif // GBXASM_INSTRUCTION_H

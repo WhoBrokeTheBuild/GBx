@@ -26,7 +26,7 @@ void SymbolReferenceList_Clear(SymbolReferenceList * list)
         SymbolReference * entry = &list->Entries[i];
 
         entry->Name[0] = '\0';
-        entry->Type = SYM_REF_TYPE_NONE;
+        entry->Type = ARG_TYPE_NONE;
         entry->WriteOffset = LONG_MIN;
         entry->BaseAddress = LONG_MIN;
     }
@@ -51,7 +51,7 @@ bool SymbolReferenceList_Grow(SymbolReferenceList * list, size_t newCapacity)
             SymbolReference * entry = &list->Entries[i];
 
             entry->Name[0] = '\0';
-            entry->Type = SYM_REF_TYPE_NONE;
+            entry->Type = ARG_TYPE_NONE;
             entry->WriteOffset = LONG_MIN;
             entry->BaseAddress = LONG_MIN;
         }
@@ -65,7 +65,7 @@ bool SymbolReferenceList_Grow(SymbolReferenceList * list, size_t newCapacity)
 }
 
 bool SymbolReferenceList_Add(SymbolReferenceList * list, const char * name,
-    SymbolReferenceType type, long writeOffset, long baseAddress)
+    ArgumentType type, long writeOffset, long baseAddress)
 {
     if (writeOffset < 0) {
         return false;
@@ -82,12 +82,18 @@ bool SymbolReferenceList_Add(SymbolReferenceList * list, const char * name,
         SymbolReference * entry = &list->Entries[i];
 
         if (entry->Name[0] == '\0') {
-            strncpy(entry->Name, name, SYMBOL_MAX_NAME_LENGTH - 1);
-            entry->Name[SYMBOL_MAX_NAME_LENGTH - 1] = '\0';
+            strncpy(entry->Name, name, SYM_MAX_NAME_LEN - 1);
+            entry->Name[SYM_MAX_NAME_LEN - 1] = '\0';
 
             entry->Type = type;
             entry->WriteOffset = writeOffset;
-            entry->BaseAddress = baseAddress;
+
+            if (type == ARG_TYPE_S8 || type == ARG_TYPE_SP_S8) {
+                entry->BaseAddress = baseAddress;
+            }
+            else {
+                entry->BaseAddress = 0;
+            }
 
             ++list->Count;
             return true;
@@ -120,22 +126,28 @@ void SymbolReferenceList_Write(SymbolReferenceList * list,
 
             fseek(file, entry->WriteOffset, SEEK_SET);
 
-            if (entry->Type == SYM_REF_TYPE_U8) {
+            if (entry->Type == ARG_TYPE_U8 || 
+                entry->Type == ARG_TYPE_FF00_U8) {
+
                 uint8_t data = value;
                 fwrite(&data, sizeof(data), 1, file);
             }
-            else if (entry->Type == SYM_REF_TYPE_U16) {
+            else if (entry->Type == ARG_TYPE_U16 || 
+                entry->Type == ARG_TYPE_ADDR_U16 ) {
+
                 uint16_t data = value;
                 fwrite(&data, sizeof(data), 1, file);
             }
-            else if (entry->Type == SYM_REF_TYPE_S8) {
+            else if (entry->Type == ARG_TYPE_S8 ||
+                entry->Type == ARG_TYPE_SP_S8) {
+
                 int8_t data = value;
                 fwrite(&data, sizeof(data), 1, file);
             }
 
             // Remove entry
             entry->Name[0] = '\0';
-            entry->Type = SYM_REF_TYPE_NONE;
+            entry->Type = ARG_TYPE_NONE;
             entry->WriteOffset = LONG_MIN;
             entry->BaseAddress = LONG_MIN;
             --list->Count;

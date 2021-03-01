@@ -1,5 +1,12 @@
 #include "Instruction.h"
 
+#include "Util.h"
+
+#include <stdio.h>
+#include <ctype.h>
+
+#include "InstructionList.inc.h"
+
 int GetInstructionSize(Instruction * inst)
 {
     int size = 1;
@@ -41,535 +48,103 @@ int GetInstructionSize(Instruction * inst)
     return size;
 }
 
-Instruction _InstructionList[] = {
-    { "NOP",  0x00,   -1, ARG_TYPE_NONE,     NULL,        ARG_TYPE_NONE,     NULL         },
-    { "LD",   0x01,   -1, ARG_TYPE_LITERAL,  "BC",        ARG_TYPE_U16,      NULL         },
-    { "LD",   0x02,   -1, ARG_TYPE_LITERAL,  "(BC)",      ARG_TYPE_LITERAL,  "A"          },
-    { "INC",  0x03,   -1, ARG_TYPE_LITERAL,  "BC",        ARG_TYPE_NONE,     NULL         },
-    { "INC",  0x04,   -1, ARG_TYPE_LITERAL,  "B",         ARG_TYPE_NONE,     NULL         },
-    { "DEC",  0x05,   -1, ARG_TYPE_LITERAL,  "B",         ARG_TYPE_NONE,     NULL         },
-    { "LD",   0x06,   -1, ARG_TYPE_LITERAL,  "B",         ARG_TYPE_U8,       NULL         },
-    { "RLCA", 0x07,   -1, ARG_TYPE_NONE,     NULL,        ARG_TYPE_NONE,     NULL         },
-    { "LD",   0x08,   -1, ARG_TYPE_ADDR_U16, NULL,        ARG_TYPE_LITERAL,  "SP"         },
-    { "ADD",  0x09,   -1, ARG_TYPE_LITERAL,  "HL",        ARG_TYPE_LITERAL,  "BC"         },
-    { "LD",   0x0A,   -1, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_LITERAL,  "(BC)"       },
-    { "DEC",  0x0B,   -1, ARG_TYPE_LITERAL,  "BC",        ARG_TYPE_NONE,     NULL         },
-    { "INC",  0x0C,   -1, ARG_TYPE_LITERAL,  "C",         ARG_TYPE_NONE,     NULL         },
-    { "DEC",  0x0D,   -1, ARG_TYPE_LITERAL,  "C",         ARG_TYPE_NONE,     NULL         },
-    { "LD",   0x0E,   -1, ARG_TYPE_LITERAL,  "C",         ARG_TYPE_U8,       NULL         },
-    { "RRCA", 0x0F,   -1, ARG_TYPE_NONE,     NULL,        ARG_TYPE_NONE,     NULL         },
-    { "STOP", 0x10, 0x00, ARG_TYPE_NONE,     NULL,        ARG_TYPE_NONE,     NULL         },
-    { "LD",   0x11,   -1, ARG_TYPE_LITERAL,  "DE",        ARG_TYPE_U16,      NULL         },
-    { "LD",   0x12,   -1, ARG_TYPE_LITERAL,  "(DE)",      ARG_TYPE_LITERAL,  "A"          },
-    { "INC",  0x13,   -1, ARG_TYPE_LITERAL,  "DE",        ARG_TYPE_NONE,     NULL         },
-    { "INC",  0x14,   -1, ARG_TYPE_LITERAL,  "D",         ARG_TYPE_NONE,     NULL         },
-    { "DEC",  0x15,   -1, ARG_TYPE_LITERAL,  "D",         ARG_TYPE_NONE,     NULL         },
-    { "LD",   0x16,   -1, ARG_TYPE_LITERAL,  "D",         ARG_TYPE_U8,       NULL         },
-    { "RLA",  0x17,   -1, ARG_TYPE_NONE,     NULL,        ARG_TYPE_NONE,     NULL         },
-    { "JR",   0x18,   -1, ARG_TYPE_S8,       NULL,        ARG_TYPE_NONE,     NULL         },
-    { "ADD",  0x19,   -1, ARG_TYPE_LITERAL,  "HL",        ARG_TYPE_LITERAL,  "DE"         },
-    { "LD",   0x1A,   -1, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_LITERAL,  "(DE)"       },
-    { "DEC",  0x1B,   -1, ARG_TYPE_LITERAL,  "DE",        ARG_TYPE_NONE,     NULL         },
-    { "INC",  0x1C,   -1, ARG_TYPE_LITERAL,  "E",         ARG_TYPE_NONE,     NULL         },
-    { "DEC",  0x1D,   -1, ARG_TYPE_LITERAL,  "E",         ARG_TYPE_NONE,     NULL         },
-    { "LD",   0x1E,   -1, ARG_TYPE_LITERAL,  "E",         ARG_TYPE_U8,       NULL         },
-    { "RRA",  0x1F,   -1, ARG_TYPE_NONE,     NULL,        ARG_TYPE_NONE,     NULL         },
-    { "JR",   0x20,   -1, ARG_TYPE_LITERAL,  "NZ",        ARG_TYPE_S8,       NULL         },
-    { "LD",   0x21,   -1, ARG_TYPE_LITERAL,  "HL",        ARG_TYPE_U16,      NULL         },
-    { "LD",   0x22,   -1, ARG_TYPE_LITERAL,  "(HL+)",     ARG_TYPE_LITERAL,  "A"          },
-    { "LD",   0x22,   -1, ARG_TYPE_LITERAL,  "(HLI)",     ARG_TYPE_LITERAL,  "A"          },
-    { "LDI",  0x22,   -1, ARG_TYPE_LITERAL,  "(HL)",      ARG_TYPE_LITERAL,  "A"          },
-    { "INC",  0x23,   -1, ARG_TYPE_LITERAL,  "HL",        ARG_TYPE_NONE,     NULL         },
-    { "INC",  0x24,   -1, ARG_TYPE_LITERAL,  "H",         ARG_TYPE_NONE,     NULL         },
-    { "DEC",  0x25,   -1, ARG_TYPE_LITERAL,  "H",         ARG_TYPE_NONE,     NULL         },
-    { "LD",   0x26,   -1, ARG_TYPE_LITERAL,  "H",         ARG_TYPE_U8,       NULL         },
-    { "DAA",  0x27,   -1, ARG_TYPE_NONE,     NULL,        ARG_TYPE_NONE,     NULL         },
-    { "JR",   0x28,   -1, ARG_TYPE_LITERAL,  "Z",         ARG_TYPE_S8,       NULL         },
-    { "ADD",  0x29,   -1, ARG_TYPE_LITERAL,  "HL",        ARG_TYPE_LITERAL,  "HL"         },
-    { "LD",   0x2A,   -1, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_LITERAL,  "(HL+)",     },
-    { "LD",   0x2A,   -1, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_LITERAL,  "(HLI)",     },
-    { "LDI",  0x2A,   -1, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_LITERAL,  "(HL)",      },
-    { "DEC",  0x2B,   -1, ARG_TYPE_LITERAL,  "HL",        ARG_TYPE_NONE,     NULL         },
-    { "INC",  0x2C,   -1, ARG_TYPE_LITERAL,  "L",         ARG_TYPE_NONE,     NULL         },
-    { "DEC",  0x2D,   -1, ARG_TYPE_LITERAL,  "L",         ARG_TYPE_NONE,     NULL         },
-    { "LD",   0x2E,   -1, ARG_TYPE_LITERAL,  "L",         ARG_TYPE_U8,       NULL         },
-    { "CPL",  0x2F,   -1, ARG_TYPE_NONE,     NULL,        ARG_TYPE_NONE,     NULL         },
-    { "JR",   0x30,   -1, ARG_TYPE_LITERAL,  "NC",        ARG_TYPE_S8,       NULL         },
-    { "LD",   0x31,   -1, ARG_TYPE_LITERAL,  "SP",        ARG_TYPE_U16,      NULL         },
-    { "LD",   0x32,   -1, ARG_TYPE_LITERAL,  "(HL-)",     ARG_TYPE_LITERAL,  "A"          },
-    { "LD",   0x32,   -1, ARG_TYPE_LITERAL,  "(HLD)",     ARG_TYPE_LITERAL,  "A"          },
-    { "LDD",  0x32,   -1, ARG_TYPE_LITERAL,  "(HL)",      ARG_TYPE_LITERAL,  "A"          },
-    { "INC",  0x33,   -1, ARG_TYPE_LITERAL,  "SP",        ARG_TYPE_NONE,     NULL         },
-    { "INC",  0x34,   -1, ARG_TYPE_LITERAL,  "(HL)",      ARG_TYPE_NONE,     NULL         },
-    { "DEC",  0x35,   -1, ARG_TYPE_LITERAL,  "(HL)",      ARG_TYPE_NONE,     NULL         },
-    { "LD",   0x36,   -1, ARG_TYPE_LITERAL,  "(HL)",      ARG_TYPE_U8,       NULL         },
-    { "SCF",  0x37,   -1, ARG_TYPE_NONE,     NULL,        ARG_TYPE_NONE,     NULL         },
-    { "JR",   0x38,   -1, ARG_TYPE_LITERAL,  "C",         ARG_TYPE_S8,       NULL         },
-    { "ADD",  0x39,   -1, ARG_TYPE_LITERAL,  "HL",        ARG_TYPE_LITERAL,  "SP"         },
-    { "LD",   0x3A,   -1, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_LITERAL,  "(HL-)",     },
-    { "LD",   0x3A,   -1, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_LITERAL,  "(HLD)",     },
-    { "LDD",  0x3A,   -1, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_LITERAL,  "(HL)",      },
-    { "DEC",  0x3B,   -1, ARG_TYPE_LITERAL,  "SP",        ARG_TYPE_NONE,     NULL         },
-    { "INC",  0x3C,   -1, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_NONE,     NULL         },
-    { "DEC",  0x3D,   -1, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_NONE,     NULL         },
-    { "LD",   0x3E,   -1, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_U8,       NULL         },
-    { "CCF",  0x3F,   -1, ARG_TYPE_NONE,     NULL,        ARG_TYPE_NONE,     NULL         },
-    { "LD",   0x40,   -1, ARG_TYPE_LITERAL,  "B",         ARG_TYPE_LITERAL,  "B"          },
-    { "LD",   0x41,   -1, ARG_TYPE_LITERAL,  "B",         ARG_TYPE_LITERAL,  "C"          },
-    { "LD",   0x42,   -1, ARG_TYPE_LITERAL,  "B",         ARG_TYPE_LITERAL,  "D"          },
-    { "LD",   0x43,   -1, ARG_TYPE_LITERAL,  "B",         ARG_TYPE_LITERAL,  "E"          },
-    { "LD",   0x44,   -1, ARG_TYPE_LITERAL,  "B",         ARG_TYPE_LITERAL,  "H"          },
-    { "LD",   0x45,   -1, ARG_TYPE_LITERAL,  "B",         ARG_TYPE_LITERAL,  "L"          },
-    { "LD",   0xF2,   -1, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_LITERAL,  "($FF00+C)", },
-    { "LD",   0x46,   -1, ARG_TYPE_LITERAL,  "B",         ARG_TYPE_LITERAL,  "(HL)"       },
-    { "LD",   0x47,   -1, ARG_TYPE_LITERAL,  "B",         ARG_TYPE_LITERAL,  "A"          },
-    { "LD",   0x48,   -1, ARG_TYPE_LITERAL,  "C",         ARG_TYPE_LITERAL,  "B"          },
-    { "LD",   0x49,   -1, ARG_TYPE_LITERAL,  "C",         ARG_TYPE_LITERAL,  "C"          },
-    { "LD",   0x4A,   -1, ARG_TYPE_LITERAL,  "C",         ARG_TYPE_LITERAL,  "D"          },
-    { "LD",   0x4B,   -1, ARG_TYPE_LITERAL,  "C",         ARG_TYPE_LITERAL,  "E"          },
-    { "LD",   0x4C,   -1, ARG_TYPE_LITERAL,  "C",         ARG_TYPE_LITERAL,  "H"          },
-    { "LD",   0x4D,   -1, ARG_TYPE_LITERAL,  "C",         ARG_TYPE_LITERAL,  "L"          },
-    { "LD",   0x4E,   -1, ARG_TYPE_LITERAL,  "C",         ARG_TYPE_LITERAL,  "(HL)"       },
-    { "LD",   0x4F,   -1, ARG_TYPE_LITERAL,  "C",         ARG_TYPE_LITERAL,  "A"          },
-    { "LD",   0x50,   -1, ARG_TYPE_LITERAL,  "D",         ARG_TYPE_LITERAL,  "B"          },
-    { "LD",   0x51,   -1, ARG_TYPE_LITERAL,  "D",         ARG_TYPE_LITERAL,  "C"          },
-    { "LD",   0x52,   -1, ARG_TYPE_LITERAL,  "D",         ARG_TYPE_LITERAL,  "D"          },
-    { "LD",   0x53,   -1, ARG_TYPE_LITERAL,  "D",         ARG_TYPE_LITERAL,  "E"          },
-    { "LD",   0x54,   -1, ARG_TYPE_LITERAL,  "D",         ARG_TYPE_LITERAL,  "H"          },
-    { "LD",   0x55,   -1, ARG_TYPE_LITERAL,  "D",         ARG_TYPE_LITERAL,  "L"          },
-    { "LD",   0x56,   -1, ARG_TYPE_LITERAL,  "D",         ARG_TYPE_LITERAL,  "(HL)"       },
-    { "LD",   0x57,   -1, ARG_TYPE_LITERAL,  "D",         ARG_TYPE_LITERAL,  "A"          },
-    { "LD",   0x58,   -1, ARG_TYPE_LITERAL,  "E",         ARG_TYPE_LITERAL,  "B"          },
-    { "LD",   0x59,   -1, ARG_TYPE_LITERAL,  "E",         ARG_TYPE_LITERAL,  "C"          },
-    { "LD",   0x5A,   -1, ARG_TYPE_LITERAL,  "E",         ARG_TYPE_LITERAL,  "D"          },
-    { "LD",   0x5B,   -1, ARG_TYPE_LITERAL,  "E",         ARG_TYPE_LITERAL,  "E"          },
-    { "LD",   0x5C,   -1, ARG_TYPE_LITERAL,  "E",         ARG_TYPE_LITERAL,  "H"          },
-    { "LD",   0x5D,   -1, ARG_TYPE_LITERAL,  "E",         ARG_TYPE_LITERAL,  "L"          },
-    { "LD",   0x5E,   -1, ARG_TYPE_LITERAL,  "E",         ARG_TYPE_LITERAL,  "(HL)"       },
-    { "LD",   0x5F,   -1, ARG_TYPE_LITERAL,  "E",         ARG_TYPE_LITERAL,  "A"          },
-    { "LD",   0x60,   -1, ARG_TYPE_LITERAL,  "H",         ARG_TYPE_LITERAL,  "B"          },
-    { "LD",   0x61,   -1, ARG_TYPE_LITERAL,  "H",         ARG_TYPE_LITERAL,  "C"          },
-    { "LD",   0x62,   -1, ARG_TYPE_LITERAL,  "H",         ARG_TYPE_LITERAL,  "D"          },
-    { "LD",   0x63,   -1, ARG_TYPE_LITERAL,  "H",         ARG_TYPE_LITERAL,  "E"          },
-    { "LD",   0x64,   -1, ARG_TYPE_LITERAL,  "H",         ARG_TYPE_LITERAL,  "H"          },
-    { "LD",   0x65,   -1, ARG_TYPE_LITERAL,  "H",         ARG_TYPE_LITERAL,  "L"          },
-    { "LD",   0x66,   -1, ARG_TYPE_LITERAL,  "H",         ARG_TYPE_LITERAL,  "(HL)"       },
-    { "LD",   0x67,   -1, ARG_TYPE_LITERAL,  "H",         ARG_TYPE_LITERAL,  "A"          },
-    { "LD",   0x68,   -1, ARG_TYPE_LITERAL,  "L",         ARG_TYPE_LITERAL,  "B"          },
-    { "LD",   0x69,   -1, ARG_TYPE_LITERAL,  "L",         ARG_TYPE_LITERAL,  "C"          },
-    { "LD",   0x6A,   -1, ARG_TYPE_LITERAL,  "L",         ARG_TYPE_LITERAL,  "D"          },
-    { "LD",   0x6B,   -1, ARG_TYPE_LITERAL,  "L",         ARG_TYPE_LITERAL,  "E"          },
-    { "LD",   0x6C,   -1, ARG_TYPE_LITERAL,  "L",         ARG_TYPE_LITERAL,  "H"          },
-    { "LD",   0x6D,   -1, ARG_TYPE_LITERAL,  "L",         ARG_TYPE_LITERAL,  "L"          },
-    { "LD",   0x6E,   -1, ARG_TYPE_LITERAL,  "L",         ARG_TYPE_LITERAL,  "(HL)"       },
-    { "LD",   0x6F,   -1, ARG_TYPE_LITERAL,  "L",         ARG_TYPE_LITERAL,  "A"          },
-    { "LD",   0x70,   -1, ARG_TYPE_LITERAL,  "(HL)",      ARG_TYPE_LITERAL,  "B"          },
-    { "LD",   0x71,   -1, ARG_TYPE_LITERAL,  "(HL)",      ARG_TYPE_LITERAL,  "C"          },
-    { "LD",   0x72,   -1, ARG_TYPE_LITERAL,  "(HL)",      ARG_TYPE_LITERAL,  "D"          },
-    { "LD",   0x73,   -1, ARG_TYPE_LITERAL,  "(HL)",      ARG_TYPE_LITERAL,  "E"          },
-    { "LD",   0x74,   -1, ARG_TYPE_LITERAL,  "(HL)",      ARG_TYPE_LITERAL,  "H"          },
-    { "LD",   0x75,   -1, ARG_TYPE_LITERAL,  "(HL)",      ARG_TYPE_LITERAL,  "L"          },
-    { "HALT", 0x76,   -1, ARG_TYPE_NONE,     NULL,        ARG_TYPE_NONE,     NULL         },
-    { "LD",   0x77,   -1, ARG_TYPE_LITERAL,  "(HL)",      ARG_TYPE_LITERAL,  "A"          },
-    { "LD",   0x78,   -1, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_LITERAL,  "B"          },
-    { "LD",   0x79,   -1, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_LITERAL,  "C"          },
-    { "LD",   0x7A,   -1, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_LITERAL,  "D"          },
-    { "LD",   0x7B,   -1, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_LITERAL,  "E"          },
-    { "LD",   0x7C,   -1, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_LITERAL,  "H"          },
-    { "LD",   0x7D,   -1, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_LITERAL,  "L"          },
-    { "LD",   0x7E,   -1, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_LITERAL,  "(HL)"       },
-    { "LD",   0x7F,   -1, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_LITERAL,  "A"          },
-    { "LD",   0x01,   -1, ARG_TYPE_LITERAL,  "BC",        ARG_TYPE_U16,      NULL         },
-    { "ADD",  0x80,   -1, ARG_TYPE_LITERAL,  "B",         ARG_TYPE_NONE,     NULL         },
-    { "ADD",  0x81,   -1, ARG_TYPE_LITERAL,  "C",         ARG_TYPE_NONE,     NULL         },
-    { "ADD",  0x82,   -1, ARG_TYPE_LITERAL,  "D",         ARG_TYPE_NONE,     NULL         },
-    { "ADD",  0x83,   -1, ARG_TYPE_LITERAL,  "E",         ARG_TYPE_NONE,     NULL         },
-    { "ADD",  0x84,   -1, ARG_TYPE_LITERAL,  "H",         ARG_TYPE_NONE,     NULL         },
-    { "ADD",  0x85,   -1, ARG_TYPE_LITERAL,  "L",         ARG_TYPE_NONE,     NULL         },
-    { "ADD",  0x86,   -1, ARG_TYPE_LITERAL,  "(HL)",      ARG_TYPE_NONE,     NULL         },
-    { "ADD",  0x87,   -1, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_NONE,     NULL         },
-    { "ADC",  0x88,   -1, ARG_TYPE_LITERAL,  "B",         ARG_TYPE_NONE,     NULL         },
-    { "ADC",  0x89,   -1, ARG_TYPE_LITERAL,  "C",         ARG_TYPE_NONE,     NULL         },
-    { "ADC",  0x8A,   -1, ARG_TYPE_LITERAL,  "D",         ARG_TYPE_NONE,     NULL         },
-    { "ADC",  0x8B,   -1, ARG_TYPE_LITERAL,  "E",         ARG_TYPE_NONE,     NULL         },
-    { "ADC",  0x8C,   -1, ARG_TYPE_LITERAL,  "H",         ARG_TYPE_NONE,     NULL         },
-    { "ADC",  0x8D,   -1, ARG_TYPE_LITERAL,  "L",         ARG_TYPE_NONE,     NULL         },
-    { "ADC",  0x8E,   -1, ARG_TYPE_LITERAL,  "(HL)",      ARG_TYPE_NONE,     NULL         },
-    { "ADC",  0x8F,   -1, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_NONE,     NULL         },
-    { "SUB",  0x90,   -1, ARG_TYPE_LITERAL,  "B",         ARG_TYPE_NONE,     NULL         },
-    { "SUB",  0x91,   -1, ARG_TYPE_LITERAL,  "C",         ARG_TYPE_NONE,     NULL         },
-    { "SUB",  0x92,   -1, ARG_TYPE_LITERAL,  "D",         ARG_TYPE_NONE,     NULL         },
-    { "SUB",  0x93,   -1, ARG_TYPE_LITERAL,  "E",         ARG_TYPE_NONE,     NULL         },
-    { "SUB",  0x94,   -1, ARG_TYPE_LITERAL,  "H",         ARG_TYPE_NONE,     NULL         },
-    { "SUB",  0x95,   -1, ARG_TYPE_LITERAL,  "L",         ARG_TYPE_NONE,     NULL         },
-    { "SUB",  0x96,   -1, ARG_TYPE_LITERAL,  "(HL)",      ARG_TYPE_NONE,     NULL         },
-    { "SUB",  0x97,   -1, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_NONE,     NULL         },
-    { "SBC",  0x98,   -1, ARG_TYPE_LITERAL,  "B",         ARG_TYPE_NONE,     NULL         },
-    { "SBC",  0x99,   -1, ARG_TYPE_LITERAL,  "C",         ARG_TYPE_NONE,     NULL         },
-    { "SBC",  0x9A,   -1, ARG_TYPE_LITERAL,  "D",         ARG_TYPE_NONE,     NULL         },
-    { "SBC",  0x9B,   -1, ARG_TYPE_LITERAL,  "E",         ARG_TYPE_NONE,     NULL         },
-    { "SBC",  0x9C,   -1, ARG_TYPE_LITERAL,  "H",         ARG_TYPE_NONE,     NULL         },
-    { "SBC",  0x9D,   -1, ARG_TYPE_LITERAL,  "L",         ARG_TYPE_NONE,     NULL         },
-    { "SBC",  0x9E,   -1, ARG_TYPE_LITERAL,  "(HL)",      ARG_TYPE_NONE,     NULL         },
-    { "SBC",  0x9F,   -1, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_NONE,     NULL         },
-    { "AND",  0xA0,   -1, ARG_TYPE_LITERAL,  "B",         ARG_TYPE_NONE,     NULL         },
-    { "AND",  0xA1,   -1, ARG_TYPE_LITERAL,  "C",         ARG_TYPE_NONE,     NULL         },
-    { "AND",  0xA2,   -1, ARG_TYPE_LITERAL,  "D",         ARG_TYPE_NONE,     NULL         },
-    { "AND",  0xA3,   -1, ARG_TYPE_LITERAL,  "E",         ARG_TYPE_NONE,     NULL         },
-    { "AND",  0xA4,   -1, ARG_TYPE_LITERAL,  "H",         ARG_TYPE_NONE,     NULL         },
-    { "AND",  0xA5,   -1, ARG_TYPE_LITERAL,  "L",         ARG_TYPE_NONE,     NULL         },
-    { "AND",  0xA6,   -1, ARG_TYPE_LITERAL,  "(HL)",      ARG_TYPE_NONE,     NULL         },
-    { "AND",  0xA7,   -1, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_NONE,     NULL         },
-    { "XOR",  0xA8,   -1, ARG_TYPE_LITERAL,  "B",         ARG_TYPE_NONE,     NULL         },
-    { "XOR",  0xA9,   -1, ARG_TYPE_LITERAL,  "C",         ARG_TYPE_NONE,     NULL         },
-    { "XOR",  0xAA,   -1, ARG_TYPE_LITERAL,  "D",         ARG_TYPE_NONE,     NULL         },
-    { "XOR",  0xAB,   -1, ARG_TYPE_LITERAL,  "E",         ARG_TYPE_NONE,     NULL         },
-    { "XOR",  0xAC,   -1, ARG_TYPE_LITERAL,  "H",         ARG_TYPE_NONE,     NULL         },
-    { "XOR",  0xAD,   -1, ARG_TYPE_LITERAL,  "L",         ARG_TYPE_NONE,     NULL         },
-    { "XOR",  0xAE,   -1, ARG_TYPE_LITERAL,  "(HL)",      ARG_TYPE_NONE,     NULL         },
-    { "XOR",  0xAF,   -1, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_NONE,     NULL         },
-    { "OR",   0xB0,   -1, ARG_TYPE_LITERAL,  "B",         ARG_TYPE_NONE,     NULL         },
-    { "OR",   0xB1,   -1, ARG_TYPE_LITERAL,  "C",         ARG_TYPE_NONE,     NULL         },
-    { "OR",   0xB2,   -1, ARG_TYPE_LITERAL,  "D",         ARG_TYPE_NONE,     NULL         },
-    { "OR",   0xB3,   -1, ARG_TYPE_LITERAL,  "E",         ARG_TYPE_NONE,     NULL         },
-    { "OR",   0xB4,   -1, ARG_TYPE_LITERAL,  "H",         ARG_TYPE_NONE,     NULL         },
-    { "OR",   0xB5,   -1, ARG_TYPE_LITERAL,  "L",         ARG_TYPE_NONE,     NULL         },
-    { "OR",   0xB6,   -1, ARG_TYPE_LITERAL,  "(HL)",      ARG_TYPE_NONE,     NULL         },
-    { "OR",   0xB7,   -1, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_NONE,     NULL         },
-    { "CP",   0xB8,   -1, ARG_TYPE_LITERAL,  "B",         ARG_TYPE_NONE,     NULL         },
-    { "CP",   0xB9,   -1, ARG_TYPE_LITERAL,  "C",         ARG_TYPE_NONE,     NULL         },
-    { "CP",   0xBA,   -1, ARG_TYPE_LITERAL,  "D",         ARG_TYPE_NONE,     NULL         },
-    { "CP",   0xBB,   -1, ARG_TYPE_LITERAL,  "E",         ARG_TYPE_NONE,     NULL         },
-    { "CP",   0xBC,   -1, ARG_TYPE_LITERAL,  "H",         ARG_TYPE_NONE,     NULL         },
-    { "CP",   0xBD,   -1, ARG_TYPE_LITERAL,  "L",         ARG_TYPE_NONE,     NULL         },
-    { "CP",   0xBE,   -1, ARG_TYPE_LITERAL,  "(HL)",      ARG_TYPE_NONE,     NULL         },
-    { "CP",   0xBF,   -1, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_NONE,     NULL         },
-    { "RET",  0xC0,   -1, ARG_TYPE_LITERAL,  "NZ",        ARG_TYPE_U16,      NULL         },
-    { "POP",  0xC1,   -1, ARG_TYPE_LITERAL,  "BC",        ARG_TYPE_NONE,     NULL         },
-    { "JP",   0xC2,   -1, ARG_TYPE_LITERAL,  "NZ",        ARG_TYPE_U16,      NULL         },
-    { "JP",   0xC3,   -1, ARG_TYPE_U16,      NULL,        ARG_TYPE_NONE,     NULL         },
-    { "CALL", 0xC4,   -1, ARG_TYPE_LITERAL,  "NZ",        ARG_TYPE_U16,      NULL         },
-    { "PUSH", 0xC5,   -1, ARG_TYPE_LITERAL,  "BC",        ARG_TYPE_NONE,     NULL         },
-    { "ADD",  0xC6,   -1, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_U8,       NULL         },
-    { "RST",  0xC7,   -1, ARG_TYPE_LITERAL,  "$00",       ARG_TYPE_NONE,     NULL         },
-    { "RET",  0xC8,   -1, ARG_TYPE_LITERAL,  "Z",         ARG_TYPE_U16,      NULL         },
-    { "RET",  0xC9,   -1, ARG_TYPE_NONE,     NULL,        ARG_TYPE_NONE,     NULL         },
-    { "JP",   0xCA,   -1, ARG_TYPE_LITERAL,  "Z",         ARG_TYPE_U16,      NULL         },
-    // Prefix 0xCB, See Below
-    { "CALL", 0xCC,   -1, ARG_TYPE_LITERAL,  "Z",         ARG_TYPE_U16,      NULL         },
-    { "CALL", 0xCD,   -1, ARG_TYPE_U16,      NULL,        ARG_TYPE_NONE,     NULL         },
-    { "ADC",  0xCE,   -1, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_U8,       NULL         },
-    { "RST",  0xCF,   -1, ARG_TYPE_LITERAL,  "$08",       ARG_TYPE_NONE,     NULL         },
-    { "RET",  0xD0,   -1, ARG_TYPE_LITERAL,  "NC",        ARG_TYPE_U16,      NULL         },
-    { "POP",  0xD1,   -1, ARG_TYPE_LITERAL,  "DE",        ARG_TYPE_NONE,     NULL         },
-    { "JP",   0xD2,   -1, ARG_TYPE_LITERAL,  "NC",        ARG_TYPE_U16,      NULL         },
-    // 0xD3, Not Implemented
-    { "CALL", 0xD4,   -1, ARG_TYPE_LITERAL,  "NC",        ARG_TYPE_U16,      NULL         },
-    { "PUSH", 0xD5,   -1, ARG_TYPE_LITERAL,  "DE",        ARG_TYPE_NONE,     NULL         },
-    { "SUB",  0xD6,   -1, ARG_TYPE_U8,       NULL,        ARG_TYPE_NONE,     NULL         },
-    { "RST",  0xD7,   -1, ARG_TYPE_LITERAL,  "$10",       ARG_TYPE_NONE,     NULL         },
-    { "RET",  0xD8,   -1, ARG_TYPE_LITERAL,  "C",         ARG_TYPE_U16,      NULL         },
-    { "RETI", 0xD9,   -1, ARG_TYPE_NONE,     NULL,        ARG_TYPE_NONE,     NULL         },
-    { "JP",   0xDA,   -1, ARG_TYPE_LITERAL,  "C",         ARG_TYPE_U16,      NULL         },
-    // 0xDB, Not Implemented
-    { "CALL", 0xDC,   -1, ARG_TYPE_LITERAL,  "C",         ARG_TYPE_U16,      NULL         },
-    // 0xDD, Not Implemented
-    { "SBC",  0xDE,   -1, ARG_TYPE_U8,       NULL,        ARG_TYPE_NONE,     NULL         },
-    { "RST",  0xDF,   -1, ARG_TYPE_LITERAL,  "$18",       ARG_TYPE_NONE,     NULL         },
-    { "LD",   0xE0,   -1, ARG_TYPE_FF00_U8,  NULL,        ARG_TYPE_LITERAL,  "A"          },
-    { "LDH",  0xE0,   -1, ARG_TYPE_U8,       NULL,        ARG_TYPE_LITERAL,  "A"          },
-    { "POP",  0xE1,   -1, ARG_TYPE_LITERAL,  "HL",        ARG_TYPE_NONE,     NULL         },
-    { "LD",   0xE2,   -1, ARG_TYPE_LITERAL,  "(C)",       ARG_TYPE_LITERAL,  "A"          },
-    { "LD",   0xE2,   -1, ARG_TYPE_LITERAL,  "($FF00+C)", ARG_TYPE_LITERAL,  "A"          },
-    // 0xE3, Not Implemented
-    // 0xE4, Not Implemented
-    { "PUSH", 0xE5,   -1, ARG_TYPE_LITERAL,  "HL",        ARG_TYPE_NONE,     NULL         },
-    { "AND",  0xE6,   -1, ARG_TYPE_U8,       NULL,        ARG_TYPE_NONE,     NULL         },
-    { "RST",  0xE7,   -1, ARG_TYPE_LITERAL,  "$20",       ARG_TYPE_NONE,     NULL         },
-    { "ADD",  0xE8,   -1, ARG_TYPE_LITERAL,  "SP",        ARG_TYPE_S8,       NULL         },
-    { "JP",   0xE9,   -1, ARG_TYPE_LITERAL,  "(HL)",      ARG_TYPE_NONE,     NULL         },
-    { "LD",   0xEA,   -1, ARG_TYPE_ADDR_U16, NULL,        ARG_TYPE_LITERAL,  "A"          },
-    // 0xEB, Not Implemented
-    // 0xEC, Not Implemented
-    // 0xED, Not Implemented
-    { "XOR",  0xEE,   -1, ARG_TYPE_U8,       NULL,        ARG_TYPE_NONE,     NULL         },
-    { "RST",  0xEF,   -1, ARG_TYPE_LITERAL,  "$28",       ARG_TYPE_NONE,     NULL         },
-    { "LD",   0xF0,   -1, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_FF00_U8,  NULL         },
-    { "LDH",  0xF0,   -1, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_U8,       NULL         },
-    { "POP",  0xF1,   -1, ARG_TYPE_LITERAL,  "AF",        ARG_TYPE_NONE,     NULL         },
-    { "LD",   0xF2,   -1, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_LITERAL,  "(C)",       },
-    { "LD",   0xF2,   -1, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_LITERAL,  "($FF00+C)", },
-    { "DI",   0xF3,   -1, ARG_TYPE_NONE,     NULL,        ARG_TYPE_NONE,     NULL         },
-    // 0xF4, Not Implemented
-    { "PUSH", 0xF5,   -1, ARG_TYPE_LITERAL,  "AF",        ARG_TYPE_NONE,     NULL         },
-    { "OR",   0xF6,   -1, ARG_TYPE_U8,       NULL,        ARG_TYPE_NONE,     NULL         },
-    { "RST",  0xF7,   -1, ARG_TYPE_LITERAL,  "$30",       ARG_TYPE_NONE,     NULL         },
-    { "LD",   0xF8,   -1, ARG_TYPE_LITERAL,  "HL",        ARG_TYPE_SP_S8,    NULL         },
-    { "LD",   0xF9,   -1, ARG_TYPE_LITERAL,  "SP",        ARG_TYPE_LITERAL,  "HL"         },
-    { "LD",   0xFA,   -1, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_ADDR_U16, NULL,        },
-    { "EI",   0xFB,   -1, ARG_TYPE_NONE,     NULL,        ARG_TYPE_NONE,     NULL         },
-    // 0xFC, Not Implemented
-    // 0xFD, Not Implemented
-    { "CP",   0xFE,   -1, ARG_TYPE_U8,       NULL,        ARG_TYPE_NONE,     NULL         },
-    { "RST",  0xFF,   -1, ARG_TYPE_LITERAL,  "$38",       ARG_TYPE_NONE,     NULL         },
+bool ParseInstructionArgument(char out[INST_ARG_MAX_LEN], 
+    const char * arg, ArgumentType type, const char * literal)
+{
+    if (!out) {
+        return false;
+    }
 
-    // Prefix 0xCB
-    { "RLC",  0xCB, 0x00, ARG_TYPE_LITERAL,  "B",         ARG_TYPE_NONE,     NULL         },
-    { "RLC",  0xCB, 0x01, ARG_TYPE_LITERAL,  "C",         ARG_TYPE_NONE,     NULL         },
-    { "RLC",  0xCB, 0x02, ARG_TYPE_LITERAL,  "D",         ARG_TYPE_NONE,     NULL         },
-    { "RLC",  0xCB, 0x03, ARG_TYPE_LITERAL,  "E",         ARG_TYPE_NONE,     NULL         },
-    { "RLC",  0xCB, 0x04, ARG_TYPE_LITERAL,  "H",         ARG_TYPE_NONE,     NULL         },
-    { "RLC",  0xCB, 0x05, ARG_TYPE_LITERAL,  "L",         ARG_TYPE_NONE,     NULL         },
-    { "RLC",  0xCB, 0x06, ARG_TYPE_LITERAL,  "(HL)",      ARG_TYPE_NONE,     NULL         },
-    { "RLC",  0xCB, 0x07, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_NONE,     NULL         },
-    { "RRC",  0xCB, 0x08, ARG_TYPE_LITERAL,  "B",         ARG_TYPE_NONE,     NULL         },
-    { "RRC",  0xCB, 0x09, ARG_TYPE_LITERAL,  "C",         ARG_TYPE_NONE,     NULL         },
-    { "RRC",  0xCB, 0x0A, ARG_TYPE_LITERAL,  "D",         ARG_TYPE_NONE,     NULL         },
-    { "RRC",  0xCB, 0x0B, ARG_TYPE_LITERAL,  "E",         ARG_TYPE_NONE,     NULL         },
-    { "RRC",  0xCB, 0x0C, ARG_TYPE_LITERAL,  "H",         ARG_TYPE_NONE,     NULL         },
-    { "RRC",  0xCB, 0x0D, ARG_TYPE_LITERAL,  "L",         ARG_TYPE_NONE,     NULL         },
-    { "RRC",  0xCB, 0x0E, ARG_TYPE_LITERAL,  "(HL)",      ARG_TYPE_NONE,     NULL         },
-    { "RRC",  0xCB, 0x0F, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_NONE,     NULL         },
-    { "RL",   0xCB, 0x10, ARG_TYPE_LITERAL,  "B",         ARG_TYPE_NONE,     NULL         },
-    { "RL",   0xCB, 0x11, ARG_TYPE_LITERAL,  "C",         ARG_TYPE_NONE,     NULL         },
-    { "RL",   0xCB, 0x12, ARG_TYPE_LITERAL,  "D",         ARG_TYPE_NONE,     NULL         },
-    { "RL",   0xCB, 0x13, ARG_TYPE_LITERAL,  "E",         ARG_TYPE_NONE,     NULL         },
-    { "RL",   0xCB, 0x14, ARG_TYPE_LITERAL,  "H",         ARG_TYPE_NONE,     NULL         },
-    { "RL",   0xCB, 0x15, ARG_TYPE_LITERAL,  "L",         ARG_TYPE_NONE,     NULL         },
-    { "RL",   0xCB, 0x16, ARG_TYPE_LITERAL,  "(HL)",      ARG_TYPE_NONE,     NULL         },
-    { "RL",   0xCB, 0x17, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_NONE,     NULL         },
-    { "RR",   0xCB, 0x18, ARG_TYPE_LITERAL,  "B",         ARG_TYPE_NONE,     NULL         },
-    { "RR",   0xCB, 0x19, ARG_TYPE_LITERAL,  "C",         ARG_TYPE_NONE,     NULL         },
-    { "RR",   0xCB, 0x1A, ARG_TYPE_LITERAL,  "D",         ARG_TYPE_NONE,     NULL         },
-    { "RR",   0xCB, 0x1B, ARG_TYPE_LITERAL,  "E",         ARG_TYPE_NONE,     NULL         },
-    { "RR",   0xCB, 0x1C, ARG_TYPE_LITERAL,  "H",         ARG_TYPE_NONE,     NULL         },
-    { "RR",   0xCB, 0x1D, ARG_TYPE_LITERAL,  "L",         ARG_TYPE_NONE,     NULL         },
-    { "RR",   0xCB, 0x1E, ARG_TYPE_LITERAL,  "(HL)",      ARG_TYPE_NONE,     NULL         },
-    { "RR",   0xCB, 0x1F, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_NONE,     NULL         },
-    { "SLA",  0xCB, 0x20, ARG_TYPE_LITERAL,  "B",         ARG_TYPE_NONE,     NULL         },
-    { "SLA",  0xCB, 0x21, ARG_TYPE_LITERAL,  "C",         ARG_TYPE_NONE,     NULL         },
-    { "SLA",  0xCB, 0x22, ARG_TYPE_LITERAL,  "D",         ARG_TYPE_NONE,     NULL         },
-    { "SLA",  0xCB, 0x23, ARG_TYPE_LITERAL,  "E",         ARG_TYPE_NONE,     NULL         },
-    { "SLA",  0xCB, 0x24, ARG_TYPE_LITERAL,  "H",         ARG_TYPE_NONE,     NULL         },
-    { "SLA",  0xCB, 0x25, ARG_TYPE_LITERAL,  "L",         ARG_TYPE_NONE,     NULL         },
-    { "SLA",  0xCB, 0x26, ARG_TYPE_LITERAL,  "(HL)",      ARG_TYPE_NONE,     NULL         },
-    { "SLA",  0xCB, 0x27, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_NONE,     NULL         },
-    { "SRA",  0xCB, 0x28, ARG_TYPE_LITERAL,  "B",         ARG_TYPE_NONE,     NULL         },
-    { "SRA",  0xCB, 0x29, ARG_TYPE_LITERAL,  "C",         ARG_TYPE_NONE,     NULL         },
-    { "SRA",  0xCB, 0x2A, ARG_TYPE_LITERAL,  "D",         ARG_TYPE_NONE,     NULL         },
-    { "SRA",  0xCB, 0x2B, ARG_TYPE_LITERAL,  "E",         ARG_TYPE_NONE,     NULL         },
-    { "SRA",  0xCB, 0x2C, ARG_TYPE_LITERAL,  "H",         ARG_TYPE_NONE,     NULL         },
-    { "SRA",  0xCB, 0x2D, ARG_TYPE_LITERAL,  "L",         ARG_TYPE_NONE,     NULL         },
-    { "SRA",  0xCB, 0x2E, ARG_TYPE_LITERAL,  "(HL)",      ARG_TYPE_NONE,     NULL         },
-    { "SRA",  0xCB, 0x2F, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_NONE,     NULL         },
-    { "SWAP", 0xCB, 0x30, ARG_TYPE_LITERAL,  "B",         ARG_TYPE_NONE,     NULL         },
-    { "SWAP", 0xCB, 0x31, ARG_TYPE_LITERAL,  "C",         ARG_TYPE_NONE,     NULL         },
-    { "SWAP", 0xCB, 0x32, ARG_TYPE_LITERAL,  "D",         ARG_TYPE_NONE,     NULL         },
-    { "SWAP", 0xCB, 0x33, ARG_TYPE_LITERAL,  "E",         ARG_TYPE_NONE,     NULL         },
-    { "SWAP", 0xCB, 0x34, ARG_TYPE_LITERAL,  "H",         ARG_TYPE_NONE,     NULL         },
-    { "SWAP", 0xCB, 0x35, ARG_TYPE_LITERAL,  "L",         ARG_TYPE_NONE,     NULL         },
-    { "SWAP", 0xCB, 0x36, ARG_TYPE_LITERAL,  "(HL)",      ARG_TYPE_NONE,     NULL         },
-    { "SWAP", 0xCB, 0x37, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_NONE,     NULL         },
-    { "SRL",  0xCB, 0x38, ARG_TYPE_LITERAL,  "B",         ARG_TYPE_NONE,     NULL         },
-    { "SRL",  0xCB, 0x39, ARG_TYPE_LITERAL,  "C",         ARG_TYPE_NONE,     NULL         },
-    { "SRL",  0xCB, 0x3A, ARG_TYPE_LITERAL,  "D",         ARG_TYPE_NONE,     NULL         },
-    { "SRL",  0xCB, 0x3B, ARG_TYPE_LITERAL,  "E",         ARG_TYPE_NONE,     NULL         },
-    { "SRL",  0xCB, 0x3C, ARG_TYPE_LITERAL,  "H",         ARG_TYPE_NONE,     NULL         },
-    { "SRL",  0xCB, 0x3D, ARG_TYPE_LITERAL,  "L",         ARG_TYPE_NONE,     NULL         },
-    { "SRL",  0xCB, 0x3E, ARG_TYPE_LITERAL,  "(HL)",      ARG_TYPE_NONE,     NULL         },
-    { "SRL",  0xCB, 0x3F, ARG_TYPE_LITERAL,  "A",         ARG_TYPE_NONE,     NULL         },
-    { "BIT",  0xCB, 0x40, ARG_TYPE_LITERAL,  "0",         ARG_TYPE_LITERAL,  "B"          },
-    { "BIT",  0xCB, 0x41, ARG_TYPE_LITERAL,  "0",         ARG_TYPE_LITERAL,  "C"          },
-    { "BIT",  0xCB, 0x42, ARG_TYPE_LITERAL,  "0",         ARG_TYPE_LITERAL,  "D"          },
-    { "BIT",  0xCB, 0x43, ARG_TYPE_LITERAL,  "0",         ARG_TYPE_LITERAL,  "E"          },
-    { "BIT",  0xCB, 0x44, ARG_TYPE_LITERAL,  "0",         ARG_TYPE_LITERAL,  "H"          },
-    { "BIT",  0xCB, 0x45, ARG_TYPE_LITERAL,  "0",         ARG_TYPE_LITERAL,  "L"          },
-    { "BIT",  0xCB, 0x46, ARG_TYPE_LITERAL,  "0",         ARG_TYPE_LITERAL,  "(HL)"       },
-    { "BIT",  0xCB, 0x47, ARG_TYPE_LITERAL,  "0",         ARG_TYPE_LITERAL,  "A"          },
-    { "BIT",  0xCB, 0x48, ARG_TYPE_LITERAL,  "1",         ARG_TYPE_LITERAL,  "B"          },
-    { "BIT",  0xCB, 0x49, ARG_TYPE_LITERAL,  "1",         ARG_TYPE_LITERAL,  "C"          },
-    { "BIT",  0xCB, 0x4A, ARG_TYPE_LITERAL,  "1",         ARG_TYPE_LITERAL,  "D"          },
-    { "BIT",  0xCB, 0x4B, ARG_TYPE_LITERAL,  "1",         ARG_TYPE_LITERAL,  "E"          },
-    { "BIT",  0xCB, 0x4C, ARG_TYPE_LITERAL,  "1",         ARG_TYPE_LITERAL,  "H"          },
-    { "BIT",  0xCB, 0x4D, ARG_TYPE_LITERAL,  "1",         ARG_TYPE_LITERAL,  "L"          },
-    { "BIT",  0xCB, 0x4E, ARG_TYPE_LITERAL,  "1",         ARG_TYPE_LITERAL,  "(HL)"       },
-    { "BIT",  0xCB, 0x4F, ARG_TYPE_LITERAL,  "1",         ARG_TYPE_LITERAL,  "A"          },
-    { "BIT",  0xCB, 0x50, ARG_TYPE_LITERAL,  "2",         ARG_TYPE_LITERAL,  "B"          },
-    { "BIT",  0xCB, 0x51, ARG_TYPE_LITERAL,  "2",         ARG_TYPE_LITERAL,  "C"          },
-    { "BIT",  0xCB, 0x52, ARG_TYPE_LITERAL,  "2",         ARG_TYPE_LITERAL,  "D"          },
-    { "BIT",  0xCB, 0x53, ARG_TYPE_LITERAL,  "2",         ARG_TYPE_LITERAL,  "E"          },
-    { "BIT",  0xCB, 0x54, ARG_TYPE_LITERAL,  "2",         ARG_TYPE_LITERAL,  "H"          },
-    { "BIT",  0xCB, 0x55, ARG_TYPE_LITERAL,  "2",         ARG_TYPE_LITERAL,  "L"          },
-    { "BIT",  0xCB, 0x56, ARG_TYPE_LITERAL,  "2",         ARG_TYPE_LITERAL,  "(HL)"       },
-    { "BIT",  0xCB, 0x57, ARG_TYPE_LITERAL,  "2",         ARG_TYPE_LITERAL,  "A"          },
-    { "BIT",  0xCB, 0x58, ARG_TYPE_LITERAL,  "3",         ARG_TYPE_LITERAL,  "B"          },
-    { "BIT",  0xCB, 0x59, ARG_TYPE_LITERAL,  "3",         ARG_TYPE_LITERAL,  "C"          },
-    { "BIT",  0xCB, 0x5A, ARG_TYPE_LITERAL,  "3",         ARG_TYPE_LITERAL,  "D"          },
-    { "BIT",  0xCB, 0x5B, ARG_TYPE_LITERAL,  "3",         ARG_TYPE_LITERAL,  "E"          },
-    { "BIT",  0xCB, 0x5C, ARG_TYPE_LITERAL,  "3",         ARG_TYPE_LITERAL,  "H"          },
-    { "BIT",  0xCB, 0x5D, ARG_TYPE_LITERAL,  "3",         ARG_TYPE_LITERAL,  "L"          },
-    { "BIT",  0xCB, 0x5E, ARG_TYPE_LITERAL,  "3",         ARG_TYPE_LITERAL,  "(HL)"       },
-    { "BIT",  0xCB, 0x5F, ARG_TYPE_LITERAL,  "3",         ARG_TYPE_LITERAL,  "A"          },
-    { "BIT",  0xCB, 0x60, ARG_TYPE_LITERAL,  "4",         ARG_TYPE_LITERAL,  "B"          },
-    { "BIT",  0xCB, 0x61, ARG_TYPE_LITERAL,  "4",         ARG_TYPE_LITERAL,  "C"          },
-    { "BIT",  0xCB, 0x62, ARG_TYPE_LITERAL,  "4",         ARG_TYPE_LITERAL,  "D"          },
-    { "BIT",  0xCB, 0x63, ARG_TYPE_LITERAL,  "4",         ARG_TYPE_LITERAL,  "E"          },
-    { "BIT",  0xCB, 0x64, ARG_TYPE_LITERAL,  "4",         ARG_TYPE_LITERAL,  "H"          },
-    { "BIT",  0xCB, 0x65, ARG_TYPE_LITERAL,  "4",         ARG_TYPE_LITERAL,  "L"          },
-    { "BIT",  0xCB, 0x66, ARG_TYPE_LITERAL,  "4",         ARG_TYPE_LITERAL,  "(HL)"       },
-    { "BIT",  0xCB, 0x67, ARG_TYPE_LITERAL,  "4",         ARG_TYPE_LITERAL,  "A"          },
-    { "BIT",  0xCB, 0x68, ARG_TYPE_LITERAL,  "5",         ARG_TYPE_LITERAL,  "B"          },
-    { "BIT",  0xCB, 0x69, ARG_TYPE_LITERAL,  "5",         ARG_TYPE_LITERAL,  "C"          },
-    { "BIT",  0xCB, 0x6A, ARG_TYPE_LITERAL,  "5",         ARG_TYPE_LITERAL,  "D"          },
-    { "BIT",  0xCB, 0x6B, ARG_TYPE_LITERAL,  "5",         ARG_TYPE_LITERAL,  "E"          },
-    { "BIT",  0xCB, 0x6C, ARG_TYPE_LITERAL,  "5",         ARG_TYPE_LITERAL,  "H"          },
-    { "BIT",  0xCB, 0x6D, ARG_TYPE_LITERAL,  "5",         ARG_TYPE_LITERAL,  "L"          },
-    { "BIT",  0xCB, 0x6E, ARG_TYPE_LITERAL,  "5",         ARG_TYPE_LITERAL,  "(HL)"       },
-    { "BIT",  0xCB, 0x6F, ARG_TYPE_LITERAL,  "5",         ARG_TYPE_LITERAL,  "A"          },
-    { "BIT",  0xCB, 0x70, ARG_TYPE_LITERAL,  "6",         ARG_TYPE_LITERAL,  "B"          },
-    { "BIT",  0xCB, 0x71, ARG_TYPE_LITERAL,  "6",         ARG_TYPE_LITERAL,  "C"          },
-    { "BIT",  0xCB, 0x72, ARG_TYPE_LITERAL,  "6",         ARG_TYPE_LITERAL,  "D"          },
-    { "BIT",  0xCB, 0x73, ARG_TYPE_LITERAL,  "6",         ARG_TYPE_LITERAL,  "E"          },
-    { "BIT",  0xCB, 0x74, ARG_TYPE_LITERAL,  "6",         ARG_TYPE_LITERAL,  "H"          },
-    { "BIT",  0xCB, 0x75, ARG_TYPE_LITERAL,  "6",         ARG_TYPE_LITERAL,  "L"          },
-    { "BIT",  0xCB, 0x76, ARG_TYPE_LITERAL,  "6",         ARG_TYPE_LITERAL,  "(HL)"       },
-    { "BIT",  0xCB, 0x77, ARG_TYPE_LITERAL,  "6",         ARG_TYPE_LITERAL,  "A"          },
-    { "BIT",  0xCB, 0x78, ARG_TYPE_LITERAL,  "7",         ARG_TYPE_LITERAL,  "B"          },
-    { "BIT",  0xCB, 0x79, ARG_TYPE_LITERAL,  "7",         ARG_TYPE_LITERAL,  "C"          },
-    { "BIT",  0xCB, 0x7A, ARG_TYPE_LITERAL,  "7",         ARG_TYPE_LITERAL,  "D"          },
-    { "BIT",  0xCB, 0x7B, ARG_TYPE_LITERAL,  "7",         ARG_TYPE_LITERAL,  "E"          },
-    { "BIT",  0xCB, 0x7C, ARG_TYPE_LITERAL,  "7",         ARG_TYPE_LITERAL,  "H"          },
-    { "BIT",  0xCB, 0x7D, ARG_TYPE_LITERAL,  "7",         ARG_TYPE_LITERAL,  "L"          },
-    { "BIT",  0xCB, 0x7E, ARG_TYPE_LITERAL,  "7",         ARG_TYPE_LITERAL,  "(HL)"       },
-    { "BIT",  0xCB, 0x7F, ARG_TYPE_LITERAL,  "7",         ARG_TYPE_LITERAL,  "A"          },
-    { "RES",  0xCB, 0x80, ARG_TYPE_LITERAL,  "0",         ARG_TYPE_LITERAL,  "B"          },
-    { "RES",  0xCB, 0x81, ARG_TYPE_LITERAL,  "0",         ARG_TYPE_LITERAL,  "C"          },
-    { "RES",  0xCB, 0x82, ARG_TYPE_LITERAL,  "0",         ARG_TYPE_LITERAL,  "D"          },
-    { "RES",  0xCB, 0x83, ARG_TYPE_LITERAL,  "0",         ARG_TYPE_LITERAL,  "E"          },
-    { "RES",  0xCB, 0x84, ARG_TYPE_LITERAL,  "0",         ARG_TYPE_LITERAL,  "H"          },
-    { "RES",  0xCB, 0x85, ARG_TYPE_LITERAL,  "0",         ARG_TYPE_LITERAL,  "L"          },
-    { "RES",  0xCB, 0x86, ARG_TYPE_LITERAL,  "0",         ARG_TYPE_LITERAL,  "(HL)"       },
-    { "RES",  0xCB, 0x87, ARG_TYPE_LITERAL,  "0",         ARG_TYPE_LITERAL,  "A"          },
-    { "RES",  0xCB, 0x88, ARG_TYPE_LITERAL,  "1",         ARG_TYPE_LITERAL,  "B"          },
-    { "RES",  0xCB, 0x89, ARG_TYPE_LITERAL,  "1",         ARG_TYPE_LITERAL,  "C"          },
-    { "RES",  0xCB, 0x8A, ARG_TYPE_LITERAL,  "1",         ARG_TYPE_LITERAL,  "D"          },
-    { "RES",  0xCB, 0x8B, ARG_TYPE_LITERAL,  "1",         ARG_TYPE_LITERAL,  "E"          },
-    { "RES",  0xCB, 0x8C, ARG_TYPE_LITERAL,  "1",         ARG_TYPE_LITERAL,  "H"          },
-    { "RES",  0xCB, 0x8D, ARG_TYPE_LITERAL,  "1",         ARG_TYPE_LITERAL,  "L"          },
-    { "RES",  0xCB, 0x8E, ARG_TYPE_LITERAL,  "1",         ARG_TYPE_LITERAL,  "(HL)"       },
-    { "RES",  0xCB, 0x8F, ARG_TYPE_LITERAL,  "1",         ARG_TYPE_LITERAL,  "A"          },
-    { "RES",  0xCB, 0x90, ARG_TYPE_LITERAL,  "2",         ARG_TYPE_LITERAL,  "B"          },
-    { "RES",  0xCB, 0x91, ARG_TYPE_LITERAL,  "2",         ARG_TYPE_LITERAL,  "C"          },
-    { "RES",  0xCB, 0x92, ARG_TYPE_LITERAL,  "2",         ARG_TYPE_LITERAL,  "D"          },
-    { "RES",  0xCB, 0x93, ARG_TYPE_LITERAL,  "2",         ARG_TYPE_LITERAL,  "E"          },
-    { "RES",  0xCB, 0x94, ARG_TYPE_LITERAL,  "2",         ARG_TYPE_LITERAL,  "H"          },
-    { "RES",  0xCB, 0x95, ARG_TYPE_LITERAL,  "2",         ARG_TYPE_LITERAL,  "L"          },
-    { "RES",  0xCB, 0x96, ARG_TYPE_LITERAL,  "2",         ARG_TYPE_LITERAL,  "(HL)"       },
-    { "RES",  0xCB, 0x97, ARG_TYPE_LITERAL,  "2",         ARG_TYPE_LITERAL,  "A"          },
-    { "RES",  0xCB, 0x98, ARG_TYPE_LITERAL,  "3",         ARG_TYPE_LITERAL,  "B"          },
-    { "RES",  0xCB, 0x99, ARG_TYPE_LITERAL,  "3",         ARG_TYPE_LITERAL,  "C"          },
-    { "RES",  0xCB, 0x9A, ARG_TYPE_LITERAL,  "3",         ARG_TYPE_LITERAL,  "D"          },
-    { "RES",  0xCB, 0x9B, ARG_TYPE_LITERAL,  "3",         ARG_TYPE_LITERAL,  "E"          },
-    { "RES",  0xCB, 0x9C, ARG_TYPE_LITERAL,  "3",         ARG_TYPE_LITERAL,  "H"          },
-    { "RES",  0xCB, 0x9D, ARG_TYPE_LITERAL,  "3",         ARG_TYPE_LITERAL,  "L"          },
-    { "RES",  0xCB, 0x9E, ARG_TYPE_LITERAL,  "3",         ARG_TYPE_LITERAL,  "(HL)"       },
-    { "RES",  0xCB, 0x9F, ARG_TYPE_LITERAL,  "3",         ARG_TYPE_LITERAL,  "A"          },
-    { "RES",  0xCB, 0xA0, ARG_TYPE_LITERAL,  "4",         ARG_TYPE_LITERAL,  "B"          },
-    { "RES",  0xCB, 0xA1, ARG_TYPE_LITERAL,  "4",         ARG_TYPE_LITERAL,  "C"          },
-    { "RES",  0xCB, 0xA2, ARG_TYPE_LITERAL,  "4",         ARG_TYPE_LITERAL,  "D"          },
-    { "RES",  0xCB, 0xA3, ARG_TYPE_LITERAL,  "4",         ARG_TYPE_LITERAL,  "E"          },
-    { "RES",  0xCB, 0xA4, ARG_TYPE_LITERAL,  "4",         ARG_TYPE_LITERAL,  "H"          },
-    { "RES",  0xCB, 0xA5, ARG_TYPE_LITERAL,  "4",         ARG_TYPE_LITERAL,  "L"          },
-    { "RES",  0xCB, 0xA6, ARG_TYPE_LITERAL,  "4",         ARG_TYPE_LITERAL,  "(HL)"       },
-    { "RES",  0xCB, 0xA7, ARG_TYPE_LITERAL,  "4",         ARG_TYPE_LITERAL,  "A"          },
-    { "RES",  0xCB, 0xA8, ARG_TYPE_LITERAL,  "5",         ARG_TYPE_LITERAL,  "B"          },
-    { "RES",  0xCB, 0xA9, ARG_TYPE_LITERAL,  "5",         ARG_TYPE_LITERAL,  "C"          },
-    { "RES",  0xCB, 0xAA, ARG_TYPE_LITERAL,  "5",         ARG_TYPE_LITERAL,  "D"          },
-    { "RES",  0xCB, 0xAB, ARG_TYPE_LITERAL,  "5",         ARG_TYPE_LITERAL,  "E"          },
-    { "RES",  0xCB, 0xAC, ARG_TYPE_LITERAL,  "5",         ARG_TYPE_LITERAL,  "H"          },
-    { "RES",  0xCB, 0xAD, ARG_TYPE_LITERAL,  "5",         ARG_TYPE_LITERAL,  "L"          },
-    { "RES",  0xCB, 0xAE, ARG_TYPE_LITERAL,  "5",         ARG_TYPE_LITERAL,  "(HL)"       },
-    { "RES",  0xCB, 0xAF, ARG_TYPE_LITERAL,  "5",         ARG_TYPE_LITERAL,  "A"          },
-    { "RES",  0xCB, 0xB0, ARG_TYPE_LITERAL,  "6",         ARG_TYPE_LITERAL,  "B"          },
-    { "RES",  0xCB, 0xB1, ARG_TYPE_LITERAL,  "6",         ARG_TYPE_LITERAL,  "C"          },
-    { "RES",  0xCB, 0xB2, ARG_TYPE_LITERAL,  "6",         ARG_TYPE_LITERAL,  "D"          },
-    { "RES",  0xCB, 0xB3, ARG_TYPE_LITERAL,  "6",         ARG_TYPE_LITERAL,  "E"          },
-    { "RES",  0xCB, 0xB4, ARG_TYPE_LITERAL,  "6",         ARG_TYPE_LITERAL,  "H"          },
-    { "RES",  0xCB, 0xB5, ARG_TYPE_LITERAL,  "6",         ARG_TYPE_LITERAL,  "L"          },
-    { "RES",  0xCB, 0xB6, ARG_TYPE_LITERAL,  "6",         ARG_TYPE_LITERAL,  "(HL)"       },
-    { "RES",  0xCB, 0xB7, ARG_TYPE_LITERAL,  "6",         ARG_TYPE_LITERAL,  "A"          },
-    { "RES",  0xCB, 0xB8, ARG_TYPE_LITERAL,  "7",         ARG_TYPE_LITERAL,  "B"          },
-    { "RES",  0xCB, 0xB9, ARG_TYPE_LITERAL,  "7",         ARG_TYPE_LITERAL,  "C"          },
-    { "RES",  0xCB, 0xBA, ARG_TYPE_LITERAL,  "7",         ARG_TYPE_LITERAL,  "D"          },
-    { "RES",  0xCB, 0xBB, ARG_TYPE_LITERAL,  "7",         ARG_TYPE_LITERAL,  "E"          },
-    { "RES",  0xCB, 0xBC, ARG_TYPE_LITERAL,  "7",         ARG_TYPE_LITERAL,  "H"          },
-    { "RES",  0xCB, 0xBD, ARG_TYPE_LITERAL,  "7",         ARG_TYPE_LITERAL,  "L"          },
-    { "RES",  0xCB, 0xBE, ARG_TYPE_LITERAL,  "7",         ARG_TYPE_LITERAL,  "(HL)"       },
-    { "RES",  0xCB, 0xBF, ARG_TYPE_LITERAL,  "7",         ARG_TYPE_LITERAL,  "A"          },
-    { "SET",  0xCB, 0xC0, ARG_TYPE_LITERAL,  "0",         ARG_TYPE_LITERAL,  "B"          },
-    { "SET",  0xCB, 0xC1, ARG_TYPE_LITERAL,  "0",         ARG_TYPE_LITERAL,  "C"          },
-    { "SET",  0xCB, 0xC2, ARG_TYPE_LITERAL,  "0",         ARG_TYPE_LITERAL,  "D"          },
-    { "SET",  0xCB, 0xC3, ARG_TYPE_LITERAL,  "0",         ARG_TYPE_LITERAL,  "E"          },
-    { "SET",  0xCB, 0xC4, ARG_TYPE_LITERAL,  "0",         ARG_TYPE_LITERAL,  "H"          },
-    { "SET",  0xCB, 0xC5, ARG_TYPE_LITERAL,  "0",         ARG_TYPE_LITERAL,  "L"          },
-    { "SET",  0xCB, 0xC6, ARG_TYPE_LITERAL,  "0",         ARG_TYPE_LITERAL,  "(HL)"       },
-    { "SET",  0xCB, 0xC7, ARG_TYPE_LITERAL,  "0",         ARG_TYPE_LITERAL,  "A"          },
-    { "SET",  0xCB, 0xC8, ARG_TYPE_LITERAL,  "1",         ARG_TYPE_LITERAL,  "B"          },
-    { "SET",  0xCB, 0xC9, ARG_TYPE_LITERAL,  "1",         ARG_TYPE_LITERAL,  "C"          },
-    { "SET",  0xCB, 0xCA, ARG_TYPE_LITERAL,  "1",         ARG_TYPE_LITERAL,  "D"          },
-    { "SET",  0xCB, 0xCB, ARG_TYPE_LITERAL,  "1",         ARG_TYPE_LITERAL,  "E"          },
-    { "SET",  0xCB, 0xCC, ARG_TYPE_LITERAL,  "1",         ARG_TYPE_LITERAL,  "H"          },
-    { "SET",  0xCB, 0xCD, ARG_TYPE_LITERAL,  "1",         ARG_TYPE_LITERAL,  "L"          },
-    { "SET",  0xCB, 0xCE, ARG_TYPE_LITERAL,  "1",         ARG_TYPE_LITERAL,  "(HL)"       },
-    { "SET",  0xCB, 0xCF, ARG_TYPE_LITERAL,  "1",         ARG_TYPE_LITERAL,  "A"          },
-    { "SET",  0xCB, 0xD0, ARG_TYPE_LITERAL,  "2",         ARG_TYPE_LITERAL,  "B"          },
-    { "SET",  0xCB, 0xD1, ARG_TYPE_LITERAL,  "2",         ARG_TYPE_LITERAL,  "C"          },
-    { "SET",  0xCB, 0xD2, ARG_TYPE_LITERAL,  "2",         ARG_TYPE_LITERAL,  "D"          },
-    { "SET",  0xCB, 0xD3, ARG_TYPE_LITERAL,  "2",         ARG_TYPE_LITERAL,  "E"          },
-    { "SET",  0xCB, 0xD4, ARG_TYPE_LITERAL,  "2",         ARG_TYPE_LITERAL,  "H"          },
-    { "SET",  0xCB, 0xD5, ARG_TYPE_LITERAL,  "2",         ARG_TYPE_LITERAL,  "L"          },
-    { "SET",  0xCB, 0xD6, ARG_TYPE_LITERAL,  "2",         ARG_TYPE_LITERAL,  "(HL)"       },
-    { "SET",  0xCB, 0xD7, ARG_TYPE_LITERAL,  "2",         ARG_TYPE_LITERAL,  "A"          },
-    { "SET",  0xCB, 0xD8, ARG_TYPE_LITERAL,  "3",         ARG_TYPE_LITERAL,  "B"          },
-    { "SET",  0xCB, 0xD9, ARG_TYPE_LITERAL,  "3",         ARG_TYPE_LITERAL,  "C"          },
-    { "SET",  0xCB, 0xDA, ARG_TYPE_LITERAL,  "3",         ARG_TYPE_LITERAL,  "D"          },
-    { "SET",  0xCB, 0xDB, ARG_TYPE_LITERAL,  "3",         ARG_TYPE_LITERAL,  "E"          },
-    { "SET",  0xCB, 0xDC, ARG_TYPE_LITERAL,  "3",         ARG_TYPE_LITERAL,  "H"          },
-    { "SET",  0xCB, 0xDD, ARG_TYPE_LITERAL,  "3",         ARG_TYPE_LITERAL,  "L"          },
-    { "SET",  0xCB, 0xDE, ARG_TYPE_LITERAL,  "3",         ARG_TYPE_LITERAL,  "(HL)"       },
-    { "SET",  0xCB, 0xDF, ARG_TYPE_LITERAL,  "3",         ARG_TYPE_LITERAL,  "A"          },
-    { "SET",  0xCB, 0xE0, ARG_TYPE_LITERAL,  "4",         ARG_TYPE_LITERAL,  "B"          },
-    { "SET",  0xCB, 0xE1, ARG_TYPE_LITERAL,  "4",         ARG_TYPE_LITERAL,  "C"          },
-    { "SET",  0xCB, 0xE2, ARG_TYPE_LITERAL,  "4",         ARG_TYPE_LITERAL,  "D"          },
-    { "SET",  0xCB, 0xE3, ARG_TYPE_LITERAL,  "4",         ARG_TYPE_LITERAL,  "E"          },
-    { "SET",  0xCB, 0xE4, ARG_TYPE_LITERAL,  "4",         ARG_TYPE_LITERAL,  "H"          },
-    { "SET",  0xCB, 0xE5, ARG_TYPE_LITERAL,  "4",         ARG_TYPE_LITERAL,  "L"          },
-    { "SET",  0xCB, 0xE6, ARG_TYPE_LITERAL,  "4",         ARG_TYPE_LITERAL,  "(HL)"       },
-    { "SET",  0xCB, 0xE7, ARG_TYPE_LITERAL,  "4",         ARG_TYPE_LITERAL,  "A"          },
-    { "SET",  0xCB, 0xE8, ARG_TYPE_LITERAL,  "5",         ARG_TYPE_LITERAL,  "B"          },
-    { "SET",  0xCB, 0xE9, ARG_TYPE_LITERAL,  "5",         ARG_TYPE_LITERAL,  "C"          },
-    { "SET",  0xCB, 0xEA, ARG_TYPE_LITERAL,  "5",         ARG_TYPE_LITERAL,  "D"          },
-    { "SET",  0xCB, 0xEB, ARG_TYPE_LITERAL,  "5",         ARG_TYPE_LITERAL,  "E"          },
-    { "SET",  0xCB, 0xEC, ARG_TYPE_LITERAL,  "5",         ARG_TYPE_LITERAL,  "H"          },
-    { "SET",  0xCB, 0xED, ARG_TYPE_LITERAL,  "5",         ARG_TYPE_LITERAL,  "L"          },
-    { "SET",  0xCB, 0xEE, ARG_TYPE_LITERAL,  "5",         ARG_TYPE_LITERAL,  "(HL)"       },
-    { "SET",  0xCB, 0xEF, ARG_TYPE_LITERAL,  "5",         ARG_TYPE_LITERAL,  "A"          },
-    { "SET",  0xCB, 0xF0, ARG_TYPE_LITERAL,  "6",         ARG_TYPE_LITERAL,  "B"          },
-    { "SET",  0xCB, 0xF1, ARG_TYPE_LITERAL,  "6",         ARG_TYPE_LITERAL,  "C"          },
-    { "SET",  0xCB, 0xF2, ARG_TYPE_LITERAL,  "6",         ARG_TYPE_LITERAL,  "D"          },
-    { "SET",  0xCB, 0xF3, ARG_TYPE_LITERAL,  "6",         ARG_TYPE_LITERAL,  "E"          },
-    { "SET",  0xCB, 0xF4, ARG_TYPE_LITERAL,  "6",         ARG_TYPE_LITERAL,  "H"          },
-    { "SET",  0xCB, 0xF5, ARG_TYPE_LITERAL,  "6",         ARG_TYPE_LITERAL,  "L"          },
-    { "SET",  0xCB, 0xF6, ARG_TYPE_LITERAL,  "6",         ARG_TYPE_LITERAL,  "(HL)"       },
-    { "SET",  0xCB, 0xF7, ARG_TYPE_LITERAL,  "6",         ARG_TYPE_LITERAL,  "A"          },
-    { "SET",  0xCB, 0xF8, ARG_TYPE_LITERAL,  "7",         ARG_TYPE_LITERAL,  "B"          },
-    { "SET",  0xCB, 0xF9, ARG_TYPE_LITERAL,  "7",         ARG_TYPE_LITERAL,  "C"          },
-    { "SET",  0xCB, 0xFA, ARG_TYPE_LITERAL,  "7",         ARG_TYPE_LITERAL,  "D"          },
-    { "SET",  0xCB, 0xFB, ARG_TYPE_LITERAL,  "7",         ARG_TYPE_LITERAL,  "E"          },
-    { "SET",  0xCB, 0xFC, ARG_TYPE_LITERAL,  "7",         ARG_TYPE_LITERAL,  "H"          },
-    { "SET",  0xCB, 0xFD, ARG_TYPE_LITERAL,  "7",         ARG_TYPE_LITERAL,  "L"          },
-    { "SET",  0xCB, 0xFE, ARG_TYPE_LITERAL,  "7",         ARG_TYPE_LITERAL,  "(HL)"       },
-    { "SET",  0xCB, 0xFF, ARG_TYPE_LITERAL,  "7",         ARG_TYPE_LITERAL,  "A"          },
+    *out = '\0';
 
-    { NULL, 0, 0, ARG_TYPE_NONE, NULL, ARG_TYPE_NONE, NULL },
-};
+    size_t length = (arg ? strlen(arg) : 0);
+
+    if (length > INST_ARG_MAX_LEN) {
+        fprintf(stderr, "Argument too long, %zu > %d", length, INST_ARG_MAX_LEN);
+        return false;
+    }
+
+    if (type == ARG_TYPE_NONE) {
+        if (length == 0) {
+            return true;
+        }
+    }
+    else if (type == ARG_TYPE_LITERAL) {
+        if (arg && strcasecmp(arg, literal) == 0) {
+            return true;
+        }
+    }
+    else {
+        if (type == ARG_TYPE_ADDR_U16) {
+            // (#)
+            if (length < 3) {
+                return false;
+            }
+
+            if (arg[0] != '(' || arg[length - 1] != ')') {
+                return false;
+            }
+
+            length -= 2;
+            strncpy(out, arg + 1, length);
+            out[length] = '\0';
+        }
+        else if (type == ARG_TYPE_FF00_U8) {
+            // ($FF00+#)
+            const char * prefix = "($FF00+";
+            size_t prefixLength = strlen(prefix);
+
+            if (length < prefixLength + 2) {
+                return false;
+            }
+
+            if (strncasecmp(prefix, arg, prefixLength) != 0 || arg[length - 1] != ')') {
+                return false;
+            }
+
+            length -= prefixLength + 1;
+            strncpy(out, arg + prefixLength, length);
+            out[length] = '\0';
+        }
+        else if (type == ARG_TYPE_SP_S8) {
+            // SP+#
+            const char * prefix = "SP+";
+            size_t prefixLength = strlen(prefix);
+
+            if (length < prefixLength + 1) {
+                return false;
+            }
+            
+            if (strncasecmp(prefix, arg, prefixLength) != 0 || arg[length - 1] != ')') {
+                return false;
+            }
+
+            length -= prefixLength + 1;
+            strncpy(out, arg + prefixLength, length);
+            out[length] = '\0';
+        }
+        else {
+            strcpy(out, arg);
+        }
+
+        if (strcmp(out, "$ff26") == 0) {
+            printf("ass\n");
+        }
+
+        if (IsValidSymbol(out)) {
+            return true;
+        }
+
+        long num;
+        if (ParseNumber(out, &num)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+Instruction * GetInstructionList()
+{
+    return _InstructionList;
+}

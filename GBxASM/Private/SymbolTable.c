@@ -1,6 +1,9 @@
 #include "SymbolTable.h"
 
 #include <stdio.h>
+#include <ctype.h>
+
+#include "Util.h"
 
 #define SYMBOL_TABLE_INITIAL_SIZE (10)
 
@@ -75,8 +78,8 @@ bool SymbolTable_Add(SymbolTable * table, const char * name, long address)
         Symbol * entry = &table->Entries[i];
         
         if (entry->Name[0] == '\0') {
-            strncpy(entry->Name, name, SYMBOL_MAX_NAME_LENGTH - 1);
-            entry->Name[SYMBOL_MAX_NAME_LENGTH - 1] = '\0';
+            strncpy(entry->Name, name, SYM_MAX_NAME_LEN - 1);
+            entry->Name[SYM_MAX_NAME_LEN - 1] = '\0';
 
             entry->Address = address;
             ++table->Count;
@@ -93,7 +96,7 @@ long SymbolTable_Get(SymbolTable * table, const char * name)
     for (size_t i = 0; i < table->Capacity; ++i) {
         Symbol * entry = &table->Entries[i];
 
-        if (strncmp(entry->Name, name, SYMBOL_MAX_NAME_LENGTH) == 0) {
+        if (strncmp(entry->Name, name, SYM_MAX_NAME_LEN) == 0) {
             return entry->Address;
         }
     }
