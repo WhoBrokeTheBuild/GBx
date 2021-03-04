@@ -2,26 +2,16 @@
 #define GBX_H
 
 #include <GBx/Version.h>
-#include <GBx/StatusCodes.h>
 #include <GBx/Platform.h>
 #include <GBx/Macros.h>
+#include <GBx/Context.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// Defined in Context.h
+// Forward Declaration, include <GBx/Context.h>
 typedef struct GBx GBx;
-
-enum GBx_Mode
-{
-    GBX_MODE_DMG, // Original GameBoy
-    GBX_MODE_SGB, // Super GameBoy
-    GBX_MODE_CGB, // Color GameBoy
-    
-};
-
-typedef enum GBx_Mode GBx_Mode;
 
 struct GBx_Config
 {
@@ -30,9 +20,11 @@ struct GBx_Config
 
 typedef struct GBx_Config GBx_Config;
 
-int GBx_Init(GBx ** pctx, GBx_Config * cfg);
+bool GBx_Init(GBx ** pctx, GBx_Config * cfg);
 
 void GBx_Term(GBx ** ctx);
+
+void GBx_Reset(GBx * ctx);
 
 void GBx_Tick(GBx * ctx, unsigned cycles);
 

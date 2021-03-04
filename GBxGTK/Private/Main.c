@@ -69,7 +69,7 @@ int main(int argc, char ** argv)
     GBx_Config gbxConfig = {
     };
 
-    if (GBx_Init(&gbx, &gbxConfig) != GBX_SUCCESS) {
+    if (!GBx_Init(&gbx, &gbxConfig)) {
         fprintf(stderr, "Failed to initialize GBx\n");
         goto cleanup;
     }
@@ -106,6 +106,8 @@ int main(int argc, char ** argv)
             goto cleanup;
         }
     }
+
+    GBx_Reset(gbx);
 
     gbx_app_window_run(window);
 

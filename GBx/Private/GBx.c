@@ -1,11 +1,16 @@
 #include <GBx/GBx.h>
-
-#include "Context.h"
+#include <GBx/Context.h>
+#include <GBx/APU.h>
+#include <GBx/CPU.h>
+#include <GBx/PPU.h>
+#include <GBx/Cartridge.h>
+#include <GBx/Bootstrap.h>
+#include <GBx/Log.h>
 
 #include <stdlib.h>
 #include <string.h>
 
-int GBx_Init(GBx ** pctx, GBx_Config * cfg)
+bool GBx_Init(GBx ** pctx, GBx_Config * cfg)
 {
     GBx * ctx = *pctx;
 
@@ -16,19 +21,29 @@ int GBx_Init(GBx ** pctx, GBx_Config * cfg)
     }
 
     if (!ctx) {
-        return GBX_OUT_OF_MEMORY;
+        return false;
     }
 
     ctx->Mode = GBX_MODE_DMG;
 
+    GBx_Bootstrap_Init(ctx);
+    GBx_Cartridge_Init(ctx);
+
     GBx_APU_Reset(ctx);
     GBx_CPU_Reset(ctx);
     GBx_PPU_Reset(ctx);
-    GBx_Cartridge_Reset(ctx);
-    GBx_Bootstrap_Reset(ctx);
 
     *pctx = ctx;
-    return GBX_SUCCESS;
+    return true;
+}
+
+void GBx_Reset(GBx * ctx)
+{
+    GBx_Bootstrap_Reset(ctx);
+    GBx_Cartridge_Reset(ctx);
+    GBx_APU_Reset(ctx);
+    GBx_CPU_Reset(ctx);
+    GBx_PPU_Reset(ctx);
 }
 
 void GBx_Term(GBx ** ctx)
@@ -41,17 +56,19 @@ void GBx_Term(GBx ** ctx)
     clog_term();
 }
 
-void GBx_Tick(GBx * ctx, unsigned cycles)
-{
-
-}
-
 void GBx_Step(GBx * ctx)
 {
-
+    GBx_CPU_Step(ctx);
 }
 
 void GBx_Frame(GBx * ctx)
 {
+    // TODO:
 
+    while (ctx->PC < 0x0100) {
+        GBx_CPU_Step(ctx);
+        GBx_CPU_Print(ctx);
+    }
+
+    exit(0);
 }

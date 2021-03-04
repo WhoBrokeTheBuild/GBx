@@ -3,21 +3,19 @@
 
 #include <GBx/GBx.h>
 
-#include <stdio.h>
-#include <stdbool.h>
-#include <stdarg.h>
-
 #include <clog.h>
+
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define GBxLogFatal(M, ...)                                                  \
+#define GBxLogFatal(M, ...)                                               \
     do {                                                                  \
         clog_log(CLOG_COLOR_RED, "[FATA](%s:%d) " M "\n",                 \
             CLOG_FILENAME, __LINE__, ##__VA_ARGS__);                      \
-        exit(0);                                                          \
+        exit(1);                                                          \
     } while (0)
 
 #define GBxLogError(M, ...)                                               \

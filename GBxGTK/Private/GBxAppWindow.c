@@ -1,5 +1,6 @@
 #include "GBxAppWindow.h"
 
+#include <GBx/Context.h>
 #include <GBx/Cartridge.h>
 #include <GBx/APU.h>
 #include <GBx/PPU.h>
@@ -243,12 +244,10 @@ void gbx_app_window_gl_render(GBxAppWindow * self)
 {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    GBx_PPU * ppu = GBx_GetPPU(self->GBx);
-
     glBindTexture(GL_TEXTURE_2D, self->GLTexture);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
         GBX_SCREEN_WIDTH, GBX_SCREEN_HEIGHT,
-        GL_RGB, GL_UNSIGNED_BYTE, ppu->Pixels);
+        GL_RGB, GL_UNSIGNED_BYTE, self->GBx->Pixels);
 
     glUseProgram(self->GLShader);
     glBindVertexArray(self->GLVertexArray);
@@ -378,8 +377,8 @@ void gbx_app_window_change_volume(GBxAppWindow * self, double value)
     // GBxAPU_t * apu = GBx_APU(ctx);
     // gtk_scale_button_set_value(GTK_SCALE_BUTTON(self->GtkVolume), apu->Volume);
 
-    GBx_APU * apu = GBx_GetAPU(self->GBx);
-    apu->Volume = value;
+    // GBx_APU * apu = GBx_GetAPU(self->GBx);
+    // apu->Volume = value;
 }
 
 void gbx_app_window_set_scale(GBxAppWindow * self, int scale)

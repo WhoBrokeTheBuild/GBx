@@ -10,17 +10,7 @@
 extern "C" {
 #endif
 
-struct GBx_Bootstrap
-{
-    bool Enabled;
-
-    uint8_t ROM[0x900];
-
-};
-
-typedef struct GBx_Bootstrap GBx_Bootstrap;
-
-GBx_Bootstrap * GBx_GetBootstrap(GBx * ctx);
+void GBx_Bootstrap_Init(GBx * ctx);
 
 void GBx_Bootstrap_Reset(GBx * ctx);
 

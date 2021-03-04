@@ -1,28 +1,28 @@
 #include <GBx/Bootstrap.h>
-
-#include "Context.h"
+#include <GBx/Context.h>
+#include <GBx/Log.h>
 
 #include <stdio.h>
 #include <string.h>
 
-GBx_Bootstrap * GBx_GetBootstrap(GBx * ctx)
+void GBx_Bootstrap_Init(GBx * ctx)
 {
-    return &ctx->Bootstrap;
+    ctx->HaveBootstrap = false;
+    ctx->HaveBootstrapCGB = false;
+    ctx->BootstrapMapped = false;
+
+    memset(ctx->BootROM, 0, sizeof(ctx->BootROM));
 }
 
 void GBx_Bootstrap_Reset(GBx * ctx)
 {
-    GBx_Bootstrap * boot = &ctx->Bootstrap;
-
-    boot->Enabled = false;
-    memset(boot->ROM, 0, sizeof(boot->ROM));
+    if (ctx->HaveBootstrap) {
+        ctx->BootstrapMapped = true;
+    }
 }
 
 bool GBx_Bootstrap_Load(GBx * ctx, const char * filename)
 {
-    const size_t DMG_BOOT_ROM_SIZE = 0x100;
-    const size_t CGB_BOOT_ROM_SIZE = 0x900;
-
     GBxLogLoad("Opening Bootstrap ROM: '%s'", filename);
 
     FILE * file = fopen(filename, "rb");
@@ -33,12 +33,17 @@ bool GBx_Bootstrap_Load(GBx * ctx, const char * filename)
 
     GBxLogVerbose("Bootstrap ROM Size %zu", size);
 
-    size_t bytes = fread(ctx->Bootstrap.ROM, 1, sizeof(ctx->Bootstrap.ROM), file);
+    size_t bytes = fread(ctx->BootROM, 1, sizeof(ctx->BootROM), file);
 
     fclose(file);
 
-    // TODO: HaveBootstrap
-    ctx->Bootstrap.Enabled = true;
+    if (bytes >= GBX_BOOT_ROM_SIZE_DMG) {
+        ctx->HaveBootstrap = true;
+    }
+
+    if (bytes == GBX_BOOT_ROM_SIZE_CGB) {
+        ctx->HaveBootstrapCGB = true;
+    }
 
     return true;
 }

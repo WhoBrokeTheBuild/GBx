@@ -91,9 +91,10 @@ bool IsReservedSymbol(const char * name)
         "DE",
         "HL",
         "SP",
-        "ORG",
-        "DB",
-        "DS",
+        "Z",
+        "NZ",
+        // C
+        "NC",
         NULL
     };
 

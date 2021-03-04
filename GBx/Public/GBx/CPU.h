@@ -12,44 +12,11 @@
 extern "C" {
 #endif
 
-union GBx_InterruptFlags
-{
-    GBX_PACK(struct {
-        uint8_t Int40:1;
-        uint8_t Int48:1;
-        uint8_t Int50:1;
-        uint8_t Int58:1;
-        uint8_t Int60:1;
-        uint8_t :3;
-    });
 
-    uint8_t _raw;
-
-};
-
-typedef union GBx_InterruptFlags GBx_InterruptFlags;
-
-static_assert(
-    sizeof(GBx_InterruptFlags) == 1,
-    "sizeof(GBx_InterruptFlags) != 1"
-);
-
-#define GBX_WRAM_BANK_COUNT (8)
-#define GBX_WRAM_BANK_SIZE  (0x1000)
-
-#define GBX_HRAM_SIZE (0x7F)
 
 struct GBx_CPU
 {
     bool Enabled;
-
-    // Work RAM
-    uint8_t WRAM[GBX_WRAM_BANK_COUNT][GBX_WRAM_BANK_SIZE];
-
-    unsigned WRAMBank;
-
-    // High RAM / Zero Page
-    uint8_t HRAM[GBX_HRAM_SIZE];
 
     union {
         struct {
@@ -104,8 +71,8 @@ struct GBx_CPU
     bool IME;
     bool RequestEnableIME;
 
-    GBx_InterruptFlags IF;
-    GBx_InterruptFlags IE;
+    // Debug
+
 
 };
 
@@ -114,6 +81,8 @@ typedef struct GBx_CPU GBx_CPU;
 GBx_CPU * GBx_GetCPU(GBx * ctx);
 
 void GBx_CPU_Reset(GBx * ctx);
+
+void GBx_CPU_Step(GBx * ctx);
 
 #ifdef __cplusplus
 }

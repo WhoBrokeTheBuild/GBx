@@ -72,3 +72,10 @@ TARGET_COMPILE_DEFINITIONS(
     PRIVATE
         CLOG_SOURCE_PATH="${CMAKE_SOURCE_DIR}/"
 )
+
+TARGET_COMPILE_OPTIONS(
+    ${_target}
+    PUBLIC
+        $<$<CXX_COMPILER_ID:GNU>:   -Wall>
+        $<$<CXX_COMPILER_ID:Clang>: -Wall>
+)
