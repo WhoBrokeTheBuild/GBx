@@ -75,7 +75,7 @@ bool ParseInstructionArgument(char out[INST_ARG_MAX_LEN],
         }
     }
     else {
-        if (type == ARG_TYPE_ADDR_U16) {
+        if (type == ARG_TYPE_ADDR_U8 || type == ARG_TYPE_ADDR_U16) {
             // (#)
             if (length < 3) {
                 return false;
@@ -125,10 +125,6 @@ bool ParseInstructionArgument(char out[INST_ARG_MAX_LEN],
         }
         else {
             strcpy(out, arg);
-        }
-
-        if (strcmp(out, "$ff26") == 0) {
-            printf("ass\n");
         }
 
         if (IsValidSymbol(out)) {

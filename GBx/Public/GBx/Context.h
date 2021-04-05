@@ -4,10 +4,15 @@
 #include <GBx/GBx.h>
 #include <GBx/Constants.h>
 
-#include <GBx/Types/APU.h>
-#include <GBx/Types/Cartridge.h>
-#include <GBx/Types/CPU.h>
-#include <GBx/Types/Interrupt.h>
+#include <GBx/APU.h>
+#include <GBx/Cartridge.h>
+#include <GBx/CPU.h>
+#include <GBx/Interrupt.h>
+#include <GBx/Joypad.h>
+#include <GBx/Serial.h>
+#include <GBx/MBC.h>
+#include <GBx/PPU.h>
+#include <GBx/Timer.h>
 
 #include <stdbool.h>
 
@@ -15,36 +20,13 @@
 extern "C" {
 #endif
 
-typedef enum GBx_Mode
-{
-    GBX_MODE_DMG, // Original GameBoy
-    GBX_MODE_SGB, // Super GameBoy
-    GBX_MODE_CGB, // Color GameBoy
-    
-} GBx_Mode;
-
-struct GBx
+typedef struct GBx
 {
     ///
     /// General
     ///
 
-    GBx_Mode Mode;
-
-    // Output Volume, 0.0 - 1.0
-    float Volume;
-
-    bool CPUEnabled;
-
-    bool PPUEnabled;
-
-    bool SRAMEnabled;
-
-    bool BootstrapMapped;
-
-    bool HaveBootstrap;
-
-    bool HaveBootstrapCGB;
+    GBx_Model Model;
 
     ///
     /// Audio
@@ -59,6 +41,9 @@ struct GBx
     // NR30-NR34 Wave
     GBx_WaveControl Wave;
 
+    // PCM Waveform Data
+    uint8_t WaveRAM[GBX_WAVE_RAM_SIZE];
+
     // NR41-NR44 Noise
     GBx_NoiseControl Noise;
 
@@ -72,26 +57,58 @@ struct GBx
     GBx_APUControl APUC;
 
     ///
+    /// Bootstrap
+    ///
+
+    // Bootstrap / BIOS ROM
+    uint8_t BootROM[GBX_BOOT_ROM_SIZE];
+
+    bool BootstrapMapped;
+
+    bool HaveBootstrap;
+
+    bool HaveBootstrapCGB;
+
+    ///
     /// Cartridge
     ///
 
     GBx_CartridgeHeader * Header;
 
     // Memory Bank Controller Config
-    GBx_MBC MBC;
+    GBx_MemoryBankControl MBC;
 
     // Memory Bank Controller Type
-    GBx_MBCType MBCType;
+    GBx_MemoryBankControlType MBCType;
 
-    bool HaveSRAM;
+    // Cartridge ROM
+    uint8_t ROM[GBX_ROM_BANK_COUNT][GBX_ROM_BANK_SIZE];
 
-    bool HaveBattery;
+    unsigned ROMBank;
 
-    bool HaveTimer;
+    // Static RAM
+    uint8_t SRAM[GBX_SRAM_BANK_COUNT][GBX_SRAM_BANK_SIZE];
+
+    unsigned SRAMBank;
+
+    bool SRAMEnabled;
+
+    bool SRAMMapped;
+
+    // Real Time Clock
+    GBx_RealTimeClock RTC;
+
+    bool RTCEnabled;
+
+    bool RTCMapped;
+
+    unsigned RTCBank;
 
     ///
-    /// Registers
+    /// CPU
     ///
+
+    bool CPUEnabled;
 
     union {
         struct {
@@ -135,6 +152,18 @@ struct GBx
     // Program Counter
     uint16_t PC;
 
+    // Work RAM
+    uint8_t WRAM[GBX_WRAM_BANK_COUNT][GBX_WRAM_BANK_SIZE];
+
+    unsigned WRAMBank;
+
+    // High RAM / Zero Page
+    uint8_t HRAM[GBX_HRAM_SIZE];
+
+    ///
+    /// Interrupt
+    ///
+
     // Interrupt Master Enable Flag
     bool IME;
 
@@ -148,49 +177,119 @@ struct GBx
     GBx_InterruptFlags IE;
 
     ///
-    /// Memory
+    /// Timer / Divider
     ///
 
-    // Bootstrap / BIOS ROM
-    uint8_t BootROM[GBX_BOOT_ROM_SIZE];
+    // Divider
+    uint8_t DIV;
 
-    // Cartridge ROM
-    uint8_t ROM[GBX_ROM_BANK_COUNT][GBX_ROM_BANK_SIZE];
-    unsigned ROMBank;
+    // Timer Counter
+    uint8_t TIMA;
+
+    // Timer Modulo
+    uint8_t TMA;
+
+    GBx_TimerControl TAC;
+
+    unsigned TimerCycles;
+
+    unsigned DividerCycles;
+
+    ///
+    /// PPU
+    ///
+
+    bool PPUEnabled;
+
+    unsigned PPUModeCycles;
+
+    bool DMATransferOAM;
+
+    GBx_LCDControl LCDC;
+
+    GBx_LCDStatus STAT;
 
     // Video RAM
     uint8_t VRAM[GBX_VRAM_BANK_COUNT][GBX_VRAM_BANK_SIZE];
+
     unsigned VRAMBank;
-
-    // Static RAM
-    uint8_t SRAM[GBX_SRAM_BANK_COUNT][GBX_SRAM_BANK_SIZE];
-    unsigned SRAMBank;
-
-    // Work RAM
-    uint8_t WRAM[GBX_WRAM_BANK_COUNT][GBX_WRAM_BANK_SIZE];
-    unsigned WRAMBank;
 
     // Object Attribute Memory
     uint8_t OAM[GBX_OAM_SIZE];
 
-    // PCM Waveform Data
-    uint8_t WaveRAM[GBX_WAVE_RAM_SIZE];
-
     // Raw Pixel Data
-    uint8_t Pixels[GBX_SCREEN_SIZE];
+    uint8_t PixelData[GBX_SCREEN_SIZE];
 
-    // High RAM / Zero Page
-    uint8_t HRAM[GBX_HRAM_SIZE];
+    // Scroll Y
+    uint8_t SCY;
+
+    // Scroll X
+    uint8_t SCX;
+
+    // Current Line
+    uint8_t LY;
+
+    // Coincidence when LY == LYC
+    uint8_t LYC;
+
+    // Window Y
+    uint8_t WY;
+
+    // Window X
+    uint8_t WX;
+
+    // DMG
+
+    // Background Palette Data
+    GBx_PaletteMonochrome BGP;
+
+    // Sprite Palette 0 Data
+    GBx_PaletteMonochrome OBP0;
+
+    // Sprite Palette 1 Data
+    GBx_PaletteMonochrome OBP1;
+
+    // CGB
+
+    // // Background Color Palette Data
+    // GBx_PaletteColor BCPS;
+
+    // // Background Palette Index
+    // GBx_PaletteIndex BCPI;
+
+    // // Sprite Color Palette Data
+    // GBx_PaletteColor OCPS;
+
+    // // Sprite Palette Index
+    // GBx_PaletteIndex OCPI;
+
+    ///
+    /// Input/Output
+    ///
+
+    GBx_Joypad JOYP;
+
+    GBx_SerialControl SC;
+
+    uint8_t SB;
+
+    GBx_SerialReadCallback SerialReadCallback;
+
+    GBx_SerialWriteCallback SerialWriteCallback;
+
+    void * SerialUserData;
 
     ///
     /// Debug
     ///
 
+    uint8_t * MemoryReadTracker;
+
+    uint8_t * MemoryWriteTracker;
+
     uint16_t LastInstructionAddress;
 
-};
-
-typedef struct GBx GBx;
+} GBx;
 
 #ifdef __cplusplus
 }

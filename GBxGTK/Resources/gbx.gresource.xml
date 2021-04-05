@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/GBx/">
-    <file preprocess="xml-stripblanks">GBxAppWindow.glade</file>
-    <file preprocess="xml-stripblanks">GBxSettingsWindow.glade</file>
-    <file preprocess="xml-stripblanks">GBxDebugWindow.glade</file>
-    <file preprocess="xml-stripblanks">GBxLogWindow.glade</file>
+    <file preprocess="xml-stripblanks">AppWindow.ui</file>
+    <file preprocess="xml-stripblanks">SettingsWindow.ui</file>
+    <file preprocess="xml-stripblanks">DebugWindow.ui</file>
+    <file preprocess="xml-stripblanks">LogWindow.ui</file>
+    <file preprocess="xml-stripblanks">SerialWindow.ui</file>
   </gresource>
 </gresources>

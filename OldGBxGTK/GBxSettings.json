@@ -1,0 +1,18 @@
+{
+    "rom_directories": [],
+    "bootstrap": "",
+    "use_native_colors": false,
+    "volume": 1.0,
+    "fullscreen?": false,
+    "speed": 1,
+    "keybindings": {
+        "a": "z",
+        "b": "x",
+        "start": "lshift",
+        "select": "space",
+        "up": "up",
+        "down": "down",
+        "left": "left",
+        "right": "right"
+    }
+}

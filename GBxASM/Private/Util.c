@@ -59,7 +59,7 @@ bool ParseNumber(char * str, long * num)
     else if (str[0] == '0') {
         *num = strtol(str + 1, &endptr, 8);
     }
-    else if (isdigit(str[0])) {
+    else if (str[0] == '-' || isdigit(str[0])) {
         *num = strtol(str, &endptr, 10);
     }
 

@@ -34,7 +34,7 @@ ENDFOREACH()
 SET(_target GBx)
 
 ADD_LIBRARY(
-    ${_target}
+    ${_target} SHARED
     ${_sources}
     ${_sources_in}
     ${_sources_out}

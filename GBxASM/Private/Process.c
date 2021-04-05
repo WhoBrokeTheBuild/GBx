@@ -89,7 +89,7 @@ bool ProcessArgument(GBxASM * ctx, char * arg, ArgumentType type, long baseAddre
         return false;
     }
 
-    if (type == ARG_TYPE_U8 || type == ARG_TYPE_FF00_U8) {
+    if (type == ARG_TYPE_U8 || type == ARG_TYPE_ADDR_U8 ||type == ARG_TYPE_FF00_U8) {
         if (num < INT8_MIN || num > UINT8_MAX) {
             fprintf(stderr, "Argument out of bounds for int8, $%lX (%ld) [%d, %d]\n",
                 num, num, INT8_MIN, UINT8_MAX);

@@ -4,11 +4,40 @@
 #include <GBx/Bootstrap.h>
 
 #include <cflags.h>
+#include <portaudio.h>
 
 #include <stdio.h>
 
 #include "GBxAppWindow.h"
 #include "Resource.h"
+
+#include <math.h>
+
+float _table[200];
+unsigned long _index;
+
+static int audio_callback(
+    const void * inputBuffer,
+    void * outputBuffer, 
+    unsigned long framesPerBuffer,
+    const PaStreamCallbackTimeInfo *timeInfo,
+    PaStreamCallbackFlags flags,
+    void * userData
+)
+{
+    GBx * ctx = (GBx *)userData;
+
+    float * output = (float *)outputBuffer;
+
+    for (unsigned long i = 0; i < framesPerBuffer; ++i) {
+        *output++ = _table[_index]; // Left
+        _index = (_index + 1) % 200;
+        *output++ = _table[_index]; // Right
+        _index = (_index + 1) % 200;
+    }
+
+    return paContinue;
+}
 
 void add_log_file(const char * filename)
 {
@@ -22,6 +51,10 @@ int main(int argc, char ** argv)
     GError * error = NULL;
     GtkApplication * app = NULL;
     GBxAppWindow * window = NULL;
+
+    PaStreamParameters paParam;
+    PaStream * paStream;
+    PaError paErr;
 
     GBx * gbx = NULL;
     
@@ -105,13 +138,72 @@ int main(int argc, char ** argv)
             fprintf(stderr, "Failed to load Cartridge ROM '%s'\n", flags->argv[1]);
             goto cleanup;
         }
+
+        window->IsRunning = true;
     }
 
     GBx_Reset(gbx);
 
+    
+    // for (unsigned long i = 0; i < 200; ++i) {
+    //     _table[i] = sinf(((float)i / 200.0f) * M_PI * 2.0f);
+    //     _table[i] *= 0.1f;
+    // }
+    // _index = 0;
+
+    // paErr = Pa_Initialize();
+    // if (paErr != paNoError) {
+    //     goto cleanup;
+    // }
+
+    // for (PaDeviceIndex i = 0, end = Pa_GetDeviceCount(); i != end; ++i) {
+    //     PaDeviceInfo const * info = Pa_GetDeviceInfo(i);
+    //     if (!info) {
+    //         continue;
+    //     }
+
+    //     if (strcmp(info->name, "pulse") == 0) {
+    //         paParam.device = i;
+    //     }
+    // }
+
+    // if (paParam.device == paNoDevice) {
+    //     fprintf(stderr, "Failed to find audio output device\n");
+    //     goto cleanup;
+    // }
+
+    // paParam.channelCount = 2;
+    // paParam.sampleFormat = paFloat32;
+    // paParam.suggestedLatency = Pa_GetDeviceInfo(paParam.device)->defaultLowOutputLatency;
+    // paParam.hostApiSpecificStreamInfo = NULL;
+
+    // paErr = Pa_OpenStream(
+    //     &paStream,
+    //     NULL, // input
+    //     &paParam,
+    //     44100,
+    //     200,
+    //     paClipOff,
+    //     audio_callback,
+    //     gbx
+    // );
+    // if (paErr != paNoError) {
+    //     goto cleanup;
+    // }
+
+    // Pa_StartStream(paStream);
+
+
+
     gbx_app_window_run(window);
 
 cleanup:
+
+    if (paErr != paNoError) {
+        fprintf(stderr, "PortAudio Error: %s\n", Pa_GetErrorText(paErr));
+    }
+
+    Pa_Terminate();
 
     if (error) {
         g_error_free(error);

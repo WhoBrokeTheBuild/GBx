@@ -16,8 +16,13 @@ void GBx_WriteByte(GBx * ctx, uint16_t address, uint8_t data);
 
 static GBX_INLINE uint16_t GBx_ReadWord(GBx * ctx, uint16_t address)
 {
-    return GBx_ReadByte(ctx, address)
-        | (GBx_ReadByte(ctx, address + 1) << 8);
+    uint8_t b1 = GBx_ReadByte(ctx, address);
+    uint8_t b2 = GBx_ReadByte(ctx, address + 1);
+
+    return b1 | (b2 << 8);
+
+    // return GBx_ReadByte(ctx, address)
+    //     | (GBx_ReadByte(ctx, address + 1) << 8);
 }
 
 static GBX_INLINE void GBx_WriteWord(GBx * ctx, uint16_t address, uint16_t data)

@@ -25,21 +25,34 @@ const char * FRAGMENT_SHADER =
     "#version 330 core                      \n"
     "in vec2 vUV;                           \n"
     "uniform sampler2D uTexture;            \n"
+    "uniform vec2 uSize;                    \n"
+    "uniform vec2 uOffset;                  \n"
     "out vec4 oColor;                       \n"
     "void main() {                          \n"
-    "  oColor = texture2D(uTexture, vUV);   \n"
+    "  vec2 uv = (vUV - uOffset) / uSize;   \n"
+    "  if (uv.x < 0.0 || uv.x > 1.0 ||      \n"
+    "      uv.y < 0.0 || uv.y > 1.0) {      \n"
+    "    oColor = vec4(0, 0, 0, 1);         \n"
+    "  } else {                             \n"
+    "    oColor = texture2D(uTexture, uv);  \n"
+    "  }                                    \n"
     "}                                      \n";
 
-const float VERTICES[] = {
-    -1.0f,  1.0f,  0.0f,  1.0f,     0.0f, 0.0f,
-     1.0f,  1.0f,  0.0f,  1.0f,     1.0f, 0.0f,
-     1.0f, -1.0f,  0.0f,  1.0f,     1.0f, 1.0f,
-     1.0f, -1.0f,  0.0f,  1.0f,     1.0f, 1.0f,
-    -1.0f, -1.0f,  0.0f,  1.0f,     0.0f, 1.0f,
-    -1.0f,  1.0f,  0.0f,  1.0f,     0.0f, 0.0f,
-};
+typedef struct Vertex
+{
+    float position[4];
+    float uv[2];
 
-#define VERTEX_COUNT 6
+} Vertex;
+
+const Vertex VERTICES[] = {
+    { { -1.0f,  1.0f,  0.0f,  1.0f, }, { 0.0f, 0.0f, } },
+    { {  1.0f,  1.0f,  0.0f,  1.0f, }, { 1.0f, 0.0f, } },
+    { {  1.0f, -1.0f,  0.0f,  1.0f, }, { 1.0f, 1.0f, } },
+    { {  1.0f, -1.0f,  0.0f,  1.0f, }, { 1.0f, 1.0f, } },
+    { { -1.0f, -1.0f,  0.0f,  1.0f, }, { 0.0f, 1.0f, } },
+    { { -1.0f,  1.0f,  0.0f,  1.0f, }, { 0.0f, 0.0f, } },
+};
 
 G_DEFINE_TYPE(GBxAppWindow, gbx_app_window, GTK_TYPE_APPLICATION_WINDOW)
 
@@ -48,10 +61,8 @@ void gbx_app_window_init(GBxAppWindow * self)
     gtk_widget_init_template(GTK_WIDGET(self));
 
     self->IsOpen = true;
-    self->IsRunning = true;
+    self->IsRunning = false;
     self->IsFullscreen = false;
-
-    self->LogWindow = GBX_LOG_WINDOW(gbx_log_window_new(self->GBx));
 }
 
 void gbx_app_window_class_init(GBxAppWindowClass * klass)
@@ -72,18 +83,22 @@ void gbx_app_window_class_init(GBxAppWindowClass * klass)
     gtk_widget_class_bind_template_callback(wc, gbx_app_window_destroy);
     gtk_widget_class_bind_template_callback(wc, gbx_app_window_gl_init);
     gtk_widget_class_bind_template_callback(wc, gbx_app_window_gl_term);
-    gtk_widget_class_bind_template_callback(wc, gbx_app_window_gl_configure);
+    gtk_widget_class_bind_template_callback(wc, gbx_app_window_gl_resize);
     gtk_widget_class_bind_template_callback(wc, gbx_app_window_gl_render);
     gtk_widget_class_bind_template_callback(wc, gbx_app_window_reset);
     gtk_widget_class_bind_template_callback(wc, gbx_app_window_open_rom);
     gtk_widget_class_bind_template_callback(wc, gbx_app_window_play_pause);
     gtk_widget_class_bind_template_callback(wc, gbx_app_window_show_debug_window);
     gtk_widget_class_bind_template_callback(wc, gbx_app_window_show_log_window);
+    gtk_widget_class_bind_template_callback(wc, gbx_app_window_show_serial_console_window);
     gtk_widget_class_bind_template_callback(wc, gbx_app_window_show_about);
+    gtk_widget_class_bind_template_callback(wc, gbx_app_window_set_model_dmg);
+    gtk_widget_class_bind_template_callback(wc, gbx_app_window_set_model_mgb);
+    gtk_widget_class_bind_template_callback(wc, gbx_app_window_set_model_sgb);
+    gtk_widget_class_bind_template_callback(wc, gbx_app_window_set_model_cgb);
     gtk_widget_class_bind_template_callback(wc, gbx_app_window_on_key_release);
     gtk_widget_class_bind_template_callback(wc, gbx_app_window_toggle_fullscreen);
     gtk_widget_class_bind_template_callback(wc, gbx_app_window_change_volume);
-    gtk_widget_class_bind_template_callback(wc, gbx_app_window_zoom_1);
     gtk_widget_class_bind_template_callback(wc, gbx_app_window_zoom_2);
     gtk_widget_class_bind_template_callback(wc, gbx_app_window_zoom_3);
     gtk_widget_class_bind_template_callback(wc, gbx_app_window_zoom_4);
@@ -96,7 +111,11 @@ GtkWidget * gbx_app_window_new(GBx * ctx)
     GBxAppWindow * window;
     window = GBX_APP_WINDOW(g_object_new(gbx_app_window_get_type(), NULL));
     window->GBx = ctx;
-    
+
+    window->LogWindow = GBX_LOG_WINDOW(gbx_log_window_new());
+
+    window->SerialConsoleWindow = GBX_SERIAL_CONSOLE_WINDOW(gbx_serial_console_window_new(window->GBx));
+
     return GTK_WIDGET(window);
 }
 
@@ -235,9 +254,31 @@ void gbx_app_window_gl_term(GBxAppWindow * self)
     self->GLVertexBuffer = 0;
 }
 
-void gbx_app_window_gl_configure(GBxAppWindow * self, GdkEventConfigure * event)
+void gbx_app_window_gl_resize(GBxAppWindow * self, int width, int height)
 {
-    glViewport(0, 0, event->width, event->height);
+    glViewport(0, 0, width, height);
+
+    glUseProgram(self->GLShader);
+
+    float zoom = MIN(
+        (float)height / (float)GBX_SCREEN_HEIGHT,
+        (float)width / (float)GBX_SCREEN_WIDTH
+    );
+
+    float size[2] = {
+        (float)GBX_SCREEN_WIDTH / (float)width * zoom,
+        (float)GBX_SCREEN_HEIGHT / (float)height * zoom,
+    };
+
+    float offset[2] = {
+        (1.0f - size[0]) * 0.5f,
+        (1.0f - size[1]) * 0.5f,
+    };
+
+    glUniform2fv(glGetUniformLocation(self->GLShader, "uSize"), 1, size);
+    glUniform2fv(glGetUniformLocation(self->GLShader, "uOffset"), 1, offset);
+
+    glUseProgram(0);
 }
 
 void gbx_app_window_gl_render(GBxAppWindow * self)
@@ -251,12 +292,12 @@ void gbx_app_window_gl_render(GBxAppWindow * self)
 
     glUseProgram(self->GLShader);
     glBindVertexArray(self->GLVertexArray);
-    glDrawArrays(GL_TRIANGLES, 0, VERTEX_COUNT);
+    glDrawArrays(GL_TRIANGLES, 0, sizeof(VERTICES) / sizeof(VERTICES[0]));
 }
 
 void gbx_app_window_reset(GBxAppWindow * self)
 {
-
+    GBx_Reset(self->GBx);
 }
 
 void gbx_app_window_open_rom(GBxAppWindow * self)
@@ -301,6 +342,9 @@ void gbx_app_window_open_rom(GBxAppWindow * self)
             gtk_dialog_run(GTK_DIALOG(errorDialog));
             gtk_widget_destroy(errorDialog);
         }
+
+        GBx_Reset(self->GBx);
+        self->IsRunning = true;
     }
 
     gtk_widget_destroy(dialog);
@@ -318,14 +362,12 @@ void gbx_app_window_show_debug_window(GBxAppWindow * self)
 
 void gbx_app_window_show_log_window(GBxAppWindow * self)
 {
-    gint x, y, w, h;
-    gtk_window_get_position(GTK_WINDOW(self), &x, &y);
-    gtk_window_get_size(GTK_WINDOW(self), &w, &h);
-
-    gtk_window_move(GTK_WINDOW(self->LogWindow), x + w, y);
-
     gtk_widget_show_all(GTK_WIDGET(self->LogWindow));
-    // gtk_window_present(GTK_WINDOW(self->LogWindow));
+}
+
+void gbx_app_window_show_serial_console_window(GBxAppWindow * self)
+{
+    gtk_widget_show_all(GTK_WIDGET(self->SerialConsoleWindow));
 }
 
 void gbx_app_window_show_about(GBxAppWindow * self)
@@ -349,6 +391,26 @@ void gbx_app_window_show_about(GBxAppWindow * self)
         "license-type", GTK_LICENSE_MIT_X11,
         "logo-icon-name", "application-x-executable",
         NULL);
+}
+
+void gbx_app_window_set_model_dmg(GBxAppWindow * self)
+{
+    GBx_SetModel(self->GBx, GBX_MODEL_DMG);
+}
+
+void gbx_app_window_set_model_mgb(GBxAppWindow * self)
+{
+    GBx_SetModel(self->GBx, GBX_MODEL_MGB);
+}
+
+void gbx_app_window_set_model_sgb(GBxAppWindow * self)
+{
+    GBx_SetModel(self->GBx, GBX_MODEL_SGB);
+}
+
+void gbx_app_window_set_model_cgb(GBxAppWindow * self)
+{
+    GBx_SetModel(self->GBx, GBX_MODEL_CGB);
 }
 
 void gbx_app_window_on_key_release(GBxAppWindow * self, GdkEventKey * event)

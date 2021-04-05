@@ -4,26 +4,49 @@
 #include <GBx/MMU.h>
 #include <GBx/Log.h>
 
+#include <string.h>
+
 void GBx_CPU_Reset(GBx * ctx)
 {
     ctx->CPUEnabled = true;
 
+    ctx->AF = 0x0080;
+    ctx->BC = 0x0000;
+    ctx->DE = 0x0000;
+    ctx->HL = 0x0000;
+    
     if (ctx->HaveBootstrap) {
-        ctx->AF = 0x0000;
-        ctx->BC = 0x0000;
-        ctx->DE = 0x0000;
-        ctx->HL = 0x0000;
         ctx->PC = 0x0000;
         ctx->SP = 0x0000;
     }
     else {
-        // TODO: Initial Register Values
-        ctx->AF = 0x0000;
-        ctx->BC = 0x0000;
-        ctx->DE = 0x0000;
-        ctx->HL = 0x0000;
         ctx->PC = 0x0100;
         ctx->SP = 0xFFFE;
+
+        ctx->L = 0x7C;
+
+        switch (ctx->Model) {
+        case GBX_MODEL_DMG:
+            ctx->A = 0x01;
+            
+            // $FF = DMG-CPU
+            // ctx->B = 0xFF;
+            
+            // $13 = DMG-CPU A/B/C
+            ctx->C = 0x13;
+            break;
+        case GBX_MODEL_SGB:
+            ctx->A = 0x01;
+            break;
+        case GBX_MODEL_MGB:
+            ctx->A = 0xFF;
+            break;
+        case GBX_MODEL_CGB:
+            ctx->A = 0x11;
+            break;
+        default:
+            break;
+        }
     }
 
     ctx->IME = true;
@@ -31,6 +54,11 @@ void GBx_CPU_Reset(GBx * ctx)
 
     ctx->IF._raw = 0x00;
     ctx->IE._raw = 0x00;
+
+    ctx->WRAMBank = 1;
+    for (unsigned i = 0; i < GBX_WRAM_BANK_COUNT; ++i) {
+        memset(ctx->WRAM[i], 0, GBX_WRAM_BANK_SIZE);
+    }
 
     ctx->LastInstructionAddress = 0x00;
 }
@@ -51,12 +79,13 @@ void GBx_CPU_Print(GBx * ctx)
         (ctx->F.C ? 'C' : '-'));
 }
 
-void GBx_CPU_Step(GBx * ctx)
+unsigned GBx_CPU_Step(GBx * ctx)
 {
     if (!ctx->CPUEnabled) {
-        // Tick 4
-        return;
+        return 4;
     }
+
+    unsigned cycles = 0;
 
     ctx->LastInstructionAddress = ctx->PC;
 
@@ -67,7 +96,12 @@ void GBx_CPU_Step(GBx * ctx)
     uint16_t u16;
     uint32_t u32;
 
+    int bits;
+
+    cycles += GBx_CheckInterrupts(ctx);
+
     uint8_t op = GBx_NextByte(ctx);
+    cycles += 1;
 
     switch (op) {
 
@@ -148,10 +182,11 @@ void GBx_CPU_Step(GBx * ctx)
     
     #define _CALL(COND)                                                       \
         u16 = GBx_NextWord(ctx);                                              \
-        /* Tick 1 */                                                          \
+        cycles += 2;                                                          \
         if (COND) {                                                           \
             GBx_PushWord(ctx, ctx->PC);                                       \
             ctx->PC = u16;                                                    \
+            cycles += 3;                                                      \
         }                                                                     \
 
     // CALL u16
@@ -181,8 +216,8 @@ void GBx_CPU_Step(GBx * ctx)
 
     #define _RST(ADDR)                                                        \
         GBx_PushWord(ctx, ctx->PC);                                           \
-        /* Tick 1 */                                                          \
-        ctx->PC = (ADDR)
+        ctx->PC = (ADDR);                                                     \
+        cycles += 3
 
     // RST $00
     case 0xC7:
@@ -227,24 +262,24 @@ void GBx_CPU_Step(GBx * ctx)
     // RET
     case 0xC9:
         u16 = GBx_PopWord(ctx);
-        /* Tick 1 */
         ctx->PC = u16;
+        cycles += 3;
         break;
 
     // RETI
     case 0xD9:
         u16 = GBx_PopWord(ctx);
-        /* Tick 1 */
         ctx->PC = u16;
         ctx->IME = true;
+        cycles += 3;
         break;
     
     #define _RET(COND)                                                        \
-        /* Tick 2 */                                                          \
+        cycles += 1;                                                          \
         if (COND) {                                                           \
             u16 = GBx_PopWord(ctx);                                           \
-            /* Tick 1 */                                                      \
             ctx->PC = u16;                                                    \
+            cycles += 3;                                                      \
         }
 
     // RET NZ
@@ -274,8 +309,9 @@ void GBx_CPU_Step(GBx * ctx)
 
     #define _JP(COND)                                                         \
         u16 = GBx_NextWord(ctx);                                              \
+        cycles += 2;                                                          \
         if (COND) {                                                           \
-            /* Tick 1 */                                                      \
+            cycles += 1;                                                      \
             ctx->PC = u16;                                                    \
         }
 
@@ -306,9 +342,10 @@ void GBx_CPU_Step(GBx * ctx)
     
     #define _JR(COND)                                                         \
         s8 = (int8_t)GBx_NextByte(ctx);                                       \
+        cycles += 1;                                                          \
         if (COND) {                                                           \
-            /* Tick 1 */                                                      \
             ctx->PC += s8;                                                    \
+            cycles += 1;                                                      \
         }
 
     // JR s8
@@ -337,12 +374,12 @@ void GBx_CPU_Step(GBx * ctx)
         break;
 
     #define _PUSH(SRC)                                                         \
-        /* Tick 1 */                                                           \
-        GBx_PushWord(ctx, (SRC))
+        GBx_PushWord(ctx, (SRC));                                              \
+        cycles += 3
     
     // PUSH AF
     case 0xF5:
-        _PUSH(ctx->AF);
+        _PUSH(ctx->AF & 0xFFF0);
         break;
     
     // PUSH BC
@@ -361,7 +398,8 @@ void GBx_CPU_Step(GBx * ctx)
         break;
 
     #define _POP(DST)                                                          \
-        DST = GBx_PopWord(ctx)
+        DST = GBx_PopWord(ctx);                                                \
+        cycles += 2
 
     // POP AF
     case 0xF1:
@@ -416,6 +454,7 @@ void GBx_CPU_Step(GBx * ctx)
     // LD A,(HL)
     case 0x7E:
         ctx->A = GBx_ReadByte(ctx, ctx->HL);
+        cycles += 1;
         break;
         
     // LD A,A
@@ -426,6 +465,7 @@ void GBx_CPU_Step(GBx * ctx)
     // LD A,u8
     case 0x3E:
         ctx->A = GBx_NextByte(ctx);
+        cycles += 1;
         break;
         
     // LD B,B
@@ -461,6 +501,7 @@ void GBx_CPU_Step(GBx * ctx)
     // LD B,(HL)
     case 0x46:
         ctx->B = GBx_ReadByte(ctx, ctx->HL);
+        cycles += 1;
         break;
         
     // LD B,A
@@ -471,6 +512,7 @@ void GBx_CPU_Step(GBx * ctx)
     // LD B,u8
     case 0x06:
         ctx->B = GBx_NextByte(ctx);
+        cycles += 1;
         break;
         
     // LD C,B
@@ -506,6 +548,7 @@ void GBx_CPU_Step(GBx * ctx)
     // LD C,(HL)
     case 0x4E:
         ctx->C = GBx_ReadByte(ctx, ctx->HL);
+        cycles += 1;
         break;
         
     // LD C,A
@@ -516,6 +559,7 @@ void GBx_CPU_Step(GBx * ctx)
     // LD C,u8
     case 0x0E:
         ctx->C = GBx_NextByte(ctx);
+        cycles += 1;
         break;
         
     // LD D,B
@@ -551,6 +595,7 @@ void GBx_CPU_Step(GBx * ctx)
     // LD D,(HL)
     case 0x56:
         ctx->D = GBx_ReadByte(ctx, ctx->HL);
+        cycles += 1;
         break;
         
     // LD D,A
@@ -561,6 +606,7 @@ void GBx_CPU_Step(GBx * ctx)
     // LD D,u8
     case 0x16:
         ctx->D = GBx_NextByte(ctx);
+        cycles += 1;
         break;
         
     // LD E,B
@@ -596,6 +642,7 @@ void GBx_CPU_Step(GBx * ctx)
     // LD E,(HL)
     case 0x5E:
         ctx->E = GBx_ReadByte(ctx, ctx->HL);
+        cycles += 1;
         break;
         
     // LD E,A
@@ -606,6 +653,7 @@ void GBx_CPU_Step(GBx * ctx)
     // LD E,u8
     case 0x1E:
         ctx->E = GBx_NextByte(ctx);
+        cycles += 1;
         break;
         
     // LD H,B
@@ -641,6 +689,7 @@ void GBx_CPU_Step(GBx * ctx)
     // LD H,(HL)
     case 0x66:
         ctx->H = GBx_ReadByte(ctx, ctx->HL);
+        cycles += 1;
         break;
         
     // LD H,A
@@ -651,6 +700,7 @@ void GBx_CPU_Step(GBx * ctx)
     // LD H,u8
     case 0x26:
         ctx->H = GBx_NextByte(ctx);
+        cycles += 1;
         break;
         
     // LD L,B
@@ -686,6 +736,7 @@ void GBx_CPU_Step(GBx * ctx)
     // LD L,(HL)
     case 0x6E:
         ctx->L = GBx_ReadByte(ctx, ctx->HL);
+        cycles += 1;
         break;
         
     // LD L,A
@@ -696,86 +747,103 @@ void GBx_CPU_Step(GBx * ctx)
     // LD L,u8
     case 0x2E:
         ctx->L = GBx_NextByte(ctx);
+        cycles += 1;
         break;
     
     // LD (HL),B
     case 0x70:
         GBx_WriteByte(ctx, ctx->HL, ctx->B);
+        cycles += 1;
         break;
 
     // LD (HL),C
     case 0x71:
         GBx_WriteByte(ctx, ctx->HL, ctx->C);
+        cycles += 1;
         break;
 
     // LD (HL),D
     case 0x72:
         GBx_WriteByte(ctx, ctx->HL, ctx->D);
+        cycles += 1;
         break;
 
     // LD (HL),E
     case 0x73:
         GBx_WriteByte(ctx, ctx->HL, ctx->E);
+        cycles += 1;
         break;
 
     // LD (HL),H
     case 0x74:
         GBx_WriteByte(ctx, ctx->HL, ctx->H);
+        cycles += 1;
         break;
 
     // LD (HL),L
     case 0x75:
         GBx_WriteByte(ctx, ctx->HL, ctx->L);
+        cycles += 1;
         break;
 
     // LD (HL),u8
     case 0x36:
         GBx_WriteByte(ctx, ctx->HL, GBx_NextByte(ctx));
+        cycles += 2;
         break;
 
     // LD (HL),A
     case 0x77:
         GBx_WriteByte(ctx, ctx->HL, ctx->A);
+        cycles += 1;
         break;
 
     // LD (BC),A
     case 0x02:
         GBx_WriteByte(ctx, ctx->BC, ctx->A);
+        cycles += 1;
         break;
 
     // LD (DE),A
     case 0x12:
         GBx_WriteByte(ctx, ctx->DE, ctx->A);
+        cycles += 1;
         break;
 
     // LD A,(BC)
     case 0x0A:
         ctx->A = GBx_ReadByte(ctx, ctx->BC);
+        cycles += 1;
         break;
 
     // LD A,(DE)
     case 0x1A:
         ctx->A = GBx_ReadByte(ctx, ctx->DE);
+        cycles += 1;
         break;
 
     // LD BC,u16
     case 0x01:
         ctx->BC = GBx_NextWord(ctx);
+        cycles += 2;
         break;
 
     // LD DE,u16
     case 0x11:
         ctx->DE = GBx_NextWord(ctx);
+        cycles += 2;
         break;
 
     // LD HL,u16
     case 0x21:
         ctx->HL = GBx_NextWord(ctx);
+        cycles += 2;
         break;
 
     // LD SP,u16
     case 0x31:
         ctx->SP = GBx_NextWord(ctx);
+        cycles += 2;
         break;
 
     // LD SP,HL
@@ -786,16 +854,19 @@ void GBx_CPU_Step(GBx * ctx)
     // LD (u16),SP
     case 0x08:
         GBx_WriteWord(ctx, GBx_NextWord(ctx), ctx->SP);
+        cycles += 4;
         break;
 
     // LD (u16),A
     case 0xEA:
         GBx_WriteByte(ctx, GBx_NextWord(ctx), ctx->A);
+        cycles += 4;
         break;
 
     // LD A,(u16)
     case 0xFA:
         ctx->A = GBx_ReadByte(ctx, GBx_NextWord(ctx));
+        cycles += 3;
         break;
 
     // LD (HL+),A
@@ -803,6 +874,7 @@ void GBx_CPU_Step(GBx * ctx)
     // LDI (HL),A
     case 0x22:
         GBx_WriteByte(ctx, ctx->HL, ctx->A);
+        cycles += 1;
         ++ctx->HL;
         break;
 
@@ -811,6 +883,7 @@ void GBx_CPU_Step(GBx * ctx)
     // LDD (HL),A
     case 0x32:
         GBx_WriteByte(ctx, ctx->HL, ctx->A);
+        cycles += 1;
         --ctx->HL;
         break;
 
@@ -819,6 +892,7 @@ void GBx_CPU_Step(GBx * ctx)
     // LDI A,(HL)
     case 0x2A:
         ctx->A = GBx_ReadByte(ctx, ctx->HL);
+        cycles += 1;
         ++ctx->HL;
         break;
 
@@ -827,6 +901,7 @@ void GBx_CPU_Step(GBx * ctx)
     // LDD A,(HL)
     case 0x3A:
         ctx->A = GBx_ReadByte(ctx, ctx->HL);
+        cycles += 1;
         --ctx->HL;
         break;
 
@@ -834,44 +909,51 @@ void GBx_CPU_Step(GBx * ctx)
     // LDH (u8),A
     case 0xE0:
         GBx_WriteByte(ctx, 0xFF00 + GBx_NextByte(ctx), ctx->A);
+        cycles += 2;
         break;
 
     // LD A,($FF00+u8)
     // LDH A,(u8)
     case 0xF0:
         ctx->A = GBx_ReadByte(ctx, 0xFF00 + GBx_NextByte(ctx));
+        cycles += 2;
         break;
 
     // LD ($FF00+C),A
     // LDH (C),A
     case 0xE2:
         GBx_WriteByte(ctx, 0xFF00 + ctx->C, ctx->A);
+        cycles += 1;
         break;
 
     // LD A,($FF00+C)
     // LDH A,(C)
     case 0xF2:
         ctx->A = GBx_ReadByte(ctx, 0xFF00 + ctx->C);
+        cycles += 1;
         break;
 
     // LD HL,SP+s8
     case 0xF8:
         s8 = (int8_t)GBx_NextByte(ctx);
         u32 = ctx->SP + s8;
+        bits = (ctx->SP ^ s8 ^ (u32 & 0xFFFF));
         ctx->F.N = false;
-        ctx->F.H = ((((ctx->SP & 0x7FF) + s8) & 0x800) == 0x800);
-        ctx->F.C = ((u32 & 0xFFFF0000) > 0);
+        ctx->F.Z = false;
+        ctx->F.C = ((bits & 0x100) == 0x100);
+        ctx->F.H = ((bits & 0x10) == 0x10);
         ctx->HL = (uint16_t)u32;
-        /* Tick 1 */
+        cycles += 1;
         break;
 
     #define _ADD(X)                                                           \
         u8 = (X);                                                             \
         u16 = ctx->A + u8;                                                    \
+        bits = ctx->A ^ u8 ^ u16;                                             \
         ctx->F.N = false;                                                     \
         ctx->F.Z = ((u16 & 0xFF) == 0);                                       \
-        ctx->F.H = ((((ctx->A & 0x0F) + (u8 & 0x0F)) & 0x10) == 0x10);        \
-        ctx->F.C = ((u16 & 0xFF00) > 0);                                      \
+        ctx->F.H = ((bits & 0x10) != 0);                                      \
+        ctx->F.C = ((bits & 0x100) != 0);                                     \
         ctx->A = (uint8_t)u16
 
     // ADD B
@@ -907,6 +989,7 @@ void GBx_CPU_Step(GBx * ctx)
     // ADD (HL)
     case 0x86:
         _ADD(GBx_ReadByte(ctx, ctx->HL));
+        cycles += 1;
         break;
 
     // ADD A
@@ -917,10 +1000,17 @@ void GBx_CPU_Step(GBx * ctx)
     // ADD u8
     case 0xC6:
         _ADD(GBx_NextByte(ctx));
+        cycles += 1;
         break;
 
     #define _ADC(X)                                                           \
-        _ADD((X) + (uint8_t)ctx->F.C)
+        u8 = (X) + ctx->F.C;                                                  \
+        u16 = ctx->A + u8;                                                    \
+        ctx->F.N = false;                                                     \
+        ctx->F.H = ((((ctx->A & 0x0F) + (u8 & 0x0F)) + ctx->F.C) > 0x0F);     \
+        ctx->F.C = (u16 > 0xFF);                                              \
+        ctx->A = (uint8_t)u16;                                                \
+        ctx->F.Z = (ctx->A == 0)
 
     // ADC B
     case 0x88:
@@ -955,6 +1045,7 @@ void GBx_CPU_Step(GBx * ctx)
     // ADC (HL)
     case 0x8E:
         _ADC(GBx_ReadByte(ctx, ctx->HL));
+        cycles += 1;
         break;
 
     // ADC A
@@ -965,13 +1056,14 @@ void GBx_CPU_Step(GBx * ctx)
     // ADC u8
     case 0xCE:
         _ADC(GBx_NextByte(ctx));
+        cycles += 1;
         break;
 
     #define _ADD_HL(X)                                                        \
         u16 = (X);                                                            \
         u32 = ctx->HL + u16;                                                  \
         ctx->F.N = false;                                                     \
-        ctx->F.H = ((((ctx->A & 0x7FF) + (u16 & 0x7FF)) & 0x800) == 0x800);   \
+        ctx->F.H = (((ctx->HL ^ u16 ^ (u32 & 0xFFFF)) & 0x1000) == 0x1000);   \
         ctx->F.C = ((u32 & 0xFFFF0000) > 0);                                  \
         ctx->HL = (uint16_t)u32
 
@@ -999,10 +1091,13 @@ void GBx_CPU_Step(GBx * ctx)
     case 0xE8:
         s8 = (int8_t)GBx_NextByte(ctx);
         u32 = ctx->SP + s8;
+        bits = (ctx->SP ^ s8 ^ (u32 & 0xFFFF));
         ctx->F.N = false;
-        ctx->F.H = ((((ctx->SP & 0x7FF) + s8) & 0x800) == 0x800);
-        ctx->F.C = ((u32 & 0xFFFF0000) > 0);
+        ctx->F.Z = false;
+        ctx->F.C = ((bits & 0x100) == 0x100);
+        ctx->F.H = ((bits & 0x10) == 0x10);
         ctx->SP = (uint16_t)u32;
+        cycles += 3;
         break;
 
     #define _CP(X)                                                            \
@@ -1046,6 +1141,7 @@ void GBx_CPU_Step(GBx * ctx)
     // CP (HL)
     case 0xBE:
         _CP(GBx_ReadByte(ctx, ctx->HL));
+        cycles += 1;
         break;
 
     // CP A
@@ -1056,6 +1152,7 @@ void GBx_CPU_Step(GBx * ctx)
     // CP u8
     case 0xFE:
         _CP(GBx_NextByte(ctx));
+        cycles += 1;
         break;
 
     #define _SUB(X)                                                           \
@@ -1095,6 +1192,7 @@ void GBx_CPU_Step(GBx * ctx)
     // SUB (HL)
     case 0x96:
         _SUB(GBx_ReadByte(ctx, ctx->HL));
+        cycles += 1;
         break;
 
     // SUB A
@@ -1105,6 +1203,7 @@ void GBx_CPU_Step(GBx * ctx)
     // SUB u8
     case 0xD6:
         _SUB(GBx_NextByte(ctx));
+        cycles += 1;
         break;
 
     #define _SBC(X)                                                           \
@@ -1143,6 +1242,7 @@ void GBx_CPU_Step(GBx * ctx)
     // SBC (HL)
     case 0x9E:
         _SBC(GBx_ReadByte(ctx, ctx->HL));
+        cycles += 1;
         break;
 
     // SBC A
@@ -1153,6 +1253,7 @@ void GBx_CPU_Step(GBx * ctx)
     // SBC_u8
     case 0xDE:
         _SBC(GBx_NextByte(ctx));
+        cycles += 1;
         break;
 
     #define _INC(VAR)                                                         \
@@ -1196,6 +1297,7 @@ void GBx_CPU_Step(GBx * ctx)
         u8 = GBx_ReadByte(ctx, ctx->HL);
         _INC(u8);
         GBx_WriteByte(ctx, ctx->HL, u8);
+        cycles += 2;
         break;
 
     // INC A
@@ -1205,25 +1307,25 @@ void GBx_CPU_Step(GBx * ctx)
 
     // INC BC
     case 0x03:
-        /* Tick 1 */
+        cycles += 1;
         ++ctx->BC;
         break;
 
     // INC DE
     case 0x13:
-        /* Tick 1 */
+        cycles += 1;
         ++ctx->DE;
         break;
 
     // INC HL
     case 0x23:
-        /* Tick 1 */
+        cycles += 1;
         ++ctx->HL;
         break;
 
     // INC SP
     case 0x33:
-        /* Tick 1 */
+        cycles += 1;
         ++ctx->SP;
         break;
 
@@ -1268,6 +1370,7 @@ void GBx_CPU_Step(GBx * ctx)
         u8 = GBx_ReadByte(ctx, ctx->HL);
         _DEC(u8);
         GBx_WriteByte(ctx, ctx->HL, u8);
+        cycles += 2;
         break;
 
     // DEC A
@@ -1335,6 +1438,7 @@ void GBx_CPU_Step(GBx * ctx)
     // AND (HL)
     case 0xA6:
         _AND(GBx_ReadByte(ctx, ctx->HL));
+        cycles += 1;
         break;
 
     // AND A
@@ -1345,6 +1449,7 @@ void GBx_CPU_Step(GBx * ctx)
     // AND u8
     case 0xE6:
         _AND(GBx_NextByte(ctx));
+        cycles += 1;
         break;
 
     #define _OR(X)                                                            \
@@ -1387,6 +1492,7 @@ void GBx_CPU_Step(GBx * ctx)
     // OR (HL)
     case 0xB6:
         _OR(GBx_ReadByte(ctx, ctx->HL));
+        cycles += 1;
         break;
 
     // OR A
@@ -1397,6 +1503,7 @@ void GBx_CPU_Step(GBx * ctx)
     // OR u8
     case 0xF6:
         _OR(GBx_NextByte(ctx));
+        cycles += 1;
         break;
 
     #define _XOR(X)                                                           \
@@ -1439,6 +1546,7 @@ void GBx_CPU_Step(GBx * ctx)
     // XOR (HL)
     case 0xAE:
         _XOR(GBx_ReadByte(ctx, ctx->HL));
+        cycles += 1;
         break;
 
     // XOR A
@@ -1449,6 +1557,7 @@ void GBx_CPU_Step(GBx * ctx)
     // XOR u8
     case 0xEE:
         _XOR(GBx_NextByte(ctx));
+        cycles += 1;
         break;
 
     #define _RLC(X)                                                           \
@@ -1504,6 +1613,7 @@ void GBx_CPU_Step(GBx * ctx)
     case 0xCB:
 
         op = GBx_NextByte(ctx);
+        cycles += 1;
 
         switch (op) {
 
@@ -1542,6 +1652,7 @@ void GBx_CPU_Step(GBx * ctx)
             u8 = GBx_ReadByte(ctx, ctx->HL);
             _RLC(u8);
             GBx_WriteByte(ctx, ctx->HL, u8);
+            cycles += 2;
             break;
 
         // RLC A
@@ -1584,6 +1695,7 @@ void GBx_CPU_Step(GBx * ctx)
             u8 = GBx_ReadByte(ctx, ctx->HL);
             _RRC(u8);
             GBx_WriteByte(ctx, ctx->HL, u8);
+            cycles += 2;
             break;
 
         // RRC A
@@ -1626,6 +1738,7 @@ void GBx_CPU_Step(GBx * ctx)
             u8 = GBx_ReadByte(ctx, ctx->HL);
             _RL(u8);
             GBx_WriteByte(ctx, ctx->HL, u8);
+            cycles += 2;
             break;
 
         // RL A
@@ -1668,6 +1781,7 @@ void GBx_CPU_Step(GBx * ctx)
             u8 = GBx_ReadByte(ctx, ctx->HL);
             _RR(u8);
             GBx_WriteByte(ctx, ctx->HL, u8);
+            cycles += 2;
             break;
 
         // RR A
@@ -1717,6 +1831,7 @@ void GBx_CPU_Step(GBx * ctx)
             u8 = GBx_ReadByte(ctx, ctx->HL);
             _SLA(u8);
             GBx_WriteByte(ctx, ctx->HL, u8);
+            cycles += 2;
             break;
 
         // SLA A
@@ -1766,6 +1881,7 @@ void GBx_CPU_Step(GBx * ctx)
             u8 = GBx_ReadByte(ctx, ctx->HL);
             _SRA(u8);
             GBx_WriteByte(ctx, ctx->HL, u8);
+            cycles += 2;
             break;
 
         // SRA A
@@ -1815,6 +1931,7 @@ void GBx_CPU_Step(GBx * ctx)
             u8 = GBx_ReadByte(ctx, ctx->HL);
             _SRL(u8);
             GBx_WriteByte(ctx, ctx->HL, u8);
+            cycles += 2;
             break;
 
         // SRL A
@@ -1864,6 +1981,7 @@ void GBx_CPU_Step(GBx * ctx)
             u8 = GBx_ReadByte(ctx, ctx->HL);
             _SWAP(u8);
             GBx_WriteByte(ctx, ctx->HL, u8);
+            cycles += 2;
             break;
 
         // SWAP A
@@ -1900,6 +2018,7 @@ void GBx_CPU_Step(GBx * ctx)
                 break;                                                        \
             case (0x40 + ((NUM) * 8) + 6):                                    \
                 _BIT((NUM), GBx_ReadByte(ctx, ctx->HL));                      \
+                cycles += 1;                                                  \
                 break;                                                        \
             case (0x40 + ((NUM) * 8) + 7):                                    \
                 _BIT((NUM), ctx->A);                                          \
@@ -1937,6 +2056,7 @@ void GBx_CPU_Step(GBx * ctx)
                 u8 = GBx_ReadByte(ctx, ctx->HL);                              \
                 _RES((NUM), u8);                                              \
                 GBx_WriteByte(ctx, ctx->HL, u8);                              \
+                cycles += 2;                                                  \
                 break;                                                        \
             case (0x80 + ((NUM) * 8) + 7):                                    \
                 _RES((NUM), ctx->A);                                          \
@@ -1977,6 +2097,7 @@ void GBx_CPU_Step(GBx * ctx)
                 u8 = GBx_ReadByte(ctx, ctx->HL);                              \
                 _SET((NUM), u8);                                              \
                 GBx_WriteByte(ctx, ctx->HL, u8);                              \
+                cycles += 2;                                                  \
                 break;                                                        \
             case (0xC0 + ((NUM) * 8) + 7):                                    \
                 _SET((NUM), ctx->A);                                          \
@@ -2004,5 +2125,5 @@ void GBx_CPU_Step(GBx * ctx)
         ctx->RequestEnableIME = false;
     }
 
-    GBx_CheckInterrupts(ctx);
+    return cycles;
 }

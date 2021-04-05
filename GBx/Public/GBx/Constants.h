@@ -33,4 +33,13 @@
 #define GBX_SCREEN_SIZE                                                       \
     (GBX_SCREEN_WIDTH * GBX_SCREEN_HEIGHT * GBX_SCREEN_COMPONENTS)
 
+#define GBX_STAT_MODE_HBLANK    0
+#define GBX_STAT_MODE_VBLANK    1
+#define GBX_STAT_MODE_SEARCH    2
+#define GBX_STAT_MODE_DRAW      3
+
+#define GBX_CLOCK_SPEED_DMG     4194304
+#define GBX_CLOCK_SPEED_SGB     4295454
+#define GBX_CLOCK_SPEED_CGB     8388608
+
 #endif // GBX_CONSTANTS_H

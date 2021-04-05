@@ -11,10 +11,6 @@ void GBx_Cartridge_Init(GBx * ctx)
 
     memset(ctx->ROM, 0, sizeof(ctx->ROM));
 
-    ctx->HaveSRAM = false;
-    ctx->HaveBattery = false;
-    ctx->HaveTimer = false;
-    
     ctx->MBCType = GBX_MBC_TYPE_NONE;
 
     GBx_Cartridge_Reset(ctx);
@@ -26,7 +22,7 @@ void GBx_Cartridge_Reset(GBx * ctx)
 
     ctx->MBC._raw = 0x00;
 
-    ctx->ROMBank = 0;
+    ctx->ROMBank = 1;
 
     memset(ctx->SRAM, 0, sizeof(ctx->SRAM));
     ctx->SRAMBank = 0;
@@ -75,122 +71,6 @@ bool GBx_Cartridge_Load(GBx * ctx, const char * filename)
     int titleLength = sizeof(ctx->Header->Title);
     GBxLogVerbose("ROM Title: %.*s",  titleLength,  ctx->Header->Title);
 
-    ctx->Mode = GBX_MODE_DMG;
-    if (ctx->Header->ColorEnabled == 0x80) {
-        ctx->Mode = GBX_MODE_CGB;
-    }
-    else if (ctx->Header->SuperEnabled != 0x00) {
-        ctx->Mode = GBX_MODE_SGB;
-    }
-
-    switch (ctx->Header->CartridgeType) {
-    case 0x00: // ROM Only
-        break;
-    case 0x01: // MBC1
-        ctx->MBCType = GBX_MBC_TYPE_MBC1;
-        break;
-    case 0x02: // MBC1+RAM
-        ctx->MBCType = GBX_MBC_TYPE_MBC1;
-        ctx->HaveSRAM = true;
-        break;
-    case 0x03: // MBC1+RAM+BATT
-        ctx->MBCType = GBX_MBC_TYPE_MBC1;
-        ctx->HaveSRAM = true;
-        ctx->HaveBattery = true;
-        break;
-    case 0x05: // MBC2
-        ctx->MBCType = GBX_MBC_TYPE_MBC2;
-        break;
-    case 0x06: // MBC2+BATT
-        ctx->MBCType = GBX_MBC_TYPE_MBC2;
-        ctx->HaveBattery = true;
-        break;
-    case 0x08: // RAM
-        ctx->HaveSRAM = true;
-        break;
-    case 0x09: // RAM+BATT
-        ctx->HaveSRAM = true;
-        ctx->HaveBattery = true;
-        break;
-    case 0x0B: // MMM01
-        ctx->MBCType = GBX_MBC_TYPE_MMM01;
-        break;
-    case 0x0C: // MMM01+SRAM
-        ctx->MBCType = GBX_MBC_TYPE_MMM01;
-        ctx->HaveSRAM = true;
-        break;
-    case 0x0D: // MMM01+SRAM+BATT
-        ctx->MBCType = GBX_MBC_TYPE_MMM01;
-        ctx->HaveSRAM = true;
-        ctx->HaveBattery = true;
-        break;
-    case 0x0F: // MBC3+Timer+BATT
-        ctx->MBCType = GBX_MBC_TYPE_MBC3;
-        ctx->HaveTimer = true;
-        ctx->HaveBattery = true;
-        break;
-    case 0x10: // MBC3+Timer+RAM+BATT
-        ctx->MBCType = GBX_MBC_TYPE_MBC3;
-        ctx->HaveTimer = true;
-        ctx->HaveSRAM = true;
-        ctx->HaveBattery = true;
-        break;
-    case 0x11: // MBC3
-        ctx->MBCType = GBX_MBC_TYPE_MBC3;
-        break;
-    case 0x12: // MBC3+RAM
-        ctx->MBCType = GBX_MBC_TYPE_MBC3;
-        ctx->HaveSRAM = true;
-        break;
-    case 0x13: // MBC3+RAM+BATT
-        ctx->MBCType = GBX_MBC_TYPE_MBC3;
-        ctx->HaveSRAM = true;
-        ctx->HaveBattery = true;
-        break;
-    case 0x19: // MBC5
-        ctx->MBCType = GBX_MBC_TYPE_MBC5;
-        break;
-    case 0x1A: // MBC5+RAM
-        ctx->MBCType = GBX_MBC_TYPE_MBC5;
-        ctx->HaveSRAM = true;
-        break;
-    case 0x1B: // MBC5+RAM+BATT
-        ctx->MBCType = GBX_MBC_TYPE_MBC5;
-        ctx->HaveSRAM = true;
-        ctx->HaveBattery = true;
-        break;
-    case 0x1C: // MBC5+Rumble
-        ctx->MBCType = GBX_MBC_TYPE_MBC5;
-        break;
-    case 0x1D: // MBC5+Rumble+SRAM
-        ctx->MBCType = GBX_MBC_TYPE_MBC5;
-        ctx->HaveSRAM = true;
-        break;
-    case 0x1E: // MBC5+Rumble+SRAM+BATT
-        ctx->MBCType = GBX_MBC_TYPE_MBC5;
-        ctx->HaveSRAM = true;
-        ctx->HaveBattery = true;
-        break;
-    case 0x20: // MBC6
-        ctx->MBCType = GBX_MBC_TYPE_MBC6;
-        break;
-    case 0x22: // MBC7+Sensor+Rumble+RAM+BATT
-        ctx->MBCType = GBX_MBC_TYPE_MBC7;
-        ctx->HaveSRAM = true;
-        ctx->HaveBattery = true;
-        break;
-    case 0xFC: // Pocket Camera
-        break;
-    case 0xFD: // Bandai TAMA5
-        break;
-    case 0xFE: // Hudson HuC-3
-        break;
-    case 0xFF: // Hudson HuC-1
-        break;
-    default:
-        break;
-    }
-
     // switch (ctx->Header->SRAMType) {
     // case 0x01: // 2KB
     // case 0x02: // 8KB
@@ -210,62 +90,58 @@ bool GBx_Cartridge_Load(GBx * ctx, const char * filename)
     return true;
 }
 
-void GBx_Cartridge_MBCWriteByte(GBx * ctx, uint16_t address, uint8_t data)
-{
-    // TODO:
-}
-
 const char * GBx_Cartridge_GetTypeString(uint8_t type)
 {
+
     switch (type) {
     case 0x00:
         return "ROM Only";
     case 0x01:
         return "MBC1";
     case 0x02:
-        return "MBC1+RAM";
+        return "MBC1,SRAM";
     case 0x03:
-        return "MBC1+RAM+BATT";
+        return "MBC1,SRAM,Battery";
     case 0x05:
         return "MBC2";
     case 0x06:
-        return "MBC2+BATT";
+        return "MBC2,Battery";
     case 0x08:
-        return "RAM";
+        return "SRAM";
     case 0x09:
-        return "RAM+BATT";
+        return "SRAM,Battery";
     case 0x0B:
         return "MMM01";
     case 0x0C:
-        return "MMM01+SRAM";
+        return "MMM01,SRAM";
     case 0x0D:
-        return "MMM01+SRAM+BATT";
+        return "MMM01,SRAM,Battery";
     case 0x0F:
-        return "MBC3+TIMER+BATT";
+        return "MBC3,RTC,Battery";
     case 0x10:
-        return "MBC3+TIMER+RAM+BATT";
+        return "MBC3,RTC,SRAM,Battery";
     case 0x11:
         return "MBC3";
     case 0x12:
-        return "MBC3+RAM";
+        return "MBC3,SRAM";
     case 0x13:
-        return "MBC3+RAM+BATT";
+        return "MBC3,SRAM,Battery";
     case 0x19:
         return "MBC5";
     case 0x1A:
-        return "MBC5+RAM";
+        return "MBC5,SRAM";
     case 0x1B:
-        return "MBC5+RAM+BATT";
+        return "MBC5,SRAM,Battery";
     case 0x1C:
-        return "MBC5+RMBL";
+        return "MBC5,Rumble";
     case 0x1D:
-        return "MBC5+RMBL+SRAM";
+        return "MBC5,Rumble,SRAM";
     case 0x1E:
-        return "MBC5+RMBL+SRAM+BATT";
+        return "MBC5,Rumble,SRAM,Battery";
     case 0x20:
         return "MBC6";
     case 0x22:
-        return "MBC7+SNSR+RMBL+RAM+BATT";
+        return "MBC7,Sensor,Rumble,SRAM,Battery";
     case 0xFC:
         return "Pocket Camera";
     case 0xFD:
@@ -364,14 +240,4 @@ void GBx_Cartridge_PrintHeader(GBx * ctx)
     else {
         GBxLogInfo("SRAM Type $%02X unknown", ctx->Header->SRAMType);
     }
-}
-
-void GBx_Cartridge_PrintMBC(GBx * ctx)
-{
-    GBxLogInfo(
-        "MBC: Lower=$%02X Upper=$%01X Full=$%04X Mode=%s",
-        ctx->MBC.Lower,
-        ctx->MBC.Upper,
-        ctx->MBC.Full,
-        (ctx->MBC.Mode ? "RAM" : "ROM"));
 }

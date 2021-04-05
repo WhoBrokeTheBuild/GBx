@@ -5,6 +5,7 @@
 #include <gtk/gtk.h>
 
 #include "GBxLogWindow.h"
+#include "GBxSerialConsoleWindow.h"
 
 #include <stdbool.h>
 
@@ -29,8 +30,15 @@ struct _GBxAppWindow
 
     GBxLogWindow * LogWindow;
 
-    GtkVolumeButton * GtkVolume;
+    GBxSerialConsoleWindow * SerialConsoleWindow;
+
+    GtkVolumeButton * GtkVolumeButton;
     GtkGLArea * GtkGLArea;
+
+    GtkRadioMenuItem * GtkModelGameBoy;
+    GtkRadioMenuItem * GtkModelGameBoyPocket;
+    GtkRadioMenuItem * GtkModelSuperGameBoy;
+    GtkRadioMenuItem * GtkModelGameBoyColor;
 
     unsigned GLShader;
     unsigned GLTexture;
@@ -46,7 +54,7 @@ void gbx_app_window_destroy(GBxAppWindow * self);
 
 void gbx_app_window_gl_init(GBxAppWindow * self);
 void gbx_app_window_gl_term(GBxAppWindow * self);
-void gbx_app_window_gl_configure(GBxAppWindow * self, GdkEventConfigure * event);
+void gbx_app_window_gl_resize(GBxAppWindow * self, int width, int height);
 void gbx_app_window_gl_render(GBxAppWindow * self);
 
 void gbx_app_window_reset(GBxAppWindow * self);
@@ -57,7 +65,13 @@ void gbx_app_window_play_pause(GBxAppWindow * self);
 
 void gbx_app_window_show_debug_window(GBxAppWindow * self);
 void gbx_app_window_show_log_window(GBxAppWindow * self);
+void gbx_app_window_show_serial_console_window(GBxAppWindow * self);
 void gbx_app_window_show_about(GBxAppWindow * self);
+
+void gbx_app_window_set_model_dmg(GBxAppWindow * self);
+void gbx_app_window_set_model_mgb(GBxAppWindow * self);
+void gbx_app_window_set_model_sgb(GBxAppWindow * self);
+void gbx_app_window_set_model_cgb(GBxAppWindow * self);
 
 void gbx_app_window_on_key_release(GBxAppWindow * self, GdkEventKey * event);
 
@@ -67,7 +81,6 @@ void gbx_app_window_change_volume(GBxAppWindow * self, double value);
 
 void gbx_app_window_set_scale(GBxAppWindow * self, int scale);
 
-void gbx_app_window_zoom_1(GBxAppWindow * self);
 void gbx_app_window_zoom_2(GBxAppWindow * self);
 void gbx_app_window_zoom_3(GBxAppWindow * self);
 void gbx_app_window_zoom_4(GBxAppWindow * self);

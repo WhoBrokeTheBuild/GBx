@@ -13,6 +13,7 @@ typedef enum _ArgumentType
     ARG_TYPE_U8,
     ARG_TYPE_U16,
     ARG_TYPE_S8,
+    ARG_TYPE_ADDR_U8,   // ($xx)
     ARG_TYPE_ADDR_U16,  // ($xxxx)
     ARG_TYPE_FF00_U8,   // ($FF00+$xx)
     ARG_TYPE_SP_S8,     // SP+xx

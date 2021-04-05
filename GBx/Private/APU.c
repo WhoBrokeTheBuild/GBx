@@ -18,3 +18,8 @@ void GBx_APU_Reset(GBx * ctx)
 
     ctx->APUC._raw = 0x80;
 }
+
+void GBx_APU_Tick(GBx * ctx, unsigned cycles)
+{
+    
+}

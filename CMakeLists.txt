@@ -58,9 +58,9 @@ IF(BUILD_THIRDPARTY)
     FILE(MAKE_DIRECTORY ${_thirdparty_binary_dir})
 
     # Set _ROOT variables for config-based packages
-    SET(SDL2_ROOT   ${_thirdparty_binary_dir}/SDL2)
-    SET(cflags_ROOT ${_thirdparty_binary_dir}/cflags)
-    SET(clog_ROOT   ${_thirdparty_binary_dir}/clog)
+    SET(cflags_ROOT     ${_thirdparty_binary_dir}/cflags)
+    SET(clog_ROOT       ${_thirdparty_binary_dir}/clog)
+    SET(portaudio_ROOT  ${_thirdparty_binary_dir}/portaudio)
 
     EXECUTE_PROCESS(
         COMMAND ${CMAKE_COMMAND} 
@@ -95,8 +95,10 @@ ENDIF()
 
 # Libraries
 
+FIND_PACKAGE(Python3 COMPONENTS Interpreter REQUIRED)
 FIND_PACKAGE(cflags CONFIG REQUIRED)
 FIND_PACKAGE(clog CONFIG REQUIRED)
+FIND_PACKAGE(portaudio CONFIG REQUIRED)
 FIND_PACKAGE(GTK3 REQUIRED)
 
 # Tools

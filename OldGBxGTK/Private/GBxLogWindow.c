@@ -4,17 +4,11 @@
 
 G_DEFINE_TYPE(GBxLogWindow, gbx_log_window, GTK_TYPE_WINDOW)
 
-void _gbx_log_window_callback(clog_color_t color, const char * message, void * userData)
-{
-    GBxLogWindow * self = GBX_LOG_WINDOW(userData);
-    gbx_log_window_add_entry(self, color, message);
-}
-
 void gbx_log_window_init(GBxLogWindow * self)
 {
     gtk_widget_init_template(GTK_WIDGET(self));
 
-    clog_add_callback(_gbx_log_window_callback, self);
+    clog_add_callback((clog_func_t)gbx_log_window_add_entry, self);
 }
 
 void gbx_log_window_class_init(GBxLogWindowClass * klass)
@@ -47,7 +41,7 @@ GtkWidget * gbx_log_window_new()
 
 void gbx_log_window_destroy(GBxLogWindow * self)
 {
-    clog_remove_callback(_gbx_log_window_callback, self);
+    clog_remove_callback((clog_func_t)gbx_log_window_add_entry, self);
 }
 
 gboolean gbx_log_window_delete(GBxLogWindow * self)

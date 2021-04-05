@@ -3,7 +3,9 @@
 
 uint8_t GBx_ReadByte(GBx * ctx, uint16_t address)
 {
-    // TODO: Memory Tracker
+    if (ctx->MemoryReadTracker) {
+        ctx->MemoryReadTracker[address]++;
+    }
 
     switch (address & 0xF000) {
     case 0x0000:
@@ -11,31 +13,40 @@ uint8_t GBx_ReadByte(GBx * ctx, uint16_t address)
         if (ctx->BootstrapMapped && address <= 0x00FF) {
             return ctx->BootROM[address];
         }
+
+        // Intentional Fallthrough
+
     case 0x1000:
     case 0x2000:
     case 0x3000:
         // $0000-$3FFF Cartridge ROM Bank 0
         return ctx->ROM[0][address];
+
     case 0x4000:
     case 0x5000:
     case 0x6000:
     case 0x7000:
         // $4000-$7FFF Cartridge ROM Switchable
         return ctx->ROM[ctx->ROMBank][address - 0x4000];
+
     case 0x8000:
     case 0x9000:
         // $8000-$9FFF Video RAM
         return ctx->VRAM[ctx->VRAMBank][address - 0x8000];
+
     case 0xA000:
     case 0xB000:
         // $A000-$BFFF Cartridge Static RAM
         return ctx->SRAM[ctx->SRAMBank][address - 0xA000];
+
     case 0xC000:
         // $C000-$CFFF Work RAM Bank 0
         return ctx->WRAM[0][address - 0xC000];
+
     case 0xD000:
         // $C000-$CFFF Work RAM Switchable
-        return ctx->WRAM[ctx->WRAMBank][address - 0xC000];
+        return ctx->WRAM[ctx->WRAMBank][address - 0xD000];
+
     case 0xE000:
     case 0xF000:
         // $E000-$FDFF Echo RAM
@@ -56,8 +67,7 @@ uint8_t GBx_ReadByte(GBx * ctx, uint16_t address)
             return 0;
         }
 
-
-        // $FF00-$FE7F Hardware I/O Registers
+        // $FF00-$FE7F Memory Mapped I/O Registers
         if (address <= 0xFF7F) {
             // $FF40-$FF3F Wave RAM
             if (address >= 0xFF30 && address <= 0xFF3F) {
@@ -66,28 +76,27 @@ uint8_t GBx_ReadByte(GBx * ctx, uint16_t address)
 
             switch (address) {
             case 0xFF00:
-                return 0x80;
-                // return ctx->JOYP._raw;
+                return (ctx->JOYP._raw | GBX_JOYP_READ_MASK);
 
             case 0xFF01:
-                // return ctx->Serial.S8;
+                return ctx->SB;
 
             case 0xFF02:
-                // return ctx->Serial.SC._raw;
+                return ctx->SC._raw;
 
             case 0xFF04:
-                // return ctx->DIV;
+                return ctx->DIV;
 
             case 0xFF05:
-                // return ctx->TIMA;
+                return ctx->TIMA;
 
             case 0xFF06:
-                // return ctx->TMA;
+                return ctx->TMA;
 
             case 0xFF07:
-                // return ctx->TAC._raw;
+                return ctx->TAC._raw;
 
-            // 0xFF08 - 0xFF0E
+            // $FF08 - $FF0E
 
             case 0xFF0F:
                 return ctx->IF._raw;
@@ -114,7 +123,7 @@ uint8_t GBx_ReadByte(GBx * ctx, uint16_t address)
                 return (ctx->Tone1._raw[4] | GBX_TONE_READ_MASK_4);
 
             // NR15
-            // 0xFF15
+            // $FF15
 
             // NR21
             case 0xFF16:
@@ -153,7 +162,7 @@ uint8_t GBx_ReadByte(GBx * ctx, uint16_t address)
                 return (ctx->Wave._raw[4] | GBX_WAVE_READ_MASK_4);
 
             // NR40
-            // 0xFF1F
+            // $FF1F
 
             // NR41
             case 0xFF20:
@@ -183,18 +192,47 @@ uint8_t GBx_ReadByte(GBx * ctx, uint16_t address)
             case 0xFF26:
                 return ctx->APUC._raw;
 
+            // $FF27-$FF3E
+
+            case 0xFF40:
+                return ctx->LCDC._raw;
+
+            case 0xFF41:
+                return ctx->STAT._raw;
+
+            case 0xFF42:
+                return ctx->SCY;
+
+            case 0xFF43:
+                return ctx->SCX;
+
+            case 0xFF44:
+                return ctx->LY;
+
+            case 0xFF45:
+                return ctx->LYC;
+            
+            // $FF46
+
+            case 0xFF47:
+                return ctx->BGP._raw;
+
+            case 0xFF48:
+                return ctx->OBP0._raw;
+
+            case 0xFF49:
+                return ctx->OBP1._raw;
+
+            case 0xFF4A:
+                return ctx->WX;
+
+            case 0xFF4B:
+                return ctx->WY;
+
+            // $FF4C-$FE7F
+
             default:
                 return 0xFF;
-            }
-        }
-        
-
-        // $FF00-$FE7F Memory Mapped I/O Registers
-        if (address <= 0xFE7F) {
-            switch (address) {
-            default:
-                GBxLogFatal("Implement MMIO");
-                break;
             }
         }
 
@@ -212,7 +250,9 @@ uint8_t GBx_ReadByte(GBx * ctx, uint16_t address)
 
 void GBx_WriteByte(GBx * ctx, uint16_t address, uint8_t data)
 {
-    // TODO: Memory Tracker
+    if (ctx->MemoryWriteTracker) {
+        ctx->MemoryWriteTracker[address]++;
+    }
 
     switch (address & 0xF000) {
     case 0x0000:
@@ -224,26 +264,31 @@ void GBx_WriteByte(GBx * ctx, uint16_t address, uint8_t data)
     case 0x6000:
     case 0x7000:
         // $0000-$7FFF Cartridge Memory Bank Controller
-        GBx_Cartridge_MBCWriteByte(ctx, address, data);
+        GBx_MBC_WriteByte(ctx, address, data);
         return;
+
     case 0x8000:
     case 0x9000:
         // $8000-$9FFF Video RAM
         ctx->VRAM[ctx->VRAMBank][address - 0x8000] = data;
         return;
+
     case 0xA000:
     case 0xB000:
         // $A000-$BFFF Cartridge Static RAM
         ctx->SRAM[ctx->SRAMBank][address - 0xA000] = data;
         return;
+
     case 0xC000:
         // $C000-$CFFF Work RAM Bank 0
         ctx->WRAM[0][address - 0xC000] = data;
         return;
+
     case 0xD000:
         // $D000-$DFFF Work RAM Switchable
         ctx->WRAM[ctx->WRAMBank][address - 0xD000] = data;
         return;
+
     case 0xE000:
     case 0xF000:
         // $E000-$FDFF Echo RAM
@@ -269,8 +314,11 @@ void GBx_WriteByte(GBx * ctx, uint16_t address, uint8_t data)
         // $FF00-$FE7F Memory Mapped I/O Registers
         if (address <= 0xFF7F) {
 
-            // $FF27-$FF2F Unused
+            // $FF27-$FF2F Unusable
             if (address >= 0xFF27 && address <= 0xFF2F) {
+                GBxOnce(GBxLogWarning(
+                    "Attempting to write $%02X to unusable memory at $%04X,"
+                    "this message will not repeat.", data, address));
                 return;
             }
             
@@ -282,25 +330,33 @@ void GBx_WriteByte(GBx * ctx, uint16_t address, uint8_t data)
 
             switch (address) {
             case 0xFF00:
-                // return ctx->JOYP._raw;
+                ctx->JOYP._raw ^= GBX_JOYP_WRITE_MASK;
+                ctx->JOYP._raw |= (data & GBX_JOYP_WRITE_MASK);
+                return;
 
             case 0xFF01:
-                // return ctx->Serial.S8;
+                ctx->SB = data;
+                return;
 
             case 0xFF02:
-                // return ctx->Serial.SC._raw;
+                ctx->SC._raw = data;
+                return;
 
             case 0xFF04:
-                // return ctx->DIV;
+                ctx->DIV = 0x00;
+                return;
 
             case 0xFF05:
-                // return ctx->TIMA;
+                ctx->TIMA = data;
+                return;
 
             case 0xFF06:
-                // return ctx->TMA;
+                ctx->TMA = data;
+                return;
 
             case 0xFF07:
-                // return ctx->TAC._raw;
+                ctx->TAC._raw;
+                return;
 
             // 0xFF08 - 0xFF0E
 
@@ -416,7 +472,61 @@ void GBx_WriteByte(GBx * ctx, uint16_t address, uint8_t data)
 
             // NR52
             case 0xFF26:
+                ctx->APUC._raw ^= GBX_STAT_WRITE_MASK;
                 ctx->APUC._raw |= (data & GBX_APUC_WRITE_MASK);
+                return;
+
+            // $FF27-$FF3E
+
+            case 0xFF40:
+                ctx->LCDC._raw = data;
+                return;
+
+            case 0xFF41:
+                ctx->STAT._raw ^= GBX_STAT_WRITE_MASK;
+                ctx->STAT._raw |= (data & GBX_STAT_WRITE_MASK);
+                return;
+
+            case 0xFF42:
+                ctx->SCY = data;
+                return;
+
+            case 0xFF43:
+                ctx->SCX = data;
+                return;
+
+            case 0xFF44:
+                ctx->LY = data;
+                return;
+
+            case 0xFF45:
+                ctx->LYC = data;
+                return;
+            
+            // $FF46
+
+            case 0xFF47:
+                ctx->BGP._raw = data;
+                return;
+
+            case 0xFF48:
+                ctx->OBP0._raw = data;
+                return;
+
+            case 0xFF49:
+                ctx->OBP1._raw = data;
+                return;
+
+            case 0xFF4A:
+                ctx->WX = data;
+                return;
+
+            case 0xFF4B:
+                ctx->WY = data;
+                return;
+
+            // $FF4C-$FE7F
+            
 
             default:
                 return;

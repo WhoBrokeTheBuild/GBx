@@ -127,6 +127,7 @@ void SymbolReferenceList_Write(SymbolReferenceList * list,
             fseek(file, entry->WriteOffset, SEEK_SET);
 
             if (entry->Type == ARG_TYPE_U8 || 
+                entry->Type == ARG_TYPE_ADDR_U8 ||
                 entry->Type == ARG_TYPE_FF00_U8) {
 
                 uint8_t data = value;
